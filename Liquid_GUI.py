@@ -148,8 +148,11 @@ class Window(QtGui.QDialog):
         ax.hold(False)
 
         # plot data
-        ax.plot(self.transfMomVectData, self.intensVectData)
-
+        ax.plot(self.transfMomVectData, self.intensVectData, label='Data')
+        plt.legend()
+        plt.xlabel('Q (1/A)')
+        plt.ylabel('I(Q)')
+        
         # refresh canvas
         self.canvas.draw()
      
@@ -217,7 +220,8 @@ class Window(QtGui.QDialog):
         ax.hold(True)
 
         # plot data
-        ax.plot(self.transfMomVectBkg, self.intensVectBkg, 'k--')
+        ax.plot(self.transfMomVectBkg, self.intensVectBkg, 'k--', label='Bkg')
+        plt.legend()
 
         # refresh canvas
         self.canvas.draw()
@@ -228,29 +232,29 @@ class Window(QtGui.QDialog):
         # Function to calculate the S(Q)
         # Where S(Q) is: S(Q) = I_coh(Q) / (N * f^2(Q))
 
-        # Set the parameters to calculate the atomic form factor for Argon
+        # Read the parameters to calculate the atomic form factor for the element
         # The atomic form factor formula and the parameters values are taken from:
         # http://lampx.tugraz.at/~hadley/ss1/crystaldiffraction/atomicformfactors/formfactors.php
-        a1 = 7.4845
-        b1 = 0.9072
-        a2 = 6.7723
-        b2 = 14.8407
-        a3 = 0.6539
-        b3 = 43.8983
-        a4 = 1.6442
-        b4 = 33.3929
-        c = 1.4445
 
-        # a1 = 4.43918
-        # b1 =1.64167
-        # a2 = 3.20345
-        # b2 = 3.43757
-        # a3 = 1.19453
-        # b3 = 0.2149
-        # a4 = 0.41653
-        # b4 = 6.65365
-        # c = 0.746297
+        element = "Ar"
+        
+        file = open("./affParam.txt", "r")
+        header1 = file.readline()
+        lines = file.readlines()
+        file.close()
 
+        for line in lines:
+            columns = line.split()
+            if columns[0] == element:
+                a1 = float(columns[1])
+                b1 = float(columns[2])
+                a2 = float(columns[3])
+                b2 = float(columns[4])
+                a3 = float(columns[5])
+                b3 = float(columns[6])
+                a4 = float(columns[7])
+                b4 = float(columns[8])
+                c = float(columns[9])
         
         # Calculate the atomic form factor
         # f(Q) = f1(Q) + f2(Q) + f3(Q) + f4(Q) + c
@@ -277,7 +281,10 @@ class Window(QtGui.QDialog):
         ax.hold(False)
 
         # Plot data
-        ax.plot(self.transfMomVectData, self.S_Q)
+        ax.plot(self.transfMomVectData, self.S_Q, label='S(Q)')
+        plt.legend()
+        plt.xlabel('Q (1/A)')
+        plt.ylabel('S(Q)')
 
         # Refresh canvas
         self.canvas.draw()
@@ -294,9 +301,9 @@ class Window(QtGui.QDialog):
         i_Q = self.S_Q - 1
 #        Q_max = np.amax(self.transfMomVect)
 
-        g_r = pi2 * simps(self.transfMomVectData * i_Q * np.array(np.sin(np.mat(self.transfMomVectData).T * np.mat(r))).T, self.transfMomVectData)
+        f_r = pi2 * simps(self.transfMomVectData * i_Q * np.array(np.sin(np.mat(self.transfMomVectData).T * np.mat(r))).T, self.transfMomVectData)
 
-        #g_r = 1 + f_r / (4 * np.pi * r * rho_0)
+        g_r = 1 + f_r / (4 * np.pi * r * rho_0)
         
         #---------------------------------------------
         # # Test with the FFT
@@ -331,7 +338,10 @@ class Window(QtGui.QDialog):
         ax.hold(False)
 
         # plot data
-        ax.plot(r, g_r)
+        ax.plot(r, g_r, label='g(r)')
+        plt.legend()
+        plt.xlabel('r (A)')
+        plt.ylabel('g(r)')
 
         # refresh canvas
         self.canvas.draw()
