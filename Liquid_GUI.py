@@ -26,7 +26,9 @@
 
 # ToDo:
 # The data saved in the files are Q and I(Q), modify calsSQ for the 2_theta
+# Don't use A, it's not a formal part of SI, move to nm
 
+# The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105.
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
@@ -42,6 +44,8 @@ import numpy as np
 import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
+
+from modules.MainModules import *
 
 import os
 
@@ -65,14 +69,14 @@ class Window(QtGui.QDialog):
                 
         # Set the buttons
         self.button_load = QtGui.QPushButton('Load Data')
-        self.button_load.clicked.connect(self.loadData)
+        self.button_load.clicked.connect(self.load_data)
         self.button_loadBkg = QtGui.QPushButton('Load Bkg')
-        self.button_loadBkg.clicked.connect(self.loadBkg)
+        self.button_loadBkg.clicked.connect(self.load_bkg)
 
         self.button_calcSQ = QtGui.QPushButton('Calc S(Q)')
-        self.button_calcSQ.clicked.connect(self.calcSQ)
+        self.button_calcSQ.clicked.connect(self.calc_sq)
         self.button_calcgr = QtGui.QPushButton('Calc g(r)')
-        self.button_calcgr.clicked.connect(self.calcgr)
+        self.button_calcgr.clicked.connect(self.calc_gr)
 
         # Set the layout
         layout = QtGui.QVBoxLayout()
@@ -86,60 +90,12 @@ class Window(QtGui.QDialog):
 
     #---------------------------------------------------------        
  
-    def loadData(self):
+    def load_data(self):
         '''load and plot the file'''
         # Open data file
         path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
-        file = open(path, "r")
-        file_name = file.name
-        ext = os.path.splitext(file_name)[1]
         
-        if ext == ".chi":
-            # Read and ignore the first 4 lines
-            header1 = file.readline()
-            header2 = file.readline()
-            header3 = file.readline()
-            header4 = file.readline()
-        elif ext == ".xy":
-            # Read and ignore the first 17 lines
-            header1 = file.readline()
-            header2 = file.readline()
-            header3 = file.readline()
-            header4 = file.readline()
-            header5 = file.readline()
-            header6 = file.readline()
-            header7 = file.readline()
-            header8 = file.readline()
-            header9 = file.readline()
-            header10 = file.readline()
-            header11 = file.readline()
-            header12 = file.readline()
-            header13 = file.readline()
-            header14 = file.readline()
-            header15 = file.readline()
-            header16 = file.readline()
-            header17 = file.readline()
-
-
-        # Read all the file in one time and close it
-        lines = file.readlines()
-        file.close()
-
-        # Set the variables
-        # transfMom: transfer momentum Q
-        # intens: intensity I(Q)
-        transfMomData = []
-        intensData = []
-
-        # Scan the rows of the file stored in lines, and put the values into the variables
-        for line in lines:
-            columns = line.split()
-            transfMomData.append(float(columns[0]))
-            intensData.append(float(columns[1]))
-
-        # Modify the variables as numpy array
-        self.transfMomVectData = np.array(transfMomData)
-        self.intensVectData = np.array(intensData)
+        self.transfMomVectData, self.intensVectData = read_file(path)
 
         # create an axis
         ax = self.figure.add_subplot(311)
@@ -158,60 +114,13 @@ class Window(QtGui.QDialog):
      
     #---------------------------------------------------------
     
-    def loadBkg(self):
+    def load_bkg(self):
         '''load and plot the file'''
         # Open bkg file
         path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
-        file = open(path, "r")
-        file_name = file.name
-        ext = os.path.splitext(file_name)[1]
         
-        if ext == ".chi":
-            # Read and ignore the first 4 lines
-            header1 = file.readline()
-            header2 = file.readline()
-            header3 = file.readline()
-            header4 = file.readline()
-        elif ext == ".xy":
-            # Read and ignore the first 17 lines
-            header1 = file.readline()
-            header2 = file.readline()
-            header3 = file.readline()
-            header4 = file.readline()
-            header5 = file.readline()
-            header6 = file.readline()
-            header7 = file.readline()
-            header8 = file.readline()
-            header9 = file.readline()
-            header10 = file.readline()
-            header11 = file.readline()
-            header12 = file.readline()
-            header13 = file.readline()
-            header14 = file.readline()
-            header15 = file.readline()
-            header16 = file.readline()
-            header17 = file.readline()
-        
-
-        # Read all the file in one time and close it
-        lines = file.readlines()
-        file.close()
-
-        # Set the variables
-        # transfMom: transfer momentum Q
-        # intens: intensity I(Q)
-        transfMomBkg = []
-        intensBkg = []
-
-        # Scan the rows of the file stored in lines, and put the values into the variables
-        for line in lines:
-            columns = line.split()
-            transfMomBkg.append(float(columns[0]))
-            intensBkg.append(float(columns[1]))
-
         # Modify the variables as numpy array
-        self.transfMomVectBkg = np.array(transfMomBkg)
-        self.intensVectBkg = np.array(intensBkg)
+        self.transfMomVectBkg, self.intensVectBkg = read_file(path)
 
         # create an axis
         ax = self.figure.add_subplot(311)
@@ -225,13 +134,14 @@ class Window(QtGui.QDialog):
 
         # refresh canvas
         self.canvas.draw()
-     
+    
     #---------------------------------------------------------
+    
+    def calc_sq(self):
+        """Function to calculate the S(Q)
+        Where S(Q) is: S(Q) = I_coh(Q) / (N * f^2(Q))
+        """
         
-    def calcSQ(self):
-        # Function to calculate the S(Q)
-        # Where S(Q) is: S(Q) = I_coh(Q) / (N * f^2(Q))
-
         # Read the parameters to calculate the atomic form factor for the element
         # The atomic form factor formula and the parameters values are taken from:
         # http://lampx.tugraz.at/~hadley/ss1/crystaldiffraction/atomicformfactors/formfactors.php
@@ -255,15 +165,16 @@ class Window(QtGui.QDialog):
                 a4 = float(columns[7])
                 b4 = float(columns[8])
                 c = float(columns[9])
+                break
         
         # Calculate the atomic form factor
         # f(Q) = f1(Q) + f2(Q) + f3(Q) + f4(Q) + c
         # fi(Q) = ai * exp(-bi * (Q/4pi)^2)
         
-        f1_Q = a1 * np.exp(-b1 * ( self.transfMomVectData / (4*np.pi)**2 ) )
-        f2_Q = a2 * np.exp(-b2 * ( self.transfMomVectData / (4*np.pi)**2 ) )
-        f3_Q = a3 * np.exp(-b3 * ( self.transfMomVectData / (4*np.pi)**2 ) )
-        f4_Q = a4 * np.exp(-b4 * ( self.transfMomVectData / (4*np.pi)**2 ) )
+        f1_Q = a1 * np.exp(-b1 * (self.transfMomVectData / (4*np.pi))**2)
+        f2_Q = a2 * np.exp(-b2 * (self.transfMomVectData / (4*np.pi))**2)
+        f3_Q = a3 * np.exp(-b3 * (self.transfMomVectData / (4*np.pi))**2)
+        f4_Q = a4 * np.exp(-b4 * (self.transfMomVectData / (4*np.pi))**2)
         
         f_Q = f1_Q + f2_Q + f3_Q + f4_Q + c
         
@@ -291,43 +202,41 @@ class Window(QtGui.QDialog):
 
     #---------------------------------------------------------
         
-    def calcgr(self):
+    def calc_gr(self):
 
         #---------------------------------------------
         # Test with the integral
         r = np.linspace(0.5, 10, self.transfMomVectData.size)
-        pi2 = 2.0 / np.pi
         rho_0 = 1.4
         i_Q = self.S_Q - 1
 #        Q_max = np.amax(self.transfMomVect)
 
-        f_r = pi2 * simps(self.transfMomVectData * i_Q * np.array(np.sin(np.mat(self.transfMomVectData).T * np.mat(r))).T, self.transfMomVectData)
+        F_r = (2.0 / np.pi) * simps(self.transfMomVectData * i_Q * np.array(np.sin(np.mat(self.transfMomVectData).T * np.mat(r))).T, self.transfMomVectData)
 
-        g_r = 1 + f_r / (4 * np.pi * r * rho_0)
+        g_r = 1 + F_r / (4 * np.pi * r * rho_0)
         
         #---------------------------------------------
         # # Test with the FFT
         
         # r = fftpack.fftfreq(self.transfMomVect.size)
-        # f_r = fftpack.fft(self.S_Q)
-        # f_r_abs = np.abs(f_r)
+        # F_r = fftpack.fft(self.S_Q)
+        # F_r_abs = np.abs(F_r)
         
         # rho = 1.4
-        # g_r_abs = 1 + f_r_abs * (4 * np.pi * r * rho)
+        # g_r_abs = 1 + F_r_abs * (4 * np.pi * r * rho)
 
         #---------------------------------------------
         # # Test with the sum:
 
         # r = np.linspace(0.5, 10, self.transfMomVectData.size)
-        # pi2 = 2.0 / np.pi
         # rho = 1.4
         # i_Q = self.S_Q - 1
-        # f_r = np.zeros(self.transfMomVectData.size)
+        # F_r = np.zeros(self.transfMomVectData.size)
         # for idx_r, ri in enumerate(r):
         #     for idx_Q, Qj in enumerate(self.transfMomVectData):
-        #         f_r[idx_r] = pi2 * ( Qj * i_Q[idx_Q] * np.sin(Qj * ri))
+        #         F_r[idx_r] = (2.0 / np.pi) * ( Qj * i_Q[idx_Q] * np.sin(Qj * ri))
 
-        # g_r = 1 + f_r / (4 * np.pi * r * rho)
+        # g_r = 1 + F_r / (4 * np.pi * r * rho)
         
         #---------------------------------------------
 
