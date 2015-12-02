@@ -33,35 +33,23 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from modules.MainModules import *
+from modules.Utility import *
+from modules.LiquidStructure import *
+from modules.InterpolateData import *
 
 if __name__ == '__main__':
-#    Q, I_Q = read_file(".\data\cea_files\HT2_034.chi") # Win
+
     Q, I_Q = read_file("./data/cea_files/HT2_034.chi") # Mac
-    # Q, I_Q = read_file(".\data\my_test\HT2_034_20151104.chi")
-    #plot_data(1, Q, I_Q, "Q", "I(Q)", "b-", "Data", False)
-    
-#    Qbkg, I_Qbkg = read_file(".\data\cea_files\HT2_036.chi") # Win
     Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036.chi") # Mac
-    # Qbkg, I_Qbkg = read_file(".\data\my_test\HT2_036_20151104.chi")
-    #plot_data(1, Qbkg, I_Qbkg, "Q", "I(Q)", "k--", "Bkg", True)
 
     #-------------------------------------------------------------
     
     # plt.plot(Q, I_Q, "b-", label="Data")
-    # plt.plot(Qbkg, I_Qbkg, "k--", label="Bkg")
-    # plt.legend()
-    # plt.xlabel("Q")
-    # plt.ylabel("I(Q)")
     # plt.show()
 
     #-------------------------------------------------------------
     
-    # fakeQ = np.arange(0.0,25.0,1.0)
-    # Q /= 10 # conversion from inverse nm to inverse A
-    # fQ = calc_aff("Ar", Q)
-    
-    # print(fQ.shape)
+    fQ = calc_aff("Ar", Q)
     
     # plt.plot(Q, fQ)
     # plt.show()
@@ -71,7 +59,7 @@ if __name__ == '__main__':
     elemList = {"Ar":1}
       
     fe, Ztot = calc_eeff(elemList, Q, calc_aff)
-#    print(fe)
+    # print(fe)
     # print(Ztot)
     # plt.plot(Q, fe)
     # plt.show()
@@ -79,32 +67,36 @@ if __name__ == '__main__':
     #-------------------------------------------------------------
     
     Iinc = calc_Iincoh(elemList, Q, calc_aff)
- #   print(Iinc)
     # plt.plot(Q, Iinc)
     # plt.show()
     
     #-------------------------------------------------------------
     
     JQ = calc_JQ(Iinc, fe, Ztot)
- #   print(JQ)
     # plt.plot(Q, JQ)
     # plt.show()
 
     #-------------------------------------------------------------
 
     kp = calc_Kp(fe, "Ar", Q, calc_aff)
-#    print(kp)
+    # print(kp)
 
     #-------------------------------------------------------------
 
     sinf = calc_Sinf(elemList, fe, Q, Ztot, calc_Kp, calc_aff)
-    print(sinf)
+    # print(sinf)
 
     #-------------------------------------------------------------    
 
+    shit = interpolateSpectra(Q, I_Q)
+    plt.plot(Q, shit)
+    plt.show()
+    
+    
+    
     # print("Ztot: ", Ztot)
     # print("sum_Kp2: ", sum_Kp2)
     # print("Sinf: ", Sinf)
 
-    alpha = calc_alpha(JQ, sinf, Q, I_Q, fe, Ztot, 5)
-    print(alpha)
+    # alpha = calc_alpha(JQ, sinf, Q, I_Q, fe, Ztot, 5)
+    # print(alpha)
