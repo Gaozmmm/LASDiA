@@ -64,8 +64,9 @@ def read_file(path):
         header2 = file.readline()
         header3 = file.readline()
         header4 = file.readline()
-        if dimension.lower() in header2.lower():
-            scale_factor = 10
+        # I move the factor scale from nm to A into the other functions
+        # if dimension.lower() in header2.lower():
+            # scale_factor = 10
     elif ext == ".xy":
         # Read and ignore the first 17 lines:
         header1 = file.readline()
@@ -133,136 +134,5 @@ def read_file(path):
     # plt.ylabel(yLabel)
     # plt.show()
 
-    
-
-    
-    
-    
 
 
-
-
-
-def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0):
-    """Function to calculate alpha
-
-    arguments:
-
-    returns:
-    """
-    
-    Integral1 = simps((J_Q + Sinf) * Q**2, Q)
-    Integral2 = simps((I_Q/fe_Q**2) * Q**2,Q)
-
-    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
-
-    return alpha
-
-
-
- 
-    
-
-
-
-#-------------------------------------------------------------
-# From this point onwards I implemented functions as I see in the Igor code
-# and the Gunnar email, but I am not understanding how they works and
-# their meaning...
-
-def sinintra(Ztot):
-    """For Ar w=0
-    I just create this function for now because I need it in the other
-    ones to follow Gunnar code
-    It must be implemented!!!
-    
-    arguments:
-    
-    returns:
-    """
-    
-    w = 0
-    sintra = w / Ztot
-    return sintra
-
-    
-def calc_SQ(alpha, Isample, fe_Q, J_Q, Ztot, Sinf):
-    """Function to calculate the S(Q)
-
-    arguments:
-
-    returns:
-    """
-
-    S_Q = (alpha*Isample / fe_Q**2 - J_Q)/Ztot**2+Sinf
-    
-    return S_Q
-    
-    
-def FFT_QiQ(QiQ):
-    """ I don't understand very much this part...
-    Function to calculate the Fast Fourier Transformation
-    
-    arguments:
-    
-    returns:
-    
-    """
-    
-    val_fft = fftpack.fft(QiQ)
-    imag_fft = val_fft.imag
-    delta = QiQ[1] - QiQ[0]
-    F_r = 2/np.pi * imag_fft * delta
-    
-    return F_r
-    
-    
-def IFFT_Fr(Fr):
-    """ I don't undeerstand very much this part...
-    Function to calculate the Inverse Fast Fourier Transformation
-    
-    arguments:
-    
-    returns:
-    """
-
-    val_fft = fftpack.fft(Fr)
-    imag_fft = val_fft.imag
-    delta = Fr[1] - Fr[0]
-    QiQ = imag_fft * delta
-    
-    return QiQ
-        
-    
-def ItterateDeltaF(Q, SQ_SS, SQCorr):
-    """
-    
-    """
-    
-    Qmax = np.amax(Q)
-    Damping = 0.5
-    argQmax = np.aargmax(Q)
-    
-    QiQ_SS = exp(-(Damping/Qmax**2)*x^2)*Q*(SQ_SS-SQ_SS(argQmax+1))
-    QiQCorr = Q*(SQCorr-SQCorr(argQmax+1))
-    Del_iQ = (QiQ_SS-QiQCorr)/(Q*SQCorr)
-    
-    return (QiQ_SS, QiQCorr, Del_iQ)
-    
-# def FitRemoveGofRPeaks():
-    # """
-    # arguments:
-    
-    # returns:    
-    # """
-
-
-    
-
-# def OptimizeScaleGofRCorr():
-
-# def OptimizeDensityGofRCorr():
-
-# def OptimizeWsampleGofRCorr():
-
-# def OptimizeWrefGofRCorr():

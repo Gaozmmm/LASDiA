@@ -28,6 +28,9 @@ Eggert et al. 2002 PRB, 65, 174105
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
 returns: description - type
+
+For the variables name I used this convention:
+if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
 """
 
 import matplotlib.pyplot as plt
@@ -52,7 +55,7 @@ def calc_aff(element, Q):
     
     arguments:
     element: chemical element - string
-    Q: transferse moment - array
+    Q: momentum transfer - array
     
     returns:
     f_Q: atomic form factor - array
@@ -95,12 +98,12 @@ def calc_aff(element, Q):
       
     
 def calc_eeff(elementList, Q, calc_aff):
-    """Function to calculate the effective electron Form Factor, fe
+    """Function to calculate the effective electron Form Factor, fe (eq. 10)
     
     arguments:
     elementList: contains the chemical elements of the sample with their multiplicity - dictionary("element": multiplicity)
         element - string; multiplicity - number
-    Q: transferse moment - array
+    Q: momentum transfer - array
     calc_aff: function to calculate the atomic form factor - function
     
     returns:
@@ -143,7 +146,7 @@ def calc_Iincoh(elementList, Q, calc_aff):
     arguments:
     elementList: contains the chemical elements of the sample with their multiplicity - dictionary("element": multiplicity)
         element - string; multiplicity - number
-    Q: transferse moment - array
+    Q: momentum transfer - array
     calc_aff: function to calculate the atomic form factor - function
     
     returns:
@@ -175,7 +178,7 @@ def calc_Iincoh(elementList, Q, calc_aff):
 
     
 def calc_JQ(Iincoh_Q, Ztot, fe_Q):
-    """Function to calculate J(Q)
+    """Function to calculate J(Q) (eq. 35)
     
     arguments:
     Iincoh_Q: incoherent scattering intensity - array
@@ -193,16 +196,17 @@ def calc_JQ(Iincoh_Q, Ztot, fe_Q):
     
     
 def calc_Kp(fe_Q, element, Q, calc_aff):
-    """Function to calculate the effective atomic number. Kp_Q, and its average, Kp
+    """Function to calculate the effective atomic number, Kp_Q (eq. 11), and its average, Kp (eq. 14)
 
     arguments:
     fe_Q: effective electric form factor - array
     element: chemical element of the sample
-    Q: transferse moment - array
+    Q: momentum transfer - array
     calc_aff: function to calculate the atomic form factor - function
     
     returns:
-    Kp:  - number
+    Kp_Q: effective atomic number - array
+    Kp: average of effective atomic number - number
     """
 
     # effective atomic number
@@ -215,13 +219,13 @@ def calc_Kp(fe_Q, element, Q, calc_aff):
 
 
 def calc_Sinf(elementList, fe_Q, Q, Ztot, calc_Kp, calc_aff):
-    """Function to calculate Sinf = sum(Kp^2)/Ztot^2
+    """Function to calculate Sinf (eq. 19)
     
     arguments:
     elementList: contains the chemical elements of the sample with their multiplicity - dictionary("element": multiplicity)
         element - string; multiplicity - number
     fe_Q: effective electric form factor - array
-    Q: transferse moment - array
+    Q: momentum transfer - array
     Ztot: total Z number - number
     calc_Kp: function to calculate the average effective atomic number - function
     calc_aff: function to calculate the atomic form factor - function
@@ -238,3 +242,168 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, calc_Kp, calc_aff):
     Sinf = sum_Kp2 / Ztot**2
 
     return Sinf
+
+
+def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0 = 25.0584):
+    """Function to calculate alpha (eq. 34)
+    For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
+    
+    arguments:
+
+    returns:
+    """
+    
+    Integral1 = simps((J_Q + Sinf) * Q**2, Q)
+    Integral2 = simps((I_Q/fe_Q**2) * Q**2,Q)
+
+    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
+
+    return alpha
+
+
+def calc_SQ(alpha, Isample, Ztot, fe_Q):
+    """Function to calculate the S(Q) (eq. 18)
+
+    arguments:
+    Isample: intensity - array
+    
+    
+    returns:
+    S_Q: - array
+    """
+    
+    numAtoms = sc.N_A
+    # S_Q = Isample / (numAtoms * Ztot**2 * fe_Q**2)
+    # S_Q = (alpha*Isample / fe_Q**2 - J_Q)/Ztot**2+Sinf
+    S_Q = alpha*Isample / fe_Q**2
+    
+    return S_Q
+
+
+def calc_iQ(S_Q, Sinf):
+    """Function to calculate i(Q) (eq. 21)
+    
+    arguments:
+    S_Q: structure factor - array
+    Sinf: - number
+    
+    returns:
+    i_Q: - array
+    """
+    
+    i_Q = S_Q - Sinf
+    
+    return i_Q
+    
+
+def calc_Fr(Q, i_Q):
+    """Function to calculate F(r) (eq. 20)
+    
+    arguments:
+    
+    returns:
+    r: - array
+    F_r: - array
+    """
+    
+    r = np.linspace(0.0, 1.5, Q.size)
+    rho_0 = 1.4
+    
+    F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
+    
+    return (r, F_r)
+
+    
+def calc_rho0(Q, i_Q):
+    """Function to calculate initial value of rho0 (eq. 33)
+    
+    arguments:
+    Q: momentum transfer - array
+    i_Q: - array
+    
+    returns:
+    rho0: average atomic density - number
+    """
+    
+    rho0 = 1/(-2*np.pi**2) * simps(Q**2 * i_Q, Q)
+    
+    return rho0
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+def FFT_QiQ(QiQ):
+    """ I don't understand very much this part...
+    Function to calculate the Fast Fourier Transformation
+    
+    arguments:
+    
+    returns:
+    
+    """
+    
+    s = QiQ.size
+    r = fftpack.fftfreq(s)
+    val_fft = fftpack.fft(QiQ)
+    imag_fft = val_fft.imag
+    delta = QiQ[1] - QiQ[0]
+    F_r = 2/np.pi * imag_fft * delta
+    # print(F_r)
+    
+    return (r, F_r)
+    
+    
+# def FT_QiQ(Q, QiQ):
+    # """ I don't understand very much this part...
+    # Function to calculate the Fast Fourier Transformation
+    
+    # arguments:
+    
+    # returns:
+    
+    # """
+    # r = np.linspace(0.5, 10, QiQ.size)
+    # F_r = 2/np.pi * simps(QiQ * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
+    
+    # return (r, F_r)
+    
+def IFFT_Fr(Fr):
+    """ I don't undeerstand very much this part...
+    Function to calculate the Inverse Fast Fourier Transformation
+    
+    arguments:
+    
+    returns:
+    """
+
+    s = Fr.size
+    Qfft = fftpack.fftfreq(s)
+    val_fft = fftpack.fft(Fr)
+    imag_fft = val_fft.imag
+    delta = Fr[1] - Fr[0]
+    QiQ = imag_fft * delta
+    
+    return (Qfft, QiQ)
+
+
+def Sinintra(Ztot):
+    """For Ar w=0
+    I just create this function for now because I need it in the others to follow Gunnar code
+    It must be implemented!!!
+    
+    arguments:
+    
+    returns:
+    """
+    
+    w = 0
+    sintra = w / Ztot
+    return sintra

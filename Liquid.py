@@ -36,6 +36,7 @@ import numpy as np
 from modules.Utility import *
 from modules.LiquidStructure import *
 from modules.InterpolateData import *
+from modules.Optimization import *
 
 if __name__ == '__main__':
 
@@ -44,59 +45,110 @@ if __name__ == '__main__':
 
     #-------------------------------------------------------------
     
-    # plt.plot(Q, I_Q, "b-", label="Data")
-    # plt.show()
-
-    #-------------------------------------------------------------
-    
-    fQ = calc_aff("Ar", Q)
-    
-    # plt.plot(Q, fQ)
-    # plt.show()
-    
-    #-------------------------------------------------------------
-    
     elemList = {"Ar":1}
       
-    fe, Ztot = calc_eeff(elemList, Q, calc_aff)
-    # print(fe)
-    # print(Ztot)
-    # plt.plot(Q, fe)
-    # plt.show()
+    fe_Q, Ztot = calc_eeff(elemList, Q, calc_aff)
     
     #-------------------------------------------------------------
     
     Iinc = calc_Iincoh(elemList, Q, calc_aff)
-    # plt.plot(Q, Iinc)
-    # plt.show()
     
     #-------------------------------------------------------------
     
-    JQ = calc_JQ(Iinc, fe, Ztot)
-    # plt.plot(Q, JQ)
-    # plt.show()
-
+    J_Q = calc_JQ(Iinc, fe_Q, Ztot)
+    
     #-------------------------------------------------------------
 
-    kp = calc_Kp(fe, "Ar", Q, calc_aff)
-    # print(kp)
-
+    kp = calc_Kp(fe_Q, "Ar", Q, calc_aff)
+    
     #-------------------------------------------------------------
 
-    sinf = calc_Sinf(elemList, fe, Q, Ztot, calc_Kp, calc_aff)
-    # print(sinf)
-
+    Sinf = calc_Sinf(elemList, fe_Q, Q, Ztot, calc_Kp, calc_aff)
+    
     #-------------------------------------------------------------    
 
-    shit = interpolateSpectra(Q, I_Q)
-    plt.plot(Q, shit)
-    plt.show()
+    alpha = calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot)
+    Isample = I_Q - I_Qbkg
     
-    
-    
-    # print("Ztot: ", Ztot)
-    # print("sum_Kp2: ", sum_Kp2)
-    # print("Sinf: ", Sinf)
+    S_Q = calc_SQ(alpha, Isample, Ztot, fe_Q)
+    # plt.figure(1)
+    # plt.plot(Q, S_Q)
+    # plt.grid()
+    # plt.show
 
-    # alpha = calc_alpha(JQ, sinf, Q, I_Q, fe, Ztot, 5)
-    # print(alpha)
+    #--------------------------------------------------------------
+    
+    i_Q = calc_iQ(S_Q, Sinf)
+
+    r, F_r = calc_Fr(Q, i_Q)
+    # plt.plot(r, F_r)
+    # plt.grid()
+    # plt.show()
+    
+    #--------------------------------------------------------------
+    # calc of rho0
+       
+    rho0 = calc_rho0(Q, i_Q)
+    # print(rho0)
+    
+    #--------------------------------------------------------------
+    rho0 = 25.0584
+    r_cutoff = 0.2
+    
+    Fintra_r = calc_Fintra()
+    
+    # first iteration
+    deltaF_r1 = calc_deltaFr(F_r, Fintra_r, rho0)
+    i_Q1 = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r1, r, r_cutoff)
+
+    # second iteration
+    r, F_r2 = calc_Fr(Q, i_Q1)
+    deltaF_r2 = calc_deltaFr(F_r2, Fintra_r, rho0)
+    i_Q2 = calc_iQi(i_Q1, Q, Sinf, J_Q, deltaF_r2, r, r_cutoff)
+    
+    r, F_r3 = calc_Fr(Q, i_Q2)
+    
+    plt.figure(1)
+    plt.plot(r, F_r)
+    plt.grid()
+    plt.show
+    
+    plt.figure(2)
+    plt.plot(r, F_r2)
+    plt.grid()
+    plt.show
+    
+    plt.figure(3)
+    plt.plot(r, F_r3)
+    plt.grid()
+    plt.show()
+
+    # plt.figure(4)
+    # plt.plot(r, F_r)
+    # plt.grid()
+    # plt.show()
+
+    
+    
+    # #-------------------------------------------------------------    
+    # Very important for the FFT!!!
+    # r = fftpack.fftfreq(S_Q.size, Q[1] - Q[0])    
+    # F_r = fftpack.fft(S_Q)
+    # F_rI = F_r.imag
+
+    # pidxs = np.where(r > 0)
+    # r = r[pidxs]
+    # F_rI = F_rI[pidxs]
+    
+    # print(r.size, F_rI.size)
+    
+    # plt.figure(2)
+    # plt.plot(r, F_rI)
+    # plt.grid()
+    # plt.show()
+    
+    # #-------------------------------------------------------------    
+
+    # QiQ = Q*(S_Q - Sinf)
+    
+    # r, F_r = FFT_QiQ(QiQ)

@@ -28,6 +28,9 @@ Eggert et al. 2002 PRB, 65, 174105
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
 returns: description - type
+
+For the variables name I used this convention:
+if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
 """
 
 import matplotlib.pyplot as plt
@@ -39,32 +42,76 @@ import numpy as np
 import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
-from scipy.interpolate import interp1d
-from scipy.stats import binned_statistic
 
-def interpolateSpectra(Q, I_Q):
+from lmfit import minimize, Parameters
+
+
+def calc_Fintra():
+    """To implemente!!!
+    eq. 42
     """
     
+    Fintra_r = 0
+    
+    return Fintra_r
+    
+    
+def calc_deltaFr(F_r, Fintra_r, rho0):
+    """Function to calculate deltaF(r) eq. 44, 48
+    
+    arguments:
+    F(r): - array
+    Fintra_r: intramolecular contribution of F(r) - array
+    rho0: average atomic density - number
+    
+    return:
+    deltaF_r: - array
     """
     
-    BinNum = 1
-    Num = 2048
-    MaxQ = 109
-    MinQ = 3
+    deltaF_r = F_r - (Fintra_r - 4*np.pi*rho0)
     
-    Qmin = np.amin(Q)
+    return deltaF_r
     
-    startVal = ((BinNum-1)/2*(MaxQ/(BinNum*Num-1))) + Qmin
-    endVal = (MaxQ-(BinNum-1)/2*(MaxQ/(BinNum*Num-1)))
+
+def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
+    """Function to calculate the i-th iteration of i(Q) (eq. 49)
     
-    myBins = (endVal - startVal)/BinNum
+    arguments:
+    i_Q:
+    Q:
+    Sinf:
+    J_Q:
+    deltaF_r:
+    r_cutoff: - number
     
-    xVal = np.linspace(startVal, endVal, Num)
-    f = interp1d(Q, I_Q)
-    yVal = f(xVal)
+    returns:
+    i_Qi: i-th iteration of i(Q) - array
+    """
     
-    yval = binned_statistic(yVal, xVal, bins=myBins)[0]
+    rint = np.linspace(0, r_cutoff, Q.size)
+    # print("rint ", rint.size)
+    # print("r ", r.size)
+    # print("Q ", Q.size)
+    # print("deltaF_r ", deltaF_r.size)
     
-    yVal[ yVal < MinQ ] = 0
+    integral = simps(deltaF_r * np.sin(Q*r), rint)
     
-    return (xVal, yVal)
+    i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q))) * integral
+    
+    return i_Qi
+    
+
+# def calc_optimize_Fr(iteration, ):
+    # """
+    
+    # """
+    
+    # for :
+        
+        
+    
+    # return optF_r
+    
+    
+    
+    
