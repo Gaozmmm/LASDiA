@@ -47,11 +47,11 @@ if __name__ == '__main__':
     
     elemList = {"Ar":1}
       
-    fe_Q, Ztot = calc_eeff(elemList, Q, calc_aff)
+    fe_Q, Ztot = calc_eeff(elemList, Q)
     
     #-------------------------------------------------------------
     
-    Iinc = calc_Iincoh(elemList, Q, calc_aff)
+    Iinc = calc_Iincoh(elemList, Q)
     
     #-------------------------------------------------------------
     
@@ -59,11 +59,12 @@ if __name__ == '__main__':
     
     #-------------------------------------------------------------
 
-    kp = calc_Kp(fe_Q, "Ar", Q, calc_aff)
+    kp = calc_Kp(fe_Q, "Ar", Q)
     
     #-------------------------------------------------------------
 
-    Sinf = calc_Sinf(elemList, fe_Q, Q, Ztot, calc_Kp, calc_aff)
+    Sinf = calc_Sinf(elemList, fe_Q, Q, Ztot)
+    # print(Sinf)
     
     #-------------------------------------------------------------    
 
@@ -95,42 +96,16 @@ if __name__ == '__main__':
     rho0 = 25.0584
     r_cutoff = 0.2
     
-    Fintra_r = calc_Fintra()
-    
-    # first iteration
-    deltaF_r1 = calc_deltaFr(F_r, Fintra_r, rho0)
-    i_Q1 = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r1, r, r_cutoff)
-
-    # second iteration
-    r, F_r2 = calc_Fr(Q, i_Q1)
-    deltaF_r2 = calc_deltaFr(F_r2, Fintra_r, rho0)
-    i_Q2 = calc_iQi(i_Q1, Q, Sinf, J_Q, deltaF_r2, r, r_cutoff)
-    
-    r, F_r3 = calc_Fr(Q, i_Q2)
+    iteration = 2
+    opt_Fr = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff)
     
     plt.figure(1)
-    plt.plot(r, F_r)
-    plt.grid()
-    plt.show
-    
-    plt.figure(2)
-    plt.plot(r, F_r2)
-    plt.grid()
-    plt.show
-    
-    plt.figure(3)
-    plt.plot(r, F_r3)
+    plt.plot(r, opt_Fr)
     plt.grid()
     plt.show()
 
-    # plt.figure(4)
-    # plt.plot(r, F_r)
-    # plt.grid()
-    # plt.show()
-
     
-    
-    # #-------------------------------------------------------------    
+    # #-------------------------------------------------------------
     # Very important for the FFT!!!
     # r = fftpack.fftfreq(S_Q.size, Q[1] - Q[0])    
     # F_r = fftpack.fft(S_Q)

@@ -97,13 +97,15 @@ def calc_aff(element, Q):
     return f_Q
       
     
-def calc_eeff(elementList, Q, calc_aff):
+def calc_eeff(elementList, Q):
     """Function to calculate the effective electron Form Factor, fe (eq. 10)
     
     arguments:
     elementList: contains the chemical elements of the sample with their multiplicity - dictionary("element": multiplicity)
         element - string; multiplicity - number
     Q: momentum transfer - array
+    
+    functions used into the calculation:
     calc_aff: function to calculate the atomic form factor - function
     
     returns:
@@ -138,7 +140,7 @@ def calc_eeff(elementList, Q, calc_aff):
     return (fe_Q, Ztot)
     
     
-def calc_Iincoh(elementList, Q, calc_aff):
+def calc_Iincoh(elementList, Q):
     """ Function to calculate the incoherent scattering intensity Iincoh(Q)
     The incoherent scattering intensity is calculated with the formula and parameters from the article:
     Hajdu Acta Cryst. (1972). A28, 250
@@ -147,6 +149,8 @@ def calc_Iincoh(elementList, Q, calc_aff):
     elementList: contains the chemical elements of the sample with their multiplicity - dictionary("element": multiplicity)
         element - string; multiplicity - number
     Q: momentum transfer - array
+    
+    functions used into the calculation:
     calc_aff: function to calculate the atomic form factor - function
     
     returns:
@@ -195,13 +199,15 @@ def calc_JQ(Iincoh_Q, Ztot, fe_Q):
     return J_Q
     
     
-def calc_Kp(fe_Q, element, Q, calc_aff):
+def calc_Kp(fe_Q, element, Q):
     """Function to calculate the effective atomic number, Kp_Q (eq. 11), and its average, Kp (eq. 14)
 
     arguments:
     fe_Q: effective electric form factor - array
     element: chemical element of the sample
     Q: momentum transfer - array
+    
+    functions used into the calculation:
     calc_aff: function to calculate the atomic form factor - function
     
     returns:
@@ -218,7 +224,7 @@ def calc_Kp(fe_Q, element, Q, calc_aff):
     return Kp
 
 
-def calc_Sinf(elementList, fe_Q, Q, Ztot, calc_Kp, calc_aff):
+def calc_Sinf(elementList, fe_Q, Q, Ztot):
     """Function to calculate Sinf (eq. 19)
     
     arguments:
@@ -227,6 +233,8 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, calc_Kp, calc_aff):
     fe_Q: effective electric form factor - array
     Q: momentum transfer - array
     Ztot: total Z number - number
+    
+    functions used into the calculation:
     calc_Kp: function to calculate the average effective atomic number - function
     calc_aff: function to calculate the atomic form factor - function
     
@@ -237,7 +245,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, calc_Kp, calc_aff):
     sum_Kp2 = 0
 
     for element, multiplicity in elementList.items():
-        sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q, calc_aff)**2
+        sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q)**2
     
     Sinf = sum_Kp2 / Ztot**2
 
@@ -249,7 +257,7 @@ def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0 = 25.0584):
     For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
     
     arguments:
-
+    
     returns:
     """
     

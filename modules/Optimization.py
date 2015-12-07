@@ -45,6 +45,7 @@ from scipy.integrate import simps
 
 from lmfit import minimize, Parameters
 
+from modules.LiquidStructure import *
 
 def calc_Fintra():
     """To implemente!!!
@@ -101,16 +102,18 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     return i_Qi
     
 
-# def calc_optimize_Fr(iteration, ):
-    # """
+def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
+    """Function to calculate the optimization
     
-    # """
-    
-    # for :
+    """
+   
+    for i in range(iteration):
+        deltaF = calc_deltaFr(F_r, Fintra_r, rho0)
+        i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF, r, r_cutoff)
+        r, F_r = calc_Fr(Q, i_Q)     
         
-        
-    
-    # return optF_r
+    optF_r = F_r
+    return optF_r
     
     
     
