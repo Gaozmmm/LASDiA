@@ -252,7 +252,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot):
     return Sinf
 
 
-def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0 = 25.0584):
+def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0):
     """Function to calculate alpha (eq. 34)
     For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
     
@@ -269,7 +269,7 @@ def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0 = 25.0584):
     return alpha
 
 
-def calc_SQ(alpha, Isample, Ztot, fe_Q):
+def calc_SQ(Isample, Ztot, fe_Q):
     """Function to calculate the S(Q) (eq. 18)
 
     arguments:
@@ -281,9 +281,9 @@ def calc_SQ(alpha, Isample, Ztot, fe_Q):
     """
     
     numAtoms = sc.N_A
-    # S_Q = Isample / (numAtoms * Ztot**2 * fe_Q**2)
+    S_Q = Isample / (numAtoms * Ztot**2 * fe_Q**2)
     # S_Q = (alpha*Isample / fe_Q**2 - J_Q)/Ztot**2+Sinf
-    S_Q = alpha*Isample / fe_Q**2
+    # S_Q = alpha*Isample / fe_Q**2
     
     return S_Q
 
@@ -315,7 +315,6 @@ def calc_Fr(Q, i_Q):
     """
     
     r = np.linspace(0.0, 1.5, Q.size)
-    rho_0 = 1.4
     
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
     
@@ -333,7 +332,7 @@ def calc_rho0(Q, i_Q):
     rho0: average atomic density - number
     """
     
-    rho0 = 1/(-2*np.pi**2) * simps(Q**2 * i_Q, Q)
+    rho0 = 1/(-2*np.pi**2) * simps(i_Q * Q**2, Q)
     
     return rho0
     
@@ -358,15 +357,28 @@ def FFT_QiQ(QiQ):
     
     """
     
-    s = QiQ.size
-    r = fftpack.fftfreq(s)
-    val_fft = fftpack.fft(QiQ)
-    imag_fft = val_fft.imag
-    delta = QiQ[1] - QiQ[0]
-    F_r = 2/np.pi * imag_fft * delta
+    
+    r = fftpack.fftfreq(QiQ.size, QiQ[1] - QiQ[0])    
+    F_r = fftpack.fft(QiQ)
+    F_rI = F_r.imag
+
+    pidxs = np.where(r > 0)
+    r = r[pidxs]
+    
+    pidxsa = np.where(r < 1.5)
+    r = r[pidxsa]
+
+    F_rI = F_rI[pidxsa]
+    
+    # s = QiQ.size
+    # r = fftpack.fftfreq(s)
+    # val_fft = fftpack.fft(QiQ)
+    # imag_fft = val_fft.imag
+    # delta = QiQ[1] - QiQ[0]
+    # F_r = 2/np.pi * imag_fft * delta
     # print(F_r)
     
-    return (r, F_r)
+    return (r, F_rI)
     
     
 # def FT_QiQ(Q, QiQ):
@@ -391,11 +403,12 @@ def IFFT_Fr(Fr):
     
     returns:
     """
-
-    s = Fr.size
-    Qfft = fftpack.fftfreq(s)
+    
+    
+    Qfft = fftpack.fftfreq(Fr.size)
     val_fft = fftpack.fft(Fr)
     imag_fft = val_fft.imag
+
     delta = Fr[1] - Fr[0]
     QiQ = imag_fft * delta
     

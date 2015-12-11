@@ -30,6 +30,7 @@ import six
 import sys
 import os
 
+import scipy.constants as sc
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -40,13 +41,16 @@ from modules.Optimization import *
 
 if __name__ == '__main__':
 
-    Q, I_Q = read_file("./data/cea_files/HT2_034.chi") # Mac
-    Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036.chi") # Mac
+    # Q, I_Q = read_file("./data/cea_files/HT2_034.chi")
+    # Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036.chi")
+
+    Q, I_Q = read_file("./data/my_test/HT2_034_20151104.chi")
+    Qbkg, I_Qbkg = read_file("./data/my_test/HT2_036_20151104.chi")
 
     #-------------------------------------------------------------
     
     elemList = {"Ar":1}
-      
+    
     fe_Q, Ztot = calc_eeff(elemList, Q)
     
     #-------------------------------------------------------------
@@ -67,39 +71,73 @@ if __name__ == '__main__':
     # print(Sinf)
     
     #-------------------------------------------------------------    
-
-    alpha = calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot)
-    Isample = I_Q - I_Qbkg
+    numAtoms = sc.N_A
+    s = 1.2
+    Isample = I_Q - s * I_Qbkg
     
-    S_Q = calc_SQ(alpha, Isample, Ztot, fe_Q)
-    # plt.figure(1)
-    # plt.plot(Q, S_Q)
-    # plt.grid()
-    # plt.show
+    alpha = calc_alpha(J_Q, Sinf, Q, Isample, fe_Q, Ztot, rho0=25)
+    
+    Icoh = (numAtoms * alpha * Isample) - (numAtoms * Iinc)
+    
+    
+    S_Q = calc_SQ(Icoh, Ztot, fe_Q)
+    i_Q = calc_iQ(S_Q, Sinf)
+    rho0 = calc_rho0(Q, i_Q)
+    
+    
+    
+    
+    plt.figure(1)
+    plt.plot(Q, S_Q)
+    plt.grid()
+    plt.show
 
     #--------------------------------------------------------------
     
-    i_Q = calc_iQ(S_Q, Sinf)
+    
 
     r, F_r = calc_Fr(Q, i_Q)
-    # plt.plot(r, F_r)
-    # plt.grid()
-    # plt.show()
+
+    plt.figure(2)
+    plt.plot(r, F_r)
+    plt.grid()
+    plt.show
+    
+    QiQ = i_Q
+    rrr, Frrr = FFT_QiQ(QiQ)
+    
+    # print(rrr.size)
+    # print(Frrr.size)
+    plt.figure(3)
+    plt.plot(rrr, Frrr)
+    plt.grid()
+    plt.show
+    
+    
+    # r = fftpack.fftfreq(S_Q.size, Q[1] - Q[0])    
+    # F_r = fftpack.fft(S_Q)
+    # F_rI = F_r.imag
+
+    # pidxs = np.where(r > 0)
+    # r = r[pidxs]
+    # F_rI = F_rI[pidxs]
+    
     
     #--------------------------------------------------------------
     # calc of rho0
        
-    rho0 = calc_rho0(Q, i_Q)
+    
     # print(rho0)
     
     #--------------------------------------------------------------
-    rho0 = 25.0584
+    #rho0 = 25.0584
     r_cutoff = 0.2
     
+    Fintra_r = calc_Fintra()
     iteration = 2
-    opt_Fr = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff)
+    opt_Fr = calc_optimize_Fr(iteration, Frrr, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, rrr, r_cutoff)
     
-    plt.figure(1)
+    plt.figure(4)
     plt.plot(r, opt_Fr)
     plt.grid()
     plt.show()

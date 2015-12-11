@@ -58,7 +58,7 @@ def calc_Fintra():
     
     
 def calc_deltaFr(F_r, Fintra_r, rho0):
-    """Function to calculate deltaF(r) eq. 44, 48
+    """Function to calculate deltaF(r) (eq. 44, 48)
     
     arguments:
     F(r): - array
