@@ -42,44 +42,28 @@ import numpy as np
 import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
+from scipy.stats import chisquare
 
+from modules.LiquidStructure import *
 
-def IterateDeltaF(Q, SQ_SS, SQCorr):
-    """
+def calc_deltaMinim(r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot, Fintra):
+    """Function to minimize the density
     
     """
+    numAtoms = sc.N_A
+    Isample = I_Q - s * I_Qbkg
+    alpha = calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0)
+    Icoh = (numAtoms * alpha * Isample) - (numAtoms * Iincoh)
+    S_Q = calc_SQ(Icoh, Ztot, fe_Q)
+    i_Q = calc_iQ(S_Q, Sinf)
+    F_r = calc_Fr(r, Q, i_Q)
+    observed = F_r
+    excepted = Fintra - (4*np.pi*rho0)
     
-    Qmax = np.amax(Q)
-    Damping = 0.5
-    argQmax = np.aargmax(Q)
+    chi2, p = chisquare(observed, f_exp=excepted)
+    return chi2
     
-    QiQ_SS = exp(-(Damping/Qmax**2)*x^2)*Q*(SQ_SS-SQ_SS(argQmax+1))
-    QiQCorr = Q*(SQCorr-SQCorr(argQmax+1))
-    Del_iQ = (QiQ_SS-QiQCorr)/(Q*SQCorr)
-    
-    return (QiQ_SS, QiQCorr, Del_iQ)
-    
-def FitRemoveGofRPeaks():
-    """
-    arguments:
-    
-    returns:    
-    """
-
-    IFFT_GofR(DeltaG,"QiQCorrection",1)	
-    QiQ1[1,x2pnt(QiQ1,QMaxIntegrate)-1]=QiQ1-(QiQ1/(x*(SQinf+JofQ/Ztot^2))+1)*QiQCorr
-    FFT_QIofQ("QiofQ1", "GofRCorrection")
-    DelG=0
-    DelG[,x2pnt(DelG,Rnn)]=GR1-GRIdealSmallR
-    Wavestats/Q/R=(0.95*Rnn,) GR1
-    Rnn=0.99*V_minloc
-
     
 
-# def OptimizeScaleGofRCorr():
 
-# def OptimizeDensityGofRCorr():
 
-# def OptimizeWsampleGofRCorr():
-
-# def OptimizeWrefGofRCorr():

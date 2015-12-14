@@ -138,10 +138,18 @@ def calc_eeff(elementList, Q):
     fe_Q /= Ztot
 
     return (fe_Q, Ztot)
+
+
+def calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q):
+    """Function to calcultate the cohrent scattering intensity Icoh(Q)
     
+    """
+    Icoh_Q = numAtoms * ((alpha * Isample_Q) - Iincoh_Q)
+    return Icoh_Q
+
     
 def calc_Iincoh(elementList, Q):
-    """ Function to calculate the incoherent scattering intensity Iincoh(Q)
+    """Function to calculate the incoherent scattering intensity Iincoh(Q)
     The incoherent scattering intensity is calculated with the formula and parameters from the article:
     Hajdu Acta Cryst. (1972). A28, 250
     
@@ -268,12 +276,12 @@ def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0):
 
     return alpha
 
-
-def calc_SQ(Isample, Ztot, fe_Q):
+    
+def calc_SQ(Icoh, Ztot, fe_Q):
     """Function to calculate the S(Q) (eq. 18)
 
     arguments:
-    Isample: intensity - array
+    Icoh: intensity - array
     
     
     returns:
@@ -281,9 +289,9 @@ def calc_SQ(Isample, Ztot, fe_Q):
     """
     
     numAtoms = sc.N_A
-    S_Q = Isample / (numAtoms * Ztot**2 * fe_Q**2)
-    # S_Q = (alpha*Isample / fe_Q**2 - J_Q)/Ztot**2+Sinf
-    # S_Q = alpha*Isample / fe_Q**2
+    S_Q = Icoh / (numAtoms * Ztot**2 * fe_Q**2)
+#    S_Q = (alpha*Icoh / fe_Q**2 - J_Q)/Ztot**2+Sinf
+    # S_Q = alpha*Icoh / fe_Q**2
     
     return S_Q
 
@@ -304,7 +312,7 @@ def calc_iQ(S_Q, Sinf):
     return i_Q
     
 
-def calc_Fr(Q, i_Q):
+def calc_Fr(r, Q, i_Q):
     """Function to calculate F(r) (eq. 20)
     
     arguments:
@@ -314,11 +322,21 @@ def calc_Fr(Q, i_Q):
     F_r: - array
     """
     
-    r = np.linspace(0.0, 1.5, Q.size)
+#    r = np.linspace(0.0, 1.5, Q.size)
     
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
     
-    return (r, F_r)
+    return (F_r)
+    
+    
+def calc_gr(r, F_r, rho0):
+    """Function to calculate g(r)
+    
+    """
+    
+    g_r = 1 + F_r / (4 * np.pi * r * rho0)
+    
+    return g_r
 
     
 def calc_rho0(Q, i_Q):
@@ -336,14 +354,28 @@ def calc_rho0(Q, i_Q):
     
     return rho0
     
+def calc_spectrum(func):    
+    """
+
+    """
+    spectrum = fftpack.fftfreq(func.size, func[1] - func[0])
+    pidxs = np.where(spectrum > 0)
+    spectrum = spectrum[pidxs]
     
-    
-    
-    
-    
-    
-    
-    
+    return spectrum
+
+
+def calc_SQi(F_r, r, Q, Sinf):
+    """Function to calculate S(Q) from F(r)
+
+    """
+
+    Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)
+    S_Q = Qi_Q/Q +Sinf
+
+    return S_Q
+
+
     
     
     
@@ -358,14 +390,14 @@ def FFT_QiQ(QiQ):
     """
     
     
-    r = fftpack.fftfreq(QiQ.size, QiQ[1] - QiQ[0])    
+    r = fftpack.fftfreq(QiQ.size, QiQ[1] - QiQ[0])
     F_r = fftpack.fft(QiQ)
     F_rI = F_r.imag
 
     pidxs = np.where(r > 0)
     r = r[pidxs]
     
-    pidxsa = np.where(r < 1.5)
+    pidxsa = np.where(r < 3)
     r = r[pidxsa]
 
     F_rI = F_rI[pidxsa]

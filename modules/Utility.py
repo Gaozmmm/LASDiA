@@ -105,7 +105,7 @@ def read_file(path):
 
     # Modify the variables as numpy array:
     xVect = np.array(x)
-    xVect /= scale_factor
+#    xVect /= scale_factor
     yVect = np.array(y)
     
 #    plot_data(xVect, yVect,  "Q", "I(Q)", "Data")

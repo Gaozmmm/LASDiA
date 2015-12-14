@@ -38,6 +38,7 @@ from modules.Utility import *
 from modules.LiquidStructure import *
 from modules.InterpolateData import *
 from modules.Optimization import *
+from modules.Minimization import *
 
 if __name__ == '__main__':
 
@@ -46,101 +47,61 @@ if __name__ == '__main__':
 
     Q, I_Q = read_file("./data/my_test/HT2_034_20151104.chi")
     Qbkg, I_Qbkg = read_file("./data/my_test/HT2_036_20151104.chi")
-
-    #-------------------------------------------------------------
     
-    elemList = {"Ar":1}
+    elementList = {"Ar":1}
     
-    fe_Q, Ztot = calc_eeff(elemList, Q)
+    fe_Q, Ztot = calc_eeff(elementList, Q)
     
-    #-------------------------------------------------------------
-    
-    Iinc = calc_Iincoh(elemList, Q)
-    
-    #-------------------------------------------------------------
-    
-    J_Q = calc_JQ(Iinc, fe_Q, Ztot)
-    
-    #-------------------------------------------------------------
-
-    kp = calc_Kp(fe_Q, "Ar", Q)
-    
-    #-------------------------------------------------------------
-
-    Sinf = calc_Sinf(elemList, fe_Q, Q, Ztot)
-    # print(Sinf)
-    
-    #-------------------------------------------------------------    
     numAtoms = sc.N_A
-    s = 1.2
-    Isample = I_Q - s * I_Qbkg
+    alpha = 1
+    s = 1
+    Isample_Q = I_Q - s * I_Qbkg
+    Iincoh_Q = calc_Iincoh(elementList, Q)
+    Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
     
-    alpha = calc_alpha(J_Q, Sinf, Q, Isample, fe_Q, Ztot, rho0=25)
-    
-    Icoh = (numAtoms * alpha * Isample) - (numAtoms * Iinc)
-    
-    
-    S_Q = calc_SQ(Icoh, Ztot, fe_Q)
-    i_Q = calc_iQ(S_Q, Sinf)
-    rho0 = calc_rho0(Q, i_Q)
-    
-    
-    
-    
+    S_Q = calc_SQ(Icoh_Q, Ztot, fe_Q)
+
     plt.figure(1)
     plt.plot(Q, S_Q)
     plt.grid()
     plt.show
-
-    #--------------------------------------------------------------
     
+    Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
+    i_Q = calc_iQ(S_Q, Sinf)
+    r = calc_spectrum(i_Q)
+    F_r = calc_Fr(r, Q, i_Q)
     
-
-    r, F_r = calc_Fr(Q, i_Q)
-
     plt.figure(2)
     plt.plot(r, F_r)
     plt.grid()
     plt.show
     
-    QiQ = i_Q
-    rrr, Frrr = FFT_QiQ(QiQ)
+    rho0 = calc_rho0(Q, i_Q)
+    g_r = calc_gr(r, F_r, rho0)
     
-    # print(rrr.size)
-    # print(Frrr.size)
-    plt.figure(3)
-    plt.plot(rrr, Frrr)
-    plt.grid()
+    # plt.figure(3)
+    # plt.plot(r, g_r)
+    # plt.grid()
+    # plt.show
+    
+    iteration = 2
+    r_cutoff = 0.25
+    Fintra_r = calc_Fintra()
+    J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    optF_r = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff)
+    
+    plt.figure(2)
+    plt.plot(r, optF_r)
+    #plt.grid()
     plt.show
     
+    SQ1 = calc_SQi(optF_r, r, Q, Sinf)
     
-    # r = fftpack.fftfreq(S_Q.size, Q[1] - Q[0])    
-    # F_r = fftpack.fft(S_Q)
-    # F_rI = F_r.imag
-
-    # pidxs = np.where(r > 0)
-    # r = r[pidxs]
-    # F_rI = F_rI[pidxs]
-    
-    
-    #--------------------------------------------------------------
-    # calc of rho0
-       
-    
-    # print(rho0)
-    
-    #--------------------------------------------------------------
-    #rho0 = 25.0584
-    r_cutoff = 0.2
-    
-    Fintra_r = calc_Fintra()
-    iteration = 2
-    opt_Fr = calc_optimize_Fr(iteration, Frrr, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, rrr, r_cutoff)
-    
-    plt.figure(4)
-    plt.plot(r, opt_Fr)
-    plt.grid()
+    plt.figure(1)
+    plt.plot(Q, SQ1)
+    #plt.grid()
     plt.show()
+    
 
     
     # #-------------------------------------------------------------

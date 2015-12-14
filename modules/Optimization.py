@@ -89,13 +89,13 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     i_Qi: i-th iteration of i(Q) - array
     """
     
-    rint = np.linspace(0, r_cutoff, Q.size)
+    rint = np.linspace(0, r_cutoff, r.size)
     # print("rint ", rint.size)
     # print("r ", r.size)
     # print("Q ", Q.size)
     # print("deltaF_r ", deltaF_r.size)
     
-    integral = simps(deltaF_r * np.sin(Q*r), rint)
+    integral = simps(deltaF_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, rint) #simps(deltaF_r * np.sin(np.mat(r)*Q), rint)
     
     i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q))) * integral
     
@@ -110,8 +110,8 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cut
     for i in range(iteration):
         deltaF = calc_deltaFr(F_r, Fintra_r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF, r, r_cutoff)
-        r, F_r = calc_Fr(Q, i_Q)     
-        
+        F_r = calc_Fr(r, Q, i_Q)     
+    
     optF_r = F_r
     return optF_r
     
