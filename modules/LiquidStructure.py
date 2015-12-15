@@ -140,11 +140,11 @@ def calc_eeff(elementList, Q):
     return (fe_Q, Ztot)
 
 
-def calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q):
+def calc_Icoh(N, alpha, Isample_Q, Iincoh_Q):
     """Function to calcultate the cohrent scattering intensity Icoh(Q)
     
     """
-    Icoh_Q = numAtoms * ((alpha * Isample_Q) - Iincoh_Q)
+    Icoh_Q = N * ((alpha * Isample_Q) - Iincoh_Q)
     return Icoh_Q
 
     
@@ -260,7 +260,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot):
     return Sinf
 
 
-def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0):
+def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     """Function to calculate alpha (eq. 34)
     For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
     
@@ -270,14 +270,14 @@ def calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0):
     """
     
     Integral1 = simps((J_Q + Sinf) * Q**2, Q)
-    Integral2 = simps((I_Q/fe_Q**2) * Q**2,Q)
+    Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
 
     alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
 
     return alpha
 
     
-def calc_SQ(Icoh, Ztot, fe_Q):
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q):
     """Function to calculate the S(Q) (eq. 18)
 
     arguments:
@@ -288,8 +288,8 @@ def calc_SQ(Icoh, Ztot, fe_Q):
     S_Q: - array
     """
     
-    numAtoms = sc.N_A
-    S_Q = Icoh / (numAtoms * Ztot**2 * fe_Q**2)
+    #numAtoms = N #sc.N_A
+    S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
 #    S_Q = (alpha*Icoh / fe_Q**2 - J_Q)/Ztot**2+Sinf
     # S_Q = alpha*Icoh / fe_Q**2
     
@@ -365,7 +365,7 @@ def calc_spectrum(func):
     return spectrum
 
 
-def calc_SQi(F_r, r, Q, Sinf):
+def calc_SQ_F(F_r, r, Q, Sinf):
     """Function to calculate S(Q) from F(r)
 
     """
@@ -397,10 +397,10 @@ def FFT_QiQ(QiQ):
     pidxs = np.where(r > 0)
     r = r[pidxs]
     
-    pidxsa = np.where(r < 3)
-    r = r[pidxsa]
+    # pidxsa = np.where(r < 3)
+    # r = r[pidxsa]
 
-    F_rI = F_rI[pidxsa]
+    F_rI = F_rI[pidxs]
     
     # s = QiQ.size
     # r = fftpack.fftfreq(s)

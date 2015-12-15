@@ -52,21 +52,27 @@ if __name__ == '__main__':
     
     fe_Q, Ztot = calc_eeff(elementList, Q)
     
-    numAtoms = sc.N_A
-    alpha = 1
-    s = 1
-    Isample_Q = I_Q - s * I_Qbkg
-    Iincoh_Q = calc_Iincoh(elementList, Q)
-    Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
+    N = 1#sc.N_A
+    s = 1.2
+    rho0 = 25.6
     
-    S_Q = calc_SQ(Icoh_Q, Ztot, fe_Q)
+    Iincoh_Q = calc_Iincoh(elementList, Q)
+    J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
+    
+    Isample_Q = I_Q - s * I_Qbkg
+
+    alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0)
+    
+    Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
+    
+    S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q)
 
     plt.figure(1)
     plt.plot(Q, S_Q)
     plt.grid()
     plt.show
     
-    Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
     i_Q = calc_iQ(S_Q, Sinf)
     r = calc_spectrum(i_Q)
     F_r = calc_Fr(r, Q, i_Q)
@@ -76,7 +82,7 @@ if __name__ == '__main__':
     plt.grid()
     plt.show
     
-    rho0 = calc_rho0(Q, i_Q)
+    #rho0 = calc_rho0(Q, i_Q)
     g_r = calc_gr(r, F_r, rho0)
     
     # plt.figure(3)
@@ -84,24 +90,31 @@ if __name__ == '__main__':
     # plt.grid()
     # plt.show
     
-    iteration = 2
-    r_cutoff = 0.25
+    iteration = 4
+    r_cutoff = 1.0
     Fintra_r = calc_Fintra()
-    J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    
     optF_r = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff)
     
-    plt.figure(2)
-    plt.plot(r, optF_r)
-    #plt.grid()
-    plt.show
+    # plt.figure(2)
+    # plt.plot(r, optF_r)
+    # #plt.grid()
+    # plt.show
     
-    SQ1 = calc_SQi(optF_r, r, Q, Sinf)
+    SQ_F = calc_SQ_F(optF_r, r, Q, Sinf)
     
-    plt.figure(1)
-    plt.plot(Q, SQ1)
+    # plt.figure(1)
+    # plt.plot(Q, SQ_F)
+    # #plt.grid()
+    # plt.show
+    
+    
+    R, FR = FFT_QiQ(i_Q + 1)
+    
+    plt.figure(4)
+    plt.plot(R, FR)
     #plt.grid()
     plt.show()
-    
 
     
     # #-------------------------------------------------------------

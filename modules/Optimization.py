@@ -97,20 +97,53 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     
     integral = simps(deltaF_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, rint) #simps(deltaF_r * np.sin(np.mat(r)*Q), rint)
     
-    i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q))) * integral
+    i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q) + 1)) * integral
     
     return i_Qi
-    
 
-def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
+    
+def calc_deltaAlpha(i_Q, i_Qi, S_Q):
+    """
+    """
+    
+    deltaAlpha = (i_Q - i_Qi) / S_Q
+    
+    return deltaAlpha
+
+
+def calc_alphai(alpha, deltaAlpha):
+    """
+    
+    """
+    
+    alphai = alpha * (1 + deltaAlpha)
+    
+    return alphai
+    
+    
+def calc_SQi():
+ 
+ 
+
+def calc_optimize_Fr(iteration, i_Q, F_r, Fintra_r, rho0, Q, Sinf, J_Q, r, r_cutoff, S_Q, alpha, N, Isample_Q, Iincoh_Q, Ztot, fe_Q):
     """Function to calculate the optimization
     
     """
    
     for i in range(iteration):
+        # i_QTemp = i_Q
+        # S_QTemp = S_Q
+        # deltaF = calc_deltaFr(F_r, Fintra_r, rho0)
+        # i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF, r, r_cutoff)
+        
+        # deltaAlpha = calc_deltaAlpha(i_QTemp, i_Q, S_QTemp)
+        # alpha = calc_alphai(alpha, deltaAlpha)
+        # Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
+        # S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q)
+        # F_r = calc_Fr(r, Q, i_Q)
         deltaF = calc_deltaFr(F_r, Fintra_r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF, r, r_cutoff)
-        F_r = calc_Fr(r, Q, i_Q)     
+        F_r = calc_Fr(r, Q, i_Q)
     
     optF_r = F_r
     return optF_r

@@ -46,14 +46,14 @@ from scipy.stats import chisquare
 
 from modules.LiquidStructure import *
 
-def calc_deltaMinim(r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot, Fintra):
+def calc_deltaMinim(N, r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot, Fintra):
     """Function to minimize the density
     
     """
-    numAtoms = sc.N_A
+    #numAtoms = sc.N_A
     Isample = I_Q - s * I_Qbkg
     alpha = calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0)
-    Icoh = (numAtoms * alpha * Isample) - (numAtoms * Iincoh)
+    Icoh = (N * alpha * Isample) - (N * Iincoh)
     S_Q = calc_SQ(Icoh, Ztot, fe_Q)
     i_Q = calc_iQ(S_Q, Sinf)
     F_r = calc_Fr(r, Q, i_Q)
