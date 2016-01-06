@@ -87,10 +87,10 @@ def calc_aff(element, Q):
     # f(Q) = f1(Q) + f2(Q) + f3(Q) + f4(Q) + c
     # fi(Q) = ai * exp(-bi * (Q/4pi)^2)
     
-    f1_Q = a1 * np.exp(-b1 * (Q/(4*np.pi))**2)
-    f2_Q = a2 * np.exp(-b2 * (Q/(4*np.pi))**2)
-    f3_Q = a3 * np.exp(-b3 * (Q/(4*np.pi))**2)
-    f4_Q = a4 * np.exp(-b4 * (Q/(4*np.pi))**2)
+    f1_Q = a1 * np.exp(-b1 * (Q/(4*10*np.pi))**2)
+    f2_Q = a2 * np.exp(-b2 * (Q/(4*10*np.pi))**2)
+    f3_Q = a3 * np.exp(-b3 * (Q/(4*10*np.pi))**2)
+    f4_Q = a4 * np.exp(-b4 * (Q/(4*10*np.pi))**2)
     
     f_Q = f1_Q + f2_Q + f3_Q + f4_Q + c
     
@@ -184,7 +184,7 @@ def calc_Iincoh(elementList, Q):
                 L = float(columns[4])
                 break
 
-        Iincoh_Q += multiplicity * ((Z - aff**2/Z ) * (1 - M * (np.exp(-K*Q/(4*np.pi)) - np.exp(-L*Q/(4*np.pi)))))
+        Iincoh_Q += multiplicity * ((Z - aff**2/Z ) * (1 - M * (np.exp(-K*Q/(4*10*np.pi)) - np.exp(-L*Q/(4*10*np.pi)))))
         
     return Iincoh_Q
 
@@ -272,6 +272,9 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     Integral1 = simps((J_Q + Sinf) * Q**2, Q)
     Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
 
+    # Integral1 = np.sum((J_Q + Sinf) * Q**2, Q)
+    # Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
+
     alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
 
     return alpha
@@ -289,9 +292,21 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q):
     """
     
     #numAtoms = N #sc.N_A
+    # Qmax = 80
+    # sinf = 1
+    
     S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
-#    S_Q = (alpha*Icoh / fe_Q**2 - J_Q)/Ztot**2+Sinf
-    # S_Q = alpha*Icoh / fe_Q**2
+
+#     pidxsA = np.where(Q > Qmax)
+#     pidxsB = np.where(Q <= Qmax)
+    
+#     S_QA = S_Q[pidxsA]
+#     S_QB = S_Q[pidxsB]
+
+#     S_QA.fill(1)
+#     newSQ = np.concatenate([S_QB, S_QA])
+# #    S_Q = (alpha*Icoh / fe_Q**2 - J_Q)/Ztot**2+Sinf
+#     # S_Q = alpha*Icoh / fe_Q**2
     
     return S_Q
 
@@ -322,11 +337,14 @@ def calc_Fr(r, Q, i_Q):
     F_r: - array
     """
     
-#    r = np.linspace(0.0, 1.5, Q.size)
+    #    r = np.linspace(0.0, 1.5, Q.size)
     
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
+    # rQ = np.outer(r,Q)
+    # sinrQ = np.sin(rQ)
+    # F_r = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1)
     
-    return (F_r)
+    return F_r
     
     
 def calc_gr(r, F_r, rho0):
@@ -370,7 +388,10 @@ def calc_SQ_F(F_r, r, Q, Sinf):
 
     """
 
-    Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)
+    # Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)
+    Qr = np.outer(Q,r)
+    sinQr = np.sin(Qr)
+    Qi_Q =  np.sum(sinQr * F_r, axis=1)
     S_Q = Qi_Q/Q +Sinf
 
     return S_Q
