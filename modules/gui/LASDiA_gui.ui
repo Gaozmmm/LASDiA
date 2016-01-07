@@ -6,40 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>751</height>
+    <width>696</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>LASDiA</string>
   </property>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>300</x>
-     <y>10</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Raw Data</string>
-   </property>
-  </widget>
-  <widget class="MplWidget" name="Fr" native="true">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>490</y>
-     <width>481</width>
-     <height>191</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>650</x>
+     <x>30</x>
      <y>10</y>
      <width>144</width>
      <height>211</height>
@@ -76,40 +53,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>10</y>
-     <width>101</width>
-     <height>111</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="pixmap">
-    <pixmap>ESRF.jpg</pixmap>
-   </property>
-   <property name="scaledContents">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="MplWidget" name="RawData" native="true">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>40</y>
-     <width>481</width>
-     <height>191</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
     <rect>
-     <x>650</x>
-     <y>470</y>
+     <x>210</x>
+     <y>280</y>
      <width>201</width>
      <height>161</height>
     </rect>
@@ -180,32 +128,13 @@
     </property>
    </widget>
   </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>1120</x>
-     <y>10</y>
-     <width>131</width>
-     <height>111</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="pixmap">
-    <pixmap>CEA.png</pixmap>
-   </property>
-   <property name="scaledContents">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>870</x>
-     <y>360</y>
+     <x>440</x>
+     <y>160</y>
      <width>251</width>
-     <height>291</height>
+     <height>281</height>
     </rect>
    </property>
    <property name="title">
@@ -224,7 +153,7 @@
      <string>Minimization</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -264,20 +193,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QLabel" name="label_15">
-         <property name="text">
-          <string>s value</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_16">
-         <property name="text">
-          <string>rho0 value</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item>
@@ -310,40 +225,16 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="sValue">
-         <property name="locale">
-          <locale language="C" country="AnyCountry"/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="rho0Value">
-         <property name="locale">
-          <locale language="C" country="AnyCountry"/>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
     </layout>
    </widget>
   </widget>
-  <widget class="MplWidget" name="SQ" native="true">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>270</y>
-     <width>481</width>
-     <height>191</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="groupBox_5">
    <property name="geometry">
     <rect>
-     <x>820</x>
-     <y>20</y>
+     <x>220</x>
+     <y>10</y>
      <width>261</width>
      <height>81</height>
     </rect>
@@ -418,37 +309,11 @@
     </property>
    </widget>
   </widget>
-  <widget class="QLabel" name="label_5">
-   <property name="geometry">
-    <rect>
-     <x>290</x>
-     <y>470</y>
-     <width>100</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>F(r)</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>300</x>
-     <y>240</y>
-     <width>59</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>S(Q)</string>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="groupBox_4">
    <property name="geometry">
     <rect>
-     <x>820</x>
-     <y>120</y>
+     <x>500</x>
+     <y>10</y>
      <width>161</width>
      <height>71</height>
     </rect>
@@ -483,15 +348,80 @@
     </property>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>100</y>
+     <width>171</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Initial values</string>
+   </property>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>30</y>
+      <width>161</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>s value</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>rho0 value</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QDoubleSpinBox" name="sValue">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="rho0Value">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <zorder>label_15</zorder>
+   <zorder>label_15</zorder>
+   <zorder>sValue</zorder>
+   <zorder>rho0Value</zorder>
+   <zorder>label_16</zorder>
+  </widget>
+  <zorder>layoutWidget</zorder>
+  <zorder>groupBox_2</zorder>
+  <zorder>groupBox</zorder>
+  <zorder>groupBox_5</zorder>
+  <zorder>groupBox_4</zorder>
+  <zorder>LoadData</zorder>
+  <zorder>groupBox_3</zorder>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MplWidget</class>
-   <extends>QWidget</extends>
-   <header>mplwidget</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
