@@ -31,6 +31,8 @@ import sys
 import os
 
 import scipy.constants as sc
+from scipy import fftpack
+from scipy import signal
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -41,40 +43,17 @@ from modules.Optimization import *
 from modules.Minimization import *
 
 if __name__ == '__main__':
-    N = 1#sc.N_A
-    # Q, I_Q = read_file("./data/cea_files/HT2_034.chi")
-    # Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036.chi")
-
-    # Q, I_Q = read_file("./data/my_test/HT2_034_20151104.chi")
-    # Qbkg, I_Qbkg = read_file("./data/my_test/HT2_036_20151104.chi")
-
+    N = 1 # sc.N_A
+    
     Q, I_Q = read_file("./data/cea_files/HT2_034T++.chi")
     Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036T++.chi")
-
-    plt.figure(1)
-    plt.plot(Q,I_Q)
-    plt.grid()
-    plt.show
-
-    plt.figure(1)
-    plt.plot(Qbkg,I_Qbkg)
-    plt.grid()
-    plt.show
-
-    plt.figure(1)
-    plt.plot(Qbkg,0.5*I_Qbkg)
-    plt.grid()
-    plt.show
-    
-    # print(np.amin(Q))
-    # print(np.amax(Q))
 
     minQ = 3
     maxQ = 109
     QmaxIntegrate = 90
 
     right_index = np.where((Q>minQ) & (Q<QmaxIntegrate))
-    inf_index = np.where((Q>QmaxIntegrate) & (Q<maxQ))
+    # inf_index = np.where((Q>QmaxIntegrate) & (Q<maxQ))
     newQ = Q[right_index]
     newI_Q = I_Q[right_index]
     newI_Qbkg = I_Qbkg[right_index]
@@ -99,51 +78,60 @@ if __name__ == '__main__':
 
     S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q)
 
-    
-    Qinf = Q[inf_index]
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    # Qinf = Q[inf_index]
+    Qinf = np.arange(QmaxIntegrate, maxQ, meanDeltaQ)
     newQinf = np.concatenate([newQ, Qinf])
 
     SQinf = np.zeros(Qinf.size)
     SQinf.fill(Sinf)
     newSQinf = np.concatenate([S_Q, SQinf])
     
-    # plt.figure(2)
-    # plt.plot(newQ,S_Q)
-    # plt.grid()
-    # plt.show
-
-    plt.figure(3)
+    plt.figure(1)
     plt.plot(newQinf,newSQinf)
     plt.grid()
     plt.show
 
     i_Q = calc_iQ(newSQinf, Sinf)
     Qi_Q = newQinf * i_Q
-    r = calc_spectrum(i_Q)
-    #r = np.linspace(0.0, 1.5, newQinf.size)
-    F_r = calc_Fr(r, newQinf, i_Q)
-    # print(r)
-    # r_index = np.where(r<1.6)
-    # newr = r[r_index]
-    # newF_r = F_r[r_index]
-
     
-    # plt.figure(5)
-    # plt.plot(newQinf,i_Q)
-    # plt.grid()
-    # plt.show
-
-    # plt.figure(6)
-    # plt.plot(newQinf,Qi_Q)
-    # plt.grid()
-    # plt.show
-
+    F_r = fftpack.fft(Qi_Q)
+    F_rI = F_r.imag
+    # F_rI *= 2/np.pi
+    # f_s = newQinf.size * meanDeltaQ
+    r = fftpack.fftfreq(newQinf.size, meanDeltaQ)
+    mask = np.where(r>0)
     
-    
-    plt.figure(4)
-    plt.plot(r,F_r)
+    plt.figure(2)
+    plt.plot(r[mask], F_rI[mask])
     plt.grid()
     plt.show()
+
+    
+    # sinF_r = fftpack.dst(Qi_Q)
+    # f_s = int(newQinf.size/np.amax(newQinf))
+    # f = fftpack.fftfreq(newQinf.size, 1.0/f_s)
+    # mask = np.where((f>0))# & (f<1.5))
+    # F_rI2 = F_rI * (Qi_Q[1] - Qi_Q[0]) *2/np.pi
+    
+      
+    # plt.figure(3)
+    # plt.plot(F_rI)
+    # plt.grid()
+    # plt.show
+   
+    # r = np.linspace(0.0, 3.5, newQinf.size)
+    # F_r2 = calc_Fr(r, newQinf, i_Q)
+   
+    # plt.figure(4)
+    # plt.plot(r, F_r2)
+    # plt.grid()
+    # plt.show()
+   
+    
+   
+
 
     
 
