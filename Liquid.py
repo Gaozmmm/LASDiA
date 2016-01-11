@@ -61,8 +61,13 @@ if __name__ == '__main__':
     plt.grid()
     plt.show
 
-    print(np.amin(Q))
-    print(np.amax(Q))
+    plt.figure(1)
+    plt.plot(Qbkg,0.5*I_Qbkg)
+    plt.grid()
+    plt.show
+    
+    # print(np.amin(Q))
+    # print(np.amax(Q))
 
     minQ = 3
     maxQ = 109
@@ -79,8 +84,8 @@ if __name__ == '__main__':
     # remember the electronic unit in atomic form factor!!!
     fe_Q, Ztot = calc_eeff(elementList, newQ)
     
-    s =  0.8
-    rho0 = 25.06#24.00
+    s =  0.5
+    rho0 = 24.00
     
     Iincoh_Q = calc_Iincoh(elementList, newQ)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
@@ -102,10 +107,10 @@ if __name__ == '__main__':
     SQinf.fill(Sinf)
     newSQinf = np.concatenate([S_Q, SQinf])
     
-    plt.figure(2)
-    plt.plot(newQ,S_Q)
-    plt.grid()
-    plt.show
+    # plt.figure(2)
+    # plt.plot(newQ,S_Q)
+    # plt.grid()
+    # plt.show
 
     plt.figure(3)
     plt.plot(newQinf,newSQinf)
@@ -114,8 +119,8 @@ if __name__ == '__main__':
 
     i_Q = calc_iQ(newSQinf, Sinf)
     Qi_Q = newQinf * i_Q
-    #r = calc_spectrum(i_Q)
-    r = np.linspace(0.0, 1.5, newQinf.size)
+    r = calc_spectrum(i_Q)
+    #r = np.linspace(0.0, 1.5, newQinf.size)
     F_r = calc_Fr(r, newQinf, i_Q)
     # print(r)
     # r_index = np.where(r<1.6)
