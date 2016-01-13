@@ -42,6 +42,9 @@ from modules.InterpolateData import *
 from modules.Optimization import *
 from modules.Minimization import *
 
+# import cmath
+# from cmath import exp, pi
+
 if __name__ == '__main__':
     N = 1 # sc.N_A
     
@@ -82,11 +85,15 @@ if __name__ == '__main__':
     meanDeltaQ = np.mean(DeltaQ)
     # Qinf = Q[inf_index]
     Qinf = np.arange(QmaxIntegrate, maxQ, meanDeltaQ)
-    newQinf = np.concatenate([newQ, Qinf])
+    Qzero = np.arange(0.0, minQ, meanDeltaQ)
+    newQinf = np.concatenate([Qzero, newQ])
+    newQinf = np.concatenate([newQinf, Qinf])
 
     SQinf = np.zeros(Qinf.size)
     SQinf.fill(Sinf)
+    SQzero = np.zeros(Qzero.size)
     newSQinf = np.concatenate([S_Q, SQinf])
+    newSQinf = np.concatenate([SQzero, newSQinf])
     
     plt.figure(1)
     plt.plot(newQinf,newSQinf)
@@ -97,152 +104,22 @@ if __name__ == '__main__':
     Qi_Q = newQinf * i_Q
     
     F_r = fftpack.fft(Qi_Q)
+    # num = Qi_Q.size
     F_rI = F_r.imag
-    # F_rI *= 2/np.pi
+    F_rI *= (2/np.pi*meanDeltaQ)
     # f_s = newQinf.size * meanDeltaQ
     r = fftpack.fftfreq(newQinf.size, meanDeltaQ)
     mask = np.where(r>0)
-    
+
     plt.figure(2)
     plt.plot(r[mask], F_rI[mask])
     plt.grid()
+    plt.show
+
+    r3 = np.linspace(0.0, 9.0, newQinf.size)
+    F_r3 = calc_Fr(r[mask], newQinf, i_Q)
+   
+    plt.figure(3)
+    plt.plot(r[mask], F_r3)
+    plt.grid()
     plt.show()
-
-    
-    # sinF_r = fftpack.dst(Qi_Q)
-    # f_s = int(newQinf.size/np.amax(newQinf))
-    # f = fftpack.fftfreq(newQinf.size, 1.0/f_s)
-    # mask = np.where((f>0))# & (f<1.5))
-    # F_rI2 = F_rI * (Qi_Q[1] - Qi_Q[0]) *2/np.pi
-    
-      
-    # plt.figure(3)
-    # plt.plot(F_rI)
-    # plt.grid()
-    # plt.show
-   
-    # r = np.linspace(0.0, 3.5, newQinf.size)
-    # F_r2 = calc_Fr(r, newQinf, i_Q)
-   
-    # plt.figure(4)
-    # plt.plot(r, F_r2)
-    # plt.grid()
-    # plt.show()
-   
-    
-   
-
-
-    
-
-    # qmax = np.amax(Q)
-    # Qa = np.arange(qmax,20,Q[1]-Q[0])
-    # newQ = np.concatenate([Q, Qa])
-    # print(newQ.size)
-    # SQa = np.zeros(Qa.size)
-    # SQa.fill(1)
-    # newSQ = np.concatenate([S_Q, SQa])
-    # print(newSQ.size)
-
-    # Iincoh_Q = calc_Iincoh(elementList, newQ)
-    # fe_Q, Ztot = calc_eeff(elementList, newQ)
-    # J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
-
-    
-
-
-    # i_Q = calc_iQ(S_Q, Sinf)
-    # r = calc_spectrum(i_Q)
-    # F_r = calc_Fr(r, Q, i_Q)
-#    print(F_r)
-
-    # plt.figure(2)
-    # plt.plot(r,F_r)
-    # plt.grid()
-    # plt.show
-
-    # Fintra_r = calc_Fintra()
-    # iteration=2
-    # r_cutoff=2
-    # optF_r = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, newQ, Sinf, J_Q, r, r_cutoff)
-
-    # plt.figure(3)
-    # plt.plot(r,optF_r)
-    # plt.grid()
-    # plt.show
-
-    
-    # plt.figure(4)
-    # plt.plot(Q, I_Q)
-    # plt.show
-
-    # plt.figure(4)
-    # plt.plot(Qbkg, I_Qbkg)
-    # plt.show()
-
-    
-    # Integral1 = simps((J_Q + Sinf) * Q**2, Q)
-    # print("int1 ", Integral1)
-    # Integral2 = (J_Q + Sinf) * Q**2
-    # print("int2 ", Integral2.sum(axis=0))
-
-    # rQ = np.outer(r,Q)
-    # sinrQ = np.sin(rQ)
-    # FR = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1)
-    # FR /=1000
-
-    # iteration = 1
-    # r_cutoff = 1.0
-    # Fintra_r = calc_Fintra()
-    
-    # optF_r = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff)
-
-    # plt.figure(1)
-    # plt.plot(r, F_r)
-    # plt.grid()
-    # plt.show
-
-    
-    # plt.figure(1)
-    # plt.plot(r, optF_r)
-    # plt.grid()
-    # plt.show()
-    
-    # SQ_F = calc_SQ_F(optF_r, r, Q, Sinf)
-    
-    # plt.figure(1)
-    # plt.plot(Q, SQ_F)
-    # #plt.grid()
-    # plt.show
-    
-    
-    # R, FR = FFT_QiQ(i_Q + 1)
-    
-    # plt.figure(2)
-    # plt.plot(r, FR)
-    # plt.grid()
-    # plt.show()
-
-    
-    # #-------------------------------------------------------------
-    # Very important for the FFT!!!
-    # r = fftpack.fftfreq(S_Q.size, Q[1] - Q[0])    
-    # F_r = fftpack.fft(S_Q)
-    # F_rI = F_r.imag
-
-    # pidxs = np.where(r > 0)
-    # r = r[pidxs]
-    # F_rI = F_rI[pidxs]
-    
-    # print(r.size, F_rI.size)
-    
-    # plt.figure(2)
-    # plt.plot(r, F_rI)
-    # plt.grid()
-    # plt.show()
-    
-    # #-------------------------------------------------------------    
-
-    # QiQ = Q*(S_Q - Sinf)
-    
-    # r, F_r = FFT_QiQ(QiQ)
