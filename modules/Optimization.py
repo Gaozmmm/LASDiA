@@ -47,35 +47,36 @@ from lmfit import minimize, Parameters
 
 from modules.LiquidStructure import *
 
-def calc_Fintra():
+def calc_Fintra(r):
     """To implemente!!!
     eq. 42
     """
     
-    Fintra_r = 0
+    Fintra_r = np.zeros(r.size)
     
     return Fintra_r
     
     
-def calc_deltaFr(F_r, Fintra_r, rho0):
+def calc_deltaFr(F_r, Fintra_r, r, rho0):
     """Function to calculate deltaF(r) (eq. 44, 48)
     
     arguments:
     F(r): - array
     Fintra_r: intramolecular contribution of F(r) - array
+    r: - array
     rho0: average atomic density - number
     
     return:
     deltaF_r: - array
     """
     
-    deltaF_r = F_r - (Fintra_r - 4*np.pi*rho0)
+    deltaF_r = F_r - (Fintra_r - 4*np.pi*r*rho0)
     
     return deltaF_r
     
 
 def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
-    """Function to calculate the i-th iteration of i(Q) (eq. 49)
+    """Function to calculate the i-th iteration of i(Q) (eq. 46, 49)
     
     arguments:
     i_Q:
@@ -89,77 +90,54 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     i_Qi: i-th iteration of i(Q) - array
     """
     
-    # rint = np.linspace(0, r_cutoff, r.size)
-    # pidxs = np.where(r < r_cutoff)
-    # rInt = r[pidxs]
-    # deltaF_rInt = deltaF_r[pidxs]
-    # print(rInt.size)
+    mask = np.where(r < r_cutoff)
+    rInt = r[mask]
+    deltaF_rInt = deltaF_r[mask]
+    QInt = Q[mask]
     
-#    integral = simps(deltaF_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r) #simps(deltaF_r * np.sin(np.mat(r)*Q), rint)
+    integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(QInt)))).T, rInt)
+    # simps(deltaF_r * np.sin(np.mat(r)*Q), rint)
     
-    Qr = np.outer(Q,r)
-    sinQr = np.sin(Qr)
-    integral = np.sum(sinQr * deltaF_r, axis=1)
+    # Qr = np.outer(Q,r)
+    # sinQr = np.sin(Qr)
+    # integral = np.sum(sinQr * deltaF_r, axis=1)
     i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q) + 1)) * integral
          
     return i_Qi
 
     
-def calc_deltaAlpha(i_Q, i_Qi, S_Q):
-    """
-    """
+# def calc_deltaAlpha(i_Q, i_Qi, S_Q):
+    # """
+    # """
     
-    deltaAlpha = (i_Q - i_Qi) / S_Q
+    # deltaAlpha = (i_Q - i_Qi) / S_Q
     
-    return deltaAlpha
+    # return deltaAlpha
 
 
-def calc_alphai(alpha, deltaAlpha):
-    """
+# def calc_alphai(alpha, deltaAlpha):
+    # """
     
-    """
+    # """
     
-    alphai = alpha * (1 + deltaAlpha)
+    # alphai = alpha * (1 + deltaAlpha)
     
-    return alphai
+    # return alphai
     
     
-#def calc_SQi():
- 
- 
-
 def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
     #(iteration, i_Q, F_r, Fintra_r, rho0, Q, Sinf, J_Q, r, r_cutoff, S_Q, alpha, N, Isample_Q, Iincoh_Q, Ztot, fe_Q):
     """Function to calculate the optimization
     
     """
 
-    pidxs = np.where(r < r_cutoff)
-    pidxsA = np.where(r >= r_cutoff)
-    rInt = r[pidxs]
-    F_rInt = F_r[pidxs]
-    F_rA =  F_r[pidxsA]
-
     for i in range(iteration):
-        # i_QTemp = i_Q
-        # S_QTemp = S_Q
-        # deltaF = calc_deltaFr(F_r, Fintra_r, rho0)
-        # i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF, r, r_cutoff)
-        
-        # deltaAlpha = calc_deltaAlpha(i_QTemp, i_Q, S_QTemp)
-        # alpha = calc_alphai(alpha, deltaAlpha)
-        # Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
-        # S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q)
-        # F_r = calc_Fr(r, Q, i_Q)
-
-        deltaF_rInt = calc_deltaFr(F_rInt, Fintra_r, rho0)
+        deltaF_rInt = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_rInt, rInt, r_cutoff)
         F_rInt = calc_Fr(rInt, Q, i_Q)
-
-
-    F_rIntB = np.zeros(F_rInt.size)
-    optF_r = np.concatenate([F_rInt, F_rA])
-    return optF_r
+        F_r = F_rInt
+        
+    return F_r
     
     
     

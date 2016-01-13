@@ -65,20 +65,47 @@ if __name__ == '__main__':
 
     # remember the electronic unit in atomic form factor!!!
     fe_Q, Ztot = calc_eeff(elementList, newQ)
+
+    plt.figure(1)
+    plt.plot(newQ, fe_Q)
+    plt.grid()
+    plt.show
     
     s =  0.5
     rho0 = 24.00
     
     Iincoh_Q = calc_Iincoh(elementList, newQ)
+    
+    plt.figure(2)
+    plt.plot(newQ, Iincoh_Q)
+    plt.grid()
+    plt.show
+    
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    
+    plt.figure(3)
+    plt.plot(newQ, J_Q)
+    plt.grid()
+    plt.show
+    
     Sinf = calc_Sinf(elementList, fe_Q, newQ, Ztot)
     
     Isample_Q = newI_Q - s * newI_Qbkg
 
-    alpha = calc_alpha(J_Q, Sinf, newQ, Isample_Q, fe_Q, Ztot, rho0)
+    plt.figure(4)
+    plt.plot(newQ, Isample_Q)
+    plt.grid()
+    plt.show
     
+    alpha = calc_alpha(J_Q, Sinf, newQ, Isample_Q, fe_Q, Ztot, rho0)
+    print(alpha)
     Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
-
+    
+    plt.figure(5)
+    plt.plot(newQ, Icoh_Q)
+    plt.grid()
+    plt.show
+    
     S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q)
 
     DeltaQ = np.diff(Q)
@@ -95,31 +122,129 @@ if __name__ == '__main__':
     newSQinf = np.concatenate([S_Q, SQinf])
     newSQinf = np.concatenate([SQzero, newSQinf])
     
-    plt.figure(1)
-    plt.plot(newQinf,newSQinf)
+    plt.figure(6)
+    plt.plot(newQinf, newSQinf)
     plt.grid()
     plt.show
 
-    i_Q = calc_iQ(newSQinf, Sinf)
-    Qi_Q = newQinf * i_Q
+    # i_Q = calc_iQ(newSQinf, Sinf)
+    # Qi_Q = newQinf * i_Q
     
-    F_r = fftpack.fft(Qi_Q)
-    # num = Qi_Q.size
-    F_rI = F_r.imag
-    F_rI *= (2/np.pi*meanDeltaQ)
-    # f_s = newQinf.size * meanDeltaQ
-    r = fftpack.fftfreq(newQinf.size, meanDeltaQ)
-    mask = np.where(r>0)
+    # # F_r = fftpack.fft(Qi_Q)
+    # # # num = Qi_Q.size
+    # # F_rI = F_r.imag
+    # # F_rI *= (2/np.pi*meanDeltaQ)
+    # # # f_s = newQinf.size * meanDeltaQ
+    # r = fftpack.fftfreq(newQinf.size, meanDeltaQ)
+    # mask = np.where(r>0)
 
+    # # plt.figure(2)
+    # # plt.plot(r[mask], F_rI[mask])
+    # # plt.grid()
+    # # plt.show
+
+    # # r3 = np.linspace(0.0, 9.0, newQinf.size)
+    # F_r3 = calc_Fr(r[mask], newQinf, i_Q)
+   
+    # plt.figure(3)
+    # plt.plot(r[mask], F_r3)
+    # plt.grid()
+    # plt.show()
+    
+    # iteration = 1
+    # Fintra_r = calc_Fintra(r)
+    # r_cutoff = 0.25
+    # F_rInt = calc_optimize_Fr(iteration, F_r3, Fintra_r, rho0, i_Q, newQinf, Sinf, J_Q, r, r_cutoff)
+    
+    
+    
+    #-----------------------------------------------------------------
+    
+    
+    
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    QzeroLow = np.arange(0.0, minQ, meanDeltaQ)
+    QzeroUp = np.arange(QmaxIntegrate, maxQ, meanDeltaQ)
+    
+    SQ_index = np.where((Q>minQ) & (Q<QmaxIntegrate))
+    Q = Q[SQ_index]
+    I_Q = I_Q[SQ_index]
+    I_Qbkg = I_Qbkg[SQ_index]
+    
+    Q = np.concatenate([QzeroLow, Q])
+    Q = np.concatenate([Q, QzeroUp])
+    Qbkg = Q
+    
+    IzeroLow = np.zeros(QzeroLow.size)
+    I_Q = np.concatenate([IzeroLow, I_Q])
+    I_Qbkg = np.concatenate([IzeroLow, I_Qbkg])
+    IzeroUp = np.zeros(QzeroUp.size)
+    I_Q = np.concatenate([I_Q,IzeroUp])
+    I_Qbkg = np.concatenate([I_Qbkg,IzeroUp])
+    
+    elementList = {"Ar":1}
+
+    # remember the electronic unit in atomic form factor!!!
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    
+    plt.figure(1)
+    plt.plot(Q, fe_Q)
+    # plt.grid()
+    plt.show
+    
+    s =  0.5
+    rho0 = 24.00
+    
+    Iincoh_Q = calc_Iincoh(elementList, Q)
+    
     plt.figure(2)
-    plt.plot(r[mask], F_rI[mask])
-    plt.grid()
+    plt.plot(Q, Iincoh_Q)
+    # plt.grid()
+    plt.show
+        
+    J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    
+    plt.figure(3)
+    plt.plot(Q, J_Q)
+    # plt.grid()
+    plt.show
+    
+    Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
+    print(Sinf)
+    
+    Isample_Q = I_Q - s * I_Qbkg
+
+    plt.figure(4)
+    plt.plot(Q, Isample_Q)
+    # plt.grid()
     plt.show
 
-    r3 = np.linspace(0.0, 9.0, newQinf.size)
-    F_r3 = calc_Fr(r[mask], newQinf, i_Q)
-   
-    plt.figure(3)
-    plt.plot(r[mask], F_r3)
-    plt.grid()
+    alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0)
+    print(alpha)
+    
+    Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
+
+    plt.figure(5)
+    plt.plot(Q, Icoh_Q)
+    # plt.grid()
+    plt.show
+    
+    S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q)
+
+    plt.figure(6)
+    plt.plot(Q, S_Q)
+    # plt.grid()
     plt.show()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

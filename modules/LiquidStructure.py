@@ -286,7 +286,6 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q):
     arguments:
     Icoh: intensity - array
     
-    
     returns:
     S_Q: - array
     """
@@ -309,6 +308,43 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q):
 #     # S_Q = alpha*Icoh / fe_Q**2
     
     return S_Q
+    
+    
+def calc_SQ2(N, Icoh_Q, Ztot, fe_Q):
+    """Function to calculate the S(Q) (eq. 18)
+
+    arguments:
+    Icoh: intensity - array
+    
+    returns:
+    S_Q: - array
+    """
+    
+    S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
+    
+    return S_Q
+    
+    
+# def calc_extendSQ(Q, QmaxIntegrate, maxQ, minQ, newQ, S_Q, Sinf):
+    # """Function to extend S(Q) to 0 and maxQ
+    
+    # """
+    
+    # DeltaQ = np.diff(Q)
+    # meanDeltaQ = np.mean(DeltaQ)
+    # # Qinf = Q[inf_index]
+    # Qinf = np.arange(QmaxIntegrate, maxQ, meanDeltaQ)
+    # Qzero = np.arange(0.0, minQ, meanDeltaQ)
+    # newQinf = np.concatenate([Qzero, newQ])
+    # newQinf = np.concatenate([newQinf, Qinf])
+
+    # SQinf = np.zeros(Qinf.size)
+    # SQinf.fill(Sinf)
+    # SQzero = np.zeros(Qzero.size)
+    # newSQinf = np.concatenate([S_Q, SQinf])
+    # newSQinf = np.concatenate([SQzero, newSQinf])
+    
+    # return (newQinf, newSQinf)
 
 
 def calc_iQ(S_Q, Sinf):
@@ -337,8 +373,6 @@ def calc_Fr(r, Q, i_Q):
     F_r: - array
     """
     
-    #    r = np.linspace(0.0, 1.5, Q.size)
-    
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
     # rQ = np.outer(r,Q)
     # sinrQ = np.sin(rQ)
@@ -347,91 +381,91 @@ def calc_Fr(r, Q, i_Q):
     return F_r
     
     
-def calc_gr(r, F_r, rho0):
-    """Function to calculate g(r)
+# def calc_gr(r, F_r, rho0):
+    # """Function to calculate g(r)
     
-    """
+    # """
     
-    g_r = 1 + F_r / (4 * np.pi * r * rho0)
+    # g_r = 1 + F_r / (4 * np.pi * r * rho0)
     
-    return g_r
+    # return g_r
 
     
-def calc_rho0(Q, i_Q):
-    """Function to calculate initial value of rho0 (eq. 33)
+# def calc_rho0(Q, i_Q):
+    # """Function to calculate initial value of rho0 (eq. 33)
     
-    arguments:
-    Q: momentum transfer - array
-    i_Q: - array
+    # arguments:
+    # Q: momentum transfer - array
+    # i_Q: - array
     
-    returns:
-    rho0: average atomic density - number
-    """
+    # returns:
+    # rho0: average atomic density - number
+    # """
     
-    rho0 = 1/(-2*np.pi**2) * simps(i_Q * Q**2, Q)
+    # rho0 = 1/(-2*np.pi**2) * simps(i_Q * Q**2, Q)
     
-    return rho0
+    # return rho0
     
-def calc_spectrum(func):    
-    """
+# def calc_spectrum(func):    
+    # """
 
-    """
-    spectrum = fftpack.fftfreq(func.size, func[1] - func[0])
-    pidxs = np.where(spectrum > 0)
-    spectrum = spectrum[pidxs]
+    # """
+    # spectrum = fftpack.fftfreq(func.size, func[1] - func[0])
+    # pidxs = np.where(spectrum > 0)
+    # spectrum = spectrum[pidxs]
     
-    return spectrum
-
-
-def calc_SQ_F(F_r, r, Q, Sinf):
-    """Function to calculate S(Q) from F(r)
-
-    """
-
-    # Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)
-    Qr = np.outer(Q,r)
-    sinQr = np.sin(Qr)
-    Qi_Q =  np.sum(sinQr * F_r, axis=1)
-    S_Q = Qi_Q/Q +Sinf
-
-    return S_Q
+    # return spectrum
 
 
-    
-    
-    
-def FFT_QiQ(QiQ):
-    """ I don't understand very much this part...
-    Function to calculate the Fast Fourier Transformation
-    
-    arguments:
-    
-    returns:
-    
-    """
-    
-    
-    r = fftpack.fftfreq(QiQ.size, QiQ[1] - QiQ[0])
-    F_r = fftpack.fft(QiQ)
-    F_rI = F_r.imag
+# def calc_SQ_F(F_r, r, Q, Sinf):
+    # """Function to calculate S(Q) from F(r)
 
-    pidxs = np.where(r > 0)
-    r = r[pidxs]
-    
-    # pidxsa = np.where(r < 3)
-    # r = r[pidxsa]
+    # """
 
-    F_rI = F_rI[pidxs]
+    # # Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)
+    # Qr = np.outer(Q,r)
+    # sinQr = np.sin(Qr)
+    # Qi_Q =  np.sum(sinQr * F_r, axis=1)
+    # S_Q = Qi_Q/Q +Sinf
+
+    # return S_Q
+
+
     
-    # s = QiQ.size
-    # r = fftpack.fftfreq(s)
-    # val_fft = fftpack.fft(QiQ)
-    # imag_fft = val_fft.imag
-    # delta = QiQ[1] - QiQ[0]
-    # F_r = 2/np.pi * imag_fft * delta
-    # print(F_r)
     
-    return (r, F_rI)
+    
+# def FFT_QiQ(QiQ):
+    # """ I don't understand very much this part...
+    # Function to calculate the Fast Fourier Transformation
+    
+    # arguments:
+    
+    # returns:
+    
+    # """
+    
+    
+    # r = fftpack.fftfreq(QiQ.size, QiQ[1] - QiQ[0])
+    # F_r = fftpack.fft(QiQ)
+    # F_rI = F_r.imag
+
+    # pidxs = np.where(r > 0)
+    # r = r[pidxs]
+    
+    # # pidxsa = np.where(r < 3)
+    # # r = r[pidxsa]
+
+    # F_rI = F_rI[pidxs]
+    
+    # # s = QiQ.size
+    # # r = fftpack.fftfreq(s)
+    # # val_fft = fftpack.fft(QiQ)
+    # # imag_fft = val_fft.imag
+    # # delta = QiQ[1] - QiQ[0]
+    # # F_r = 2/np.pi * imag_fft * delta
+    # # print(F_r)
+    
+    # return (r, F_rI)
     
     
 # def FT_QiQ(Q, QiQ):
@@ -448,36 +482,36 @@ def FFT_QiQ(QiQ):
     
     # return (r, F_r)
     
-def IFFT_Fr(Fr):
-    """ I don't undeerstand very much this part...
-    Function to calculate the Inverse Fast Fourier Transformation
+# def IFFT_Fr(Fr):
+    # """ I don't undeerstand very much this part...
+    # Function to calculate the Inverse Fast Fourier Transformation
     
-    arguments:
+    # arguments:
     
-    returns:
-    """
+    # returns:
+    # """
     
     
-    Qfft = fftpack.fftfreq(Fr.size)
-    val_fft = fftpack.fft(Fr)
-    imag_fft = val_fft.imag
+    # Qfft = fftpack.fftfreq(Fr.size)
+    # val_fft = fftpack.fft(Fr)
+    # imag_fft = val_fft.imag
 
-    delta = Fr[1] - Fr[0]
-    QiQ = imag_fft * delta
+    # delta = Fr[1] - Fr[0]
+    # QiQ = imag_fft * delta
     
-    return (Qfft, QiQ)
+    # return (Qfft, QiQ)
 
 
-def Sinintra(Ztot):
-    """For Ar w=0
-    I just create this function for now because I need it in the others to follow Gunnar code
-    It must be implemented!!!
+# def Sinintra(Ztot):
+    # """For Ar w=0
+    # I just create this function for now because I need it in the others to follow Gunnar code
+    # It must be implemented!!!
     
-    arguments:
+    # arguments:
     
-    returns:
-    """
+    # returns:
+    # """
     
-    w = 0
-    sintra = w / Ztot
-    return sintra
+    # w = 0
+    # sintra = w / Ztot
+    # return sintra
