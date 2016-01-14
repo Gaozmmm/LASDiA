@@ -278,9 +278,34 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
 
     return alpha
+    
+    
+def calc_alpha2(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, integr_index):
+    """Function to calculate alpha (eq. 34)
+    For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
+    
+    arguments:
+    
+    returns:
+    """
+    
+    J_Q = J_Q[integr_index]
+    Q = Q[integr_index]
+    fe_Q = fe_Q[integr_index]
+    Isample_Q = Isample_Q[integr_index]
+    
+    Integral1 = simps((J_Q + Sinf) * Q**2, Q)
+    Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
+
+    # Integral1 = np.sum((J_Q + Sinf) * Q**2, Q)
+    # Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
+
+    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
+
+    return alpha
 
     
-def calc_SQ(N, Icoh_Q, Ztot, fe_Q):
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index):
     """Function to calculate the S(Q) (eq. 18)
 
     arguments:
@@ -289,28 +314,22 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q):
     returns:
     S_Q: - array
     """
-    
-    #numAtoms = N #sc.N_A
-    # Qmax = 80
-    # sinf = 1
-    
+        
     S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
-
-#     pidxsA = np.where(Q > Qmax)
-#     pidxsB = np.where(Q <= Qmax)
+    S_Qmin = np.zeros(Q[min_index].size)
+    S_Q = np.concatenate([S_Qmin, S_Q])
     
-#     S_QA = S_Q[pidxsA]
-#     S_QB = S_Q[pidxsB]
+    # S_Qmax = np.zeros(Q[max_index].size)
+    # S_Qmax.fill(Sinf)
+    # S_Q = np.concatenate([S_Q, S_Qmax])
 
-#     S_QA.fill(1)
-#     newSQ = np.concatenate([S_QB, S_QA])
-# #    S_Q = (alpha*Icoh / fe_Q**2 - J_Q)/Ztot**2+Sinf
-#     # S_Q = alpha*Icoh / fe_Q**2
+    S_Q[max_index] = Sinf
+    S_Q = np.delete(S_Q, min_index)
     
     return S_Q
     
     
-def calc_SQ2(N, Icoh_Q, Ztot, fe_Q):
+def calc_SQ2(N, Icoh_Q, Ztot, fe_Q, Sinf, integr_index):
     """Function to calculate the S(Q) (eq. 18)
 
     arguments:
@@ -320,7 +339,11 @@ def calc_SQ2(N, Icoh_Q, Ztot, fe_Q):
     S_Q: - array
     """
     
-    S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
+    S_Q = np.zeros(Icoh_Q.size)
+    S_Q[integr_index] = Icoh_Q[integr_index] / (N * Ztot**2 * fe_Q[integr_index]**2)
+    maxIndex = np.amax(integr_index)
+    maxSQ = S_Q[maxIndex]
+    S_Q[S_Q>maxSQ] = Sinf
     
     return S_Q
     
@@ -374,9 +397,13 @@ def calc_Fr(r, Q, i_Q):
     """
     
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
+    
+    # DeltaQ = np.diff(Q)
+    # meanDeltaQ = np.mean(DeltaQ)
+    
     # rQ = np.outer(r,Q)
     # sinrQ = np.sin(rQ)
-    # F_r = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1)
+    # F_r = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
     
     return F_r
     

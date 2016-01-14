@@ -93,9 +93,9 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     mask = np.where(r < r_cutoff)
     rInt = r[mask]
     deltaF_rInt = deltaF_r[mask]
-    QInt = Q[mask]
+    # QInt = Q[mask]
     
-    integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(QInt)))).T, rInt)
+    integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(Q)))).T, rInt)
     # simps(deltaF_r * np.sin(np.mat(r)*Q), rint)
     
     # Qr = np.outer(Q,r)
@@ -106,36 +106,18 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     return i_Qi
 
     
-# def calc_deltaAlpha(i_Q, i_Qi, S_Q):
-    # """
-    # """
-    
-    # deltaAlpha = (i_Q - i_Qi) / S_Q
-    
-    # return deltaAlpha
-
-
-# def calc_alphai(alpha, deltaAlpha):
-    # """
-    
-    # """
-    
-    # alphai = alpha * (1 + deltaAlpha)
-    
-    # return alphai
-    
-    
-def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
+def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
     #(iteration, i_Q, F_r, Fintra_r, rho0, Q, Sinf, J_Q, r, r_cutoff, S_Q, alpha, N, Isample_Q, Iincoh_Q, Ztot, fe_Q):
     """Function to calculate the optimization
     
     """
 
+    Fintra_r = calc_Fintra(r)
     for i in range(iteration):
-        deltaF_rInt = calc_deltaFr(F_r, Fintra_r, r, rho0)
-        i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_rInt, rInt, r_cutoff)
-        F_rInt = calc_Fr(rInt, Q, i_Q)
-        F_r = F_rInt
+        deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
+        i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff)
+        F_r = calc_Fr(r, Q, i_Q)
+        # F_r = F_rInt
         
     return F_r
     
