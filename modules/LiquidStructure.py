@@ -346,6 +346,20 @@ def calc_SQ2(N, Icoh_Q, Ztot, fe_Q, Sinf, integr_index):
     S_Q[S_Q>maxSQ] = Sinf
     
     return S_Q
+
+def calc_SQ3(N, Icoh_Q, Ztot, fe_Q):
+    """Function to calculate the S(Q) (eq. 18)
+
+    arguments:
+    Icoh: intensity - array
+    
+    returns:
+    S_Q: - array
+    """
+    
+    S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
+    
+    return S_Q
     
     
 # def calc_extendSQ(Q, QmaxIntegrate, maxQ, minQ, newQ, S_Q, Sinf):

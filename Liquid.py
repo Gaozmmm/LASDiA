@@ -72,8 +72,9 @@ if __name__ == '__main__':
     s =  0.5
     rho0 = 24.00
     
-    range_flag = "operative"
+    # range_flag = "operative"
     # range_flag = "integrate"
+    range_flag = ""
     if range_flag == "operative":
         used_Q = operative_Q
         used_I_Q = operative_I_Q
@@ -82,6 +83,10 @@ if __name__ == '__main__':
         used_Q = integrate_Q
         used_I_Q = integrate_I_Q
         used_I_Qbkg = integrate_I_Qbkg
+    else:
+        used_Q = Q
+        used_I_Q = I_Q
+        used_I_Qbkg = I_Qbkg
     
     # remember the electron unit in atomic form factor!!!
     fe_Q, Ztot = calc_eeff(elementList, used_Q)
@@ -91,20 +96,31 @@ if __name__ == '__main__':
     Isample_Q = used_I_Q - s * used_I_Qbkg
     alpha = calc_alpha(J_Q, Sinf, used_Q, Isample_Q, fe_Q, Ztot, rho0)
     Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
+
+    # plt.figure(1)
+    # plt.plot(used_Q, J_Q)
+    # plt.grid()
+    # plt.show
+
     
     print("used_Q = ", used_Q.size)
     print("J_Q = ", J_Q.size)
-    
-    S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index)
-    
+
+    if range_flag == "operative":
+        S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index)
+    elif range_flag == "integrate":
+        S_Q = calc_SQ2()
+    else:
+        S_Q = calc_SQ3(N, Icoh_Q, Ztot, fe_Q)
+        
     # used_Q = np.concatenate([Q[min_index], used_Q])
     print("S(Q) = ", S_Q.size)
     print("used_Q = ", used_Q.size)
     
-    # plt.figure(1)
-    # plt.plot(used_Q, S_Q)
-    # plt.grid()
-    # plt.show
+    plt.figure(1)
+    plt.plot(used_Q, S_Q)
+    plt.grid()
+    plt.show
     
     i_Q = calc_iQ(S_Q, Sinf)
     Qi_Q = used_Q * i_Q
