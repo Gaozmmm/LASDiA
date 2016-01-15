@@ -260,7 +260,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot):
     return Sinf
 
 
-def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
+def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     """Function to calculate alpha (eq. 34)
     For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
     
@@ -269,43 +269,15 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     returns:
     """
     
-    Integral1 = simps((J_Q + Sinf) * Q**2, Q)
-    Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
-
-    # Integral1 = np.sum((J_Q + Sinf) * Q**2, Q)
-    # Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
-
+    Integral1 = simps((J_Q[index] + Sinf) * Q[index]**2, Q[index])
+    Integral2 = simps((Isample_Q[index]/fe_Q[index]**2) * Q[index]**2,Q[index])
+    
     alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
 
     return alpha
     
     
-def calc_alpha2(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, integr_index):
-    """Function to calculate alpha (eq. 34)
-    For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
-    
-    arguments:
-    
-    returns:
-    """
-    
-    J_Q = J_Q[integr_index]
-    Q = Q[integr_index]
-    fe_Q = fe_Q[integr_index]
-    Isample_Q = Isample_Q[integr_index]
-    
-    Integral1 = simps((J_Q + Sinf) * Q**2, Q)
-    Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
-
-    # Integral1 = np.sum((J_Q + Sinf) * Q**2, Q)
-    # Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
-
-    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
-
-    return alpha
-
-    
-def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index):
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, index):
     """Function to calculate the S(Q) (eq. 18)
 
     arguments:
@@ -314,76 +286,21 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index):
     returns:
     S_Q: - array
     """
-        
-    S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
+    
+    S_Q = Icoh_Q[index] / (N * Ztot**2 * fe_Q[index]**2)
     S_Qmin = np.zeros(Q[min_index].size)
     S_Q = np.concatenate([S_Qmin, S_Q])
     
-    # S_Qmax = np.zeros(Q[max_index].size)
-    # S_Qmax.fill(Sinf)
-    # S_Q = np.concatenate([S_Q, S_Qmax])
+    S_Qmax = np.zeros(Q[max_index].size)
+    S_Qmax.fill(Sinf)
+    S_Q = np.concatenate([S_Q, S_Qmax])
 
-    S_Q[max_index] = Sinf
-    S_Q = np.delete(S_Q, min_index)
+    # S_Q[max_index] = Sinf
+    # S_Q = np.delete(S_Q, min_index)
     
     return S_Q
     
     
-def calc_SQ2(N, Icoh_Q, Ztot, fe_Q, Sinf, integr_index):
-    """Function to calculate the S(Q) (eq. 18)
-
-    arguments:
-    Icoh: intensity - array
-    
-    returns:
-    S_Q: - array
-    """
-    
-    S_Q = np.zeros(Icoh_Q.size)
-    S_Q[integr_index] = Icoh_Q[integr_index] / (N * Ztot**2 * fe_Q[integr_index]**2)
-    maxIndex = np.amax(integr_index)
-    maxSQ = S_Q[maxIndex]
-    S_Q[S_Q>maxSQ] = Sinf
-    
-    return S_Q
-
-def calc_SQ3(N, Icoh_Q, Ztot, fe_Q):
-    """Function to calculate the S(Q) (eq. 18)
-
-    arguments:
-    Icoh: intensity - array
-    
-    returns:
-    S_Q: - array
-    """
-    
-    S_Q = Icoh_Q / (N * Ztot**2 * fe_Q**2)
-    
-    return S_Q
-    
-    
-# def calc_extendSQ(Q, QmaxIntegrate, maxQ, minQ, newQ, S_Q, Sinf):
-    # """Function to extend S(Q) to 0 and maxQ
-    
-    # """
-    
-    # DeltaQ = np.diff(Q)
-    # meanDeltaQ = np.mean(DeltaQ)
-    # # Qinf = Q[inf_index]
-    # Qinf = np.arange(QmaxIntegrate, maxQ, meanDeltaQ)
-    # Qzero = np.arange(0.0, minQ, meanDeltaQ)
-    # newQinf = np.concatenate([Qzero, newQ])
-    # newQinf = np.concatenate([newQinf, Qinf])
-
-    # SQinf = np.zeros(Qinf.size)
-    # SQinf.fill(Sinf)
-    # SQzero = np.zeros(Qzero.size)
-    # newSQinf = np.concatenate([S_Q, SQinf])
-    # newSQinf = np.concatenate([SQzero, newSQinf])
-    
-    # return (newQinf, newSQinf)
-
-
 def calc_iQ(S_Q, Sinf):
     """Function to calculate i(Q) (eq. 21)
     
@@ -430,34 +347,8 @@ def calc_Fr(r, Q, i_Q):
     # g_r = 1 + F_r / (4 * np.pi * r * rho0)
     
     # return g_r
-
     
-# def calc_rho0(Q, i_Q):
-    # """Function to calculate initial value of rho0 (eq. 33)
     
-    # arguments:
-    # Q: momentum transfer - array
-    # i_Q: - array
-    
-    # returns:
-    # rho0: average atomic density - number
-    # """
-    
-    # rho0 = 1/(-2*np.pi**2) * simps(i_Q * Q**2, Q)
-    
-    # return rho0
-    
-# def calc_spectrum(func):    
-    # """
-
-    # """
-    # spectrum = fftpack.fftfreq(func.size, func[1] - func[0])
-    # pidxs = np.where(spectrum > 0)
-    # spectrum = spectrum[pidxs]
-    
-    # return spectrum
-
-
 # def calc_SQ_F(F_r, r, Q, Sinf):
     # """Function to calculate S(Q) from F(r)
 
@@ -470,89 +361,3 @@ def calc_Fr(r, Q, i_Q):
     # S_Q = Qi_Q/Q +Sinf
 
     # return S_Q
-
-
-    
-    
-    
-# def FFT_QiQ(QiQ):
-    # """ I don't understand very much this part...
-    # Function to calculate the Fast Fourier Transformation
-    
-    # arguments:
-    
-    # returns:
-    
-    # """
-    
-    
-    # r = fftpack.fftfreq(QiQ.size, QiQ[1] - QiQ[0])
-    # F_r = fftpack.fft(QiQ)
-    # F_rI = F_r.imag
-
-    # pidxs = np.where(r > 0)
-    # r = r[pidxs]
-    
-    # # pidxsa = np.where(r < 3)
-    # # r = r[pidxsa]
-
-    # F_rI = F_rI[pidxs]
-    
-    # # s = QiQ.size
-    # # r = fftpack.fftfreq(s)
-    # # val_fft = fftpack.fft(QiQ)
-    # # imag_fft = val_fft.imag
-    # # delta = QiQ[1] - QiQ[0]
-    # # F_r = 2/np.pi * imag_fft * delta
-    # # print(F_r)
-    
-    # return (r, F_rI)
-    
-    
-# def FT_QiQ(Q, QiQ):
-    # """ I don't understand very much this part...
-    # Function to calculate the Fast Fourier Transformation
-    
-    # arguments:
-    
-    # returns:
-    
-    # """
-    # r = np.linspace(0.5, 10, QiQ.size)
-    # F_r = 2/np.pi * simps(QiQ * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
-    
-    # return (r, F_r)
-    
-# def IFFT_Fr(Fr):
-    # """ I don't undeerstand very much this part...
-    # Function to calculate the Inverse Fast Fourier Transformation
-    
-    # arguments:
-    
-    # returns:
-    # """
-    
-    
-    # Qfft = fftpack.fftfreq(Fr.size)
-    # val_fft = fftpack.fft(Fr)
-    # imag_fft = val_fft.imag
-
-    # delta = Fr[1] - Fr[0]
-    # QiQ = imag_fft * delta
-    
-    # return (Qfft, QiQ)
-
-
-# def Sinintra(Ztot):
-    # """For Ar w=0
-    # I just create this function for now because I need it in the others to follow Gunnar code
-    # It must be implemented!!!
-    
-    # arguments:
-    
-    # returns:
-    # """
-    
-    # w = 0
-    # sintra = w / Ztot
-    # return sintra
