@@ -72,30 +72,88 @@ if __name__ == '__main__':
     s =  0.5
     rho0 = 24.00
     
-    # range_flag = "operative"
+    range_flag = "operative"
     # range_flag = "integrate"
-    range_flag = ""
-    if range_flag == "operative":
-        used_Q = operative_Q
-        used_I_Q = operative_I_Q
-        used_I_Qbkg = operative_I_Qbkg
-    elif range_flag == "integrate":
-        used_Q = integrate_Q
-        used_I_Q = integrate_I_Q
-        used_I_Qbkg = integrate_I_Qbkg
-    else:
-        used_Q = Q
-        used_I_Q = I_Q
-        used_I_Qbkg = I_Qbkg
+    # range_flag = ""
+    # if range_flag == "operative":
+        # used_Q = operative_Q
+        # used_I_Q = operative_I_Q
+        # used_I_Qbkg = operative_I_Qbkg
+    # elif range_flag == "integrate":
+        # used_Q = integrate_Q
+        # used_I_Q = integrate_I_Q
+        # used_I_Qbkg = integrate_I_Qbkg
+    # else:
+        # used_Q = Q
+        # used_I_Q = I_Q
+        # used_I_Qbkg = I_Qbkg
     
     # remember the electron unit in atomic form factor!!!
-    fe_Q, Ztot = calc_eeff(elementList, used_Q)
-    Iincoh_Q = calc_Iincoh(elementList, used_Q)
-    J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    Sinf = calc_Sinf(elementList, fe_Q, used_Q, Ztot)
-    Isample_Q = used_I_Q - s * used_I_Qbkg
-    alpha = calc_alpha(J_Q, Sinf, used_Q, Isample_Q, fe_Q, Ztot, rho0)
-    Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
+    
+    fe_Q1, Ztot1 = calc_eeff(elementList, Q)
+    fe_Q2, Ztot2 = calc_eeff(elementList, operative_Q)
+    fe_Q3, Ztot3 = calc_eeff(elementList, integrate_Q)
+    print(Ztot1, Ztot2, Ztot3)
+    plt.figure(1)
+    plt.plot(Q, fe_Q1)
+    plt.plot(operative_Q, fe_Q2)
+    plt.plot(integrate_Q, fe_Q3)
+    plt.grid()
+    plt.show
+    
+    
+    Iincoh_Q1 = calc_Iincoh(elementList, Q)
+    Iincoh_Q2 = calc_Iincoh(elementList, operative_Q)
+    Iincoh_Q3 = calc_Iincoh(elementList, integrate_Q)
+    plt.figure(2)
+    plt.plot(Q, Iincoh_Q1)
+    plt.plot(operative_Q, Iincoh_Q2)
+    plt.plot(integrate_Q, Iincoh_Q3)
+    plt.grid()
+    plt.show
+    
+    J_Q1 = calc_JQ(Iincoh_Q1, Ztot1, fe_Q1)
+    J_Q2 = calc_JQ(Iincoh_Q2, Ztot2, fe_Q2)
+    J_Q3 = calc_JQ(Iincoh_Q3, Ztot3, fe_Q3)
+    plt.figure(3)
+    plt.plot(Q, J_Q1)
+    plt.plot(operative_Q, J_Q2)
+    plt.plot(integrate_Q, J_Q3)
+    plt.grid()
+    plt.show
+    
+    
+    Sinf1 = calc_Sinf(elementList, fe_Q1, Q, Ztot1)
+    Sinf2 = calc_Sinf(elementList, fe_Q2, operative_Q, Ztot2)
+    Sinf3 = calc_Sinf(elementList, fe_Q3, integrate_Q, Ztot3)
+    print(Sinf1, Sinf2, Sinf3)
+    
+    Isample_Q1 = I_Q - s * I_Qbkg
+    Isample_Q2 = operative_I_Q - s * operative_I_Qbkg
+    Isample_Q3 = integrate_I_Q - s * integrate_I_Qbkg
+    plt.figure(4)
+    plt.plot(Q, Isample_Q1)
+    plt.plot(operative_Q, Isample_Q2)
+    plt.plot(integrate_Q, Isample_Q3)
+    plt.grid()
+    plt.show
+    
+    
+    alpha1 = calc_alpha(J_Q1, Sinf1, Q, Isample_Q1, fe_Q1, Ztot1, rho0)
+    alpha2 = calc_alpha(J_Q2, Sinf2, operative_Q, Isample_Q2, fe_Q2, Ztot2, rho0)
+    alpha3 = calc_alpha(J_Q3, Sinf3, integrate_Q, Isample_Q3, fe_Q3, Ztot3, rho0)
+    print(alpha1, alpha2, alpha3)
+    
+    Icoh_Q1 = calc_Icoh(N, alpha1, Isample_Q1, Iincoh_Q1)
+    Icoh_Q2 = calc_Icoh(N, alpha2, Isample_Q2, Iincoh_Q2)
+    Icoh_Q3 = calc_Icoh(N, alpha3, Isample_Q3, Iincoh_Q3)
+    plt.figure(5)
+    plt.plot(Q, Icoh_Q1)
+    plt.plot(operative_Q, Icoh_Q2)
+    plt.plot(integrate_Q, Icoh_Q3)
+    plt.grid()
+    plt.show()
+    
 
     # plt.figure(1)
     # plt.plot(used_Q, J_Q)
@@ -103,52 +161,51 @@ if __name__ == '__main__':
     # plt.show
 
     
-    print("used_Q = ", used_Q.size)
-    print("J_Q = ", J_Q.size)
+    # print("used_Q = ", used_Q.size)
+    # print("J_Q = ", J_Q.size)
 
-    if range_flag == "operative":
-        S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index)
-    elif range_flag == "integrate":
-        S_Q = calc_SQ2()
-    else:
-        S_Q = calc_SQ3(N, Icoh_Q, Ztot, fe_Q)
+    # if range_flag == "operative":
+        # S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index)
+    # elif range_flag == "integrate":
+        # S_Q = calc_SQ2()
+    # else:
+        # S_Q = calc_SQ3(N, Icoh_Q, Ztot, fe_Q)
         
-    # used_Q = np.concatenate([Q[min_index], used_Q])
-    print("S(Q) = ", S_Q.size)
-    print("used_Q = ", used_Q.size)
+    # # used_Q = np.concatenate([Q[min_index], used_Q])
+    # print("S(Q) = ", S_Q.size)
+    # print("used_Q = ", used_Q.size)
     
-    plt.figure(1)
-    plt.plot(used_Q, S_Q)
-    plt.grid()
-    plt.show
+    # # plt.figure(1)
+    # # plt.plot(used_Q, S_Q)
+    # # plt.grid()
+    # # plt.show
     
-    i_Q = calc_iQ(S_Q, Sinf)
-    Qi_Q = used_Q * i_Q
+    # i_Q = calc_iQ(S_Q, Sinf)
+    # Qi_Q = used_Q * i_Q
     
-    print("i(Q) = ", i_Q.size)
-    print("Qi(Q) = ", Qi_Q.size)
+    # print("i(Q) = ", i_Q.size)
+    # print("Qi(Q) = ", Qi_Q.size)
     
-    DeltaQ = np.diff(Q)
-    meanDeltaQ = np.mean(DeltaQ)
-    r = fftpack.fftfreq(used_Q.size, meanDeltaQ)
-    mask = np.where(r>0)
+    # DeltaQ = np.diff(Q)
+    # meanDeltaQ = np.mean(DeltaQ)
+    # r = fftpack.fftfreq(used_Q.size, meanDeltaQ)
+    # mask = np.where(r>0)
     
-    F_r3 = calc_Fr(r[mask], used_Q, i_Q)
+    # F_r3 = calc_Fr(r[mask], used_Q, i_Q)
     
-    plt.figure(2)
-    plt.plot(r[mask], F_r3)
-    plt.grid()
-    plt.show
+    # # plt.figure(2)
+    # # plt.plot(r[mask], F_r3)
+    # # plt.grid()
+    # # plt.show
     
-    print("F(r) = ", F_r3.size)
-    print("J(Q) = ", J_Q.size)
+    # print("F(r) = ", F_r3.size)
+    # print("J(Q) = ", J_Q.size)
     
-    iteration = 4
-    r_cutoff = 0.25
-    F_rInt = calc_optimize_Fr(iteration, F_r3, rho0, i_Q, used_Q, Sinf, J_Q, r[mask], r_cutoff)
+    # iteration = 4
+    # r_cutoff = 0.25
+    # F_rInt = calc_optimize_Fr(iteration, F_r3, rho0, i_Q, used_Q, Sinf, J_Q, r[mask], r_cutoff)
     
     
-    plt.figure(2)
-    plt.plot(r[mask], F_rInt)
-    # plt.grid()
-    plt.show()
+    # # plt.figure(2)
+    # # plt.plot(r[mask], F_rInt)
+    # # plt.show()
