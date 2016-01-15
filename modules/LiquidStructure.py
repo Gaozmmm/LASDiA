@@ -20,17 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in the Liquid program
+"""Set of modules used in LASDiA to calculate all the used functions.
 
-The nomenclature and the procedures follow the article:
-Eggert et al. 2002 PRB, 65, 174105
+The nomenclature and the procedure follow the article:
+Eggert et al. 2002 PRB, 65, 174105.
 
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
-returns: description - type
+returns: description - type.
 
 For the variables name I used this convention:
 if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
+otherwise it is just the name.
 """
 
 import matplotlib.pyplot as plt
@@ -95,7 +96,7 @@ def calc_aff(element, Q):
     f_Q = f1_Q + f2_Q + f3_Q + f4_Q + c
     
     return f_Q
-      
+    
     
 def calc_eeff(elementList, Q):
     """Function to calculate the effective electron Form Factor, fe (eq. 10)
@@ -138,19 +139,11 @@ def calc_eeff(elementList, Q):
     fe_Q /= Ztot
 
     return (fe_Q, Ztot)
-
-
-def calc_Icoh(N, alpha, Isample_Q, Iincoh_Q):
-    """Function to calcultate the cohrent scattering intensity Icoh(Q)
     
-    """
-    Icoh_Q = N * ((alpha * Isample_Q) - Iincoh_Q)
-    return Icoh_Q
-
     
 def calc_Iincoh(elementList, Q):
     """Function to calculate the incoherent scattering intensity Iincoh(Q)
-    The incoherent scattering intensity is calculated with the formula and parameters from the article:
+    The incoherent scattering intensity is calculated with the formula from the article:
     Hajdu Acta Cryst. (1972). A28, 250
     
     arguments:
@@ -169,7 +162,7 @@ def calc_Iincoh(elementList, Q):
     header1 = file.readline()
     lines = file.readlines()
     file.close()
-
+    
     Iincoh_Q = 0
     
     # scan the lines and when it find the right element take the Z number
@@ -208,7 +201,7 @@ def calc_JQ(Iincoh_Q, Ztot, fe_Q):
     
     
 def calc_Kp(fe_Q, element, Q):
-    """Function to calculate the effective atomic number, Kp_Q (eq. 11), and its average, Kp (eq. 14)
+    """Function to calculate the average of effective atomic number Kp (eq. 11, 14)
 
     arguments:
     fe_Q: effective electric form factor - array
@@ -219,7 +212,6 @@ def calc_Kp(fe_Q, element, Q):
     calc_aff: function to calculate the atomic form factor - function
     
     returns:
-    Kp_Q: effective atomic number - array
     Kp: average of effective atomic number - number
     """
 
@@ -258,15 +250,40 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot):
     Sinf = sum_Kp2 / Ztot**2
 
     return Sinf
-
-
-def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
-    """Function to calculate alpha (eq. 34)
-    For now fix rho0=25.0584 it's Init[1] but I don't know where it come from...
+    
+    
+def calc_IsampleQ(I_Q, s, I_Qbkg):
+    """Function to calculate the sample scattering intensity Isample(Q) (eq. 28)
     
     arguments:
+    I_Q: measured scattering intensity - array
+    s: scale factor - number
+    I_Qbkg: background scattering intensity - array
     
     returns:
+    Isample_Q: sample scattering intensity - array
+    """
+    
+    Isample_Q = I_Q - s * I_Qbkg
+    
+    return Isample_Q
+    
+    
+def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
+    """Function to calculate the normalization factor alpha (eq. 34)
+    
+    arguments:
+    J_Q: J(Q) - array
+    Sinf: Sinf - number
+    Q: momentum transfer - array
+    Isample_Q: sample scattering intensity - array
+    fe_Q: effective electric form factor - array
+    Ztot: total Z number - number
+    rho0: average atomic density - number
+    index: array index of element in the calculation range - array
+    
+    returns:
+    alpha: normalization factor - number
     """
     
     Integral1 = simps((J_Q[index] + Sinf) * Q[index]**2, Q[index])
@@ -277,17 +294,43 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     return alpha
     
     
-def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, index):
-    """Function to calculate the S(Q) (eq. 18)
-
+def calc_Icoh(N, alpha, Isample_Q, Iincoh_Q):
+    """Function to calcultate the cohrent scattering intensity Icoh(Q) (eq. 10)
+    
     arguments:
-    Icoh: intensity - array
+    N: number of atoms - number
+    alpha: normalization factor - number
+    Isample_Q: sample scattering intensity - array
+    Iincoh_Q: incoherent scattering intensity - array
     
     returns:
-    S_Q: - array
+    Icoh_Q: cohrent scattering intensity - array
     """
     
-    S_Q = Icoh_Q[index] / (N * Ztot**2 * fe_Q[index]**2)
+    Icoh_Q = N * ((alpha * Isample_Q) - Iincoh_Q)
+    
+    return Icoh_Q
+    
+    
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index):
+    """Function to calculate the structure factor S(Q) (eq. 18)
+
+    arguments:
+    N: number of atoms - number
+    Icoh: cohrent scattering intensity - array
+    Ztot: total Z number - number
+    fe_Q: effective electric form factor - array
+    Sinf: Sinf - number
+    Q: momentum transfer - array
+    min_index: array index of element with Q<minQ - array
+    max_index: array index of element with Q>QmaxIntegrate & Q<=maxQ - array
+    calculation_index: array index of element in the calculation range Q>minQ & Q<=QmaxIntegrate - array
+    
+    returns:
+    S_Q: structure factor - array
+    """
+    
+    S_Q = Icoh_Q[calculation_index] / (N * Ztot**2 * fe_Q[calculation_index]**2)
     S_Qmin = np.zeros(Q[min_index].size)
     S_Q = np.concatenate([S_Qmin, S_Q])
     
@@ -295,9 +338,6 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, index):
     S_Qmax.fill(Sinf)
     S_Q = np.concatenate([S_Q, S_Qmax])
 
-    # S_Q[max_index] = Sinf
-    # S_Q = np.delete(S_Q, min_index)
-    
     return S_Q
     
     
@@ -306,10 +346,10 @@ def calc_iQ(S_Q, Sinf):
     
     arguments:
     S_Q: structure factor - array
-    Sinf: - number
+    Sinf: Sinf - number
     
     returns:
-    i_Q: - array
+    i_Q: i(Q) - array
     """
     
     i_Q = S_Q - Sinf
@@ -321,10 +361,12 @@ def calc_Fr(r, Q, i_Q):
     """Function to calculate F(r) (eq. 20)
     
     arguments:
+    r: radius - array
+    Q: momentum transfer - array
+    i_Q: i(Q) - array
     
     returns:
-    r: - array
-    F_r: - array
+    F_r: F(r) - array
     """
     
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)

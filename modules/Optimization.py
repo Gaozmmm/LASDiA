@@ -20,17 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in the Liquid program
+"""Set of modules used in LASDiA to calculate the F(r) optimization.
 
-The nomenclature and the procedures follow the article:
-Eggert et al. 2002 PRB, 65, 174105
+The nomenclature and the procedure follow the article:
+Eggert et al. 2002 PRB, 65, 174105.
 
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
-returns: description - type
+returns: description - type.
 
 For the variables name I used this convention:
 if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
+otherwise it is just the name.
 """
 
 import matplotlib.pyplot as plt
@@ -48,8 +49,9 @@ from lmfit import minimize, Parameters
 from modules.LiquidStructure import *
 
 def calc_Fintra(r):
-    """To implemente!!!
-    eq. 42
+    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
+    
+    To implemente!!!
     """
     
     Fintra_r = np.zeros(r.size)
@@ -61,13 +63,13 @@ def calc_deltaFr(F_r, Fintra_r, r, rho0):
     """Function to calculate deltaF(r) (eq. 44, 48)
     
     arguments:
-    F(r): - array
+    F_r: F(r) - array
     Fintra_r: intramolecular contribution of F(r) - array
-    r: - array
+    r: radius - array
     rho0: average atomic density - number
     
     return:
-    deltaF_r: - array
+    deltaF_r: deltaF(r) - array
     """
     
     deltaF_r = F_r - (Fintra_r - 4*np.pi*r*rho0)
@@ -79,12 +81,12 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     """Function to calculate the i-th iteration of i(Q) (eq. 46, 49)
     
     arguments:
-    i_Q:
-    Q:
-    Sinf:
-    J_Q:
-    deltaF_r:
-    r_cutoff: - number
+    i_Q: i(Q) - array
+    Q: momentum transfer - array
+    Sinf: Sinf - number
+    J_Q: J(Q) - array
+    deltaF_r: deltaF(r) - array
+    r_cutoff: value of r cutoff - number
     
     returns:
     i_Qi: i-th iteration of i(Q) - array
@@ -93,23 +95,29 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     mask = np.where(r < r_cutoff)
     rInt = r[mask]
     deltaF_rInt = deltaF_r[mask]
-    # QInt = Q[mask]
     
     integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(Q)))).T, rInt)
-    # simps(deltaF_r * np.sin(np.mat(r)*Q), rint)
-    
-    # Qr = np.outer(Q,r)
-    # sinQr = np.sin(Qr)
-    # integral = np.sum(sinQr * deltaF_r, axis=1)
     i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q) + 1)) * integral
          
     return i_Qi
 
     
 def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
-    #(iteration, i_Q, F_r, Fintra_r, rho0, Q, Sinf, J_Q, r, r_cutoff, S_Q, alpha, N, Isample_Q, Iincoh_Q, Ztot, fe_Q):
-    """Function to calculate the optimization
+    """Function to calculate the F(r) optimization (eq 47, 48, 49)
     
+    arguments:
+    iteration: number of iteration - number
+    F_r: initial value of F(r) - array
+    rho0: average atomic density - number
+    i_Q: i(Q) - array
+    Q: momentum transfer - array
+    Sinf: Sinf - number
+    J_Q: J(Q) - array
+    r: radius - array
+    r_cutoff: value of r cutoff - number
+    
+    returns:
+    F_r: optimazed F(r) - array
     """
 
     Fintra_r = calc_Fintra(r)
@@ -117,7 +125,6 @@ def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff)
         F_r = calc_Fr(r, Q, i_Q)
-        # F_r = F_rInt
         
     return F_r
     

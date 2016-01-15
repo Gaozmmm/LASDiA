@@ -55,19 +55,12 @@ if __name__ == '__main__':
     maxQ = 109
     QmaxIntegrate = 90
     
-    operative_index = np.where((Q>minQ) & (Q<=maxQ))
-    operative_Q = Q[operative_index]
-    operative_I_Q = I_Q[operative_index]
-    operative_I_Qbkg = I_Qbkg[operative_index]
-    
     min_index = np.where(Q<=minQ)
     max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
     validate_index = np.where(Q<=maxQ)
+    integration_index = np.where(Q<=QmaxIntegrate)
     
-    integrate_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
-    integrate_Q = Q[integrate_index]
-    integrate_I_Q = I_Q[integrate_index]
-    integrate_I_Qbkg = I_Qbkg[integrate_index]
+    calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
     
     elementList = {"Ar":1}
     s =  0.5
@@ -78,12 +71,12 @@ if __name__ == '__main__':
     Iincoh_Q = calc_Iincoh(elementList, Q)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
-    Isample_Q = I_Q - s * I_Qbkg
+    Isample_Q = calc_IsampleQ(I_Q, s, I_Qbkg)
     
-    alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, integrate_index)
+    alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, integration_index)
     Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
     
-    S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, integrate_index)
+    S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
     
     plt.figure(1)
     plt.plot(Q[validate_index], S_Q)
@@ -98,7 +91,7 @@ if __name__ == '__main__':
     r = fftpack.fftfreq(Q[validate_index].size, meanDeltaQ)
     mask = np.where(r>0)
     
-    F_r = calc_Fr(r[mask], Q[validate_index], i_Q)
+    F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
     
     plt.figure(2)
     plt.plot(r[mask], F_r)
