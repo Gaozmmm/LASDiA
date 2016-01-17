@@ -77,7 +77,7 @@ def calc_deltaFr(F_r, Fintra_r, r, rho0):
     return deltaF_r
     
 
-def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
+def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     """Function to calculate the i-th iteration of i(Q) (eq. 46, 49)
     
     arguments:
@@ -86,13 +86,13 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     Sinf: Sinf - number
     J_Q: J(Q) - array
     deltaF_r: deltaF(r) - array
-    r_cutoff: value of r cutoff - number
+    rmin: value of r cutoff - number
     
     returns:
     i_Qi: i-th iteration of i(Q) - array
     """
     
-    mask = np.where(r < r_cutoff)
+    mask = np.where(r < rmin)
     rInt = r[mask]
     deltaF_rInt = deltaF_r[mask]
     
@@ -102,7 +102,7 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff):
     return i_Qi
 
     
-def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
+def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin):
     """Function to calculate the F(r) optimization (eq 47, 48, 49)
     
     arguments:
@@ -114,7 +114,7 @@ def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
     Sinf: Sinf - number
     J_Q: J(Q) - array
     r: radius - array
-    r_cutoff: value of r cutoff - number
+    rmin: value of r cutoff - number
     
     returns:
     F_r: optimazed F(r) - array
@@ -123,7 +123,7 @@ def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, r_cutoff):
     Fintra_r = calc_Fintra(r)
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
-        i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, r_cutoff)
+        i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         F_r = calc_Fr(r, Q, i_Q)
         
     return F_r

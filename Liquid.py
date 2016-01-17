@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Environment where to test the new modules
+"""Environment for testing the software
 The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105
 """
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     
     min_index = np.where(Q<=minQ)
     max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
-    validate_index = np.where(Q<=maxQ)
+    validation_index = np.where(Q<=maxQ)
     integration_index = np.where(Q<=QmaxIntegrate)
     
     calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
@@ -79,16 +79,16 @@ if __name__ == '__main__':
     S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
     
     plt.figure(1)
-    plt.plot(Q[validate_index], S_Q)
+    plt.plot(Q[validation_index], S_Q)
     plt.grid()
     plt.show
     
     i_Q = calc_iQ(S_Q, Sinf)
-    Qi_Q = Q[validate_index] * i_Q
+    Qi_Q = Q[validation_index] * i_Q
     
     DeltaQ = np.diff(Q)
     meanDeltaQ = np.mean(DeltaQ)
-    r = fftpack.fftfreq(Q[validate_index].size, meanDeltaQ)
+    r = fftpack.fftfreq(Q[validation_index].size, meanDeltaQ)
     mask = np.where(r>0)
     
     F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
@@ -99,9 +99,12 @@ if __name__ == '__main__':
     plt.show
     
     iteration = 2
-    r_cutoff = 0.25
-    F_rInt = calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q[validate_index], Sinf, J_Q[validate_index], r[mask], r_cutoff)
+    rmin = 0.25
+    F_rInt = calc_optimize_Fr(iteration, F_r, rho0, i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
     
     plt.figure(2)
     plt.plot(r[mask], F_rInt)
     plt.show()
+
+
+    

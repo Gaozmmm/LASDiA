@@ -20,17 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in the Liquid program
+"""Set of modules used in LASDiA to calculate all the used functions.
 
-The nomenclature and the procedures follow the article:
-Eggert et al. 2002 PRB, 65, 174105
+The nomenclature and the procedure follow the article:
+Eggert et al. 2002 PRB, 65, 174105.
 
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
-returns: description - type
+returns: description - type.
 
 For the variables name I used this convention:
 if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
+otherwise it is just the name.
 """
 
 import matplotlib.pyplot as plt
