@@ -51,6 +51,15 @@ if __name__ == '__main__':
     
     Q, I_Q = read_file("./data/cea_files/HT2_034T++.chi")
     Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036T++.chi")
+
+    # s = UnivariateSpline(Q, I_Q, k=3, s=0.5)
+    # I_Qs = s(Q)
+
+    # plt.figure(3)
+    # plt.plot(Q, I_Q)
+    # plt.plot(Q, I_Qs)
+    # plt.grid()
+    # plt.show()
     
     minQ = 3
     maxQ = 109
@@ -80,14 +89,14 @@ if __name__ == '__main__':
     S_Q, S_Qs = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
     
     
-    
     plt.figure(1)
-    plt.plot(Q[validation_index], S_Q)
+    #plt.plot(Q[validation_index], S_Q)
     plt.plot(Q[validation_index], S_Qs)
     plt.grid()
     plt.show
     
     i_Q = calc_iQ(S_Q, Sinf)
+#    i_Q = calc_iQ(S_Qs, Sinf)
     Qi_Q = Q[validation_index] * i_Q
     
     DeltaQ = np.diff(Q)
@@ -103,7 +112,7 @@ if __name__ == '__main__':
     plt.show
     
     iteration = 4
-    rmin = 0.25
+    rmin = 0.24
     F_rInt = calc_optimize_Fr(iteration, F_r, rho0, i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
     
     plt.figure(2)
