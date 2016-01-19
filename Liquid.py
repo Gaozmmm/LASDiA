@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2015 Francesco Devoto
+# Copyright (c) 2016 Francesco Devoto
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@ import os
 import scipy.constants as sc
 from scipy import fftpack
 from scipy import signal
+from scipy.interpolate import UnivariateSpline
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -76,10 +77,13 @@ if __name__ == '__main__':
     alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, integration_index)
     Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
     
-    S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
+    S_Q, S_Qs = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
+    
+    
     
     plt.figure(1)
     plt.plot(Q[validation_index], S_Q)
+    plt.plot(Q[validation_index], S_Qs)
     plt.grid()
     plt.show
     
@@ -98,7 +102,7 @@ if __name__ == '__main__':
     plt.grid()
     plt.show
     
-    iteration = 2
+    iteration = 4
     rmin = 0.25
     F_rInt = calc_optimize_Fr(iteration, F_r, rho0, i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
     

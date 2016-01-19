@@ -20,10 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in LASDiA to calculate the chi2 minimization.
+"""Set of modules used in LASDiA to calculate the relations among the different set of Structure Factors.
 
-The nomenclature and the procedure follow the article:
-Eggert et al. 2002 PRB, 65, 174105.
+The formalisms used are Ashcroft-Langreth and Faber-Ziman.
+
+The nomenclature and the procedure follow the book:
+Waseda - The Structure of Non-Crystalline Materials.
 
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
@@ -47,24 +49,55 @@ from scipy.stats import chisquare
 
 from modules.LiquidStructure import *
 
-def calc_deltaMinim(N, r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot, Fintra):
-    """Function to minimize the density
+import math
+
+def calc_AL_FZ(N1, N2, S11, S12, S22):
+    """Function to transform the AL to FZ (eq 1.2.17)
     
+    arguments:
+    N1:
+    N2:
+    S11:
+    S12:
+    S22:
+    
+    returns:
+    a11:
+    a12:
+    a22:
     """
-    #numAtoms = sc.N_A
-    Isample = I_Q - s * I_Qbkg
-    alpha = calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0)
-    Icoh = (N * alpha * Isample) - (N * Iincoh)
-    S_Q = calc_SQ(Icoh, Ztot, fe_Q)
-    i_Q = calc_iQ(S_Q, Sinf)
-    F_r = calc_Fr(r, Q, i_Q)
-    observed = F_r
-    excepted = Fintra - (4*np.pi*rho0)
     
-    chi2, p = chisquare(observed, f_exp=excepted)
-    return chi2
+    c1 = N1/(N1+N2)
+    c2 = N2/(N1+N2)
+    
+    a11_Q = (S11 - c2)/c1
+    a12_Q = S12/math.sqrt(c1*c2) + 1
+    a22_Q = (S22 - c1)/c2
+    
+    return (a11_Q, a12_Q, a22_Q)
     
     
-
-
-
+def calc_FZ_AL(N1, N2, a11, a12, a22):
+    """Function to transform the AL to FZ (eq 1.2.17)
+    
+    arguments:
+    N1:
+    N2:
+    a11:
+    a12:
+    a22:
+    
+    returns:
+    S11:
+    S12:
+    S22:
+    """
+    
+    c1 = N1/(N1+N2)
+    c2 = N2/(N1+N2)
+    
+    S11_Q = 1 + c1*(a11_Q - 1)
+    S12_Q = math.sqrt(c1*c2) * (a12_Q - 1)
+    S11_Q = 1 + c2*(a22_Q - 1)
+    
+    return (S11_Q, S12_Q, S22_Q)

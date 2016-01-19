@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2015 Francesco Devoto
+# Copyright (c) 2016 Francesco Devoto
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ import numpy as np
 import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
+from scipy.interpolate import UnivariateSpline
 
 # from modules.MainModules import *
 
@@ -331,14 +332,20 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_in
     """
     
     S_Q = Icoh_Q[calculation_index] / (N * Ztot**2 * fe_Q[calculation_index]**2)
+    
+    s = UnivariateSpline(Q[calculation_index], S_Q, k=3, s=0.5)
+    S_Qs = s(Q[calculation_index])
+    
     S_Qmin = np.zeros(Q[min_index].size)
     S_Q = np.concatenate([S_Qmin, S_Q])
+    S_Qs = np.concatenate([S_Qmin, S_Qs])
     
     S_Qmax = np.zeros(Q[max_index].size)
     S_Qmax.fill(Sinf)
     S_Q = np.concatenate([S_Q, S_Qmax])
+    S_Qs = np.concatenate([S_Qs, S_Qmax])
 
-    return S_Q
+    return (S_Q, S_Qs)
     
     
 def calc_iQ(S_Q, Sinf):
