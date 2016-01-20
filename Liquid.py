@@ -159,16 +159,19 @@ if __name__ == '__main__':
     # print(chi2.shape)
     
     # x, y = np.meshgrid(s, rho0)
-    
-    # print(x.shape)
-    # print(y.shape)
+    # # print(x.shape)
+    # # print(y.shape)
+    # fig = plt.figure(3)
+    # # ax = fig.gca(projection='3d')
+    # ax = Axes3D(fig)
+    # ax.plot_surface(y, x, chi2, rstride=1, cstride=1, cmap='hot')
+    # # cset = ax.contour(x, y, chi2, zdir='z', offset=3, cmap='hot')
+    # # cset = ax.contour(x, y, chi2, zdir='x', offset=0.19, cmap='hot')
+    # # cset = ax.contour(x, y, chi2, zdir='y', offset=27.1, cmap='hot')
     
     plt.figure(3)
-    # fig = plt.figure()
-    # ax = Axes3D(fig)
-    # ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='hot')
     plt.contour(s, rho0, chi2)
-    # l = plt.clabel(c)
+    
     plt.show()
     
 
