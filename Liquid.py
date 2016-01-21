@@ -75,12 +75,12 @@ if __name__ == '__main__':
     
     elementList = {"Ar":1}
     # test values
-    s = np.arange(0.2, 0.8, 0.1)
-    rho0 = np.arange(24, 28, 1)
+    # s = np.arange(0.2, 0.8, 0.1)
+    # rho0 = np.arange(24, 28, 1)
     
     # real values
-    # s = np.arange(0.2, 0.8, 0.01)
-    # rho0 = np.arange(24.0, 28.0, 0.1)
+    s = np.arange(0.2, 0.8, 0.01)
+    rho0 = np.arange(24.0, 28.0, 0.1)
     
     # best values
     # s = np.array([0.57])
@@ -158,19 +158,19 @@ if __name__ == '__main__':
     # print(s.shape)
     # print(chi2.shape)
     
-    # x, y = np.meshgrid(s, rho0)
-    # # print(x.shape)
-    # # print(y.shape)
-    # fig = plt.figure(3)
-    # # ax = fig.gca(projection='3d')
-    # ax = Axes3D(fig)
-    # ax.plot_surface(y, x, chi2, rstride=1, cstride=1, cmap='hot')
-    # # cset = ax.contour(x, y, chi2, zdir='z', offset=3, cmap='hot')
-    # # cset = ax.contour(x, y, chi2, zdir='x', offset=0.19, cmap='hot')
-    # # cset = ax.contour(x, y, chi2, zdir='y', offset=27.1, cmap='hot')
+    x, y = np.meshgrid(s, rho0)
+    # print(x.shape)
+    # print(y.shape)
+    fig = plt.figure(3)
+    # ax = fig.gca(projection='3d')
+    ax = Axes3D(fig)
+    ax.plot_surface(y, x, chi2, rstride=1, cstride=1, cmap='hot')
+    # cset = ax.contour(x, y, chi2, zdir='z', offset=3, cmap='hot')
+    # cset = ax.contour(x, y, chi2, zdir='x', offset=0.19, cmap='hot')
+    # cset = ax.contour(x, y, chi2, zdir='y', offset=27.1, cmap='hot')
     
-    plt.figure(3)
-    plt.contour(s, rho0, chi2)
+    plt.figure(4)
+    plt.contour(s, rho0, chi2, 200)
     
     plt.show()
     
