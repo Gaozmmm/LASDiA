@@ -164,7 +164,7 @@ if __name__ == '__main__':
     fig = plt.figure(3)
     # ax = fig.gca(projection='3d')
     ax = Axes3D(fig)
-    ax.plot_surface(y, x, chi2, rstride=1, cstride=1, cmap='hot')
+    ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
     # cset = ax.contour(x, y, chi2, zdir='z', offset=3, cmap='hot')
     # cset = ax.contour(x, y, chi2, zdir='x', offset=0.19, cmap='hot')
     # cset = ax.contour(x, y, chi2, zdir='y', offset=27.1, cmap='hot')
