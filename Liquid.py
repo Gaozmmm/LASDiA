@@ -79,12 +79,12 @@ if __name__ == '__main__':
     # rho0 = np.arange(24, 28, 1)
     
     # real values
-    s = np.arange(0.2, 0.8, 0.01)
-    rho0 = np.arange(24.0, 28.0, 0.1)
+    # s = np.arange(0.2, 0.8, 0.01)
+    # rho0 = np.arange(24.0, 28.0, 0.1)
     
     # best values
-    # s = np.array([0.57])
-    # rho0 = np.array([26.10])
+    s = np.array([0.57])
+    rho0 = np.array([26.10])
     
     chi2 = np.zeros((rho0.size, s.size))
     
@@ -92,18 +92,23 @@ if __name__ == '__main__':
     fe_Q, Ztot = calc_eeff(elementList, Q)
     Iincoh_Q = calc_Iincoh(elementList, Q)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
 
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
             # print(rho0[i], s[j])
-            Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
             Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
-        
+            
+            plt.figure(1)
+            plt.plot(Q, Isample_Q)
+            plt.grid()
+            plt.show()
+            
             alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0[i], integration_index)
             Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
             
             S_Q, S_Qs = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
-        
+            
             # plt.figure(1)
             # plt.plot(Q[validation_index], S_Q)
             # # plt.plot(Q[validation_index], S_Qs)
@@ -140,34 +145,14 @@ if __name__ == '__main__':
             deltaF_r = calc_deltaFr(F_rInt[maskInt], Fintra_r, rInt, rho0[i])
             chi2[i][j] = simps(deltaF_r**2, rInt)
         
-    # np.amin(chi2)
-    # minIndx = np.where(chi2 == chi2.min())
-    # print(minIndx)
-    # print(s[minIndx])
-    
-    # print(chi2)
-    # print(np.amin(chi2, axis=0))
-    # print(np.amin(chi2, axis=1))
-    # print(np.amin(chi2))
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
-    # print(minIndxRho0, minIndxS)
-    print(chi2[minIndxRho0][minIndxS])
-    print(rho0[minIndxRho0], s[minIndxS])
-    
-    # print(rho0.shape)
-    # print(s.shape)
-    # print(chi2.shape)
+    # print(chi2[minIndxRho0][minIndxS])
+    # print(rho0[minIndxRho0], s[minIndxS])
     
     x, y = np.meshgrid(s, rho0)
-    # print(x.shape)
-    # print(y.shape)
     fig = plt.figure(3)
-    # ax = fig.gca(projection='3d')
     ax = Axes3D(fig)
     ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
-    # cset = ax.contour(x, y, chi2, zdir='z', offset=3, cmap='hot')
-    # cset = ax.contour(x, y, chi2, zdir='x', offset=0.19, cmap='hot')
-    # cset = ax.contour(x, y, chi2, zdir='y', offset=27.1, cmap='hot')
     
     plt.figure(4)
     plt.contour(s, rho0, chi2, 200)
