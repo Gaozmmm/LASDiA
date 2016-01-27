@@ -99,21 +99,21 @@ if __name__ == '__main__':
             # print(rho0[i], s[j])
             Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
             
-            plt.figure(1)
-            plt.plot(Q, Isample_Q)
-            plt.grid()
-            plt.show()
+            # plt.figure(1)
+            # plt.plot(Q, Isample_Q)
+            # plt.grid()
+            # plt.show()
             
             alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0[i], integration_index)
             Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
             
             S_Q, S_Qs = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
             
-            # plt.figure(1)
-            # plt.plot(Q[validation_index], S_Q)
-            # # plt.plot(Q[validation_index], S_Qs)
-            # plt.grid()
-            # plt.show()
+            plt.figure(1)
+            plt.plot(Q[validation_index], S_Q)
+            # plt.plot(Q[validation_index], S_Qs)
+            plt.grid()
+            plt.show
             
             i_Q = calc_iQ(S_Q, Sinf)
         #    i_Q = calc_iQ(S_Qs, Sinf)
@@ -126,18 +126,18 @@ if __name__ == '__main__':
             
             F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
             
-            # plt.figure(2)
-            # plt.plot(r[mask], F_r)
-            # plt.grid()
-            # plt.show
+            plt.figure(2)
+            plt.plot(r[mask], F_r)
+            plt.grid()
+            plt.show
             
             iteration = 2
             rmin = 0.24
             F_rInt = calc_optimize_Fr(iteration, F_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
             
-            # plt.figure(2)
-            # plt.plot(r[mask], F_rInt)
-            # plt.show()
+            plt.figure(2)
+            plt.plot(r[mask], F_rInt)
+            plt.show()
             
             maskInt = np.where((r>0) & (r < rmin))
             rInt = r[maskInt]
@@ -149,15 +149,15 @@ if __name__ == '__main__':
     # print(chi2[minIndxRho0][minIndxS])
     # print(rho0[minIndxRho0], s[minIndxS])
     
-    x, y = np.meshgrid(s, rho0)
-    fig = plt.figure(3)
-    ax = Axes3D(fig)
-    ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
+    # x, y = np.meshgrid(s, rho0)
+    # fig = plt.figure(3)
+    # ax = Axes3D(fig)
+    # ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
     
-    plt.figure(4)
-    plt.contour(s, rho0, chi2, 200)
+    # plt.figure(4)
+    # plt.contour(s, rho0, chi2, 200)
     
-    plt.show()
+    # plt.show()
     
 
     
