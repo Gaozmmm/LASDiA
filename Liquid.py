@@ -37,6 +37,7 @@ from scipy.interpolate import UnivariateSpline
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 import numpy as np
+import time
 
 from modules.Utility import *
 from modules.LiquidStructure import *
@@ -96,27 +97,19 @@ if __name__ == '__main__':
 
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
-            # print(rho0[i], s[j])
             Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
-            
-            # plt.figure(1)
-            # plt.plot(Q, Isample_Q)
-            # plt.grid()
-            # plt.show()
             
             alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0[i], integration_index)
             Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
             
-            S_Q, S_Qs = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
+            S_Q, S_Qs = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index, QmaxIntegrate)
             
-            plt.figure(1)
-            plt.plot(Q[validation_index], S_Q)
-            # plt.plot(Q[validation_index], S_Qs)
-            plt.grid()
-            plt.show
+            # plt.figure(1)
+            # plt.plot(Q[validation_index], S_Q)
+            # plt.grid()
+            # plt.show()
             
             i_Q = calc_iQ(S_Q, Sinf)
-        #    i_Q = calc_iQ(S_Qs, Sinf)
             Qi_Q = Q[validation_index] * i_Q
             
             DeltaQ = np.diff(Q)
@@ -126,24 +119,17 @@ if __name__ == '__main__':
             
             F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
             
-            plt.figure(2)
-            plt.plot(r[mask], F_r)
-            plt.grid()
-            plt.show
-            
-            iteration = 2
+            iteration = 4
             rmin = 0.24
-            F_rInt = calc_optimize_Fr(iteration, F_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
             
-            plt.figure(2)
-            plt.plot(r[mask], F_rInt)
-            plt.show()
+            F_rIt = calc_optimize_Fr(iteration, F_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
+            # plt.show()
             
-            maskInt = np.where((r>0) & (r < rmin))
-            rInt = r[maskInt]
-            Fintra_r = calc_Fintra(rInt)
-            deltaF_r = calc_deltaFr(F_rInt[maskInt], Fintra_r, rInt, rho0[i])
-            chi2[i][j] = simps(deltaF_r**2, rInt)
+            maskIt = np.where((r>0) & (r < rmin))
+            rIt = r[maskIt]
+            Fintra_r = calc_Fintra(rIt)
+            deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r, rIt, rho0[i])
+            chi2[i][j] = simps(deltaF_r**2, rIt)
         
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
     # print(chi2[minIndxRho0][minIndxS])
@@ -156,7 +142,6 @@ if __name__ == '__main__':
     
     # plt.figure(4)
     # plt.contour(s, rho0, chi2, 200)
-    
     # plt.show()
     
 

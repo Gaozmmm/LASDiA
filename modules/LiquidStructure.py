@@ -312,8 +312,19 @@ def calc_Icoh(N, alpha, Isample_Q, Iincoh_Q):
     
     return Icoh_Q
     
+def calc_damp(Q, QmaxIntegrate):
+    """
+    """
     
-def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index):
+    # damping_factor = 0.5
+    damping_factor = np.log(10)
+    exponent_factor = damping_factor / QmaxIntegrate**2
+    damp_Q = np.exp(-exponent_factor * Q**2)
+    
+    return damp_Q
+
+
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index, QmaxIntegrate):
     """Function to calculate the structure factor S(Q) (eq. 18)
 
     arguments:
@@ -332,6 +343,8 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_in
     """
     
     S_Q = Icoh_Q[calculation_index] / (N * Ztot**2 * fe_Q[calculation_index]**2)
+    # damp_Q = calc_damp(Q[calculation_index], QmaxIntegrate)
+    # S_Q *= damp_Q
     
     s = UnivariateSpline(Q[calculation_index], S_Q, k=3, s=0.5)
     S_Qs = s(Q[calculation_index])
