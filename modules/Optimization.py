@@ -121,22 +121,23 @@ def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin):
     F_r: optimazed F(r) - array
     """
     
-    plt.figure()
-    plt.plot(r, F_r)
-    plt.grid()
-    plt.ion()
+    # commented just for testing the damping factor!!!
+    # plt.figure()
+    # plt.plot(r, F_r)
+    # plt.grid()
+    # plt.ion()
     
     Fintra_r = calc_Fintra(r)
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         F_r = calc_Fr(r, Q, i_Q)
-        plt.plot(r, F_r)
-        plt.draw()
-        time.sleep(1.0)
+        # plt.plot(r, F_r)
+        # plt.draw()
+        # time.sleep(1.0)
     
-    plt.ioff()
-    plt.show()
+    # plt.ioff()
+    # plt.show()
     
     return F_r
     

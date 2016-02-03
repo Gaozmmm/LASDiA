@@ -70,22 +70,21 @@ if __name__ == '__main__':
     min_index = np.where(Q<=minQ)
     max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
     validation_index = np.where(Q<=maxQ)
-    integration_index = np.where(Q<=QmaxIntegrate)
-    
+    integration_index = np.where(Q<=QmaxIntegrate)    
     calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
     
     elementList = {"Ar":1}
     # test values
-    # s = np.arange(0.2, 0.8, 0.1)
+    # s = np.arange(0.2, 1.0, 0.1)
     # rho0 = np.arange(24, 28, 1)
     
     # real values
-    # s = np.arange(0.2, 0.8, 0.01)
+    # s = np.arange(0.2, 1.0, 0.01)
     # rho0 = np.arange(24.0, 28.0, 0.1)
     
     # best values
-    s = np.array([0.57])
-    rho0 = np.array([26.10])
+    s = np.array([0.8])
+    rho0 = np.array([26.0])
     
     chi2 = np.zeros((rho0.size, s.size))
     
@@ -104,10 +103,17 @@ if __name__ == '__main__':
             
             S_Q, S_Qs = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index, QmaxIntegrate)
             
-            # plt.figure(1)
+            damp = calc_damp(Q[validation_index], QmaxIntegrate)
+            S_Qdamp = damp * (S_Q - Sinf) + Sinf
+            
+            plt.figure(1)
             # plt.plot(Q[validation_index], S_Q)
-            # plt.grid()
-            # plt.show()
+            plt.plot(Q[validation_index], S_Qdamp)
+            plt.grid()
+            plt.show()
+            
+            # easy test!!!
+            S_Q = S_Qdamp
             
             i_Q = calc_iQ(S_Q, Sinf)
             Qi_Q = Q[validation_index] * i_Q
@@ -119,7 +125,13 @@ if __name__ == '__main__':
             
             F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
             
-            iteration = 4
+            # plt.figure(1)
+            # plt.plot(r[mask], F_r)
+            # plt.grid()
+            # plt.show()
+            
+            
+            iteration = 2
             rmin = 0.24
             
             F_rIt = calc_optimize_Fr(iteration, F_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
@@ -132,8 +144,16 @@ if __name__ == '__main__':
             chi2[i][j] = simps(deltaF_r**2, rIt)
         
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
-    # print(chi2[minIndxRho0][minIndxS])
-    # print(rho0[minIndxRho0], s[minIndxS])
+    print(chi2[minIndxRho0][minIndxS])
+    print(rho0[minIndxRho0], s[minIndxS])
+    
+    # print(chi2)
+    # print(chi2[:,0])
+    
+    # plt.figure(5)
+    # plt.plot(rho0,chi2[:,0])
+    # plt.grid()
+    # plt.show()
     
     # x, y = np.meshgrid(s, rho0)
     # fig = plt.figure(3)
