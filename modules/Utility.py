@@ -111,7 +111,27 @@ def read_file(path):
 #    plot_data(xVect, yVect,  "Q", "I(Q)", "Data")
     
     return (xVect, yVect)
-
+    
+    
+def rebinning(X, maxQ):
+    """
+    """
+    
+    lenX = len(X)
+    numX = 2**int(math.log(lenX,2))
+    rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    
+    return rebinnedX
+    
+def interpolation(X, f_X):
+    """
+    """
+    
+    s = UnivariateSpline(X, f_X, k=3, s=0.5)
+    newf_X = s(X)
+    
+    return newf_X
+    
     
 # def plot_data(nFigure, xSample, ySample, xLabel, yLabel, style, dataLabel, overlap):
     # """Plot the data read with the function read_file
