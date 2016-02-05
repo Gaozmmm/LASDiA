@@ -39,6 +39,8 @@ import numpy as np
 import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
+import math
+from scipy import interpolate
 
 def read_file(path):
     """Read the file and return x and y as numpy vectors
@@ -113,24 +115,43 @@ def read_file(path):
     return (xVect, yVect)
     
     
-def rebinning(X, maxQ):
+def rebinning(X, BinNum, Num, maxQ):
     """
     """
     
-    lenX = len(X)
-    numX = 2**int(math.log(lenX,2))
-    rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    # lenX = len(X)
+    # numX = 2**int(math.log(lenX,2))
+    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    
+    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
+    
+    if min < np.amin(X):
+        min = np.amin(X)
+    
+    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum * Num - 1)
+    rebinnedX = np.linspace(min, max, Num, endpoint=True)
     
     return rebinnedX
     
-def interpolation(X, f_X):
+    
+def interpolation(X, f_X, rebinnedX):
     """
     """
     
-    s = UnivariateSpline(X, f_X, k=3, s=0.5)
-    newf_X = s(X)
+    interpolatedf_X = interpolate.interp1d(X, f_X)
+    newf_X = interpolatedf_X(rebinnedX)
     
     return newf_X
+    
+    
+def smoothing(X, f_X):
+    """
+    """
+    
+    s = interpolate.UnivariateSpline(X, f_X, k=3, s=0.5)
+    smoothedf_X = s(X)
+    
+    return smoothedf_X
     
     
 # def plot_data(nFigure, xSample, ySample, xLabel, yLabel, style, dataLabel, overlap):

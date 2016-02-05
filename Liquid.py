@@ -59,17 +59,34 @@ if __name__ == '__main__':
     maxQ = 109
     QmaxIntegrate = 90
     
+    BinNum = 1
+    Num = 2048 # len(Q)
+    
+    min_index = np.where(Q<=minQ)
+    max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
+    validation_index = np.where(Q<=maxQ)
+    integration_index = np.where(Q<=QmaxIntegrate)    
+    calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
+    
+    rebinQ = rebinning(Q, BinNum, Num, maxQ)
+    interpI_Q = interpolation(Q, I_Q, rebinQ)
+    interpI_Q[min_index] = 0.0
+    
+    # print(Q[55])
+    # print(Q[56])
+    # print(rebinQ[55])
+    # print(I_Q[55], I_Q[56], I_Q[57])
+    # print(interpI_Q[55], interpI_Q[56], interpI_Q[57])
+    
+    peakind = signal.find_peaks_cwt(I_Q, np.array([100, 200]))
+    
     plt.figure(3)
     plt.plot(Q, I_Q)
-    plt.plot(newQ, newI_Q)
+    plt.plot(Q[peakind], I_Q[peakind], u'o')
+    # plt.plot(rebinQ, interpI_Q)
     plt.grid()
     plt.show()
     
-    # min_index = np.where(Q<=minQ)
-    # max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
-    # validation_index = np.where(Q<=maxQ)
-    # integration_index = np.where(Q<=QmaxIntegrate)    
-    # calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
     
     # elementList = {"Ar":1}
     # # test values
