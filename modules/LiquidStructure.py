@@ -206,7 +206,7 @@ def calc_Kp(fe_Q, element, Q):
 
     arguments:
     fe_Q: effective electric form factor - array
-    element: chemical element of the sample
+    element: chemical element of the sample - string
     Q: momentum transfer - array
     
     functions used into the calculation:

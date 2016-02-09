@@ -49,13 +49,32 @@ from lmfit import minimize, Parameters
 
 from modules.LiquidStructure import *
 
-def calc_Fintra(r):
+def calc_Fintra(r, Q, QmaxIntegrate):
     """Function to calculate the intramolecular contribution of F(r) (eq. 42)
     
-    To implemente!!!
+    To implemente!!! -> For now just for CO2!!!
     """
     
-    Fintra_r = np.zeros(r.size)
+    # Fintra_r = np.zeros(r.size)
+    
+    dCO = 0.1165 # nm
+    dOO = 2 * dCO
+    
+    elementList = {"C":1,"O":2}
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    KC = calc_Kp(fe_Q, "C", Q)
+    KO = calc_Kp(fe_Q, "O", Q)
+    
+    constCO = 4/(np.pi * Ztot**2 * dCO)
+    constOO = 2/(np.pi * Ztot**2 * dOO)
+    
+    Fintra_r_CO = constCO * KC * KO * \
+        ((np.sin((r - dCO)*QmaxIntegrate)) / (r - dCO) - (np.sin((r + dCO)*QmaxIntegrate)) / (r + dCO))
+    
+    Fintra_r_OO = constOO * KO * KO * \
+        ((np.sin((r - dOO)*QmaxIntegrate)) / (r - dOO) - (np.sin((r + dOO)*QmaxIntegrate)) / (r + dOO))
+    
+    Fintra_r = Fintra_r_CO + Fintra_r_OO
     
     return Fintra_r
     
@@ -103,7 +122,7 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     return i_Qi
 
     
-def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin):
+def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin):
     """Function to calculate the F(r) optimization (eq 47, 48, 49)
     
     arguments:
@@ -122,22 +141,28 @@ def calc_optimize_Fr(iteration, F_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin):
     """
     
     # commented just for testing the damping factor!!!
-    # plt.figure()
-    # plt.plot(r, F_r)
-    # plt.grid()
-    # plt.ion()
+    plt.figure()
+    plt.plot(r, F_r)
+    plt.xlabel('r')
+    plt.ylabel('F(r)')
+    plt.grid()
+    plt.ion()
     
-    Fintra_r = calc_Fintra(r)
+    # Fintra_r = calc_Fintra(r)
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
+        # print(deltaF_r)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
+        # print(i_Q)
         F_r = calc_Fr(r, Q, i_Q)
-        # plt.plot(r, F_r)
-        # plt.draw()
-        # time.sleep(1.0)
+        plt.plot(r, F_r)
+        plt.xlabel('r')
+        plt.ylabel('F(r)')
+        plt.draw()
+        time.sleep(1.0)
     
-    # plt.ioff()
-    # plt.show()
+    plt.ioff()
+    plt.show
     
     return F_r
     

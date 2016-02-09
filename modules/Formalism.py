@@ -51,7 +51,7 @@ from modules.LiquidStructure import *
 
 import math
 
-def calc_AL_FZ(N1, N2, S11, S12, S22):
+def ALtoFZ(N1, N2, S11, S12, S22):
     """Function to transform the AL to FZ (eq 1.2.17)
     
     arguments:
@@ -77,7 +77,7 @@ def calc_AL_FZ(N1, N2, S11, S12, S22):
     return (a11_Q, a12_Q, a22_Q)
     
     
-def calc_FZ_AL(N1, N2, a11, a12, a22):
+def FZtoAL(N1, N2, a11, a12, a22):
     """Function to transform the AL to FZ (eq 1.2.17)
     
     arguments:
@@ -101,3 +101,9 @@ def calc_FZ_AL(N1, N2, a11, a12, a22):
     S11_Q = 1 + c2*(a22_Q - 1)
     
     return (S11_Q, S12_Q, S22_Q)
+    
+    
+def FaberZiman():
+    """
+    
+    """
