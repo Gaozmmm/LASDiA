@@ -77,28 +77,13 @@ if __name__ == '__main__':
     # interpI_Q = interpolation(Q, I_Q, rebinQ)
     # interpI_Q[min_index] = 0.0
     
-    # print(Q[55])
-    # print(Q[56])
-    # print(rebinQ[55])
-    # print(I_Q[55], I_Q[56], I_Q[57])
-    # print(interpI_Q[55], interpI_Q[56], interpI_Q[57])
-    
     # peakind = signal.find_peaks_cwt(I_Q, widths = np.arange(4,6))
+        
     
-    # plt.figure(3)
-    # plt.plot(Q, I_Q)
-    # plt.plot(Q, I_Qbkg)
-    # plt.xlabel('Q')
-    # plt.ylabel('I(Q)')
-    # # plt.plot(Q[peakind], I_Q[peakind], u'o')
-    # # plt.plot(rebinQ, interpI_Q)
-    # plt.grid()
-    # plt.show()
-    
-    
-    # elementList = {"Ar":1}
-    elementList = {"C":1,"O":2}
+    elementList = {"Ar":1}
+    # elementList = {"C":1,"O":2}
     # test values
+    # s = np.arange(0.79, 0.83, 0.01)
     # s = np.arange(0.2, 1.0, 0.1)
     # rho0 = np.arange(24, 28, 1)
     
@@ -107,11 +92,10 @@ if __name__ == '__main__':
     # rho0 = np.arange(24.0, 28.0, 0.1)
     
     # best values
-    # s = np.array([0.81])
+    s = np.array([0.81])
     # rho0 = np.array([26.1])
-    s = np.array([0.57])
+    # s = np.array([0.57])
     rho0 = np.array([26.1])
-
     
     chi2 = np.zeros((rho0.size, s.size))
     
@@ -120,7 +104,7 @@ if __name__ == '__main__':
     Iincoh_Q = calc_Iincoh(elementList, Q)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
-
+    
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
             Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
@@ -133,30 +117,12 @@ if __name__ == '__main__':
             # damp = calc_damp(Q[validation_index], QmaxIntegrate)
             # S_Qdamp = (damp * (S_Q - Sinf)) + Sinf
             
-            # plt.figure(1)
-            # plt.plot(Q[validation_index], S_Q)
-            # plt.xlabel('Q')
-            # plt.ylabel('S(Q)')
-            # plt.grid()
-            # plt.show()
-            
-            # plt.figure(2)
-            # plt.plot(Q[validation_index], S_Qdamp)
-            # plt.grid()
-            # plt.show()
-
             
             # easy test!!!
             # S_Q = S_Qdamp
             
             i_Q = calc_iQ(S_Q, Sinf)
             Qi_Q = Q[validation_index] * i_Q
-            plt.figure(2)
-            plt.plot(Q, Qi_Q)
-            plt.xlabel('Q')
-            plt.ylabel('Qi(Q)')
-            plt.grid()
-            plt.show()
             
             DeltaQ = np.diff(Q)
             meanDeltaQ = np.mean(DeltaQ)
@@ -165,25 +131,57 @@ if __name__ == '__main__':
             
             F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
             
+            iteration = 2
+            rmin = 0.24
+            # rmin = 0.22
+            
+            Fintra_r = calc_Fintra(r[mask], Q, QmaxIntegrate)
+            
+            deltaF_r = calc_deltaFr(F_r, Fintra_r, r[mask], rho0[i])
+            i_Q1 = calc_iQi(i_Q[validation_index], Q[validation_index], Sinf, J_Q[validation_index], deltaF_r, r[mask], rmin)
+            F_r1 = calc_Fr(r[mask], Q[integration_index], i_Q1[integration_index])
+            
+            # i_Qi = i_Q[validation_index] - ( 1/Q[validation_index] * ( i_Q[validation_index] / (Sinf + J_Q[validation_index]) + 1))
+            # print(i_Qi)
+            
+            # F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
+            
+            # deltaF_r2 = calc_deltaFr(F_r1, Fintra_r, r[mask], rho0[i])
+            # i_Q2 = calc_iQi(i_Q1[validation_index], Q[validation_index], Sinf, J_Q[validation_index], deltaF_r2, r[mask], rmin)
+            # F_r2 = calc_Fr(r[mask], Q[integration_index], i_Q2[integration_index])
+            
+            # print(F_r)
+            # print(F_r1)
+            
+            # print(Q[integration_index] * i_Q1[integration_index])
+            # print(i_Q1[0])
+            # print(Q[integration_index] * i_Q1[integration_index] * np.array(np.sin(np.mat(Q[integration_index]).T * np.mat(r[mask]))).T)
+            # print(simps(Q[integration_index] * i_Q1[integration_index] * np.array(np.sin(np.mat(Q[integration_index]).T * np.mat(r[mask]))).T,Q[integration_index]))
+            # print((2.0 / np.pi)*simps(Q[integration_index] * i_Q1[integration_index] * np.array(np.sin(np.mat(Q[integration_index]).T * np.mat(r[mask]))).T,Q[integration_index]))
+            
             # plt.figure(1)
-            # plt.plot(r[mask], F_r)
-            # plt.xlabel('r')
-            # plt.ylabel('F(r)')
+            # plt.plot(Q[integration_index], Q[integration_index]*i_Q1[integration_index])
+            # # plt.plot(r[mask], F_r1)
+            # # plt.plot(r[mask], F_r2)
+            # plt.xlabel('Q')
+            # plt.ylabel('Qi(Q)')
             # plt.grid()
             # plt.show()
             
-            iteration = 2
-            rmin = 0.22
-            
-            Fintra_r = calc_Fintra(r[mask], Q, QmaxIntegrate)
-            plt.figure(1)
-            plt.plot(r[mask], Fintra_r)
-            plt.xlabel('r')
-            plt.ylabel('Fintra(r)')
-            plt.grid()
-            plt.show()
-            F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
-            plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+            # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
+           
             
             # maskIt = np.where((r>0) & (r < rmin))
             # rIt = r[maskIt]
