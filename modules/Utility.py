@@ -116,7 +116,7 @@ def read_file(path):
     
     
 def rebinning(X, BinNum, Num, maxQ):
-    """
+    """Function for the rebinning
     """
     
     # lenX = len(X)
@@ -135,7 +135,7 @@ def rebinning(X, BinNum, Num, maxQ):
     
     
 def interpolation(X, f_X, rebinnedX):
-    """
+    """Function for the interpolation
     """
     
     interpolatedf_X = interpolate.interp1d(X, f_X)
@@ -145,13 +145,53 @@ def interpolation(X, f_X, rebinnedX):
     
     
 def smoothing(X, f_X):
-    """
+    """Function for the smoothing
     """
     
     s = interpolate.UnivariateSpline(X, f_X, k=3, s=0.5)
+    # s = interpolate.InterpolatedUnivariateSpline(X, f_X, k=1)
     smoothedf_X = s(X)
     
     return smoothedf_X
+    
+    
+def removePeaks(Q, I_Q):
+    """Function to remove Bragg's peaks
+    """
+    # peakind = signal.find_peaks_cwt(I_Q, widths = np.arange(4,6))
+    plt.figure('RawData')
+    plt.plot(Q, I_Q)
+    plt.grid()
+    plt.xlabel('Q')
+    plt.ylabel('I(Q)')
+    
+    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, mouse_stop=2))
+    
+    
+    # plt.show()
+    
+    index1, element1 = find_nearest(Q, points[0,0])
+    index2, element2 = find_nearest(Q, points[1,0])
+    
+    # print('element1', element1)
+    # print('element2', element2)
+    
+    mask = np.where((Q>=element1) & (Q<=element2))
+    newI_Q = smoothing(Q[mask], I_Q[mask])
+    I_Q[mask] = newI_Q
+    
+    return I_Q
+    
+    
+    
+def find_nearest(array, value):
+    """Function to find the nearest array element of a given value
+    """
+    
+    index = (np.abs(array-value)).argmin()
+    element = array[index]
+    
+    return (index, element)
     
     
 # def plot_data(nFigure, xSample, ySample, xLabel, yLabel, style, dataLabel, overlap):

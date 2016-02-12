@@ -287,10 +287,15 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     alpha: normalization factor - number
     """
     
-    Integral1 = simps((J_Q[index] + Sinf) * Q[index]**2, Q[index])
-    Integral2 = simps((Isample_Q[index]/fe_Q[index]**2) * Q[index]**2,Q[index])
+    # Integral1 = simps((J_Q[index] + Sinf) * Q[index]**2, Q[index])
+    # Integral2 = simps((Isample_Q[index]/fe_Q[index]**2) * Q[index]**2,Q[index])
+    # alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
     
-    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    Int1 = np.sum((J_Q[index] + Sinf) * Q[index]**2) * meanDeltaQ
+    Int2 = np.sum( (Isample_Q[index]/fe_Q[index]**2) * Q[index]**2  ) * meanDeltaQ
+    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Int1) / Int2)
 
     return alpha
     
@@ -346,19 +351,19 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_in
     # damp_Q = calc_damp(Q[calculation_index], QmaxIntegrate)
     # S_Q *= damp_Q
     
-    s = UnivariateSpline(Q[calculation_index], S_Q, k=3, s=0.5)
-    S_Qs = s(Q[calculation_index])
+    # s = UnivariateSpline(Q[calculation_index], S_Q, k=3, s=0.5)
+    # S_Qs = s(Q[calculation_index])
     
     S_Qmin = np.zeros(Q[min_index].size)
     S_Q = np.concatenate([S_Qmin, S_Q])
-    S_Qs = np.concatenate([S_Qmin, S_Qs])
+    # S_Qs = np.concatenate([S_Qmin, S_Qs])
     
     S_Qmax = np.zeros(Q[max_index].size)
     S_Qmax.fill(Sinf)
     S_Q = np.concatenate([S_Q, S_Qmax])
-    S_Qs = np.concatenate([S_Qs, S_Qmax])
+    # S_Qs = np.concatenate([S_Qs, S_Qmax])
 
-    return (S_Q, S_Qs)
+    return S_Q
     
     
 def calc_iQ(S_Q, Sinf):
@@ -411,15 +416,17 @@ def calc_Fr(r, Q, i_Q):
     # return g_r
     
     
-# def calc_SQ_F(F_r, r, Q, Sinf):
-    # """Function to calculate S(Q) from F(r)
+def calc_SQ_F(F_r, r, Q, Sinf):
+    """Function to calculate S(Q) from F(r)
 
-    # """
+    """
 
-    # # Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)
-    # Qr = np.outer(Q,r)
-    # sinQr = np.sin(Qr)
-    # Qi_Q =  np.sum(sinQr * F_r, axis=1)
-    # S_Q = Qi_Q/Q +Sinf
+    # Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)
+    Deltar = np.diff(r)
+    meanDeltar = np.mean(Deltar)
+    Qr = np.outer(Q,r)
+    sinQr = np.sin(Qr)
+    Qi_Q =  np.sum(sinQr * F_r, axis=1) * meanDeltar
+    S_Q = Qi_Q/Q +Sinf
 
-    # return S_Q
+    return S_Q
