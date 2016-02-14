@@ -41,6 +41,7 @@ from scipy import fftpack
 from scipy.integrate import simps
 import math
 from scipy import interpolate
+from scipy import signal
 
 def read_file(path):
     """Read the file and return x and y as numpy vectors
@@ -151,8 +152,22 @@ def smoothing(X, f_X):
     s = interpolate.UnivariateSpline(X, f_X, k=3, s=0.5)
     # s = interpolate.InterpolatedUnivariateSpline(X, f_X, k=1)
     smoothedf_X = s(X)
-    
+    # smoothedf_X = signal.medfilt(f_X)
+                                 
     return smoothedf_X
+
+
+def straight_line(X, f_X, index1, element1, index2, element2):
+    """Function to flat the peak
+    """
+    xpoints = [element1, element2]
+    ypoints = [f_X[index1], f_X[index2]]
+
+    coefficients = np.polyfit(xpoints, ypoints, 1)
+    polynomial = np.poly1d(coefficients)
+    y_axis = polynomial(X)
+
+    return y_axis
     
     
 def removePeaks(Q, I_Q):
@@ -177,7 +192,8 @@ def removePeaks(Q, I_Q):
     # print('element2', element2)
     
     mask = np.where((Q>=element1) & (Q<=element2))
-    newI_Q = smoothing(Q[mask], I_Q[mask])
+    # newI_Q = smoothing(Q[mask], I_Q[mask])
+    newI_Q = straight_line(Q[mask], I_Q, index1, element1, index2, element2)
     I_Q[mask] = newI_Q
     
     return I_Q
