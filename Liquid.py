@@ -54,19 +54,33 @@ if __name__ == '__main__':
     
     Q, I_Q = read_file("./data/cea_files/HT2_034T++.chi")
     Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036T++.chi")
-    
     # Q, I_Q = read_file("./data/cea_files/WO2_007BBin.chi")
     # Qbkg, I_Qbkg = read_file("./data/cea_files/WO2_013BBin.chi")
     
-    
-    newI_Q = removePeaks(Q, I_Q)
-    # print(newI_Q.shape)
+    BinNum = 1
+    Num = 2048 #len(Q)
+    maxQ = 109
+    minQ = 3
+    rebQ, rebI_Q = rebinning(Q, I_Q, BinNum, Num, maxQ, minQ)
     
     plt.figure('RawData')
-    plt.plot(Q, newI_Q)
+    plt.plot(Q, I_Q)
+    plt.plot(rebQ, rebI_Q)
     plt.xlabel('Q')
-    plt.ylabel('newI(Q)')
+    plt.ylabel('I(Q)')
+    plt.grid()
     plt.show()
+    
+    # newI_Q = removePeaks(Q, I_Q)
+    # newI_Qbkg = removePeaks(Qbkg, I_Qbkg)
+    
+    # plt.figure('RawData Removed')
+    # plt.plot(Q, newI_Q)
+    # plt.plot(Qbkg, newI_Qbkg)
+    # plt.xlabel('Q')
+    # plt.ylabel('I(Q) Removed')
+    # plt.grid()
+    # plt.show()
     
     # minQ = 4
     # maxQ = 109
@@ -80,7 +94,7 @@ if __name__ == '__main__':
     # min_index = np.where(Q<=minQ)
     # max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
     # validation_index = np.where(Q<=maxQ)
-    # integration_index = np.where(Q<=QmaxIntegrate)    
+    # integration_index = np.where(Q<=QmaxIntegrate)
     # calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
     
     # rebinQ = rebinning(Q, BinNum, Num, maxQ)

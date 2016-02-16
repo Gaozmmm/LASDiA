@@ -116,33 +116,45 @@ def read_file(path):
     return (xVect, yVect)
     
     
-def rebinning(X, BinNum, Num, maxQ):
+def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     """Function for the rebinning
     """
+    
+    newf_X = interpolate.interp1d(X, f_X)
+    ShitX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
+    ShitY = newf_X(ShitX)
+    
+    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
+    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
+    BinX = np.linspace(min, max, Num, endpoint=True)
+    BinY = np.zeros(Num)
+    
+    for i in range(BinNum):
+        for j in range(0, Num):
+            BinY[j] += ShitY[j*BinNum+i]
+    
+    BinY /= BinNum
+    
+    mask = np.where(X<=minQ)
+    BinY[mask] = 0.0
     
     # lenX = len(X)
     # numX = 2**int(math.log(lenX,2))
     # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    # if min < np.amin(X):
+        # min = np.amin(X)
     
-    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
-    
-    if min < np.amin(X):
-        min = np.amin(X)
-    
-    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum * Num - 1)
-    rebinnedX = np.linspace(min, max, Num, endpoint=True)
-    
-    return rebinnedX
+    return (BinX, BinY)
     
     
-def interpolation(X, f_X, rebinnedX):
-    """Function for the interpolation
-    """
+# def interpolation(X, f_X, rebinnedX):
+    # """Function for the interpolation
+    # """
     
-    interpolatedf_X = interpolate.interp1d(X, f_X)
-    newf_X = interpolatedf_X(rebinnedX)
+    # interpolatedf_X = interpolate.interp1d(X, f_X)
+    # newf_X = interpolatedf_X(rebinnedX)
     
-    return newf_X
+    # return newf_X
     
     
 def smoothing(X, f_X):
@@ -152,12 +164,11 @@ def smoothing(X, f_X):
     s = interpolate.UnivariateSpline(X, f_X, k=3, s=0.5)
     # s = interpolate.InterpolatedUnivariateSpline(X, f_X, k=1)
     smoothedf_X = s(X)
-    # smoothedf_X = signal.medfilt(f_X)
-                                 
+    
     return smoothedf_X
-
-
-def straight_line(X, f_X, index1, element1, index2, element2):
+    
+    
+def fitline(X, f_X, index1, element1, index2, element2):
     """Function to flat the peak
     """
     xpoints = [element1, element2]
@@ -170,34 +181,17 @@ def straight_line(X, f_X, index1, element1, index2, element2):
     return y_axis
     
     
-def removePeaks(Q, I_Q):
-    """Function to remove Bragg's peaks
+def fitcurve(X, f_X, mask):
+    """Function to flat the peak
     """
-    # peakind = signal.find_peaks_cwt(I_Q, widths = np.arange(4,6))
-    plt.figure('RawData')
-    plt.plot(Q, I_Q)
-    plt.grid()
-    plt.xlabel('Q')
-    plt.ylabel('I(Q)')
-    
-    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, mouse_stop=2))
-    
-    
-    # plt.show()
-    
-    index1, element1 = find_nearest(Q, points[0,0])
-    index2, element2 = find_nearest(Q, points[1,0])
-    
-    # print('element1', element1)
-    # print('element2', element2)
-    
-    mask = np.where((Q>=element1) & (Q<=element2))
-    # newI_Q = smoothing(Q[mask], I_Q[mask])
-    newI_Q = straight_line(Q[mask], I_Q, index1, element1, index2, element2)
-    I_Q[mask] = newI_Q
-    
-    return I_Q
-    
+    xpoints = X[mask]
+    ypoints = f_X[mask]
+
+    coefficients = np.polyfit(xpoints, ypoints, 2)
+    polynomial = np.poly1d(coefficients)
+    y_axis = polynomial(xpoints)
+
+    return y_axis
     
     
 def find_nearest(array, value):
@@ -208,6 +202,38 @@ def find_nearest(array, value):
     element = array[index]
     
     return (index, element)
+    
+    
+def removePeaks(Q, I_Q):
+    """Function to remove Bragg's peaks
+    """
+    # peakind = signal.find_peaks_cwt(I_Q, widths = np.arange(4,6))
+    plt.figure('Remove Peaks')
+    plt.plot(Q, I_Q)
+    plt.grid()
+    plt.xlabel('Q')
+    plt.ylabel('I(Q)')
+    
+    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, mouse_stop=2))
+    
+    plt.close()
+    
+    idxelem = np.zeros(shape=(len(points),2))
+    
+    for i in range(0, len(points)):
+        idxelem[i] = find_nearest(Q, points[i,0])
+    
+    zippedidx = np.array(list(zip(*[iter(idxelem[:,0])]*2)))
+    zippedelem = np.array(list(zip(*[iter(idxelem[:,1])]*2)))
+    
+    
+    for i in range(0, len(zippedelem)):
+        mask = np.where((Q>=zippedelem[i,0]) & (Q<=zippedelem[i,1]))
+        I_Q1 = fitline(Q[mask], I_Q, zippedidx[i,0], zippedelem[i,0], zippedidx[i,1], zippedelem[i,1])
+        # I_Q1 = fitcurve(Q, I_Q, mask)
+        I_Q[mask] = I_Q1
+    
+    return I_Q
     
     
 # def plot_data(nFigure, xSample, ySample, xLabel, yLabel, style, dataLabel, overlap):
