@@ -287,15 +287,15 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     alpha: normalization factor - number
     """
     
-    # Integral1 = simps((J_Q[index] + Sinf) * Q[index]**2, Q[index])
-    # Integral2 = simps((Isample_Q[index]/fe_Q[index]**2) * Q[index]**2,Q[index])
-    # alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
+    Integral1 = simps((J_Q[index] + Sinf) * Q[index]**2, Q[index])
+    Integral2 = simps((Isample_Q[index]/fe_Q[index]**2) * Q[index]**2,Q[index])
+    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
     
-    DeltaQ = np.diff(Q)
-    meanDeltaQ = np.mean(DeltaQ)
-    Int1 = np.sum((J_Q[index] + Sinf) * Q[index]**2) * meanDeltaQ
-    Int2 = np.sum( (Isample_Q[index]/fe_Q[index]**2) * Q[index]**2  ) * meanDeltaQ
-    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Int1) / Int2)
+    # DeltaQ = np.diff(Q)
+    # meanDeltaQ = np.mean(DeltaQ)
+    # Int1 = np.sum((J_Q[index] + Sinf) * Q[index]**2) * meanDeltaQ
+    # Int2 = np.sum( (Isample_Q[index]/fe_Q[index]**2) * Q[index]**2  ) * meanDeltaQ
+    # alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Int1) / Int2)
 
     return alpha
     
@@ -394,14 +394,14 @@ def calc_Fr(r, Q, i_Q):
     F_r: F(r) - array
     """
     
-    # F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
+    F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
     
-    DeltaQ = np.diff(Q)
-    meanDeltaQ = np.mean(DeltaQ)
+    # DeltaQ = np.diff(Q)
+    # meanDeltaQ = np.mean(DeltaQ)
     
-    rQ = np.outer(r,Q)
-    sinrQ = np.sin(rQ)
-    F_r = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
+    # rQ = np.outer(r,Q)
+    # sinrQ = np.sin(rQ)
+    # F_r = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
     
     return F_r
     

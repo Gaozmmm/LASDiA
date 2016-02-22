@@ -116,6 +116,18 @@ def read_file(path):
     return (xVect, yVect)
     
     
+def write_file(path, Q, I_Q):
+    """Function to write to file
+    """
+    
+    file = open(path, "w")
+    file_name = file.name
+    
+    output = np.column_stack((Q.flatten(),I_Q.flatten()))
+    np.savetxt(file_name,output,delimiter='\t')
+    file.close()
+    
+    
 def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     """Function for the rebinning
     """

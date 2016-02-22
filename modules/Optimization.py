@@ -116,13 +116,13 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     rInt = r[mask]
     deltaF_rInt = deltaF_r[mask]
     
-    # integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(Q)))).T, rInt)
+    integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(Q)))).T, rInt)
     
-    Deltar = np.diff(rInt)
-    meanDeltar = np.mean(Deltar)
-    Qr = np.outer(Q,rInt)
-    sinQr = np.sin(Qr)
-    integral = np.sum(deltaF_rInt * sinQr, axis=1) * meanDeltar
+    # Deltar = np.diff(rInt)
+    # meanDeltar = np.mean(Deltar)
+    # Qr = np.outer(Q,rInt)
+    # sinQr = np.sin(Qr)
+    # integral = np.sum(deltaF_rInt * sinQr, axis=1) * meanDeltar
     
     i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q) + 1)) * integral
     
@@ -150,9 +150,10 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
     # commented just for testing the damping factor!!!
     # plt.ion()
     # plt.figure('F_r')
-    # plt.plot(r, F_r)
-    # plt.xlabel('r')
+    # plt.plot(r, F_r, label='F(r)')
+    # plt.xlabel('r (nm)')
     # plt.ylabel('F(r)')
+    # plt.legend()
     # plt.grid()
     
     # plt.figure('i_Q')
@@ -167,8 +168,10 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         F_r = calc_Fr(r, Q, i_Q)
         
+        # j = i+1
         # plt.figure('F_r')
-        # plt.plot(r, F_r)
+        # plt.plot(r, F_r, label='%s iteration F(r)' %j)
+        # plt.legend()
         # plt.draw()
         
         # plt.figure('i_Q')
@@ -178,7 +181,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
         # time.sleep(1.0)
     
     # plt.ioff()
-    # plt.show
+    # plt.show()
     
     return F_r
     
