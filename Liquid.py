@@ -65,14 +65,14 @@ if __name__ == '__main__':
     # minQ = 3
     # rebQ, rebI_Q = rebinning(Q, I_Q, BinNum, Num, maxQ, minQ)
     
-    # plt.figure('RawData Removed')
-    # plt.plot(Q, I_Q, label='Measured')
+    plt.figure('RawData Measured')
+    plt.plot(Q, I_Q, label='Measured')
     # plt.plot(Qbkg, 0.57*I_Qbkg, label='Bkg')
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('I(Q)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('I(Q)')
+    plt.legend()
+    plt.grid()
+    plt.show()
     
     # remI_Q = removePeaks(Q, I_Q)
     # remI_Qbkg = removePeaks(Qbkg, I_Qbkg)
@@ -116,16 +116,16 @@ if __name__ == '__main__':
     # rho0 = np.arange(24, 28, 1)
     
     # real values
-    s = np.arange(0.2, 0.8, 0.01)
-    rho0 = np.arange(24.0, 28.0, 0.1)
+    # s = np.arange(0.2, 0.8, 0.01)
+    # rho0 = np.arange(24.0, 28.0, 0.1)
     
     # best values
     # Ar
-    # s = np.array([0.57])
+    s = np.array([0.57])
     # rho0 = np.array([26.1])
     # CO2
     # s = np.array([0.81])
-    # rho0 = np.array([26.1])
+    rho0 = np.array([26.1])
     
     chi2 = np.zeros((rho0.size, s.size))
     
@@ -174,12 +174,13 @@ if __name__ == '__main__':
             
             F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
             
-            # plt.figure('F_r')
-            # plt.plot(r[mask], F_r)
-            # plt.xlabel('r')
-            # plt.ylabel('F(r)')
-            # plt.grid()
-            # plt.show
+            plt.figure('F_r')
+            plt.plot(r[mask], F_r, label='F(r)')
+            plt.xlabel('r (nm)')
+            plt.ylabel('F(r)')
+            plt.legend()
+            plt.grid()
+            plt.show()
             
             iteration = 2
             rmin = 0.24
