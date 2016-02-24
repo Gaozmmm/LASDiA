@@ -321,8 +321,8 @@ def calc_damp(Q, QmaxIntegrate):
     """
     """
     
-    # damping_factor = 0.5
-    damping_factor = np.log(10)
+    damping_factor = 0.5
+    # damping_factor = np.log(10)
     exponent_factor = damping_factor / QmaxIntegrate**2
     damp_Q = np.exp(-exponent_factor * Q**2)
     
