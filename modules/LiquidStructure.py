@@ -329,7 +329,7 @@ def calc_damp(Q, QmaxIntegrate):
     return damp_Q
 
 
-def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index, QmaxIntegrate):
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index):
     """Function to calculate the structure factor S(Q) (eq. 18)
 
     arguments:

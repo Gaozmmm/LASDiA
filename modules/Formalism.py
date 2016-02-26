@@ -103,7 +103,25 @@ def FZtoAL(N1, N2, a11, a12, a22):
     return (S11_Q, S12_Q, S22_Q)
     
     
-def FaberZiman():
-    """
+def FaberZiman(Icoh_Q, Q, Sinf, min_index, max_index, calculation_index):
+    """Function to calculate S(Q) with Faber-Ziman formalism (eq )
     
     """
+    
+    N = 3
+    c1 = 1/N
+    c2 = 2/N
+    
+    f2 = c1*calc_aff('C', Q[calculation_index])**2 + c2*calc_aff('O',Q[calculation_index])**2
+    f = c1*calc_aff('C', Q[calculation_index]) + c2*calc_aff('O',Q[calculation_index])
+    
+    S_Q = (Icoh_Q[calculation_index] - (f2 - f**2)) / (N*f**2)
+    
+    S_Qmin = np.zeros(Q[min_index].size)
+    S_Q = np.concatenate([S_Qmin, S_Q])
+    
+    S_Qmax = np.zeros(Q[max_index].size)
+    S_Qmax.fill(Sinf)
+    S_Q = np.concatenate([S_Q, S_Qmax])
+    
+    return S_Q

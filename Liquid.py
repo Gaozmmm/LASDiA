@@ -45,19 +45,23 @@ from modules.LiquidStructure import *
 from modules.InterpolateData import *
 from modules.Optimization import *
 from modules.Minimization import *
+from modules.Formalism import *
 
 # import cmath
 # from cmath import exp, pi
 
 if __name__ == '__main__':
-    N = 1 # sc.N_A
+    N = 3 # sc.N_A
     
     # Q, I_Q = read_file("./data/cea_files/HT2_034T++.chi")
     # Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036T++.chi")
-    Q, I_Q = read_file("./data/cea_files/HT2_034T++_rem.chi")
-    Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036T++_rem.chi")
-    # Q, I_Q = read_file("./data/cea_files/WO2_007BBin.chi")
-    # Qbkg, I_Qbkg = read_file("./data/cea_files/WO2_013BBin.chi")
+    # Q, I_Q = read_file("./data/cea_files/HT2_034T++_rem.chi")
+    # Qbkg, I_Qbkg = read_file("./data/cea_files/HT2_036T++_rem.chi")
+    Q, I_Q = read_file("./data/cea_files/WO2_007BBin.chi")
+    Qbkg, I_Qbkg = read_file("./data/cea_files/WO2_013BBin.chi")
+    # Q, I_Q = read_file("./data/cea_files/WO2_007T++.chi")
+    # Qbkg, I_Qbkg = read_file("./data/cea_files/WO2_013T++.chi")
+    
     
     # BinNum = 1
     # Num = 2048 #len(Q)
@@ -65,9 +69,9 @@ if __name__ == '__main__':
     # minQ = 3
     # rebQ, rebI_Q = rebinning(Q, I_Q, BinNum, Num, maxQ, minQ)
     
-    # plt.figure('RawData Measured')
+    # plt.figure('RawData')
     # plt.plot(Q, I_Q, label='Measured')
-    # # plt.plot(Qbkg, 0.57*I_Qbkg, label='Bkg')
+    # plt.plot(Qbkg, I_Qbkg, label='Bkg')
     # plt.xlabel('Q ($nm^{-1}$)')
     # plt.ylabel('I(Q)')
     # plt.legend()
@@ -89,11 +93,11 @@ if __name__ == '__main__':
     # plt.show()
     
     # Ar
-    minQ = 3
-    maxQ = 109
+    # minQ = 3
+    # maxQ = 109
     # CO2
-    # minQ = 8
-    # maxQ = 100
+    minQ = 8
+    maxQ = 100
     QmaxIntegrate = 90
     
     min_index = np.where(Q<=minQ)
@@ -102,26 +106,26 @@ if __name__ == '__main__':
     integration_index = np.where(Q<=QmaxIntegrate)
     calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
     
-    elementList = {"Ar":1}
-    # elementList = {"C":1,"O":2}
+    # elementList = {"Ar":1}
+    elementList = {"C":1,"O":2}
     
-    # test values
-    # Ar
-    # s = np.arange(0.2, 1.0, 0.1)
-    # CO2
-    # s = np.arange(0.79, 0.83, 0.01)
-    # rho0 = np.arange(24, 28, 1)
+    # # test values
+    # # Ar
+    # # s = np.arange(0.2, 1.0, 0.1)
+    # # CO2
+    # # s = np.arange(0.79, 0.83, 0.01)
+    # # rho0 = np.arange(24, 28, 1)
     
-    # real values
-    # s = np.arange(0.2, 0.8, 0.01)
-    # rho0 = np.arange(24.0, 28.0, 0.1)
+    # # real values
+    # # s = np.arange(0.2, 0.8, 0.01)
+    # # rho0 = np.arange(24.0, 28.0, 0.1)
     
     # best values
     # Ar
-    s = np.array([0.57])
+    # s = np.array([0.57])
     # rho0 = np.array([26.1])
     # CO2
-    # s = np.array([0.81])
+    s = np.array([0.81])
     rho0 = np.array([26.1])
     
     chi2 = np.zeros((rho0.size, s.size))
@@ -138,17 +142,20 @@ if __name__ == '__main__':
             alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0[i], integration_index)
             Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
             
-            S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index, QmaxIntegrate)
+            S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
             
             damp = calc_damp(Q[validation_index], QmaxIntegrate)
             S_Qdamp = (damp * (S_Q - Sinf)) + Sinf
             
+            SQFZ = FaberZiman(Icoh_Q, Q, Sinf, min_index, max_index, calculation_index)
+            
             # easy test!!!
             # S_Q = S_Qdamp
             
-            plt.figure('S_Qdamp')
+            plt.figure('S_Q FZ')
             plt.plot(Q[validation_index], S_Q, label='S(Q)')
-            plt.plot(Q[validation_index], S_Qdamp, label='S(Q) damped')
+            plt.plot(Q[validation_index], SQFZ, label='$S_{FZ}(Q)$')
+            # plt.plot(Q[validation_index], S_Qdamp, label='S(Q) damped')
             plt.xlabel('Q ($nm^{-1}$)')
             plt.ylabel('S(Q)')
             plt.legend()
