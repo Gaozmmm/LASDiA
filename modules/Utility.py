@@ -169,13 +169,12 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     # return newf_X
     
     
-def smoothing(X, f_X):
+def smoothing(X, f_X, sfactor):
     """Function for the smoothing
     """
     
-    s = interpolate.UnivariateSpline(X, f_X, k=3, s=0.5)
-    # s = interpolate.InterpolatedUnivariateSpline(X, f_X, k=1)
-    smoothedf_X = s(X)
+    sm = interpolate.UnivariateSpline(X, f_X, k=3, s=sfactor)
+    smoothedf_X = sm(X)
     
     return smoothedf_X
     

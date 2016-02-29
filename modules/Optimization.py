@@ -55,26 +55,26 @@ def calc_Fintra(r, Q, QmaxIntegrate):
     To implemente!!! -> For now just for CO2!!!
     """
     
-    Fintra_r = np.zeros(r.size)
+    # Fintra_r = np.zeros(r.size)
     
-    # dCO = 0.1165 # nm
-    # dOO = 2 * dCO
+    dCO = 0.1165 # nm
+    dOO = 2 * dCO
     
-    # elementList = {"C":1,"O":2}
-    # fe_Q, Ztot = calc_eeff(elementList, Q)
-    # KC = calc_Kp(fe_Q, "C", Q)
-    # KO = calc_Kp(fe_Q, "O", Q)
+    elementList = {"C":1,"O":2}
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    KC = calc_Kp(fe_Q, "C", Q)
+    KO = calc_Kp(fe_Q, "O", Q)
     
-    # constCO = 4/(np.pi * Ztot**2 * dCO)
-    # constOO = 2/(np.pi * Ztot**2 * dOO)
+    constCO = 4/(np.pi * Ztot**2 * dCO)
+    constOO = 2/(np.pi * Ztot**2 * dOO)
     
-    # Fintra_r_CO = constCO * KC * KO * \
-        # ((np.sin((r - dCO)*QmaxIntegrate)) / (r - dCO) - (np.sin((r + dCO)*QmaxIntegrate)) / (r + dCO))
+    Fintra_r_CO = constCO * KC * KO * \
+        ((np.sin((r - dCO)*QmaxIntegrate)) / (r - dCO) - (np.sin((r + dCO)*QmaxIntegrate)) / (r + dCO))
     
-    # Fintra_r_OO = constOO * KO * KO * \
-        # ((np.sin((r - dOO)*QmaxIntegrate)) / (r - dOO) - (np.sin((r + dOO)*QmaxIntegrate)) / (r + dOO))
+    Fintra_r_OO = constOO * KO * KO * \
+        ((np.sin((r - dOO)*QmaxIntegrate)) / (r - dOO) - (np.sin((r + dOO)*QmaxIntegrate)) / (r + dOO))
     
-    # Fintra_r = Fintra_r_CO + Fintra_r_OO
+    Fintra_r = Fintra_r_CO + Fintra_r_OO
     
     return Fintra_r
     
@@ -148,40 +148,41 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
     """
     
     # commented just for testing the damping factor!!!
-    # plt.ion()
-    # plt.figure('F_r')
-    # plt.plot(r, F_r, label='F(r)')
-    # plt.xlabel('r (nm)')
-    # plt.ylabel('F(r)')
-    # plt.legend()
-    # plt.grid()
+    plt.ion()
+    plt.figure('F_r')
+    plt.plot(r, F_r, label='F(r)')
+    plt.xlabel('r (nm)')
+    plt.ylabel('F(r)')
+    plt.legend()
+    plt.grid()
     
-    # plt.figure('i_Q')
-    # plt.plot(Q, i_Q)
-    # plt.xlabel('Q')
-    # plt.ylabel('i(Q)')
-    # plt.grid()
+    plt.figure('Qi_Q')
+    plt.plot(Q, Q*i_Q, label='Q*i(Q)')
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('Qi(Q)')
+    plt.legend()
+    plt.grid()
     
-    # Fintra_r = calc_Fintra(r)
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         F_r = calc_Fr(r, Q, i_Q)
         
-        # j = i+1
-        # plt.figure('F_r')
-        # plt.plot(r, F_r, label='%s iteration F(r)' %j)
-        # plt.legend()
-        # plt.draw()
+        j = i+1
+        plt.figure('F_r')
+        plt.plot(r, F_r, label='%s iteration F(r)' %j)
+        plt.legend()
+        plt.draw()
         
-        # plt.figure('i_Q')
-        # plt.plot(Q, i_Q)
-        # plt.draw()
+        plt.figure('Qi_Q')
+        plt.plot(Q, Q*i_Q, label='%s iteration Qi(Q)' %j)
+        plt.legend()
+        plt.draw()
         
-        # time.sleep(1.0)
+        time.sleep(1.0)
     
-    # plt.ioff()
-    # plt.show()
+    plt.ioff()
+    plt.show()
     
     return F_r
     
