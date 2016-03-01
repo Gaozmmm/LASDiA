@@ -169,14 +169,35 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     # return newf_X
     
     
-def smoothing(X, f_X, sfactor):
-    """Function for the smoothing
+def smoothing(X, f_X, smoothfactor):
+    """Function for smoothing
     """
     
-    sm = interpolate.UnivariateSpline(X, f_X, k=3, s=sfactor)
+    sm = interpolate.UnivariateSpline(X, f_X, k=3, s=smoothfactor)
     smoothedf_X = sm(X)
     
     return smoothedf_X
+    
+    
+def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, max_index, validation_index):
+    """Function for smoothing S(Q)
+    """
+    
+    sm = interpolate.UnivariateSpline(Q[validation_index], S_Q[validation_index], k=3, s=smoothfactor)
+    S_Qsmooth = sm(Q[validation_index])
+    
+    S_Qsmooth[min_index].fill(0.0)
+    S_Qsmooth[max_index].fill(Sinf)
+    # S_Qmin = np.zeros(Q[min_index].size)
+    # S_Qsmooth = np.concatenate([S_Qmin, S_Qsmooth])
+    
+    # S_Qmax = np.zeros(Q[max_index].size)
+    # S_Qmax.fill(Sinf)
+    # S_Qsmooth = np.concatenate([S_Qsmooth, S_Qmax])
+    
+    # S_Q[index] = S_Qsmooth
+    
+    return S_Qsmooth
     
     
 def fitline(X, f_X, index1, element1, index2, element2):
@@ -245,6 +266,18 @@ def removePeaks(Q, I_Q):
         I_Q[mask] = I_Q1
     
     return I_Q
+    
+    
+def calc_damp(Q, QmaxIntegrate, damping_factor):
+    """
+    """
+    
+    # damping_factor = 0.5
+    # damping_factor = np.log(10)
+    exponent_factor = damping_factor / QmaxIntegrate**2
+    damp_Q = np.exp(-exponent_factor * Q**2)
+    
+    return damp_Q
     
     
 # def plot_data(nFigure, xSample, ySample, xLabel, yLabel, style, dataLabel, overlap):

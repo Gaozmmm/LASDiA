@@ -53,20 +53,20 @@ from modules.Formalism import *
 if __name__ == '__main__':
     N = 3 # sc.N_A
     
-    # Q, I_Q = read_file("../data/cea_files/HT2_034T++.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/HT2_036T++.chi")
-    # Q, I_Q = read_file("../data/cea_files/HT2_034T++_rem.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/HT2_036T++_rem.chi")
-    Q, I_Q = read_file("../data/cea_files/WO2_007BBin.chi")
-    Qbkg, I_Qbkg = read_file("../data/cea_files/WO2_013BBin.chi")
-    # Q, I_Q = read_file("../data/cea_files/WO2_007T++.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/WO2_013T++.chi")
+    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
+    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
+    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
+    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
+    Q, I_Q = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
+    Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
+    # Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
+    # Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
     
     # Ar
     # minQ = 3
     # maxQ = 109
     # CO2
-    minQ = 8
+    minQ = 8.005
     maxQ = 100
     QmaxIntegrate = 90
     
@@ -107,54 +107,67 @@ if __name__ == '__main__':
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
     
+    
+    
+    # plt.figure('J_Q')
+    # plt.plot(Q, J_Q, label='J(Q)')
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('J(Q)')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+    
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
             Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
-
-            # plt.figure('Isample_Q')
-            # plt.plot(Q, Isample_Q, label='Isample(Q)')
-            # plt.plot(Q, Isample_Qs, label='Isample(Q) smooth')
-            # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('Isample(Q)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
-                        
-            
             alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0[i], integration_index)
             Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
             
-            S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
-            S_Qs = smoothing(Q[validation_index], S_Q, 0.5)
-            
-            
-            # plt.figure('S_Q')
-            # plt.plot(Q[validation_index], S_Q, label='S(Q)')
-            # plt.plot(Q[validation_index], S_Qs, label='S(Q)')
+            # plt.figure('Icoh_Q')
+            # plt.plot(Q, Icoh_Q, label='Icoh(Q)')
             # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('S(Q)')
+            # plt.ylabel('Icoh(Q)')
             # plt.legend()
             # plt.grid()
             # plt.show()
             
-            i_Q = calc_iQ(S_Qs, Sinf)
-            Qi_Q = Q[validation_index] * i_Q
+            S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
+            S_Qdamp = calc_SQdamp(S_Q, Q[validation_index], Sinf, QmaxIntegrate, 1)
             
-            plt.figure('i_Q')
-            plt.plot(Q[validation_index], i_Q, label='i(Q)')
-            plt.xlabel('Q ($nm^{-1}$)')
-            plt.ylabel('i(Q)')
-            plt.legend()
-            plt.grid()
-            plt.show
+            S_Qsmooth = smoothing(Q[validation_index], S_Qdamp, 0.25)
+            S_Qsmooth2 = SQsmoothing(Q, S_Qdamp, Sinf, 0.25, min_index, max_index, validation_index)
             
-            plt.figure('Qi_Q')
-            plt.plot(Q[validation_index], Q[validation_index]*i_Q, label='Qi(Q)')
+            # write_file("../Results/CO2/S_Qdampsmooth.txt", Q[validation_index], S_Qsmooth)
+            # write_file("../Results/CO2/S_Qdamp.txt", Q[validation_index], S_Qdamp)
+            
+            plt.figure('S_Q')
+            plt.plot(Q[validation_index], S_Qdamp, label='S(Q) damped')
+            plt.plot(Q[validation_index], S_Qsmooth, label='S(Q) smoothed')
+            plt.plot(Q[validation_index], S_Qsmooth2, label='S(Q) smoothed2')
             plt.xlabel('Q ($nm^{-1}$)')
-            plt.ylabel('Qi(Q)')
+            plt.ylabel('S(Q)')
             plt.legend()
             plt.grid()
             plt.show()
+            
+            # i_Q = calc_iQ(S_Qs, Sinf)
+            # Qi_Q = Q[validation_index] * i_Q
+            
+            # plt.figure('i_Q')
+            # plt.plot(Q[validation_index], i_Q, label='i(Q)')
+            # plt.xlabel('Q ($nm^{-1}$)')
+            # plt.ylabel('i(Q)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show
+            
+            # plt.figure('Qi_Q')
+            # plt.plot(Q[validation_index], Q[validation_index]*i_Q, label='Qi(Q)')
+            # plt.xlabel('Q ($nm^{-1}$)')
+            # plt.ylabel('Qi(Q)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
                         
             # DeltaQ = np.diff(Q)
             # meanDeltaQ = np.mean(DeltaQ)
