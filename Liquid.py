@@ -46,6 +46,7 @@ from modules.InterpolateData import *
 from modules.Optimization import *
 from modules.Minimization import *
 from modules.Formalism import *
+from modules.IgorFunctions import *
 
 # import cmath
 # from cmath import exp, pi
@@ -96,8 +97,12 @@ if __name__ == '__main__':
     # rho0 = np.array([26.1])
     # CO2
     # s = np.array([1.04346])
-    s = np.array([0.79])
-    rho0 = np.array([29.7404])
+    # s = np.array([0.79])
+    # rho0 = np.array([29.7404])
+    
+    # s = np.array([1.00114])
+    s = np.array([1.0])
+    rho0 = np.array([29.7877])
     
     chi2 = np.zeros((rho0.size, s.size))
     
@@ -105,84 +110,96 @@ if __name__ == '__main__':
     fe_Q, Ztot = calc_eeff(elementList, Q)
     Iincoh_Q = calc_Iincoh(elementList, Q)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    J_QIgor = calc_JQIgor(Iincoh_Q, fe_Q)
     Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
     
+    # write_file("../Results/CO2/J_Q_formIgor.txt", Q, J_Q)
     
+    plt.figure('J_Q')
+    plt.plot(Q, J_Q, label='J(Q)')
+    plt.plot(Q, J_QIgor, label='J(Q) Igor')
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('J(Q)')
+    plt.legend()
+    plt.grid()
+    plt.show()
     
-    # plt.figure('J_Q')
-    # plt.plot(Q, J_Q, label='J(Q)')
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('J(Q)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    QIsample, Isample_QIgor = read_file("../data/cea_files/CO2/WO2_007Subt.chi")
     
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
             Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
+            
             alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0[i], integration_index)
+            alphaIgor = calc_alphaIgor(J_QIgor, Sinf, Q, Isample_QIgor, fe_Q, Ztot, rho0[i], integration_index)
+            
+            print(alpha)
+            print(alphaIgor)
+            
             Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
             
-            # plt.figure('Icoh_Q')
-            # plt.plot(Q, Icoh_Q, label='Icoh(Q)')
+            # write_file("../Results/CO2/Isample_Q.txt", Q, Isample_Q)
+            
+            # plt.figure('Isample_Q')
+            # plt.plot(Q, Isample_Q, label='Isample(Q)')
             # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('Icoh(Q)')
+            # plt.ylabel('Isample(Q)')
             # plt.legend()
             # plt.grid()
             # plt.show()
             
             S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
+            S_QIgor = calc_SQIgor(N, Isample_QIgor, J_QIgor, Ztot, fe_Q, Sinf, Q, alphaIgor, min_index, max_index, calculation_index)
             S_Qdamp = calc_SQdamp(S_Q, Q[validation_index], Sinf, QmaxIntegrate, 1)
-            
-            S_Qsmooth = smoothing(Q[validation_index], S_Qdamp, 0.25)
-            S_Qsmooth2 = SQsmoothing(Q, S_Qdamp, Sinf, 0.25, min_index, max_index, validation_index)
-            
-            # write_file("../Results/CO2/S_Qdampsmooth.txt", Q[validation_index], S_Qsmooth)
-            # write_file("../Results/CO2/S_Qdamp.txt", Q[validation_index], S_Qdamp)
+            S_Qsmooth = SQsmoothing(Q, S_Qdamp, Sinf, 0.25, min_index, max_index, validation_index)
             
             plt.figure('S_Q')
+            plt.plot(Q[validation_index], S_Q, label='S(Q)')
+            plt.plot(Q[validation_index], S_QIgor, label='S(Q)')
             plt.plot(Q[validation_index], S_Qdamp, label='S(Q) damped')
-            plt.plot(Q[validation_index], S_Qsmooth, label='S(Q) smoothed')
-            plt.plot(Q[validation_index], S_Qsmooth2, label='S(Q) smoothed2')
+            # plt.plot(Q[validation_index], S_Qsmooth,label='S(Q) smoothed')
             plt.xlabel('Q ($nm^{-1}$)')
             plt.ylabel('S(Q)')
             plt.legend()
             plt.grid()
             plt.show()
             
-            # i_Q = calc_iQ(S_Qs, Sinf)
+            # i_Q = calc_iQ(S_Qsmooth, Sinf)
             # Qi_Q = Q[validation_index] * i_Q
             
-            # plt.figure('i_Q')
-            # plt.plot(Q[validation_index], i_Q, label='i(Q)')
-            # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('i(Q)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show
+            # # plt.figure('i_Q')
+            # # plt.plot(Q[validation_index], i_Q, label='i(Q)')
+            # # plt.xlabel('Q ($nm^{-1}$)')
+            # # plt.ylabel('i(Q)')
+            # # plt.legend()
+            # # plt.grid()
+            # # plt.show
             
-            # plt.figure('Qi_Q')
-            # plt.plot(Q[validation_index], Q[validation_index]*i_Q, label='Qi(Q)')
-            # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('Qi(Q)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
+            # # plt.figure('Qi_Q')
+            # # plt.plot(Q[validation_index], Qi_Q, label='Qi(Q)')
+            # # plt.xlabel('Q ($nm^{-1}$)')
+            # # plt.ylabel('Qi(Q)')
+            # # plt.legend()
+            # # plt.grid()
+            # # plt.show()
                         
             # DeltaQ = np.diff(Q)
             # meanDeltaQ = np.mean(DeltaQ)
             # r = fftpack.fftfreq(Q[validation_index].size, meanDeltaQ)
             # mask = np.where(r>0)
             
-            # F_r = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
+            # F_r, F_r2 = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
             
-            # # plt.figure('F_r')
-            # # plt.plot(r[mask], F_r, label='F(r)')
-            # # plt.xlabel('r ($nm$)')
-            # # plt.ylabel('F(r)')
-            # # plt.legend()
-            # # plt.grid()
-            # # plt.show()
+            # # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
+            
+            # plt.figure('F_r')
+            # plt.plot(r[mask], F_r, label='F(r)')
+            # plt.plot(r[mask], F_r, label='F2(r)')
+            # plt.xlabel('r ($nm$)')
+            # plt.ylabel('F(r)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
             
             # iteration = 2
             # rmin = 0.22

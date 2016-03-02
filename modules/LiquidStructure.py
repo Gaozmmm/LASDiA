@@ -45,7 +45,6 @@ from scipy import fftpack
 from scipy.integrate import simps
 from scipy.interpolate import UnivariateSpline
 
-# from modules.MainModules import *
 
 def calc_aff(element, Q):
     """Function to calculate the Atomic Form Factor
@@ -196,7 +195,6 @@ def calc_JQ(Iincoh_Q, Ztot, fe_Q):
     """
     
     J_Q = Iincoh_Q/(Ztot**2 * fe_Q**2)
-    #J_Q = Iincoh_Q/(fe_Q**2)
     
     return J_Q
     
@@ -337,7 +335,7 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_in
     """
     
     S_Q = Icoh_Q[calculation_index] / (N * Ztot**2 * fe_Q[calculation_index]**2)
-    
+        
     S_Qmin = np.zeros(Q[min_index].size)
     S_Q = np.concatenate([S_Qmin, S_Q])
     
@@ -392,14 +390,15 @@ def calc_Fr(r, Q, i_Q):
     
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
     
-    # DeltaQ = np.diff(Q)
-    # meanDeltaQ = np.mean(DeltaQ)
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    rQ = np.outer(r,Q)
+    sinrQ = np.sin(rQ)
+    F_r2 = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
     
-    # rQ = np.outer(r,Q)
-    # sinrQ = np.sin(rQ)
-    # F_r = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
     
-    return F_r
+    
+    return (F_r, F_r2)
     
     
 # def calc_gr(r, F_r, rho0):
