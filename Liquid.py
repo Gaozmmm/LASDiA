@@ -110,35 +110,28 @@ if __name__ == '__main__':
     fe_Q, Ztot = calc_eeff(elementList, Q)
     Iincoh_Q = calc_Iincoh(elementList, Q)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    J_QIgor = calc_JQIgor(Iincoh_Q, fe_Q)
+    # J_QIgor = calc_JQIgor(Iincoh_Q, fe_Q)
     Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
     
-    # write_file("../Results/CO2/J_Q_formIgor.txt", Q, J_Q)
+    # write_file("../Results/CO2/J_Q.txt", Q, J_Q)
+    # write_file("../Results/CO2/J_Q_formIgor.txt", Q, J_QIgor)
     
-    plt.figure('J_Q')
-    plt.plot(Q, J_Q, label='J(Q)')
-    plt.plot(Q, J_QIgor, label='J(Q) Igor')
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('J(Q)')
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # plt.figure('J_Q')
+    # plt.plot(Q, J_Q, label='J(Q)')
+    # plt.plot(Q, J_QIgor, label='J(Q) Igor')
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('J(Q)')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
     
     QIsample, Isample_QIgor = read_file("../data/cea_files/CO2/WO2_007Subt.chi")
     
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
-            Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
-            
-            alpha = calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0[i], integration_index)
-            alphaIgor = calc_alphaIgor(J_QIgor, Sinf, Q, Isample_QIgor, fe_Q, Ztot, rho0[i], integration_index)
-            
-            print(alpha)
-            print(alphaIgor)
-            
-            Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
-            
-            # write_file("../Results/CO2/Isample_Q.txt", Q, Isample_Q)
+            # Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
+            alpha = calc_alpha(J_Q, Sinf, Q, Isample_QIgor, fe_Q, Ztot, rho0[i], integration_index)
+            Icoh_Q = calc_Icoh(N, alpha, Isample_QIgor, Iincoh_Q)
             
             # plt.figure('Isample_Q')
             # plt.plot(Q, Isample_Q, label='Isample(Q)')
@@ -149,15 +142,19 @@ if __name__ == '__main__':
             # plt.show()
             
             S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
-            S_QIgor = calc_SQIgor(N, Isample_QIgor, J_QIgor, Ztot, fe_Q, Sinf, Q, alphaIgor, min_index, max_index, calculation_index)
-            S_Qdamp = calc_SQdamp(S_Q, Q[validation_index], Sinf, QmaxIntegrate, 1)
-            S_Qsmooth = SQsmoothing(Q, S_Qdamp, Sinf, 0.25, min_index, max_index, validation_index)
+            # S_Qdamp = calc_SQdamp(S_Q, Q[validation_index], Sinf, QmaxIntegrate, 1)
+            S_Qsmooth = SQsmoothing(Q, S_Q, Sinf, 0.25, min_index, max_index, validation_index)
+            S_Qsmooth2 = SQsmoothing2(Q, S_Q, Sinf, 0.25, min_index, max_index, calculation_index)
+            newQ, S_Qsmooth3 = SQsmoothing3(Q, S_Q, Sinf, 0.25, minQ, maxQ, QmaxIntegrate)
+            
+            # write_file("../Results/CO2/S_Q.txt", Q[validation_index], S_Q)
             
             plt.figure('S_Q')
             plt.plot(Q[validation_index], S_Q, label='S(Q)')
-            plt.plot(Q[validation_index], S_QIgor, label='S(Q)')
-            plt.plot(Q[validation_index], S_Qdamp, label='S(Q) damped')
-            # plt.plot(Q[validation_index], S_Qsmooth,label='S(Q) smoothed')
+            # plt.plot(Q[validation_index], S_Qdamp, label='S(Q) damped')
+            plt.plot(Q[validation_index], S_Qsmooth,label='S(Q) smoothed')
+            plt.plot(Q[validation_index], S_Qsmooth2,label='S(Q) smoothed2')
+            plt.plot(newQ, S_Qsmooth3,label='S(Q) smoothed3')
             plt.xlabel('Q ($nm^{-1}$)')
             plt.ylabel('S(Q)')
             plt.legend()

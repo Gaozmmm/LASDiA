@@ -183,14 +183,47 @@ def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, max_index, validation_ind
     """Function for smoothing S(Q)
     """
     
-    # sm = interpolate.UnivariateSpline(Q[validation_index], S_Q[validation_index], k=3, s=smoothfactor)
-    # sm(Q[validation_index])
     S_Qsmooth = smoothing(Q[validation_index], S_Q[validation_index], smoothfactor)
     
     S_Qsmooth[min_index] = 0.0
     S_Qsmooth[max_index] = Sinf
     
     return S_Qsmooth
+    
+    
+def SQsmoothing2(Q, S_Q, Sinf, smoothfactor, min_index, max_index, calculation_index):
+    """Function for smoothing S(Q)
+    """
+    
+    S_Qsmooth = smoothing(Q[calculation_index], S_Q[calculation_index], smoothfactor)
+    
+    S_Qmin = np.zeros(Q[min_index].size)
+    S_Qsmooth = np.concatenate([S_Qmin, S_Qsmooth])
+    
+    S_Qmax = np.zeros(Q[max_index].size)
+    S_Qmax.fill(Sinf)
+    S_Qsmooth = np.concatenate([S_Qsmooth, S_Qmax])
+    
+    return S_Qsmooth
+    
+    
+def SQsmoothing3(Q, S_Q, Sinf, smoothfactor, minQ, maxQ, QmaxIntegrate):
+    """Function for smoothing S(Q)
+    """
+    
+    newQ = np.linspace(np.amin(Q), np.amax(Q), 550, endpoint=True)
+    sm = interpolate.UnivariateSpline(Q, S_Q, k=3, s=smoothfactor)
+    S_Qsmooth = sm(newQ)
+    
+    # S_Qsmooth[min_index] = 0.0
+    # S_Qsmooth[max_index] = Sinf
+    
+    S_Qsmooth[newQ<=minQ] = 0.0
+    mask = np.where((newQ>QmaxIntegrate) & (newQ<=maxQ))
+    S_Qsmooth[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
+    
+    return (newQ, S_Qsmooth)
+    
     
     
 def fitline(X, f_X, index1, element1, index2, element2):
