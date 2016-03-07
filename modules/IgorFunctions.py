@@ -87,12 +87,10 @@ def calc_alphaIgor(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     return alpha
     
     
-def calc_SQIgor(N, Isample_Q, J_Q, Ztot, fe_Q, Sinf, Q, alpha, min_index, max_index, calculation_index): # Igor formula
-    """Function to calculate the structure factor S(Q) (eq. 18)
+def calc_SQIgor(Isample_Q, J_Q, Ztot, fe_Q, Sinf, Q, alpha, min_index, max_index, calculation_index): # Igor formula
+    """Function to calculate the structure factor S(Q) (eq. 18) with Igor formula
 
     arguments:
-    N: number of atoms - number
-    Icoh: cohrent scattering intensity - array
     Ztot: total Z number - number
     fe_Q: effective electric form factor - array
     Sinf: Sinf - number
@@ -109,6 +107,33 @@ def calc_SQIgor(N, Isample_Q, J_Q, Ztot, fe_Q, Sinf, Q, alpha, min_index, max_in
     
     S_Qmin = np.zeros(Q[min_index].size)
     S_Q = np.concatenate([S_Qmin, S_Q])
+    
+    S_Qmax = np.zeros(Q[max_index].size)
+    S_Qmax.fill(Sinf)
+    S_Q = np.concatenate([S_Q, S_Qmax])
+    
+    return S_Q
+    
+    
+def calc_SQIgor2(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index): # Igor formula
+    """Function to calculate the structure factor S(Q) (eq. 18) with Igor range
+    This function doesn't set the value 0 for Q<minQ!!!
+
+    arguments:
+    N: number of atoms - number
+    Icoh: cohrent scattering intensity - array
+    Ztot: total Z number - number
+    fe_Q: effective electric form factor - array
+    Sinf: Sinf - number
+    Q: momentum transfer - array
+    max_index: array index of element with Q>QmaxIntegrate & Q<=maxQ - array
+    integration_index: array index of element in the integration range Q<=QmaxIntegrate - array
+    
+    returns:
+    S_Q: structure factor - array
+    """
+    
+    S_Q = Icoh_Q[integration_index] / (N * Ztot**2 * fe_Q[integration_index]**2)
     
     S_Qmax = np.zeros(Q[max_index].size)
     S_Qmax.fill(Sinf)

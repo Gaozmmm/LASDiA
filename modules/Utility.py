@@ -39,9 +39,10 @@ import numpy as np
 import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
-import math
 from scipy import interpolate
 from scipy import signal
+import math
+import random
 
 def read_file(path):
     """Read the file and return x and y as numpy vectors
@@ -173,8 +174,8 @@ def smoothing(X, f_X, smoothfactor):
     """Function for smoothing
     """
     
-    sm = interpolate.UnivariateSpline(X, f_X, k=3, s=smoothfactor)
-    smoothedf_X = sm(X)
+    smooth = interpolate.UnivariateSpline(X, f_X, k=3, s=smoothfactor)
+    smoothedf_X = smooth(X)
     
     return smoothedf_X
     
@@ -186,7 +187,10 @@ def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, max_index, validation_ind
     S_Qsmooth = smoothing(Q[validation_index], S_Q[validation_index], smoothfactor)
     
     S_Qsmooth[min_index] = 0.0
-    S_Qsmooth[max_index] = Sinf
+    S_Qmax = np.zeros(Q[max_index].size)
+    S_Qmax.fill(Sinf)
+    S_Qsmooth = np.concatenate([S_Qsmooth, S_Qmax])
+    # S_Qsmooth[max_index] = Sinf
     
     return S_Qsmooth
     
@@ -207,28 +211,35 @@ def SQsmoothing2(Q, S_Q, Sinf, smoothfactor, min_index, max_index, calculation_i
     return S_Qsmooth
     
     
-def SQsmoothing3(Q, S_Q, Sinf, smoothfactor, minQ, maxQ, QmaxIntegrate):
+def SQsmoothing3(Q, S_Q, Sinf, smoothfactor, minQ, maxQ, QmaxIntegrate, NumPoints):
     """Function for smoothing S(Q)
     """
     
-    newQ = np.linspace(np.amin(Q), np.amax(Q), 550, endpoint=True)
-    sm = interpolate.UnivariateSpline(Q, S_Q, k=3, s=smoothfactor)
-    S_Qsmooth = sm(newQ)
+    mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
+    # smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smoothfactor)
+    # newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
+    # S_Qsmooth = smooth(newQ)
     
-    # S_Qsmooth[min_index] = 0.0
-    # S_Qsmooth[max_index] = Sinf
+    tck = interpolate.splrep(Q[mask_smooth], S_Q[mask_smooth], s=smoothfactor)
+    newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
+    S_Qsmooth = interpolate.splev(newQ, tck, der=0)
     
-    S_Qsmooth[newQ<=minQ] = 0.0
-    mask = np.where((newQ>QmaxIntegrate) & (newQ<=maxQ))
+    mask_low = np.where(Q<=minQ)
+    num_low = S_Qsmooth[newQ<minQ].size
+    smooth = interpolate.UnivariateSpline(Q[mask_low], S_Q[mask_low], k=3, s=smoothfactor)
+    newQLow = np.linspace(np.amin(newQ), minQ, num_low, endpoint=True)
+    S_QsmoothLow = smooth(newQLow)
+    
+    S_Qsmooth[newQ<minQ] = S_QsmoothLow
     S_Qsmooth[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
     
     return (newQ, S_Qsmooth)
     
     
-    
 def fitline(X, f_X, index1, element1, index2, element2):
     """Function to flat the peak
     """
+    
     xpoints = [element1, element2]
     ypoints = [f_X[index1], f_X[index2]]
 
@@ -242,6 +253,7 @@ def fitline(X, f_X, index1, element1, index2, element2):
 def fitcurve(X, f_X, mask):
     """Function to flat the peak
     """
+    
     xpoints = X[mask]
     ypoints = f_X[mask]
 
@@ -265,6 +277,7 @@ def find_nearest(array, value):
 def removePeaks(Q, I_Q):
     """Function to remove Bragg's peaks
     """
+    
     # peakind = signal.find_peaks_cwt(I_Q, widths = np.arange(4,6))
     plt.figure('Remove Peaks')
     plt.plot(Q, I_Q)
@@ -295,11 +308,10 @@ def removePeaks(Q, I_Q):
     
     
 def calc_damp(Q, QmaxIntegrate, damping_factor):
-    """
+    """Function to calculate the damping function
     """
     
-    # damping_factor = 0.5
-    # damping_factor = np.log(10)
+    # damping_factor = 0.5 # np.log(10)
     exponent_factor = damping_factor / QmaxIntegrate**2
     damp_Q = np.exp(-exponent_factor * Q**2)
     
