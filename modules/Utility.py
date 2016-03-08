@@ -20,14 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in the Liquid program
+"""Module containing useful functions used in LASDiA.
 
-The nomenclature and the procedures follow the article:
-Eggert et al. 2002 PRB, 65, 174105
+The nomenclature and the procedure follow the article:
+Eggert et al. 2002 PRB, 65, 174105.
 
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
-returns: description - type
+returns: description - type.
+
+For the variables name I used this convention:
+if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+otherwise it is symbolized with just its name.
 """
 
 import matplotlib.pyplot as plt
@@ -118,7 +122,7 @@ def read_file(path):
     
     
 def write_file(path, Q, I_Q):
-    """Function to write to file
+    """Function to write into file
     """
     
     file = open(path, "w")
@@ -127,6 +131,48 @@ def write_file(path, Q, I_Q):
     output = np.column_stack((Q.flatten(),I_Q.flatten()))
     np.savetxt(file_name,output,delimiter='\t')
     file.close()
+    
+    
+def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
+    """Function to calculate the ranges where S(Q) is constant
+    
+    arguments:
+    Q: momentum transfer - array
+    minQ: minimum Q value - number
+    maxQ: maximum Q value - number
+    QmaxIntegrate: maximum Q value for the intagrations - number
+    
+    returns:
+    min_index: array index of element with Q<=minQ - array
+    max_index: array index of element with Q>QmaxIntegrate & Q<=maxQ - array
+    """
+    
+    min_index = np.where(Q<=minQ)
+    max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
+    
+    return (min_index, max_index)
+    
+    
+def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
+    """Function to calculate the ranges used in the program
+    
+    arguments:
+    Q: momentum transfer - array
+    minQ: minimum Q value - number
+    maxQ: maximum Q value - number
+    QmaxIntegrate: maximum Q value for the intagrations - number
+    
+    returns:
+    validation_index: range of valide Q
+    integration_index: range of integration
+    calculation_index: range where S(Q) is calculated
+    """
+    
+    validation_index = np.where(Q<=maxQ)
+    integration_index = np.where(Q<=QmaxIntegrate)
+    calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
+    
+    return(validation_index, integration_index, calculation_index)
     
     
 def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
@@ -160,80 +206,41 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     return (BinX, BinY)
     
     
-# def interpolation(X, f_X, rebinnedX):
-    # """Function for the interpolation
-    # """
+def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
+    """Function for smoothing S(Q).
+    This function smooths S(Q) and resets the number of points for the variable Q
     
-    # interpolatedf_X = interpolate.interp1d(X, f_X)
-    # newf_X = interpolatedf_X(rebinnedX)
+    arguments:
+    Q: momentum transfer - array
+    S_Q: structure factor - array
+    Sinf: Sinf - number
+    smoothfactor: smoothing factor - number
+    min_index: array index of element with Q<=minQ - array
+    minQ: minimum Q value - number
+    maxQ: maximum Q value - number
+    QmaxIntegrate: maximum Q value for the intagrations - number
+    NumPoints: number of points in the smoothed S(Q) - number
     
-    # return newf_X
-    
-    
-def smoothing(X, f_X, smoothfactor):
-    """Function for smoothing
-    """
-    
-    smooth = interpolate.UnivariateSpline(X, f_X, k=3, s=smoothfactor)
-    smoothedf_X = smooth(X)
-    
-    return smoothedf_X
-    
-    
-def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, max_index, validation_index):
-    """Function for smoothing S(Q)
-    """
-    
-    S_Qsmooth = smoothing(Q[validation_index], S_Q[validation_index], smoothfactor)
-    
-    S_Qsmooth[min_index] = 0.0
-    S_Qmax = np.zeros(Q[max_index].size)
-    S_Qmax.fill(Sinf)
-    S_Qsmooth = np.concatenate([S_Qsmooth, S_Qmax])
-    # S_Qsmooth[max_index] = Sinf
-    
-    return S_Qsmooth
-    
-    
-def SQsmoothing2(Q, S_Q, Sinf, smoothfactor, min_index, max_index, calculation_index):
-    """Function for smoothing S(Q)
-    """
-    
-    S_Qsmooth = smoothing(Q[calculation_index], S_Q[calculation_index], smoothfactor)
-    
-    S_Qmin = np.zeros(Q[min_index].size)
-    S_Qsmooth = np.concatenate([S_Qmin, S_Qsmooth])
-    
-    S_Qmax = np.zeros(Q[max_index].size)
-    S_Qmax.fill(Sinf)
-    S_Qsmooth = np.concatenate([S_Qsmooth, S_Qmax])
-    
-    return S_Qsmooth
-    
-    
-def SQsmoothing3(Q, S_Q, Sinf, smoothfactor, minQ, maxQ, QmaxIntegrate, NumPoints):
-    """Function for smoothing S(Q)
+    returns:
+    newQ: new set of Q with NumPoints dimension - array
+    S_Qsmoothed: smoothed S(Q) with NumPoints dimension - array
     """
     
     mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
-    # smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smoothfactor)
-    # newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
-    # S_Qsmooth = smooth(newQ)
-    
-    tck = interpolate.splrep(Q[mask_smooth], S_Q[mask_smooth], s=smoothfactor)
+    smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smoothfactor)
     newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
-    S_Qsmooth = interpolate.splev(newQ, tck, der=0)
+    S_Qsmoothed = smooth(newQ)
     
-    mask_low = np.where(Q<=minQ)
-    num_low = S_Qsmooth[newQ<minQ].size
-    smooth = interpolate.UnivariateSpline(Q[mask_low], S_Q[mask_low], k=3, s=smoothfactor)
+    # mask_low = np.where(Q<=minQ)
+    num_low = S_Qsmoothed[newQ<minQ].size
+    smooth = interpolate.UnivariateSpline(Q[min_index], S_Q[min_index], k=3, s=smoothfactor)
     newQLow = np.linspace(np.amin(newQ), minQ, num_low, endpoint=True)
     S_QsmoothLow = smooth(newQLow)
     
-    S_Qsmooth[newQ<minQ] = S_QsmoothLow
-    S_Qsmooth[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
+    S_Qsmoothed[newQ<minQ] = S_QsmoothLow
+    S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
     
-    return (newQ, S_Qsmooth)
+    return (newQ, S_Qsmoothed)
     
     
 def fitline(X, f_X, index1, element1, index2, element2):
@@ -250,22 +257,16 @@ def fitline(X, f_X, index1, element1, index2, element2):
     return y_axis
     
     
-def fitcurve(X, f_X, mask):
-    """Function to flat the peak
-    """
-    
-    xpoints = X[mask]
-    ypoints = f_X[mask]
-
-    coefficients = np.polyfit(xpoints, ypoints, 2)
-    polynomial = np.poly1d(coefficients)
-    y_axis = polynomial(xpoints)
-
-    return y_axis
-    
-    
 def find_nearest(array, value):
     """Function to find the nearest array element of a given value
+    
+    arguments:
+    array: array of which it wants to find the nearest element - array
+    value: comparing element - number
+    
+    returns:
+    index: index of the nearest element - number
+    element: nearest element - number
     """
     
     index = (np.abs(array-value)).argmin()
@@ -276,9 +277,15 @@ def find_nearest(array, value):
     
 def removePeaks(Q, I_Q):
     """Function to remove Bragg's peaks
+    
+    arguments:
+    Q: momentum transfer - array
+    I_Q: measured scattering intensity - array
+    
+    returns:
+    I_Q: measured scattering intensity without peaks - array
     """
     
-    # peakind = signal.find_peaks_cwt(I_Q, widths = np.arange(4,6))
     plt.figure('Remove Peaks')
     plt.plot(Q, I_Q)
     plt.grid()
@@ -289,55 +296,17 @@ def removePeaks(Q, I_Q):
     
     plt.close()
     
-    idxelem = np.zeros(shape=(len(points),2))
+    idx_elem = np.zeros(shape=(len(points),2))
     
     for i in range(0, len(points)):
-        idxelem[i] = find_nearest(Q, points[i,0])
+        idx_elem[i] = find_nearest(Q, points[i,0])
     
-    zippedidx = np.array(list(zip(*[iter(idxelem[:,0])]*2)))
-    zippedelem = np.array(list(zip(*[iter(idxelem[:,1])]*2)))
+    zipped_idx = np.array(list(zip(*[iter(idx_elem[:,0])]*2)))
+    zipped_elem = np.array(list(zip(*[iter(idx_elem[:,1])]*2)))
     
-    
-    for i in range(0, len(zippedelem)):
-        mask = np.where((Q>=zippedelem[i,0]) & (Q<=zippedelem[i,1]))
-        I_Q1 = fitline(Q[mask], I_Q, zippedidx[i,0], zippedelem[i,0], zippedidx[i,1], zippedelem[i,1])
-        # I_Q1 = fitcurve(Q, I_Q, mask)
+    for i in range(0, len(zipped_elem)):
+        mask = np.where((Q>=zipped_elem[i,0]) & (Q<=zipped_elem[i,1]))
+        I_Q1 = fitline(Q[mask], I_Q, zipped_idx[i,0], zipped_elem[i,0], zipped_idx[i,1], zipped_elem[i,1])
         I_Q[mask] = I_Q1
     
     return I_Q
-    
-    
-def calc_damp(Q, QmaxIntegrate, damping_factor):
-    """Function to calculate the damping function
-    """
-    
-    # damping_factor = 0.5 # np.log(10)
-    exponent_factor = damping_factor / QmaxIntegrate**2
-    damp_Q = np.exp(-exponent_factor * Q**2)
-    
-    return damp_Q
-    
-    
-# def plot_data(nFigure, xSample, ySample, xLabel, yLabel, style, dataLabel, overlap):
-    # """Plot the data read with the function read_file
-    #
-    # xSample: x sample - numpy array
-    # ySample: y sample - numpy array
-    # xLabel: x axis label - string
-    # yLabel: y axis label - string
-    # style: set the line style - string
-    # dataLabel: name of the plot in the legend - string
-    # overlap: set if to overlap on an existing plot - boolean (to implement)
-    # """
-    # plt.figure(nFigure) #.add_subplot(311)
-    # if plt.fignum_exists(nFigure):
-        # plt.figure(nFigure).hold(True)
-    
-    # plt.plot(xSample, ySample, style, label=dataLabel)
-    # plt.legend()
-    # plt.xlabel(xLabel)
-    # plt.ylabel(yLabel)
-    # plt.show()
-
-
-

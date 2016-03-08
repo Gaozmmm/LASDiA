@@ -47,7 +47,7 @@ from scipy import fftpack
 from scipy.integrate import simps
 from scipy.stats import chisquare
 
-from modules.LiquidStructure import *
+from modules.MainFunctions import *
 
 import math
 

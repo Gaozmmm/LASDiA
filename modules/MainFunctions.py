@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in LASDiA to calculate all the used functions.
+"""Module containing the main functions used in LASDiA.
 
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
@@ -30,8 +30,8 @@ arguments: description - type
 returns: description - type.
 
 For the variables name I used this convention:
-if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
-otherwise it is just the name.
+if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+otherwise it is symbolized with just its name.
 """
 
 import matplotlib.pyplot as plt
@@ -47,7 +47,7 @@ from scipy.interpolate import UnivariateSpline
 
 
 def calc_aff(element, Q):
-    """Function to calculate the Atomic Form Factor
+    """Function to calculate the Atomic Form Factor.
     The atomic form factor is calculated with the formula from:
     http://lampx.tugraz.at/~hadley/ss1/crystaldiffraction/atomicformfactors/formfactors.php
     
@@ -316,48 +316,31 @@ def calc_Icoh(N, alpha, Isample_Q, Iincoh_Q):
     return Icoh_Q
     
     
-def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index):
-    """Function to calculate the structure factor S(Q) (eq. 18)
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
+    """Function to calculate the structure factor S(Q) (eq. 18) with Igor range.
+    This function doesn't set the value 0 for Q<minQ!!!
 
     arguments:
     N: number of atoms - number
-    Icoh: cohrent scattering intensity - array
+    Icoh_Q: cohrent scattering intensity - array
     Ztot: total Z number - number
     fe_Q: effective electric form factor - array
     Sinf: Sinf - number
     Q: momentum transfer - array
-    min_index: array index of element with Q<minQ - array
     max_index: array index of element with Q>QmaxIntegrate & Q<=maxQ - array
-    calculation_index: array index of element in the calculation range Q>minQ & Q<=QmaxIntegrate - array
+    integration_index: array index of element in the integration range Q<=QmaxIntegrate - array
     
     returns:
     S_Q: structure factor - array
     """
     
-    S_Q = Icoh_Q[calculation_index] / (N * Ztot**2 * fe_Q[calculation_index]**2)
-        
-    S_Qmin = np.zeros(Q[min_index].size)
-    S_Q = np.concatenate([S_Qmin, S_Q])
+    S_Q = Icoh_Q[integration_index] / (N * Ztot**2 * fe_Q[integration_index]**2)
     
     S_Qmax = np.zeros(Q[max_index].size)
     S_Qmax.fill(Sinf)
     S_Q = np.concatenate([S_Q, S_Qmax])
     
     return S_Q
-    
-    
-def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
-    """
-    """
-    
-    # damping_factor = 0.5
-    # damping_factor = np.log(10)
-    exponent_factor = damping_factor / QmaxIntegrate**2
-    damp_Q = np.exp(-exponent_factor * Q**2)
-    
-    S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
-    
-    return S_Qdamp
     
     
 def calc_iQ(S_Q, Sinf):
@@ -374,6 +357,23 @@ def calc_iQ(S_Q, Sinf):
     i_Q = S_Q - Sinf
     
     return i_Q
+    
+    
+def calc_QiQ(Q, S_Q, Sinf):
+    """Function to calculate Qi(Q) (eq. 7, 20)
+    
+    arguments:
+    Q: momentum transfer - array
+    S_Q: structure factor - array
+    Sinf: Sinf - number
+    
+    returns:
+    Qi_Q: Qi(Q) - array
+    """
+    
+    Qi_Q = Q*(S_Q - Sinf)
+    
+    return Qi_Q
     
 
 def calc_Fr(r, Q, i_Q):

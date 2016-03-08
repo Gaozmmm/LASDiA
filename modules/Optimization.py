@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in LASDiA to calculate the F(r) optimization.
+"""Module containing the functions used for the F(r) optimization.
 
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
@@ -30,8 +30,8 @@ arguments: description - type
 returns: description - type.
 
 For the variables name I used this convention:
-if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
-otherwise it is just the name.
+if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+otherwise it is symbolized with just its name.
 """
 
 import matplotlib.pyplot as plt
@@ -47,7 +47,7 @@ from scipy.integrate import simps
 
 from lmfit import minimize, Parameters
 
-from modules.LiquidStructure import *
+from modules.MainFunctions import *
 
 def calc_Fintra(r, Q, QmaxIntegrate):
     """Function to calculate the intramolecular contribution of F(r) (eq. 42)

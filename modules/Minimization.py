@@ -45,7 +45,7 @@ from scipy import fftpack
 from scipy.integrate import simps
 from scipy.stats import chisquare
 
-from modules.LiquidStructure import *
+from modules.MainFunctions import *
 
 def calc_deltaMinim(N, r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot, Fintra):
     """Function to minimize the density

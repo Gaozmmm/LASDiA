@@ -20,7 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Environment for testing the software
+"""LASDiA main script file.
+This script is mainly used for testing the software.
 The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105
 """
 
@@ -33,6 +34,7 @@ import os
 import scipy.constants as sc
 from scipy import fftpack
 from scipy import signal
+from scipy.integrate import simps
 from scipy.interpolate import UnivariateSpline
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -40,9 +42,8 @@ import numpy as np
 import time
 import math
 
+from modules.MainFunctions import *
 from modules.Utility import *
-from modules.LiquidStructure import *
-from modules.InterpolateData import *
 from modules.Optimization import *
 from modules.Minimization import *
 from modules.Formalism import *
@@ -71,11 +72,8 @@ if __name__ == '__main__':
     maxQ = 100
     QmaxIntegrate = 90
     
-    min_index = np.where(Q<=minQ)
-    max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
-    validation_index = np.where(Q<=maxQ)
-    integration_index = np.where(Q<=QmaxIntegrate)
-    calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
+    min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
+    validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
     
     # elementList = {"Ar":1}
     elementList = {"C":1,"O":2}
@@ -103,27 +101,13 @@ if __name__ == '__main__':
     # s = np.array([1.00114])
     s = np.array([1.0])
     rho0 = np.array([29.7877])
-    
     chi2 = np.zeros((rho0.size, s.size))
     
     # remember the electron unit in atomic form factor!!!
     fe_Q, Ztot = calc_eeff(elementList, Q)
     Iincoh_Q = calc_Iincoh(elementList, Q)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    # J_QIgor = calc_JQIgor(Iincoh_Q, fe_Q)
     Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot)
-    
-    # write_file("../Results/CO2/J_Q.txt", Q, J_Q)
-    # write_file("../Results/CO2/J_Q_formIgor.txt", Q, J_QIgor)
-    
-    # plt.figure('J_Q')
-    # plt.plot(Q, J_Q, label='J(Q)')
-    # plt.plot(Q, J_QIgor, label='J(Q) Igor')
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('J(Q)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
     
     QIsample, Isample_QIgor = read_file("../data/cea_files/CO2/WO2_007Subt.chi")
     
@@ -133,61 +117,36 @@ if __name__ == '__main__':
             alpha = calc_alpha(J_Q, Sinf, Q, Isample_QIgor, fe_Q, Ztot, rho0[i], integration_index)
             Icoh_Q = calc_Icoh(N, alpha, Isample_QIgor, Iincoh_Q)
             
-            # plt.figure('Isample_Q')
-            # plt.plot(Q, Isample_Q, label='Isample(Q)')
+            S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
+            newQ, S_Qsmoothed = SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, 0.25, min_index, minQ, QmaxIntegrate, maxQ, 550)
+            
+            i_Q = calc_iQ(S_Qsmoothed, Sinf)
+            Qi_Q = calc_QiQ(newQ, S_Qsmoothed, Sinf)
+            
+            # write_file("../Results/CO2/Qi_Q.txt", newQ, Qi_Q)
+            
+            # plt.figure('i_Q')
+            # plt.plot(newQ, S_Qsmoothed, label='i(Q)')
             # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('Isample(Q)')
+            # plt.ylabel('i(Q)')
             # plt.legend()
             # plt.grid()
             # plt.show()
             
-            # S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index)
-            S_Q2 = calc_SQIgor2(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
-            # S_Qdamp = calc_SQdamp(S_Q, Q[validation_index], Sinf, QmaxIntegrate, 1)
-            # S_Qsmooth = SQsmoothing(Q, S_Q2, Sinf, 0.25, min_index, max_index, integration_index)
-            # S_Qsmooth2 = SQsmoothing2(Q, S_Q2, Sinf, 0.25, min_index, max_index, calculation_index)
-            newQ, S_Qsmooth3 = SQsmoothing3(Q[validation_index], S_Q2[validation_index], Sinf, 0.25, minQ, maxQ, QmaxIntegrate, 550)
-            
-            # write_file("../Results/CO2/S_QSmooth.txt", newQ, S_Qsmooth3)
-            
-            plt.figure('S_Q')
-            # plt.plot(Q[validation_index], S_Q, label='S(Q)')
-            plt.plot(Q[validation_index], S_Q2, label='S(Q) Igor')
-            # plt.plot(Q[validation_index], S_Qdamp, label='S(Q) damped')
-            # plt.plot(Q[validation_index], S_Qsmooth,label='S(Q) smoothed')
-            # plt.plot(Q[validation_index], S_Qsmooth2,label='S(Q) smoothed2')
-            plt.plot(newQ, S_Qsmooth3,label='S(Q) smoothed3')
-            plt.xlabel('Q ($nm^{-1}$)')
-            plt.ylabel('S(Q)')
-            plt.legend()
-            plt.grid()
-            plt.show()
-            
-            # i_Q = calc_iQ(S_Qsmooth, Sinf)
-            # Qi_Q = Q[validation_index] * i_Q
-            
-            # # plt.figure('i_Q')
-            # # plt.plot(Q[validation_index], i_Q, label='i(Q)')
-            # # plt.xlabel('Q ($nm^{-1}$)')
-            # # plt.ylabel('i(Q)')
-            # # plt.legend()
-            # # plt.grid()
-            # # plt.show
-            
-            # # plt.figure('Qi_Q')
-            # # plt.plot(Q[validation_index], Qi_Q, label='Qi(Q)')
-            # # plt.xlabel('Q ($nm^{-1}$)')
-            # # plt.ylabel('Qi(Q)')
-            # # plt.legend()
-            # # plt.grid()
-            # # plt.show()
+            # plt.figure('Qi_Q')
+            # plt.plot(newQ, Qi_Q, label='Qi(Q)')
+            # plt.xlabel('Q ($nm^{-1}$)')
+            # plt.ylabel('Qi(Q)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
                         
-            # DeltaQ = np.diff(Q)
+            # DeltaQ = np.diff(newQ)
             # meanDeltaQ = np.mean(DeltaQ)
-            # r = fftpack.fftfreq(Q[validation_index].size, meanDeltaQ)
+            # r = fftpack.fftfreq(newQ.size, meanDeltaQ)
             # mask = np.where(r>0)
             
-            # F_r, F_r2 = calc_Fr(r[mask], Q[integration_index], i_Q[integration_index])
+            # F_r, F_r2 = calc_Fr(r[mask], newQ, i_Q)
             
             # # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
             
