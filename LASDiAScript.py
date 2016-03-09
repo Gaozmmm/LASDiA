@@ -118,46 +118,62 @@ if __name__ == '__main__':
             Icoh_Q = calc_Icoh(N, alpha, Isample_QIgor, Iincoh_Q)
             
             S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
-            newQ, S_Qsmoothed = SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, 0.25, min_index, minQ, QmaxIntegrate, maxQ, 550)
+            newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, 0.25, min_index, minQ, QmaxIntegrate, maxQ, 550)
             
-            i_Q = calc_iQ(S_Qsmoothed, Sinf)
-            Qi_Q = calc_QiQ(newQ, S_Qsmoothed, Sinf)
+            S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, 1)
+            
+            i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
+            Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
+            
+            print(Qi_Q[newQ>QmaxIntegrate])
+            
+            newDim = 2*2*2**math.ceil(math.log(5*(QmaxIntegrate+1))/math.log(2))
+            oldDim = Qi_Q.size
+            addDim = newDim - oldDim
+            Qi_Qzero = np.zeros(addDim)
+            Qi_Q2 = np.concatenate([Qi_Q, Qi_Qzero])
+            # Qi_Q2 = np.resize(Qi_Q, newDim)
+            newQ2 = np.linspace(np.amin(Q), maxQ, newDim, endpoint=True)
+            # Qi_Q2[newQ>QmaxIntegrate] = 0.0
             
             # write_file("../Results/CO2/Qi_Q.txt", newQ, Qi_Q)
             
-            # plt.figure('i_Q')
-            # plt.plot(newQ, S_Qsmoothed, label='i(Q)')
+            # plt.figure('Qi_Q')
+            # # plt.plot(newQ, Qi_Q, label='Qi(Q)')
+            # plt.plot(newQ2, Qi_Q2, label='Qi(Q) resized')
             # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('i(Q)')
+            # plt.ylabel('Qi(Q)')
             # plt.legend()
             # plt.grid()
-            # plt.show()
+            # plt.show
             
-            # plt.figure('Qi_Q')
-            # plt.plot(newQ, Qi_Q, label='Qi(Q)')
+            # plt.figure('Qi_Q resized')
+            # # plt.plot(newQ, Qi_Q, label='Qi(Q)')
+            # plt.plot(Qi_Q2, label='Qi(Q) resized')
             # plt.xlabel('Q ($nm^{-1}$)')
             # plt.ylabel('Qi(Q)')
             # plt.legend()
             # plt.grid()
             # plt.show()
                         
-            # DeltaQ = np.diff(newQ)
-            # meanDeltaQ = np.mean(DeltaQ)
-            # r = fftpack.fftfreq(newQ.size, meanDeltaQ)
-            # mask = np.where(r>0)
+            DeltaQ = np.diff(newQ2)
+            meanDeltaQ = np.mean(DeltaQ)
+            r = fftpack.fftfreq(newQ2.size, meanDeltaQ)
+            # r2 = np.fft.fftfreq(newQ.size, meanDeltaQ)
+            mask = np.where(r>0)
             
-            # F_r, F_r2 = calc_Fr(r[mask], newQ, i_Q)
+            F_r, F_r2 = calc_Fr(r[mask], newQ, i_Q, Qi_Q2)
             
             # # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
             
-            # plt.figure('F_r')
-            # plt.plot(r[mask], F_r, label='F(r)')
-            # plt.plot(r[mask], F_r, label='F2(r)')
-            # plt.xlabel('r ($nm$)')
-            # plt.ylabel('F(r)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
+            plt.figure('F_r')
+            plt.plot(r[mask], F_r, label='F(r)')
+            # plt.plot(r[mask], F_r2[mask], label='F(r)')
+            plt.xlabel('r ($nm$)')
+            plt.ylabel('F(r)')
+            plt.legend()
+            plt.grid()
+            plt.show()
             
             # iteration = 2
             # rmin = 0.22

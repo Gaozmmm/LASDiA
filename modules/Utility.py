@@ -206,7 +206,7 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     return (BinX, BinY)
     
     
-def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
+def calc_SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q
     

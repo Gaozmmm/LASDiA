@@ -343,6 +343,18 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
     return S_Q
     
     
+def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
+    """
+    """
+    
+    exponent_factor = damping_factor / QmaxIntegrate**2
+    damp_Q = np.exp(-exponent_factor * Q**2)
+    
+    S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
+    
+    return S_Qdamp
+    
+    
 def calc_iQ(S_Q, Sinf):
     """Function to calculate i(Q) (eq. 21)
     
@@ -376,27 +388,25 @@ def calc_QiQ(Q, S_Q, Sinf):
     return Qi_Q
     
 
-def calc_Fr(r, Q, i_Q):
+def calc_Fr(r, Q, i_Q, Qi_Q):
     """Function to calculate F(r) (eq. 20)
     
     arguments:
     r: radius - array
     Q: momentum transfer - array
-    i_Q: i(Q) - array
+    Qi_Q: Qi(Q) - array
     
     returns:
     F_r: F(r) - array
     """
     
-    F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
-    
     DeltaQ = np.diff(Q)
     meanDeltaQ = np.mean(DeltaQ)
     rQ = np.outer(r,Q)
     sinrQ = np.sin(rQ)
-    F_r2 = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
+    F_r = (2.0 / np.pi) * np.sum(Q*i_Q * sinrQ, axis=1) * meanDeltaQ
     
-    
+    F_r2 = fftpack.fft(Qi_Q)
     
     return (F_r, F_r2)
     

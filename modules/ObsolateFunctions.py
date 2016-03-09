@@ -164,3 +164,27 @@ def calc_damp(Q, QmaxIntegrate, damping_factor):
     damp_Q = np.exp(-exponent_factor * Q**2)
     
     return damp_Q
+    
+    
+def calc_Fr(r, Q, i_Q):
+    """Function to calculate F(r) (eq. 20)
+    
+    arguments:
+    r: radius - array
+    Q: momentum transfer - array
+    i_Q: i(Q) - array
+    
+    returns:
+    F_r: F(r) - array
+    """
+    
+    F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
+    
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    rQ = np.outer(r,Q)
+    sinrQ = np.sin(rQ)
+    F_r2 = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
+    
+    return (F_r, F_r2)
+    
