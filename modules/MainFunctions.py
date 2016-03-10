@@ -406,9 +406,12 @@ def calc_Fr(r, Q, i_Q, Qi_Q):
     sinrQ = np.sin(rQ)
     F_r = (2.0 / np.pi) * np.sum(Q*i_Q * sinrQ, axis=1) * meanDeltaQ
     
-    F_r2 = fftpack.fft(Qi_Q)
+    F_r2 = np.fft.fft(Qi_Q)
+    F_r3 = np.fft.rfft(Qi_Q)
     
-    return (F_r, F_r2)
+    F_r2 = np.imag(F_r2) * DeltaQ[0] *2/np.pi
+    
+    return (F_r, F_r2, F_r3)
     
     
 # def calc_gr(r, F_r, rho0):

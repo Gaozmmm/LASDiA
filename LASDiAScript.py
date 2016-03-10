@@ -99,8 +99,8 @@ if __name__ == '__main__':
     # rho0 = np.array([29.7404])
     
     # s = np.array([1.00114])
-    s = np.array([1.0])
-    rho0 = np.array([29.7877])
+    s = np.array([0.984228])
+    rho0 = np.array([29.6625])
     chi2 = np.zeros((rho0.size, s.size))
     
     # remember the electron unit in atomic form factor!!!
@@ -122,30 +122,23 @@ if __name__ == '__main__':
             
             S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, 1)
             
-            i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
             
-            print(Qi_Q[newQ>QmaxIntegrate])
+            idx, elem = find_nearest(newQ, QmaxIntegrate)
+            newDim = 2*2*2**math.ceil(math.log(5*(idx+1))/math.log(2))
+            Qi_Q2 = np.resize(Qi_Q, newDim)
+            Qi_Q2[idx:] = 0.0
             
-            newDim = 2*2*2**math.ceil(math.log(5*(QmaxIntegrate+1))/math.log(2))
-            oldDim = Qi_Q.size
-            addDim = newDim - oldDim
-            Qi_Qzero = np.zeros(addDim)
-            Qi_Q2 = np.concatenate([Qi_Q, Qi_Qzero])
-            # Qi_Q2 = np.resize(Qi_Q, newDim)
             newQ2 = np.linspace(np.amin(Q), maxQ, newDim, endpoint=True)
-            # Qi_Q2[newQ>QmaxIntegrate] = 0.0
-            
             # write_file("../Results/CO2/Qi_Q.txt", newQ, Qi_Q)
             
-            # plt.figure('Qi_Q')
-            # # plt.plot(newQ, Qi_Q, label='Qi(Q)')
-            # plt.plot(newQ2, Qi_Q2, label='Qi(Q) resized')
-            # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('Qi(Q)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show
+            plt.figure('Qi_Q')
+            plt.plot(newQ2, Qi_Q2, label='Qi(Q)2')
+            plt.xlabel('Q ($nm^{-1}$)')
+            plt.ylabel('Qi(Q)')
+            plt.legend()
+            plt.grid()
+            plt.show()
             
             # plt.figure('Qi_Q resized')
             # # plt.plot(newQ, Qi_Q, label='Qi(Q)')
@@ -155,25 +148,39 @@ if __name__ == '__main__':
             # plt.legend()
             # plt.grid()
             # plt.show()
-                        
-            DeltaQ = np.diff(newQ2)
-            meanDeltaQ = np.mean(DeltaQ)
-            r = fftpack.fftfreq(newQ2.size, meanDeltaQ)
-            # r2 = np.fft.fftfreq(newQ.size, meanDeltaQ)
-            mask = np.where(r>0)
             
-            F_r, F_r2 = calc_Fr(r[mask], newQ, i_Q, Qi_Q2)
+            # DeltaQ = np.diff(newQ2)
+            # meanDeltaQ = np.mean(DeltaQ)
+            # r = fftpack.fftfreq(newQ2.size, meanDeltaQ)
+            # # r2 = np.fft.fftfreq(newQ.size, meanDeltaQ)
+            # mask = np.where(r>=0)
+            # print(DeltaQ)
+            # deltaR = 2*np.pi/(DeltaQ[0]*newDim)
+            # print(deltaR)
             
-            # # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
+            # F_r, F_r2, F_r3 = calc_Fr(r[mask], newQ, i_Q, Qi_Q2)
+            # F_r3 = np.resize(F_r3, r[mask].size)
             
-            plt.figure('F_r')
-            plt.plot(r[mask], F_r, label='F(r)')
+            
+            # # # # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
+            
+            # plt.figure('F_r')
+            # plt.plot(r[mask], F_r, label='F(r)')
+            # # plt.plot(r[mask], F_r2[mask], label='F(r)')
+            # plt.xlabel('r ($nm$)')
+            # plt.ylabel('F(r)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show
+            
+            # plt.figure('F_r2')
+            # # plt.plot(r[mask], F_r, label='F(r)')
             # plt.plot(r[mask], F_r2[mask], label='F(r)')
-            plt.xlabel('r ($nm$)')
-            plt.ylabel('F(r)')
-            plt.legend()
-            plt.grid()
-            plt.show()
+            # plt.xlabel('r ($nm$)')
+            # plt.ylabel('F(r)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
             
             # iteration = 2
             # rmin = 0.22
