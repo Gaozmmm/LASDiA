@@ -343,18 +343,6 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
     return S_Q
     
     
-def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
-    """
-    """
-    
-    exponent_factor = damping_factor / QmaxIntegrate**2
-    damp_Q = np.exp(-exponent_factor * Q**2)
-    
-    S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
-    
-    return S_Qdamp
-    
-    
 def calc_iQ(S_Q, Sinf):
     """Function to calculate i(Q) (eq. 21)
     
@@ -387,8 +375,21 @@ def calc_QiQ(Q, S_Q, Sinf):
     
     return Qi_Q
     
-
-def calc_Fr(r, Q, i_Q, Qi_Q):
+    
+def calc_r(Q):
+    """Function to calculate the r value and range used into F(r) calculation
+    
+    """
+    
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    r = fftpack.fftfreq(Q.size, meanDeltaQ)
+    mask = np.where(r>=0)
+    
+    return r[mask]
+    
+    
+def calc_Fr(r, Q, Qi_Q):
     """Function to calculate F(r) (eq. 20)
     
     arguments:
@@ -404,24 +405,13 @@ def calc_Fr(r, Q, i_Q, Qi_Q):
     meanDeltaQ = np.mean(DeltaQ)
     rQ = np.outer(r,Q)
     sinrQ = np.sin(rQ)
-    F_r = (2.0 / np.pi) * np.sum(Q*i_Q * sinrQ, axis=1) * meanDeltaQ
+    F_r = (2.0 / np.pi) * np.sum(Qi_Q * sinrQ, axis=1) * meanDeltaQ
     
-    F_r2 = np.fft.fft(Qi_Q)
-    F_r3 = np.fft.rfft(Qi_Q)
+    # F_r2 = np.fft.fft(Qi_Q)
+    # F_r3 = np.fft.rfft(Qi_Q)
+    # F_r2 = np.imag(F_r2) * DeltaQ[0] *2/np.pi
     
-    F_r2 = np.imag(F_r2) * DeltaQ[0] *2/np.pi
-    
-    return (F_r, F_r2, F_r3)
-    
-    
-# def calc_gr(r, F_r, rho0):
-    # """Function to calculate g(r)
-    
-    # """
-    
-    # g_r = 1 + F_r / (4 * np.pi * r * rho0)
-    
-    # return g_r
+    return F_r
     
     
 def calc_SQ_F(F_r, r, Q, Sinf):

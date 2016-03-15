@@ -45,10 +45,46 @@ import time
 from scipy import fftpack
 from scipy.integrate import simps
 
-from lmfit import minimize, Parameters
-
 from modules.MainFunctions import *
 
+def calc_iintra(Q):
+    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
+    
+    To implemente!!! -> For now just for CO2!!!
+    """
+    
+    # Fintra_r = np.zeros(r.size)
+    
+    dCO = 0.1165 # nm
+    dOO = 2 * dCO
+    
+    elementList = {"C":1,"O":2}
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    KC = calc_Kp(fe_Q, "C", Q)
+    KO = calc_Kp(fe_Q, "O", Q)
+    
+    constCO = 4/Ztot**2
+    constOO = 2/Ztot**2
+    
+    sinCO = np.zeros(Q.size)
+    sinOO = np.zeros(Q.size)
+    
+    for i in range(Q.size):
+        if Q[i] == 0.0:
+            sinCO[i] = 1
+            sinOO[i] = 1
+        else:
+            sinCO[i] = np.sin(dCO*Q[i])/(dCO*Q[i])
+            sinOO[i] = np.sin(dOO*Q[i])/(dOO*Q[i])
+    
+    iintra_r_CO = constCO * KC * KO * sinCO
+    iintra_r_OO = constOO * KO * KO * sinOO
+    
+    iintra_r = iintra_r_CO + iintra_r_OO
+    
+    return iintra_r
+    
+    
 def calc_Fintra(r, Q, QmaxIntegrate):
     """Function to calculate the intramolecular contribution of F(r) (eq. 42)
     

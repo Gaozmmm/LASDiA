@@ -188,3 +188,58 @@ def calc_Fr(r, Q, i_Q):
     
     return (F_r, F_r2)
     
+    
+def calc_NewDimFFT():
+    """Function to redefine the array dimension to use the FFT
+    """
+    
+    idx, elem = find_nearest(newQ, QmaxIntegrate)
+    newDim = 2*2*2**math.ceil(math.log(5*(idx+1))/math.log(2))
+    Qi_Q2 = np.resize(Qi_Q, newDim)
+    Qi_Q2[idx:] = 0.0
+    
+    newQ2 = np.linspace(np.amin(Q), maxQ, newDim, endpoint=True)
+    
+    DeltaQ = np.diff(newQ)
+    deltaR = 2*np.pi/(DeltaQ[0]*newDim)
+    
+    
+def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
+    """Function for the rebinning
+    """
+    
+    newf_X = interpolate.interp1d(X, f_X)
+    ShitX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
+    ShitY = newf_X(ShitX)
+    
+    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
+    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
+    BinX = np.linspace(min, max, Num, endpoint=True)
+    BinY = np.zeros(Num)
+    
+    for i in range(BinNum):
+        for j in range(0, Num):
+            BinY[j] += ShitY[j*BinNum+i]
+    
+    BinY /= BinNum
+    
+    mask = np.where(X<=minQ)
+    BinY[mask] = 0.0
+    
+    # lenX = len(X)
+    # numX = 2**int(math.log(lenX,2))
+    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    # if min < np.amin(X):
+        # min = np.amin(X)
+    
+    return (BinX, BinY)
+    
+    
+def calc_gr(r, F_r, rho0):
+    """Function to calculate g(r)
+    
+    """
+    
+    g_r = 1 + F_r / (4 * np.pi * r * rho0)
+    
+    return g_r

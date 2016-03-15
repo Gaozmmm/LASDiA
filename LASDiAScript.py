@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """LASDiA main script file.
-This script is mainly used for testing the software.
+This script is mainly used for testing the software, but it can be used to run LASDiA in text mode.
 The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105
 """
 
@@ -124,69 +124,38 @@ if __name__ == '__main__':
             
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
             
-            idx, elem = find_nearest(newQ, QmaxIntegrate)
-            newDim = 2*2*2**math.ceil(math.log(5*(idx+1))/math.log(2))
-            Qi_Q2 = np.resize(Qi_Q, newDim)
-            Qi_Q2[idx:] = 0.0
+            # DeltaQ = np.diff(newQ)
+            # meanDeltaQ = np.mean(DeltaQ)
+            # r = fftpack.fftfreq(newQ.size, meanDeltaQ)
+            # mask = np.where(r>=0)
             
-            newQ2 = np.linspace(np.amin(Q), maxQ, newDim, endpoint=True)
-            # write_file("../Results/CO2/Qi_Q.txt", newQ, Qi_Q)
+            r = calc_r(newQ)
+            F_r = calc_Fr(r, newQ, Qi_Q)
             
-            plt.figure('Qi_Q')
-            plt.plot(newQ2, Qi_Q2, label='Qi(Q)2')
+            # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
+            
+            
+            iteration = 2
+            rmin = 0.22
+            
+            Fintra_r = calc_Fintra(r, Q, QmaxIntegrate)
+            Fintra_r2 = calc_Fintra(r, newQ, QmaxIntegrate)
+            iintra_Q = calc_iintra(newQ)
+            
+            dampQiintra_Q = calc_damped_iintra(iintra_Q, newQ, QmaxIntegrate, Sinf, 1)
+            
+            plt.figure('iintra_Q')
+            plt.plot(newQ, newQ*iintra_Q, label='Qiintra(r)')
+            plt.plot(newQ, dampQiintra_Q, label='Qiintra(r) damped')
             plt.xlabel('Q ($nm^{-1}$)')
-            plt.ylabel('Qi(Q)')
+            plt.ylabel('Q*iintra(Q)')
             plt.legend()
             plt.grid()
             plt.show()
             
-            # plt.figure('Qi_Q resized')
-            # # plt.plot(newQ, Qi_Q, label='Qi(Q)')
-            # plt.plot(Qi_Q2, label='Qi(Q) resized')
-            # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('Qi(Q)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
+            # read_xyz_file("./co2.xyz")
             
-            # DeltaQ = np.diff(newQ2)
-            # meanDeltaQ = np.mean(DeltaQ)
-            # r = fftpack.fftfreq(newQ2.size, meanDeltaQ)
-            # # r2 = np.fft.fftfreq(newQ.size, meanDeltaQ)
-            # mask = np.where(r>=0)
-            # print(DeltaQ)
-            # deltaR = 2*np.pi/(DeltaQ[0]*newDim)
-            # print(deltaR)
-            
-            # F_r, F_r2, F_r3 = calc_Fr(r[mask], newQ, i_Q, Qi_Q2)
-            # F_r3 = np.resize(F_r3, r[mask].size)
-            
-            
-            # # # # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
-            
-            # plt.figure('F_r')
-            # plt.plot(r[mask], F_r, label='F(r)')
-            # # plt.plot(r[mask], F_r2[mask], label='F(r)')
-            # plt.xlabel('r ($nm$)')
-            # plt.ylabel('F(r)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show
-            
-            # plt.figure('F_r2')
-            # # plt.plot(r[mask], F_r, label='F(r)')
-            # plt.plot(r[mask], F_r2[mask], label='F(r)')
-            # plt.xlabel('r ($nm$)')
-            # plt.ylabel('F(r)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
-            
-            # iteration = 2
-            # rmin = 0.22
-            
-            # Fintra_r = calc_Fintra(r[mask], Q, QmaxIntegrate)
-            # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r[mask], rmin)
+            # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r, rmin)
             
             # maskIt = np.where((r>0) & (r < rmin))
             # rIt = r[maskIt]

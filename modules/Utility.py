@@ -175,37 +175,6 @@ def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
     return(validation_index, integration_index, calculation_index)
     
     
-def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
-    """Function for the rebinning
-    """
-    
-    newf_X = interpolate.interp1d(X, f_X)
-    ShitX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
-    ShitY = newf_X(ShitX)
-    
-    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
-    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
-    BinX = np.linspace(min, max, Num, endpoint=True)
-    BinY = np.zeros(Num)
-    
-    for i in range(BinNum):
-        for j in range(0, Num):
-            BinY[j] += ShitY[j*BinNum+i]
-    
-    BinY /= BinNum
-    
-    mask = np.where(X<=minQ)
-    BinY[mask] = 0.0
-    
-    # lenX = len(X)
-    # numX = 2**int(math.log(lenX,2))
-    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
-    # if min < np.amin(X):
-        # min = np.amin(X)
-    
-    return (BinX, BinY)
-    
-    
 def calc_SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q
@@ -243,16 +212,16 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate,
     return (newQ, S_Qsmoothed)
     
     
-def fitline(X, f_X, index1, element1, index2, element2):
+def fitline(Q, I_Q, index1, element1, index2, element2):
     """Function to flat the peak
     """
     
     xpoints = [element1, element2]
-    ypoints = [f_X[index1], f_X[index2]]
+    ypoints = [I_Q[index1], I_Q[index2]]
 
     coefficients = np.polyfit(xpoints, ypoints, 1)
     polynomial = np.poly1d(coefficients)
-    y_axis = polynomial(X)
+    y_axis = polynomial(Q)
 
     return y_axis
     
@@ -275,7 +244,7 @@ def find_nearest(array, value):
     return (index, element)
     
     
-def removePeaks(Q, I_Q):
+def remove_peaks(Q, I_Q):
     """Function to remove Bragg's peaks
     
     arguments:
@@ -310,3 +279,48 @@ def removePeaks(Q, I_Q):
         I_Q[mask] = I_Q1
     
     return I_Q
+    
+    
+def calc_damped_iintra(iintra_Q, Q, QmaxIntegrate, Sinf, damping_factor):
+    """Function to calculate the damping function
+    """
+    
+    # damping_factor = 0.5 # np.log(10)
+    exponent_factor = damping_factor / QmaxIntegrate**2
+    damp_Q = np.exp(-exponent_factor * Q**2)
+    
+    Qiintra_Q = Q*iintra_Q
+    Qiintra_Q[Q<=QmaxIntegrate] = damp_Q[Q<QmaxIntegrate]*Qiintra_Q[Q<QmaxIntegrate]
+    Qiintra_Q[Q>QmaxIntegrate] = Sinf
+    
+    return Qiintra_Q
+    
+    
+def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
+    """
+    """
+    
+    exponent_factor = damping_factor / QmaxIntegrate**2
+    damp_Q = np.exp(-exponent_factor * Q**2)
+    
+    S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
+    
+    return S_Qdamp
+    
+    
+def read_xyz_file(path):
+    """Function to read xyz file to calculate the atom position
+    """
+    
+    file = open(path, "r")
+    file_name = file.name
+    ext = os.path.splitext(file_name)[1]
+    
+    numAtoms = int(file.readline())
+    comment = file.readline()
+    
+    lines = file.readlines()
+    file.close()
+    
+    for i in range(0, numAtoms):
+        print(i, lines[i])
