@@ -322,5 +322,37 @@ def read_xyz_file(path):
     lines = file.readlines()
     file.close()
     
-    for i in range(0, numAtoms):
-        print(i, lines[i])
+    element = []
+    x = []
+    y = []
+    z = []
+    
+    for line in lines:
+        columns = line.split()
+        element.append(columns[0])
+        x.append(float(columns[1]))
+        y.append(float(columns[2]))
+        z.append(float(columns[3]))
+        
+    xVect = np.array(x)
+    xVect /= 10.0
+    yVect = np.array(y)
+    yVect /= 10.0
+    zVect = np.array(z)
+    zVect /= 10.0
+    # elementPosition = {}
+    
+    # for line in lines:
+        # elem, x, y, z = line.split()
+        # elementPosition[elem] = [x, y, z]
+        
+    return (numAtoms, element, xVect, yVect, zVect)
+    
+    
+def calc_distMol(x1, y1, z1, x2, y2, z2):
+    """Function to calculate di distance between 2 points
+    """
+    
+    d = np.sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)  
+    
+    return d

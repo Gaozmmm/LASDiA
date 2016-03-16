@@ -46,6 +46,7 @@ from scipy import fftpack
 from scipy.integrate import simps
 
 from modules.MainFunctions import *
+from modules.Utility import *
 
 def calc_iintra(Q):
     """Function to calculate the intramolecular contribution of F(r) (eq. 42)
@@ -56,6 +57,7 @@ def calc_iintra(Q):
     # Fintra_r = np.zeros(r.size)
     
     dCO = 0.1165 # nm
+    dCO = 0.1514076 # nm
     dOO = 2 * dCO
     
     elementList = {"C":1,"O":2}
@@ -77,12 +79,43 @@ def calc_iintra(Q):
             sinCO[i] = np.sin(dCO*Q[i])/(dCO*Q[i])
             sinOO[i] = np.sin(dOO*Q[i])/(dOO*Q[i])
     
-    iintra_r_CO = constCO * KC * KO * sinCO
-    iintra_r_OO = constOO * KO * KO * sinOO
+    iintra_Q_CO = constCO * KC * KO * sinCO
+    iintra_Q_OO = constOO * KO * KO * sinOO
     
-    iintra_r = iintra_r_CO + iintra_r_OO
+    iintra_Q = iintra_Q_CO + iintra_Q_OO
     
-    return iintra_r
+    return iintra_Q
+    
+    
+def calc_iintra2(Q, elementList, path):
+    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
+    
+    """
+    
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    
+    numAtoms, element, x, y, z = read_xyz_file(path)
+    iintra_Q = np.zeros(Q.size)
+    sinpq = np.zeros(Q.size)
+    
+    for ielem in range(len(element)):
+        for jelem in range(len(element)):
+            if ielem != jelem:
+                KK = calc_Kp(fe_Q, element[ielem], Q) * calc_Kp(fe_Q, element[jelem], Q)
+                d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
+                iintra_Q += KK * np.sin(d*Q) / (d*Q)
+                iintra_Q[Q==0.0] = KK
+                
+    
+    # iintra_Q = np.zeros(Q.size)
+    
+    # for i in listElement:
+        # for j in listElement:
+            # iintra_Q += calc_Kp(fe_Q, i, Q) * calc_Kp(fe_Q, j, Q) * 
+            
+    iintra_Q /= Ztot**2
+    
+    return iintra_Q
     
     
 def calc_Fintra(r, Q, QmaxIntegrate):

@@ -124,34 +124,41 @@ if __name__ == '__main__':
             
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
             
-            # DeltaQ = np.diff(newQ)
-            # meanDeltaQ = np.mean(DeltaQ)
-            # r = fftpack.fftfreq(newQ.size, meanDeltaQ)
-            # mask = np.where(r>=0)
-            
             r = calc_r(newQ)
             F_r = calc_Fr(r, newQ, Qi_Q)
             
             # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
             
-            
             iteration = 2
             rmin = 0.22
             
-            Fintra_r = calc_Fintra(r, Q, QmaxIntegrate)
-            Fintra_r2 = calc_Fintra(r, newQ, QmaxIntegrate)
+            Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate)
+            
             iintra_Q = calc_iintra(newQ)
+            iintra_Q2 = calc_iintra2(newQ, elementList, "./co2.xyz")
+            # print(iintra_Q2)
             
-            dampQiintra_Q = calc_damped_iintra(iintra_Q, newQ, QmaxIntegrate, Sinf, 1)
+            dampQiintra_Q = calc_damped_iintra(iintra_Q2, newQ, QmaxIntegrate, Sinf, 1)
             
-            plt.figure('iintra_Q')
-            plt.plot(newQ, newQ*iintra_Q, label='Qiintra(r)')
-            plt.plot(newQ, dampQiintra_Q, label='Qiintra(r) damped')
-            plt.xlabel('Q ($nm^{-1}$)')
-            plt.ylabel('Q*iintra(Q)')
-            plt.legend()
-            plt.grid()
-            plt.show()
+            Fintra_r2 = calc_Fr(r, newQ, dampQiintra_Q)
+            
+            # plt.figure('iintra_Q')
+            # plt.plot(newQ, iintra_Q, label='iintra(Q)')
+            # plt.plot(newQ, iintra_Q2, label='iintra(Q)2')
+            # plt.xlabel('Q ($nm^{-1}$)')
+            # plt.ylabel('iintra(Q)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
+            
+            # plt.figure('Fintra_r')
+            # plt.plot(r, Fintra_r, label='Fintra(r)')
+            # plt.plot(r, Fintra_r2, label='Fintra(r)2')
+            # plt.xlabel('r ($nm$)')
+            # plt.ylabel('Fintra(r)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
             
             # read_xyz_file("./co2.xyz")
             
