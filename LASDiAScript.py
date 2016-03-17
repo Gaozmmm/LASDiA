@@ -114,7 +114,7 @@ if __name__ == '__main__':
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
             # Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
-            alpha = calc_alpha(J_Q, Sinf, Q, Isample_QIgor, fe_Q, Ztot, rho0[i], integration_index)
+            alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_QIgor[integration_index], fe_Q[integration_index], Ztot, rho0[i])
             Icoh_Q = calc_Icoh(N, alpha, Isample_QIgor, Iincoh_Q)
             
             S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
@@ -124,41 +124,43 @@ if __name__ == '__main__':
             
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
             
-            r = calc_r(newQ)
-            F_r = calc_Fr(r, newQ, Qi_Q)
+            validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
             
-            # write_file("../Results/CO2/F_r.txt", r[mask], F_r)
+            r = calc_r(newQ[integration_indexSmooth])
+            F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+            
+            # write_file("../Results/CO2/F_r.txt", r, F_r)
             
             iteration = 2
             rmin = 0.22
             
             Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate)
+            iintra_Q = calc_iintra(newQ) # ad-hoc
+            # iintra_Q = calc_iintra2(newQ, elementList, "./co2.xyz")
             
-            iintra_Q = calc_iintra(newQ)
-            iintra_Q2 = calc_iintra2(newQ, elementList, "./co2.xyz")
-            # print(iintra_Q2)
+            Fintra_r2 = calc_Fr(r, newQ, Qiintra_Q)
             
-            dampQiintra_Q = calc_damped_iintra(iintra_Q2, newQ, QmaxIntegrate, Sinf, 1)
-            
-            Fintra_r2 = calc_Fr(r, newQ, dampQiintra_Q)
+            dampQiintra_Q = calc_damped_iintra(iintra_Q, newQ, QmaxIntegrate, Sinf, 1)
+            Fintra_r3 = calc_Fr(r, newQ, dampQiintra_Q)
             
             # plt.figure('iintra_Q')
             # plt.plot(newQ, iintra_Q, label='iintra(Q)')
-            # plt.plot(newQ, iintra_Q2, label='iintra(Q)2')
+            # plt.plot(newQ[integration_indexSmooth], iintra_Q2, label='iintra(Q) xyz')
             # plt.xlabel('Q ($nm^{-1}$)')
             # plt.ylabel('iintra(Q)')
             # plt.legend()
             # plt.grid()
             # plt.show()
             
-            # plt.figure('Fintra_r')
-            # plt.plot(r, Fintra_r, label='Fintra(r)')
-            # plt.plot(r, Fintra_r2, label='Fintra(r)2')
-            # plt.xlabel('r ($nm$)')
-            # plt.ylabel('Fintra(r)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
+            plt.figure('Fintra_r')
+            plt.plot(r, Fintra_r, label='Fintra(r)')
+            plt.plot(r, Fintra_r2, label='Fintra(r) iintra')
+            plt.plot(r, Fintra_r3, label='Fintra(r) iintra damp')
+            plt.xlabel('r ($nm$)')
+            plt.ylabel('F(r)')
+            plt.legend()
+            plt.grid()
+            plt.show()
             
             # read_xyz_file("./co2.xyz")
             

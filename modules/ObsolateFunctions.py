@@ -243,3 +243,33 @@ def calc_gr(r, F_r, rho0):
     g_r = 1 + F_r / (4 * np.pi * r * rho0)
     
     return g_r
+    
+    
+def calc_alpha2(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
+    """Function to calculate the normalization factor alpha (eq. 34)
+    
+    arguments:
+    J_Q: J(Q) - array
+    Sinf: Sinf - number
+    Q: momentum transfer - array
+    Isample_Q: sample scattering intensity - array
+    fe_Q: effective electric form factor - array
+    Ztot: total Z number - number
+    rho0: average atomic density - number
+    index: array index of element in the calculation range - array
+    
+    returns:
+    alpha: normalization factor - number
+    """
+    
+    Integral1 = simps((J_Q[index] + Sinf) * Q[index]**2, Q[index])
+    Integral2 = simps((Isample_Q[index]/fe_Q[index]**2) * Q[index]**2,Q[index])
+    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
+    
+    # DeltaQ = np.diff(Q)
+    # meanDeltaQ = np.mean(DeltaQ)
+    # Int1 = np.sum((J_Q[index] + Sinf) * Q[index]**2) * meanDeltaQ
+    # Int2 = np.sum( (Isample_Q[index]/fe_Q[index]**2) * Q[index]**2  ) * meanDeltaQ
+    # alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Int1) / Int2)
+
+    return alpha

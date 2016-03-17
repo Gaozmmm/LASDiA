@@ -49,7 +49,7 @@ from modules.MainFunctions import *
 from modules.Utility import *
 
 def calc_iintra(Q):
-    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
+    """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
     
     To implemente!!! -> For now just for CO2!!!
     """
@@ -88,7 +88,7 @@ def calc_iintra(Q):
     
     
 def calc_iintra2(Q, elementList, path):
-    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
+    """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
     
     """
     
