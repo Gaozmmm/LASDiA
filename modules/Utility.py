@@ -175,7 +175,7 @@ def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
     return(validation_index, integration_index, calculation_index)
     
     
-def calc_SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
+def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q
     
@@ -183,7 +183,7 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate,
     Q: momentum transfer - array
     S_Q: structure factor - array
     Sinf: Sinf - number
-    smoothfactor: smoothing factor - number
+    smooth_factor: smoothing factor - number
     min_index: array index of element with Q<=minQ - array
     minQ: minimum Q value - number
     maxQ: maximum Q value - number
@@ -196,13 +196,13 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, minQ, QmaxIntegrate,
     """
     
     mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
-    smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smoothfactor)
+    smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smooth_factor)
     newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
     S_Qsmoothed = smooth(newQ)
     
     # mask_low = np.where(Q<=minQ)
     num_low = S_Qsmoothed[newQ<minQ].size
-    smooth = interpolate.UnivariateSpline(Q[min_index], S_Q[min_index], k=3, s=smoothfactor)
+    smooth = interpolate.UnivariateSpline(Q[min_index], S_Q[min_index], k=3, s=smooth_factor)
     newQLow = np.linspace(np.amin(newQ), minQ, num_low, endpoint=True)
     S_QsmoothLow = smooth(newQLow)
     
@@ -281,8 +281,9 @@ def remove_peaks(Q, I_Q):
     return I_Q
     
     
-def calc_damped_iintra(iintra_Q, Q, QmaxIntegrate, Sinf, damping_factor):
+def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
     """Function to calculate the damping function
+    
     """
     
     # damping_factor = 0.5 # np.log(10)
@@ -290,8 +291,7 @@ def calc_damped_iintra(iintra_Q, Q, QmaxIntegrate, Sinf, damping_factor):
     damp_Q = np.exp(-exponent_factor * Q**2)
     
     Qiintra_Q = Q*iintra_Q
-    Qiintra_Q[Q<=QmaxIntegrate] = damp_Q[Q<QmaxIntegrate]*Qiintra_Q[Q<QmaxIntegrate]
-    Qiintra_Q[Q>QmaxIntegrate] = Sinf
+    Qiintra_Q = damp_Q*Qiintra_Q
     
     return Qiintra_Q
     

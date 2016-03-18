@@ -54,6 +54,10 @@ from modules.IgorFunctions import *
 
 if __name__ == '__main__':
     N = 3 # sc.N_A
+    smooth_factor = 0.25
+    damp_factor = 1
+    iteration = 2
+    rmin = 0.22
     
     # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
@@ -118,51 +122,25 @@ if __name__ == '__main__':
             Icoh_Q = calc_Icoh(N, alpha, Isample_QIgor, Iincoh_Q)
             
             S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
-            newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, 0.25, min_index, minQ, QmaxIntegrate, maxQ, 550)
+            newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, 550)
             
-            S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, 1)
-            
+            S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
             
             validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
+            min_indexSmooth, max_indexSmooth = calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
             
-            r = calc_r(newQ[integration_indexSmooth])
+            r = calc_r(newQ)
             F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
             
             # write_file("../Results/CO2/F_r.txt", r, F_r)
             
-            iteration = 2
-            rmin = 0.22
+            Fintra_r = calc_Fintra(r, newQ[integration_indexSmooth], QmaxIntegrate)
             
-            Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate)
-            iintra_Q = calc_iintra(newQ) # ad-hoc
-            # iintra_Q = calc_iintra2(newQ, elementList, "./co2.xyz")
-            
-            Fintra_r2 = calc_Fr(r, newQ, Qiintra_Q)
-            
-            dampQiintra_Q = calc_damped_iintra(iintra_Q, newQ, QmaxIntegrate, Sinf, 1)
-            Fintra_r3 = calc_Fr(r, newQ, dampQiintra_Q)
-            
-            # plt.figure('iintra_Q')
-            # plt.plot(newQ, iintra_Q, label='iintra(Q)')
-            # plt.plot(newQ[integration_indexSmooth], iintra_Q2, label='iintra(Q) xyz')
-            # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('iintra(Q)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
-            
-            plt.figure('Fintra_r')
-            plt.plot(r, Fintra_r, label='Fintra(r)')
-            plt.plot(r, Fintra_r2, label='Fintra(r) iintra')
-            plt.plot(r, Fintra_r3, label='Fintra(r) iintra damp')
-            plt.xlabel('r ($nm$)')
-            plt.ylabel('F(r)')
-            plt.legend()
-            plt.grid()
-            plt.show()
-            
-            # read_xyz_file("./co2.xyz")
+            iintra_Q = calc_iintra(newQ, max_indexSmooth) # ad-hoc
+            # iintra_Q = calc_iintra2(newQ, max_indexSmooth, elementList, "./co2.xyz")
+            Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
+            Fintra_r2 = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
             
             # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r, rmin)
             
@@ -172,7 +150,29 @@ if __name__ == '__main__':
             # deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r, rIt, rho0[i])
             # chi2[i][j] = simps(deltaF_r**2, r[maskIt])
             # print(chi2[i][j])
-    
+
+
+            # plt.figure('iintra_Q')
+            # plt.plot(newQ, iintra_Q, label='iintra(Q)')
+            # plt.plot(newQ, iintra_Q2, label='iintra(Q) xyz')
+            # plt.xlabel('Q ($nm^{-1}$)')
+            # plt.ylabel('iintra(Q)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
+            
+            plt.figure('Fintra_r')
+            plt.plot(r, Fintra_r, label='Fintra(r)')
+            plt.plot(r, Fintra_r2, label='Fintra(r) iintra')
+            plt.plot(r, Fintra_r/Fintra_r2, label='ratio')
+            plt.xlabel('r ($nm$)')
+            plt.ylabel('F(r)')
+            plt.legend()
+            plt.grid()
+            plt.show()
+
+
+            
     # take min of chi2
     # minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
     # print(chi2[minIndxRho0][minIndxS])

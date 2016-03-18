@@ -48,7 +48,7 @@ from scipy.integrate import simps
 from modules.MainFunctions import *
 from modules.Utility import *
 
-def calc_iintra(Q):
+def calc_iintra(Q, max_index):
     """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
     
     To implemente!!! -> For now just for CO2!!!
@@ -56,7 +56,7 @@ def calc_iintra(Q):
     
     # Fintra_r = np.zeros(r.size)
     
-    dCO = 0.1165 # nm
+    # dCO = 0.1165 # nm
     dCO = 0.1514076 # nm
     dOO = 2 * dCO
     
@@ -84,10 +84,12 @@ def calc_iintra(Q):
     
     iintra_Q = iintra_Q_CO + iintra_Q_OO
     
+    iintra_Q[max_index] = 0.0
+    
     return iintra_Q
     
     
-def calc_iintra2(Q, elementList, path):
+def calc_iintra2(Q, max_index, elementList, path):
     """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
     
     """
@@ -106,6 +108,8 @@ def calc_iintra2(Q, elementList, path):
                 iintra_Q += KK * np.sin(d*Q) / (d*Q)
                 iintra_Q[Q==0.0] = KK
                 
+    
+    iintra_Q[max_index] = 0.0
     
     # iintra_Q = np.zeros(Q.size)
     
@@ -126,7 +130,7 @@ def calc_Fintra(r, Q, QmaxIntegrate):
     
     # Fintra_r = np.zeros(r.size)
     
-    dCO = 0.1165 # nm
+    dCO = 0.1514076 # nm
     dOO = 2 * dCO
     
     elementList = {"C":1,"O":2}
