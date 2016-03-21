@@ -53,11 +53,13 @@ from modules.IgorFunctions import *
 # from cmath import exp, pi
 
 if __name__ == '__main__':
-    N = 3 # sc.N_A
+    N = 1 # sc.N_A
     smooth_factor = 0.25
     damp_factor = 1
     iteration = 2
     rmin = 0.22
+    xyz_file = "./co2.xyz"
+    # xyz_file = "./argon.xyz"
     
     # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
@@ -98,11 +100,6 @@ if __name__ == '__main__':
     # s = np.array([0.57])
     # rho0 = np.array([26.1])
     # CO2
-    # s = np.array([1.04346])
-    # s = np.array([0.79])
-    # rho0 = np.array([29.7404])
-    
-    # s = np.array([1.00114])
     s = np.array([0.984228])
     rho0 = np.array([29.6625])
     chi2 = np.zeros((rho0.size, s.size))
@@ -118,14 +115,17 @@ if __name__ == '__main__':
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
             # Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
+            # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, rho0[i])
+            # Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
             alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_QIgor[integration_index], fe_Q[integration_index], Ztot, rho0[i])
             Icoh_Q = calc_Icoh(N, alpha, Isample_QIgor, Iincoh_Q)
             
             S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
             newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, 550)
-            
             S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
+            
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
+            i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
             
             validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
             min_indexSmooth, max_indexSmooth = calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
@@ -133,16 +133,16 @@ if __name__ == '__main__':
             r = calc_r(newQ)
             F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
             
-            # write_file("../Results/CO2/F_r.txt", r, F_r)
-            
-            Fintra_r = calc_Fintra(r, newQ[integration_indexSmooth], QmaxIntegrate)
-            
-            iintra_Q = calc_iintra(newQ, max_indexSmooth) # ad-hoc
-            # iintra_Q = calc_iintra2(newQ, max_indexSmooth, elementList, "./co2.xyz")
+            iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, xyz_file)
             Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
-            Fintra_r2 = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
+            Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
+            # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate)
             
-            # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_index], Q[integration_index], Sinf, J_Q[integration_index], r, rmin)
+            Iincoh_QSmooth = calc_Iincoh(elementList, newQ)
+            J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
+            
+            F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin)
+            # write_file("../Results/CO2/F_rCorr.txt", r, F_rIt)
             
             # maskIt = np.where((r>0) & (r < rmin))
             # rIt = r[maskIt]
@@ -150,21 +150,9 @@ if __name__ == '__main__':
             # deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r, rIt, rho0[i])
             # chi2[i][j] = simps(deltaF_r**2, r[maskIt])
             # print(chi2[i][j])
-
-
-            # plt.figure('iintra_Q')
-            # plt.plot(newQ, iintra_Q, label='iintra(Q)')
-            # plt.plot(newQ, iintra_Q2, label='iintra(Q) xyz')
-            # plt.xlabel('Q ($nm^{-1}$)')
-            # plt.ylabel('iintra(Q)')
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
             
-            plt.figure('Fintra_r')
-            plt.plot(r, Fintra_r, label='Fintra(r)')
-            plt.plot(r, Fintra_r2, label='Fintra(r) iintra')
-            plt.plot(r, Fintra_r/Fintra_r2, label='ratio')
+            plt.figure('F_rCorr')
+            plt.plot(r, F_rIt, label='F(r) Corr')
             plt.xlabel('r ($nm$)')
             plt.ylabel('F(r)')
             plt.legend()

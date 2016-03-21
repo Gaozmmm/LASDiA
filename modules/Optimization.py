@@ -47,49 +47,9 @@ from scipy.integrate import simps
 
 from modules.MainFunctions import *
 from modules.Utility import *
-
-def calc_iintra(Q, max_index):
-    """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
-    
-    To implemente!!! -> For now just for CO2!!!
-    """
-    
-    # Fintra_r = np.zeros(r.size)
-    
-    # dCO = 0.1165 # nm
-    dCO = 0.1514076 # nm
-    dOO = 2 * dCO
-    
-    elementList = {"C":1,"O":2}
-    fe_Q, Ztot = calc_eeff(elementList, Q)
-    KC = calc_Kp(fe_Q, "C", Q)
-    KO = calc_Kp(fe_Q, "O", Q)
-    
-    constCO = 4/Ztot**2
-    constOO = 2/Ztot**2
-    
-    sinCO = np.zeros(Q.size)
-    sinOO = np.zeros(Q.size)
-    
-    for i in range(Q.size):
-        if Q[i] == 0.0:
-            sinCO[i] = 1
-            sinOO[i] = 1
-        else:
-            sinCO[i] = np.sin(dCO*Q[i])/(dCO*Q[i])
-            sinOO[i] = np.sin(dOO*Q[i])/(dOO*Q[i])
-    
-    iintra_Q_CO = constCO * KC * KO * sinCO
-    iintra_Q_OO = constOO * KO * KO * sinOO
-    
-    iintra_Q = iintra_Q_CO + iintra_Q_OO
-    
-    iintra_Q[max_index] = 0.0
-    
-    return iintra_Q
     
     
-def calc_iintra2(Q, max_index, elementList, path):
+def calc_iintra(Q, max_index, elementList, path):
     """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
     
     """
@@ -105,21 +65,14 @@ def calc_iintra2(Q, max_index, elementList, path):
             if ielem != jelem:
                 KK = calc_Kp(fe_Q, element[ielem], Q) * calc_Kp(fe_Q, element[jelem], Q)
                 d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
-                iintra_Q += KK * np.sin(d*Q) / (d*Q)
-                iintra_Q[Q==0.0] = KK
-                
+                if d != 0.0:
+                    iintra_Q += KK * np.sin(d*Q) / (d*Q)
+                    iintra_Q[Q==0.0] = KK
     
     iintra_Q[max_index] = 0.0
-    
-    # iintra_Q = np.zeros(Q.size)
-    
-    # for i in listElement:
-        # for j in listElement:
-            # iintra_Q += calc_Kp(fe_Q, i, Q) * calc_Kp(fe_Q, j, Q) * 
-            
     iintra_Q /= Ztot**2
     
-    return iintra_Q
+    return (iintra_Q, fe_Q)
     
     
 def calc_Fintra(r, Q, QmaxIntegrate):
@@ -130,7 +83,7 @@ def calc_Fintra(r, Q, QmaxIntegrate):
     
     # Fintra_r = np.zeros(r.size)
     
-    dCO = 0.1514076 # nm
+    dCO = 0.1165 # nm
     dOO = 2 * dCO
     
     elementList = {"C":1,"O":2}
@@ -189,13 +142,11 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     rInt = r[mask]
     deltaF_rInt = deltaF_r[mask]
     
-    integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(Q)))).T, rInt)
-    
-    # Deltar = np.diff(rInt)
-    # meanDeltar = np.mean(Deltar)
-    # Qr = np.outer(Q,rInt)
-    # sinQr = np.sin(Qr)
-    # integral = np.sum(deltaF_rInt * sinQr, axis=1) * meanDeltar
+    Deltar = np.diff(rInt)
+    meanDeltar = np.mean(Deltar)
+    Qr = np.outer(Q, rInt)
+    sinQr = np.sin(Qr)
+    integral = np.sum(deltaF_rInt * sinQr, axis=1) * meanDeltar
     
     i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q) + 1)) * integral
     
@@ -220,7 +171,6 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
     F_r: optimazed F(r) - array
     """
     
-    # commented just for testing the damping factor!!!
     plt.ion()
     plt.figure('F_r')
     plt.plot(r, F_r, label='F(r)')
@@ -229,26 +179,15 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
     plt.legend()
     plt.grid()
     
-    plt.figure('Qi_Q')
-    plt.plot(Q, Q*i_Q, label='Q*i(Q)')
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('Qi(Q)')
-    plt.legend()
-    plt.grid()
-    
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
-        F_r = calc_Fr(r, Q, i_Q)
+        i_Q[0] = 0.0
+        F_r = calc_Fr(r, Q, Q*i_Q)
         
         j = i+1
         plt.figure('F_r')
         plt.plot(r, F_r, label='%s iteration F(r)' %j)
-        plt.legend()
-        plt.draw()
-        
-        plt.figure('Qi_Q')
-        plt.plot(Q, Q*i_Q, label='%s iteration Qi(Q)' %j)
         plt.legend()
         plt.draw()
         

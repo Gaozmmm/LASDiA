@@ -273,3 +273,100 @@ def calc_alpha2(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     # alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Int1) / Int2)
 
     return alpha
+    
+    
+def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
+    """Function to calculate the i-th iteration of i(Q) (eq. 46, 49)
+    
+    arguments:
+    i_Q: i(Q) - array
+    Q: momentum transfer - array
+    Sinf: Sinf - number
+    J_Q: J(Q) - array
+    deltaF_r: deltaF(r) - array
+    rmin: value of r cutoff - number
+    
+    returns:
+    i_Qi: i-th iteration of i(Q) - array
+    """
+    
+    mask = np.where(r < rmin)
+    rInt = r[mask]
+    deltaF_rInt = deltaF_r[mask]
+    
+    integral = simps(deltaF_rInt * (np.array(np.sin(np.mat(rInt).T *  np.mat(Q)))).T, rInt)
+    
+    i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q) + 1)) * integral
+    
+    return i_Qi
+    
+    
+def calc_Fintra(r, Q, QmaxIntegrate):
+    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
+    
+    To implemente!!! -> For now just for CO2!!!
+    """
+    
+    # Fintra_r = np.zeros(r.size)
+    
+    dCO = 0.1165 # nm
+    dOO = 2 * dCO
+    
+    elementList = {"C":1,"O":2}
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    KC = calc_Kp(fe_Q, "C", Q)
+    KO = calc_Kp(fe_Q, "O", Q)
+    
+    constCO = 4/(np.pi * Ztot**2 * dCO)
+    constOO = 2/(np.pi * Ztot**2 * dOO)
+    
+    Fintra_r_CO = constCO * KC * KO * \
+        ((np.sin((r - dCO)*QmaxIntegrate)) / (r - dCO) - (np.sin((r + dCO)*QmaxIntegrate)) / (r + dCO))
+    
+    Fintra_r_OO = constOO * KO * KO * \
+        ((np.sin((r - dOO)*QmaxIntegrate)) / (r - dOO) - (np.sin((r + dOO)*QmaxIntegrate)) / (r + dOO))
+    
+    Fintra_r = Fintra_r_CO + Fintra_r_OO
+    
+    return Fintra_r
+    
+    
+def calc_iintra(Q, max_index):
+    """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
+    
+    To implemente!!! -> For now just for CO2!!!
+    """
+    
+    # Fintra_r = np.zeros(r.size)
+    
+    # dCO = 0.1165 # nm
+    dCO = 0.1514076 # nm
+    dOO = 2 * dCO
+    
+    elementList = {"C":1,"O":2}
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    KC = calc_Kp(fe_Q, "C", Q)
+    KO = calc_Kp(fe_Q, "O", Q)
+    
+    constCO = 4/Ztot**2
+    constOO = 2/Ztot**2
+    
+    sinCO = np.zeros(Q.size)
+    sinOO = np.zeros(Q.size)
+    
+    for i in range(Q.size):
+        if Q[i] == 0.0:
+            sinCO[i] = 1
+            sinOO[i] = 1
+        else:
+            sinCO[i] = np.sin(dCO*Q[i])/(dCO*Q[i])
+            sinOO[i] = np.sin(dOO*Q[i])/(dOO*Q[i])
+    
+    iintra_Q_CO = constCO * KC * KO * sinCO
+    iintra_Q_OO = constOO * KO * KO * sinOO
+    
+    iintra_Q = iintra_Q_CO + iintra_Q_OO
+    
+    iintra_Q[max_index] = 0.0
+    
+    return iintra_Q
