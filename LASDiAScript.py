@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # s = np.arange(0.2, 1.0, 0.1)
     # CO2
     # s = np.arange(0.95, 1.05, 0.01)
-    # rho0 = np.arange(26, 31, 1)
+    rho0 = np.arange(26, 31, 1)
     
     # # real values
     # # s = np.arange(0.2, 0.8, 0.01)
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     # rho0 = np.array([26.1])
     # CO2
     s = np.array([0.984228])
-    rho0 = np.array([29.6625])
+    # rho0 = np.array([29.6625])
     chi2 = np.zeros((rho0.size, s.size))
     
     # remember the electron unit in atomic form factor!!!
@@ -144,37 +144,45 @@ if __name__ == '__main__':
             F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin)
             # write_file("../Results/CO2/F_rCorr.txt", r, F_rIt)
             
-            # maskIt = np.where((r>0) & (r < rmin))
-            # rIt = r[maskIt]
-            # Fintra_r = calc_Fintra(rIt, Q, QmaxIntegrate)
-            # deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r, rIt, rho0[i])
-            # chi2[i][j] = simps(deltaF_r**2, r[maskIt])
-            # print(chi2[i][j])
+            maskIt = np.where((r>0) & (r < rmin))
+            rIt = r[maskIt]
+            deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0[i])
             
             plt.figure('F_rCorr')
-            plt.plot(r, F_rIt, label='F(r) Corr')
+            plt.plot(rIt, deltaF_r, label='F(r) Corr')
             plt.xlabel('r ($nm$)')
             plt.ylabel('F(r)')
             plt.legend()
             plt.grid()
             plt.show()
+            
+            chi2[i][j] = simps(deltaF_r**2, r[maskIt])
+            print(chi2[i][j])
+            
+            # plt.figure('F_rCorr')
+            # plt.plot(r, F_rIt, label='F(r) Corr')
+            # plt.xlabel('r ($nm$)')
+            # plt.ylabel('F(r)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show()
 
 
             
     # take min of chi2
-    # minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
-    # print(chi2[minIndxRho0][minIndxS])
-    # print(rho0[minIndxRho0], s[minIndxS])
+    minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
+    print(chi2[minIndxRho0][minIndxS])
+    print(rho0[minIndxRho0], s[minIndxS])
     
-    # # plot 2d chi2
-    # plt.figure('chi2')
+    # plot 2d chi2
+    plt.figure('chi2')
     # plt.plot(s,chi2[0, : ])
     # plt.xlabel('s')
-    # # plt.plot(rho0,chi2[ : ,0])
-    # # plt.xlabel('rho0')
-    # plt.ylabel('chi2')
-    # plt.grid()
-    # plt.show()
+    plt.plot(rho0,chi2[ : ,0])
+    plt.xlabel('rho0')
+    plt.ylabel('chi2')
+    plt.grid()
+    plt.show()
     
     # plot the 3d chi2 and its profile
     # x, y = np.meshgrid(s, rho0)

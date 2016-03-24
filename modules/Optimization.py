@@ -171,13 +171,13 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
     F_r: optimazed F(r) - array
     """
     
-    plt.ion()
-    plt.figure('F_r')
-    plt.plot(r, F_r, label='F(r)')
-    plt.xlabel('r (nm)')
-    plt.ylabel('F(r)')
-    plt.legend()
-    plt.grid()
+    # plt.ion()
+    # plt.figure('F_r')
+    # plt.plot(r, F_r, label='F(r)')
+    # plt.xlabel('r (nm)')
+    # plt.ylabel('F(r)')
+    # plt.legend()
+    # plt.grid()
     
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
@@ -185,16 +185,16 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin)
         i_Q[0] = 0.0
         F_r = calc_Fr(r, Q, Q*i_Q)
         
-        j = i+1
-        plt.figure('F_r')
-        plt.plot(r, F_r, label='%s iteration F(r)' %j)
-        plt.legend()
-        plt.draw()
+        # j = i+1
+        # plt.figure('F_r')
+        # plt.plot(r, F_r, label='%s iteration F(r)' %j)
+        # plt.legend()
+        # plt.draw()
         
-        time.sleep(1.0)
+        # time.sleep(1.0)
     
-    plt.ioff()
-    plt.show()
+    # plt.ioff()
+    # plt.show()
     
     return F_r
     
