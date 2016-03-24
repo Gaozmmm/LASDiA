@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>934</width>
-    <height>388</height>
+    <width>1031</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,14 +40,14 @@
     <item>
      <widget class="QPushButton" name="CalcSQ">
       <property name="text">
-       <string>Calc S(Q)</string>
+       <string>S(Q)</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QPushButton" name="Calcgr">
       <property name="text">
-       <string>Calc F(r)</string>
+       <string>F(r)</string>
       </property>
      </widget>
     </item>
@@ -56,10 +56,10 @@
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>230</x>
      <y>10</y>
-     <width>591</width>
-     <height>351</height>
+     <width>671</width>
+     <height>421</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -68,7 +68,7 @@
    <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="tab">
+   <widget class="QWidget" name="Sample">
     <attribute name="title">
      <string>Sample</string>
     </attribute>
@@ -77,85 +77,83 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>261</width>
-       <height>81</height>
+       <width>281</width>
+       <height>91</height>
       </rect>
      </property>
      <property name="title">
       <string>Sample Composition</string>
      </property>
-     <widget class="QSpinBox" name="Multiplicity">
+     <widget class="QWidget" name="verticalLayoutWidget">
       <property name="geometry">
        <rect>
-        <x>140</x>
-        <y>50</y>
-        <width>47</width>
-        <height>24</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_9">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
+        <x>160</x>
         <y>30</y>
-        <width>59</width>
-        <height>16</height>
+        <width>101</width>
+        <height>41</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Elements</string>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Mol distance</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="doubleSpinBox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
-     <widget class="QLabel" name="label_10">
+     <widget class="QWidget" name="verticalLayoutWidget_2">
       <property name="geometry">
        <rect>
-        <x>140</x>
+        <x>20</x>
         <y>30</y>
-        <width>81</width>
-        <height>16</height>
+        <width>91</width>
+        <height>41</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Multiplicity</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="Elements">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>50</y>
-        <width>104</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <item>
-       <property name="text">
-        <string>Ar</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>C</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>O</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Si</string>
-       </property>
-      </item>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Molecule</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="Molecule">
+         <item>
+          <property name="text">
+           <string>Ar</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>N2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>CO2</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>180</y>
+       <x>360</x>
+       <y>230</y>
        <width>191</width>
        <height>131</height>
       </rect>
@@ -217,29 +215,11 @@
        </item>
       </layout>
      </widget>
-    </widget>
-    <widget class="QTableWidget" name="tableWidget">
-     <property name="geometry">
-      <rect>
-       <x>290</x>
-       <y>20</y>
-       <width>256</width>
-       <height>192</height>
-      </rect>
-     </property>
-     <column>
-      <property name="text">
-       <string>Element</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Multiplicity</string>
-      </property>
-     </column>
+     <zorder>layoutWidget</zorder>
+     <zorder>label_15</zorder>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
+   <widget class="QWidget" name="Experiment">
     <attribute name="title">
      <string>Experiment</string>
     </attribute>
@@ -458,6 +438,97 @@
        <string>Faber-Ziman</string>
       </property>
      </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>Unused</string>
+    </attribute>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>256</width>
+       <height>192</height>
+      </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string>Element</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Multiplicity</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QComboBox" name="Elements">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>55</y>
+       <width>104</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>Ar</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>O</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QSpinBox" name="Multiplicity">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>50</y>
+       <width>47</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_10">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>59</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Elements</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_25">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>30</y>
+       <width>81</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Multiplicity</string>
+     </property>
     </widget>
    </widget>
   </widget>

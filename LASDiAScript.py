@@ -58,8 +58,8 @@ if __name__ == '__main__':
     damp_factor = 1
     iteration = 2
     rmin = 0.22
-    xyz_file = "./co2.xyz"
-    # xyz_file = "./argon.xyz"
+    xyz_file = "./xyzFiles/co2.xyz"
+    # xyz_file = "./xyzFiles/argon.xyz"
     
     # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
