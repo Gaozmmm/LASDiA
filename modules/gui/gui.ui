@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1031</width>
-    <height>458</height>
+    <width>958</width>
+    <height>369</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,8 +18,8 @@
     <rect>
      <x>30</x>
      <y>10</y>
-     <width>144</width>
-     <height>211</height>
+     <width>162</width>
+     <height>218</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -56,17 +56,17 @@
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>10</y>
-     <width>671</width>
-     <height>421</height>
+     <x>360</x>
+     <y>0</y>
+     <width>571</width>
+     <height>341</height>
     </rect>
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="Sample">
     <attribute name="title">
@@ -89,22 +89,28 @@
        <rect>
         <x>160</x>
         <y>30</y>
-        <width>101</width>
-        <height>41</height>
+        <width>114</width>
+        <height>50</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_10">
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Mol distance</string>
+          <string>Molecule distance</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="doubleSpinBox">
+        <widget class="QDoubleSpinBox" name="molDistance">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
          <property name="decimals">
           <number>6</number>
+         </property>
+         <property name="maximum">
+          <double>99.999999000000003</double>
          </property>
         </widget>
        </item>
@@ -116,7 +122,7 @@
         <x>20</x>
         <y>30</y>
         <width>91</width>
-        <height>41</height>
+        <height>49</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -136,12 +142,12 @@
          </item>
          <item>
           <property name="text">
-           <string>N2</string>
+           <string>CO2</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>CO2</string>
+           <string>N2</string>
           </property>
          </item>
         </widget>
@@ -152,8 +158,8 @@
     <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
       <rect>
-       <x>360</x>
-       <y>230</y>
+       <x>10</x>
+       <y>130</y>
        <width>191</width>
        <height>131</height>
       </rect>
@@ -199,6 +205,9 @@
            <property name="decimals">
             <number>6</number>
            </property>
+           <property name="maximum">
+            <double>99.999999000000003</double>
+           </property>
           </widget>
          </item>
          <item>
@@ -215,8 +224,99 @@
        </item>
       </layout>
      </widget>
-     <zorder>layoutWidget</zorder>
-     <zorder>label_15</zorder>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_6">
+     <property name="geometry">
+      <rect>
+       <x>330</x>
+       <y>10</y>
+       <width>241</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Limits</string>
+     </property>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>204</width>
+        <height>96</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>minQ</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>maxQ</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>QmaxIntegrate</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <widget class="QDoubleSpinBox" name="minQ">
+           <property name="locale">
+            <locale language="C" country="AnyCountry"/>
+           </property>
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>99.999999000000003</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="maxQ">
+           <property name="locale">
+            <locale language="C" country="AnyCountry"/>
+           </property>
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>99.999999000000003</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="QmaxIntegrate">
+           <property name="locale">
+            <locale language="C" country="AnyCountry"/>
+           </property>
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>99.999999000000003</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="Experiment">
@@ -440,97 +540,32 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab">
-    <attribute name="title">
-     <string>Unused</string>
-    </attribute>
-    <widget class="QTableWidget" name="tableWidget">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>110</y>
-       <width>256</width>
-       <height>192</height>
-      </rect>
-     </property>
-     <column>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>30</y>
+     <width>162</width>
+     <height>66</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_6">
+    <item>
+     <widget class="QPushButton" name="RemovePeaksData">
       <property name="text">
-       <string>Element</string>
+       <string>Remove Peaks</string>
       </property>
-     </column>
-     <column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="RemovePeaksBkg">
       <property name="text">
-       <string>Multiplicity</string>
+       <string>Remove Peaks Bkg</string>
       </property>
-     </column>
-    </widget>
-    <widget class="QComboBox" name="Elements">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>55</y>
-       <width>104</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>Ar</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>N</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>C</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>O</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QSpinBox" name="Multiplicity">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>50</y>
-       <width>47</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_10">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>59</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Elements</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_25">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>30</y>
-       <width>81</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Multiplicity</string>
-     </property>
-    </widget>
-   </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

@@ -51,22 +51,22 @@ from collections import Counter
 
 def read_file(path):
     """Read the file and return x and y as numpy vectors
-    
+
     arguments:
     path: file path to read - string
-    
+
     returns:
     xVect: abscissa values - array
     yVect: ordinate values - array
     """
-    
+
     file = open(path, "r")
     file_name = file.name
     ext = os.path.splitext(file_name)[1]
-    
+
     dimension = "nano"
     scale_factor = 1
-    
+
     if ext == ".chi":
         # Read and ignore the first 4 lines:
         header1 = file.readline()
@@ -116,50 +116,68 @@ def read_file(path):
     xVect = np.array(x)
 #    xVect /= scale_factor
     yVect = np.array(y)
-    
+
 #    plot_data(xVect, yVect,  "Q", "I(Q)", "Data")
-    
+
     return (xVect, yVect)
-    
-    
+
+
 def write_file(path, Q, I_Q):
     """Function to write into file
     """
-    
+
     file = open(path, "w")
     file_name = file.name
-    
+
     output = np.column_stack((Q.flatten(),I_Q.flatten()))
     np.savetxt(file_name,output,delimiter='\t')
     file.close()
-    
-    
-def read_xyz_file(path):
-    """Function to read xyz file to calculate the atom position
+
+
+def molToelemList(molecule):
+    """Function from molecule to elementList
     """
-    
+
+    elemlist = re.findall('[A-Z][a-z]*|\d+', re.sub('[A-Z][a-z]*(?![\da-z])', '\g<0>1', molecule))
+    elementList = dict(zip(elemlist[0::2], elemlist[1::2]))
+
+    return elementList
+
+def path_xyz_file(molecule):
+    """Function to determinate the xyz file path from the molecule
+    """
+
+    path = "./xyzFiles/" + molecule + ".xyz"
+
+    return path
+
+
+def read_xyz_file(path):
+    """Function to read the xyz file
+    """
+
     file = open(path, "r")
     file_name = file.name
     ext = os.path.splitext(file_name)[1]
-    
+
     numAtoms = int(file.readline())
     comment = file.readline()
-    
+
     lines = file.readlines()
     file.close()
-    
+
     element = []
     x = []
     y = []
     z = []
-    
+
     for line in lines:
         columns = line.split()
         element.append(columns[0])
         x.append(float(columns[1]))
         y.append(float(columns[2]))
         z.append(float(columns[3]))
-        
+
     xVect = np.array(x)
     xVect /= 10.0
     yVect = np.array(y)
@@ -167,18 +185,18 @@ def read_xyz_file(path):
     zVect = np.array(z)
     zVect /= 10.0
     # elementPosition = {}
-    
+
     # for line in lines:
         # elem, x, y, z = line.split()
         # elementPosition[elem] = [x, y, z]
-        
+
     return (numAtoms, element, xVect, yVect, zVect)
-    
-    
+
+
 def calc_distMol(x1, y1, z1, x2, y2, z2):
     """Function to calculate di distance between 2 points
     """
-    
-    d = np.sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)  
-    
+
+    d = np.sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
+
     return d
