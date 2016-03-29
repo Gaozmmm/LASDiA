@@ -44,6 +44,7 @@ import math
 
 from modules.MainFunctions import *
 from modules.Utility import *
+from modules.UtilityAnalysis import *
 from modules.Optimization import *
 from modules.Minimization import *
 from modules.Formalism import *
@@ -61,14 +62,32 @@ if __name__ == '__main__':
     xyz_file = "./xyzFiles/co2.xyz"
     # xyz_file = "./xyzFiles/argon.xyz"
 
-    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
+    Q, I_Q = read_file("./HT2_034T++.chi")
+    Qbkg, I_Qbkg = read_file("./HT2_036T++.chi")
     # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
-    Q, I_Q = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
-    Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
+    # Q, I_Q = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
+    # Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
     # Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
+
+
+    plt.figure('data')
+    plt.plot(Q, I_Q, label='F(r) Corr')
+    plt.xlabel('r ($nm$)')
+    plt.ylabel('F(r)')
+    plt.legend()
+    plt.grid()
+    plt.show
+
+    plt.figure('data')
+    plt.plot(Qbkg, I_Qbkg, label='F(r) Corr')
+    plt.xlabel('r ($nm$)')
+    plt.ylabel('F(r)')
+    plt.legend()
+    # plt.grid()
+    plt.show()
+
 
     # Ar
     # minQ = 3

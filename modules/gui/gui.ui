@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>958</width>
-    <height>369</height>
+    <width>961</width>
+    <height>459</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,9 +16,9 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>20</x>
      <y>10</y>
-     <width>162</width>
+     <width>204</width>
      <height>218</height>
     </rect>
    </property>
@@ -45,7 +45,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="Calcgr">
+     <widget class="QPushButton" name="CalcFr">
       <property name="text">
        <string>F(r)</string>
       </property>
@@ -53,56 +53,343 @@
     </item>
    </layout>
   </widget>
-  <widget class="QTabWidget" name="tabWidget">
+  <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>0</y>
-     <width>571</width>
-     <height>341</height>
+     <x>330</x>
+     <y>280</y>
+     <width>201</width>
+     <height>161</height>
     </rect>
    </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   <property name="title">
+    <string>F(r) Optimization Parameters</string>
    </property>
-   <property name="currentIndex">
-    <number>1</number>
+   <widget class="QPushButton" name="Optimization">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>120</y>
+      <width>144</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Optimization</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>34</y>
+      <width>51</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Iteration</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>90</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>r cut-off</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="Iteration">
+    <property name="geometry">
+     <rect>
+      <x>77</x>
+      <y>34</y>
+      <width>47</width>
+      <height>24</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="rcutoff">
+    <property name="geometry">
+     <rect>
+      <x>77</x>
+      <y>90</y>
+      <width>66</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="locale">
+     <locale language="C" country="AnyCountry"/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>700</x>
+     <y>160</y>
+     <width>251</width>
+     <height>281</height>
+    </rect>
    </property>
-   <widget class="QWidget" name="Sample">
-    <attribute name="title">
-     <string>Sample</string>
-    </attribute>
-    <widget class="QGroupBox" name="groupBox_5">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>281</width>
-       <height>91</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Sample Composition</string>
-     </property>
-     <widget class="QWidget" name="verticalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>30</y>
-        <width>114</width>
-        <height>50</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_10">
+   <property name="title">
+    <string>Parameters for minimization</string>
+   </property>
+   <widget class="QPushButton" name="Minimization">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>250</y>
+      <width>115</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Minimization</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>32</y>
+      <width>179</width>
+      <height>198</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="label_11">
          <property name="text">
-          <string>Molecule distance</string>
+          <string>rho0 lower limit</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="molDistance">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>rho0 upper limit</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>s lower limit</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>s upper limit</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QDoubleSpinBox" name="rho0LowerLim">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="rho0UpperLim">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="sLowerLim">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="sUpperLim">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_5">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>10</y>
+     <width>281</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Sample Composition</string>
+   </property>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>30</y>
+      <width>114</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_10">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Molecule distance</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="molDistance">
+       <property name="locale">
+        <locale language="C" country="AnyCountry"/>
+       </property>
+       <property name="decimals">
+        <number>6</number>
+       </property>
+       <property name="maximum">
+        <double>99.999999000000003</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>91</width>
+      <height>49</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_11">
+     <item>
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>Molecule</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="Molecule">
+       <item>
+        <property name="text">
+         <string>Ar</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CO2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>N2</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_6">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>10</y>
+     <width>241</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Limits</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>204</width>
+      <height>96</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>minQ</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>maxQ</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>QmaxIntegrate</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QDoubleSpinBox" name="minQ">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="maximum">
+          <double>99.999999000000003</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="maxQ">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="maximum">
+          <double>99.999999000000003</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="QmaxIntegrate">
          <property name="locale">
           <locale language="C" country="AnyCountry"/>
          </property>
@@ -115,457 +402,152 @@
         </widget>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>30</y>
-        <width>91</width>
-        <height>49</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_11">
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>130</y>
+     <width>191</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Initial values</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>30</y>
+      <width>177</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QLabel" name="label_17">
+        <widget class="QLabel" name="label_15">
          <property name="text">
-          <string>Molecule</string>
+          <string>s value</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="Molecule">
-         <item>
-          <property name="text">
-           <string>Ar</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>CO2</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>N2</string>
-          </property>
-         </item>
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>rho0 value</string>
+         </property>
         </widget>
        </item>
       </layout>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>130</y>
-       <width>191</width>
-       <height>131</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Initial values</string>
-     </property>
-     <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>30</y>
-        <width>177</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>s value</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_16">
-           <property name="text">
-            <string>rho0 value</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QDoubleSpinBox" name="sValue">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="maximum">
+          <double>99.999999000000003</double>
+         </property>
+        </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <widget class="QDoubleSpinBox" name="sValue">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="maximum">
-            <double>99.999999000000003</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="rho0Value">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-           <property name="decimals">
-            <number>6</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QDoubleSpinBox" name="rho0Value">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+         <property name="decimals">
+          <number>6</number>
+         </property>
+        </widget>
        </item>
       </layout>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_6">
-     <property name="geometry">
-      <rect>
-       <x>330</x>
-       <y>10</y>
-       <width>241</width>
-       <height>131</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Limits</string>
-     </property>
-     <widget class="QWidget" name="">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>30</y>
-        <width>204</width>
-        <height>96</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>minQ</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>maxQ</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>QmaxIntegrate</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
-          <widget class="QDoubleSpinBox" name="minQ">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="maximum">
-            <double>99.999999000000003</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="maxQ">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="maximum">
-            <double>99.999999000000003</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="QmaxIntegrate">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="maximum">
-            <double>99.999999000000003</double>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="Experiment">
-    <attribute name="title">
-     <string>Experiment</string>
-    </attribute>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>201</width>
-       <height>161</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>F(r) Optimization Parameters</string>
-     </property>
-     <widget class="QPushButton" name="Optimization">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>120</y>
-        <width>144</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Optimization</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_6">
-      <property name="geometry">
-       <rect>
-        <x>14</x>
-        <y>34</y>
-        <width>51</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Iteration</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_7">
-      <property name="geometry">
-       <rect>
-        <x>14</x>
-        <y>90</y>
-        <width>50</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>r cut-off</string>
-      </property>
-     </widget>
-     <widget class="QSpinBox" name="Iteration">
-      <property name="geometry">
-       <rect>
-        <x>77</x>
-        <y>34</y>
-        <width>47</width>
-        <height>24</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="rcutoff">
-      <property name="geometry">
-       <rect>
-        <x>77</x>
-        <y>90</y>
-        <width>66</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="locale">
-       <locale language="C" country="AnyCountry"/>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="geometry">
-      <rect>
-       <x>300</x>
-       <y>10</y>
-       <width>251</width>
-       <height>281</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Parameters for minimization</string>
-     </property>
-     <widget class="QPushButton" name="Minimization">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>250</y>
-        <width>115</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Minimization</string>
-      </property>
-     </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>32</y>
-        <width>179</width>
-        <height>198</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>rho0 lower limit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_12">
-           <property name="text">
-            <string>rho0 upper limit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>s lower limit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_13">
-           <property name="text">
-            <string>s upper limit</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QDoubleSpinBox" name="rho0LowerLim">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="rho0UpperLim">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="sLowerLim">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="sUpperLim">
-           <property name="locale">
-            <locale language="C" country="AnyCountry"/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>210</y>
-       <width>161</width>
-       <height>71</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Formalism</string>
-     </property>
-     <widget class="QCheckBox" name="ALForm">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>137</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Ashcroft-Langreth</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="FZForm">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>50</y>
-        <width>103</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Faber-Ziman</string>
-      </property>
-     </widget>
-    </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QGroupBox" name="groupBox_4">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>30</y>
-     <width>162</width>
-     <height>66</height>
+     <x>40</x>
+     <y>260</y>
+     <width>161</width>
+     <height>91</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_6">
-    <item>
-     <widget class="QPushButton" name="RemovePeaksData">
-      <property name="text">
-       <string>Remove Peaks</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="RemovePeaksBkg">
-      <property name="text">
-       <string>Remove Peaks Bkg</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <property name="title">
+    <string>Factors</string>
+   </property>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>138</width>
+      <height>62</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Smooth</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Damping</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QDoubleSpinBox" name="smoothFactor">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+         <property name="decimals">
+          <number>2</number>
+         </property>
+         <property name="maximum">
+          <double>99.989999999999995</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="dampingFactor">
+         <property name="locale">
+          <locale language="C" country="AnyCountry"/>
+         </property>
+         <property name="decimals">
+          <number>2</number>
+         </property>
+         <property name="maximum">
+          <double>99.989999999999995</double>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
   </widget>
  </widget>
  <resources/>

@@ -23,8 +23,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
 
-from PySide import QtGui
-from PySide import QtCore
+from PySide import QtGui, QtCore
 
 import sys
 import os
@@ -35,18 +34,26 @@ from scipy import signal
 from scipy.integrate import simps
 from scipy.interpolate import UnivariateSpline
 import matplotlib.pyplot as plt
+
+import matplotlib
+matplotlib.use('Qt4Agg')
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 import numpy as np
 import time
 import math
 
 from modules.MainFunctions import *
+from modules.UtilityAnalysis import *
 from modules.Utility import *
 from modules.Optimization import *
 from modules.Minimization import *
 from modules.Formalism import *
 from modules.IgorFunctions import *
 
+from modules.gui.mplwidget import MplWidget
 from modules.gui.gui import *
 
 class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
@@ -59,6 +66,7 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         #self.toolbar = NavigationToolbar(self.canvas, self)
         self.ui = Ui_LASDiAGui()
         self.ui.setupUi(self)
+        # self.RawData = MplWidget()
 
         # Set the variable
         self.Q = None
@@ -85,14 +93,19 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         self.validation_index = None
         self.integration_index = None
         self.calculation_index = None
+        self.damp_factor = None
+        self.newQ = None
+        self.S_QsmoothedDamp = None
 
         # Set the buttons
         self.ui.LoadData.clicked.connect(self.load_data)
         self.ui.LoadBkg.clicked.connect(self.load_bkg)
         self.ui.CalcSQ.clicked.connect(self.calcSQ)
-        # self.ui.Calcgr.clicked.connect(self.calcgr)
+        # self.ui.CalcFr.clicked.connect(self.CalcFr)
         # self.ui.Optimization.clicked.connect(self.calcOptimization)
         #self.ui.Minimization.clicked.connect(self.calcMinimization)
+
+        # Set plots
 
     #---------------------------------------------------------
 
@@ -100,21 +113,8 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         '''load and plot the file'''
         # Open data file
         path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
-        # print("path   ", path[0])
 
         self.Q, self.I_Q = read_file(path[0])
-
-        plt.figure('RawData')
-        plt.plot(self.Q, self.I_Q, label='I(Q) sample')
-        plt.xlabel('Q ($nm^{-1}$)')
-        plt.ylabel('I(Q)')
-        plt.legend()
-        plt.grid()
-        plt.show()
-
-        # self.ui.RawData.canvas.ax.clear()
-        # self.ui.RawData.canvas.ax.plot(self.Q, self.I_Q, label='Data')
-        # self.ui.RawData.canvas.draw()
 
     #---------------------------------------------------------
 
@@ -126,16 +126,6 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         # Modify the variables as numpy array
         self.Qbkg, self.I_Qbkg = read_file(path[0])
 
-        # self.ui.RawData.canvas.ax.plot(self.Qbkg, self.I_Qbkg, 'g--', label='Bkg')
-        # self.ui.RawData.canvas.draw()
-
-        self.figure('RawData')
-        plt.plot(self.Qbkg, self.I_Qbkg, label='I(Q) bkg')
-        plt.xlabel('Q ($nm^{-1}$)')
-        plt.ylabel('I(Q)')
-        plt.legend()
-        plt.grid()
-        plt.show()
 
     #---------------------------------------------------------
 
@@ -177,26 +167,26 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
 
         self.S_Q = calc_SQ(N, Icoh_Q, self.Ztot, self.fe_Q, self.Sinf, self.Q, self.max_index, self.integration_index)
 
-        # self.ui.SQ.canvas.ax.clear()
-        # self.ui.SQ.canvas.ax.plot(newQ, self.S_Q)
-        # self.ui.SQ.canvas.draw()
+        smooth_factor = self.ui.smoothFactor.value()
+        damp_factor = self.ui.dampingFactor.value()
+
+        self.newQ, S_Qsmoothed = calc_SQsmoothing(self.Q[self.validation_index], \
+            self.S_Q[self.validation_index], self.Sinf, smooth_factor, \
+            self.min_index, self.minQ, self.QmaxIntegrate, self.maxQ, 550)
+        self.S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, self.newQ, self.Sinf, \
+            self.QmaxIntegrate, self.damp_factor)
 
     #---------------------------------------------------------
 
-    def calcgr(self):
-        self.i_Q = calc_iQ(self.S_Q, self.Sinf)
-        self.r = calc_spectrum(self.i_Q)
-        self.F_r = calc_Fr(self.r, self.Q, self.i_Q)
-        #self.rho0 = calc_rho0(self.Q, self.i_Q)
-        #g_r = calc_gr(r, F_r, rho0)
+    def CalcFr(self):
+        Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
+        i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
 
-        # self.ui.gr.canvas.ax.clear()
-        # self.ui.gr.canvas.ax.plot(r, g_r)
-        # self.ui.gr.canvas.draw()
+        validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
+        min_indexSmooth, max_indexSmooth = calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
 
-        # self.ui.Fr.canvas.ax.clear()
-        # self.ui.Fr.canvas.ax.plot(self.r, self.F_r)
-        # self.ui.Fr.canvas.draw()
+        r = calc_r(newQ)
+        F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
 
     #---------------------------------------------------------
 
