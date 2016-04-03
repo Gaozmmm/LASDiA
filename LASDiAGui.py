@@ -61,12 +61,8 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         super(self.__class__, self).__init__()
         self.setupUi(self)
 
-        # self.figure = plt.figure()
-        # self.canvas = FigureCanvas(self.figure)
-        #self.toolbar = NavigationToolbar(self.canvas, self)
         self.ui = Ui_LASDiAGui()
         self.ui.setupUi(self)
-        # self.RawData = MplWidget()
 
         # Set the variable
         self.Q = None
@@ -99,9 +95,9 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
 
         # Set the buttons
         self.ui.LoadData.clicked.connect(self.load_data)
-        self.ui.LoadBkg.clicked.connect(self.load_bkg)
+        # self.ui.LoadBkg.clicked.connect(self.load_bkg)
         self.ui.CalcSQ.clicked.connect(self.calcSQ)
-        # self.ui.CalcFr.clicked.connect(self.CalcFr)
+        self.ui.CalcFr.clicked.connect(self.calcFr)
         # self.ui.Optimization.clicked.connect(self.calcOptimization)
         #self.ui.Minimization.clicked.connect(self.calcMinimization)
 
@@ -112,20 +108,40 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
     def load_data(self):
         '''load and plot the file'''
         # Open data file
-        path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
+        path = QtGui.QFileDialog.getOpenFileName(self, 'Open Data file', '.')
+        pathbkg = QtGui.QFileDialog.getOpenFileName(self, 'Open Bkg file', '.')
 
+        # Modify the variables as numpy array
         self.Q, self.I_Q = read_file(path[0])
+        self.Qbkg, self.I_Qbkg = read_file(pathbkg[0])
+
+        plt.figure('data')
+        plt.plot(self.Q, self.I_Q, label='Data')
+        plt.plot(self.Qbkg, self.I_Qbkg, label='Bkg')
+        plt.xlabel('Q ($nm^{-1}$)')
+        plt.ylabel('I(Q)')
+        plt.legend()
+        plt.grid()
+        plt.show()
 
     #---------------------------------------------------------
 
-    def load_bkg(self):
-        '''load and plot the file'''
-        # Open bkg file
-        path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
-
-        # Modify the variables as numpy array
-        self.Qbkg, self.I_Qbkg = read_file(path[0])
-
+    # def load_bkg(self):
+    #     '''load and plot the file'''
+    #     # Open bkg file
+    #     path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
+    #
+    #     # Modify the variables as numpy array
+    #     self.Qbkg, self.I_Qbkg = read_file(pathbkg[0])
+    #
+    #     plt.figure('data')
+    #     plt.plot(self.Q, self.I_Q, label='Data')
+    #     plt.plot(self.Qbkg, self.I_Qbkg, label='Bkg')
+    #     plt.xlabel('Q ($nm^{-1}$)')
+    #     plt.ylabel('I(Q)')
+    #     plt.legend()
+    #     plt.grid()
+    #     plt.show()
 
     #---------------------------------------------------------
 
@@ -133,7 +149,7 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         self.molecule = str(self.ui.Molecule.currentText())
         # multiplicity = self.ui.Multiplicity.value()
         # self.elementList = {element:multiplicity}
-        self.elementList = molToelemList(molecule)
+        self.elementList = molToelemList(self.molecule)
 
         #numAtoms =  sc.N_A
         N = 1
@@ -168,7 +184,9 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         self.S_Q = calc_SQ(N, Icoh_Q, self.Ztot, self.fe_Q, self.Sinf, self.Q, self.max_index, self.integration_index)
 
         smooth_factor = self.ui.smoothFactor.value()
-        damp_factor = self.ui.dampingFactor.value()
+        self.damp_factor = self.ui.dampingFactor.value()
+
+        # print("damp_factor ", damp_factor)
 
         self.newQ, S_Qsmoothed = calc_SQsmoothing(self.Q[self.validation_index], \
             self.S_Q[self.validation_index], self.Sinf, smooth_factor, \
@@ -176,17 +194,34 @@ class LASDiA(QtGui.QMainWindow, Ui_LASDiAGui):
         self.S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, self.newQ, self.Sinf, \
             self.QmaxIntegrate, self.damp_factor)
 
+        plt.figure('S_Q')
+        plt.plot(self.newQ, self.S_QsmoothedDamp) #, label='Bkg')
+        plt.xlabel('Q ($nm^{-1}$)')
+        plt.ylabel('S(Q)')
+        # plt.legend()
+        plt.grid()
+        plt.show()
+
     #---------------------------------------------------------
 
-    def CalcFr(self):
-        Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
-        i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
+    def calcFr(self):
+        Qi_Q = calc_QiQ(self.newQ, self.S_QsmoothedDamp, self.Sinf)
+        # i_Q = calc_iQ(self.S_QsmoothedDamp, self.Sinf)
 
-        validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
-        min_indexSmooth, max_indexSmooth = calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
+        validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(self.newQ, self.minQ, self.QmaxIntegrate, self.maxQ)
+        min_indexSmooth, max_indexSmooth = calc_indices(self.newQ, self.minQ, self.QmaxIntegrate, self.maxQ)
 
-        r = calc_r(newQ)
-        F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+        r = calc_r(self.newQ)
+        F_r = calc_Fr(r, self.newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+
+
+        plt.figure('F_r')
+        plt.plot(r, F_r) #, label='Bkg')
+        plt.xlabel('r ($nm$)')
+        plt.ylabel('F(r)')
+        # plt.legend()
+        plt.grid()
+        plt.show()
 
     #---------------------------------------------------------
 

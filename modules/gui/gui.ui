@@ -31,13 +31,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="LoadBkg">
-      <property name="text">
-       <string>Load Bkg</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QPushButton" name="CalcSQ">
       <property name="text">
        <string>S(Q)</string>
@@ -330,7 +323,7 @@
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>204</width>
+      <width>211</width>
       <height>96</height>
      </rect>
     </property>
@@ -371,7 +364,7 @@
           <number>6</number>
          </property>
          <property name="maximum">
-          <double>99.999999000000003</double>
+          <double>999.999999000000003</double>
          </property>
         </widget>
        </item>
@@ -384,7 +377,7 @@
           <number>6</number>
          </property>
          <property name="maximum">
-          <double>99.999999000000003</double>
+          <double>999.999999000000003</double>
          </property>
         </widget>
        </item>
@@ -397,7 +390,7 @@
           <number>6</number>
          </property>
          <property name="maximum">
-          <double>99.999999000000003</double>
+          <double>999.999999000000003</double>
          </property>
         </widget>
        </item>
@@ -488,7 +481,7 @@
    <property name="title">
     <string>Factors</string>
    </property>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
