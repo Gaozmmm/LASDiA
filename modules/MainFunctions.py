@@ -385,7 +385,7 @@ def calc_r(Q):
     r = fftpack.fftfreq(Q.size, meanDeltaQ)
     mask = np.where(r>=0)
     
-    return r[mask]
+    return r[mask], r
     
     
 def calc_Fr(r, Q, Qi_Q):
@@ -406,11 +406,37 @@ def calc_Fr(r, Q, Qi_Q):
     sinrQ = np.sin(rQ)
     F_r = (2.0 / np.pi) * np.sum(Qi_Q * sinrQ, axis=1) * meanDeltaQ
     
-    # F_r2 = np.fft.fft(Qi_Q)
-    # F_r3 = np.fft.rfft(Qi_Q)
-    # F_r2 = np.imag(F_r2) * DeltaQ[0] *2/np.pi
-    
     return F_r
+    
+    
+def calc_Fr2(Q, Qi_Q):
+    """Function to calculate F(r) (eq. 20)
+    
+    arguments:
+    r: radius - array
+    Q: momentum transfer - array
+    Qi_Q: Qi(Q) - array
+    
+    returns:
+    F_r: F(r) - array
+    """
+    
+    DeltaQ = np.diff(Q)
+    
+    # F_r2 = np.fft.fft(Qi_Q)
+    F_r2 = fftpack.fft(Qi_Q)
+    
+    F_r2imag = np.imag(F_r2)
+    # F_r2imag = np.array(F_r2imag).copy()
+    F_r2imag *= DeltaQ[0] *2/np.pi
+    
+    F_r3 = fftpack.dst(Qi_Q)
+    F_r3 *= DeltaQ[0] * 2/np.pi
+    
+    # for i in range(len(F_r2)):
+        # print(F_r2[i], "----", F_r2imag[i], "----", F_r3[i])
+    
+    return (F_r2, F_r3)
     
     
 def calc_SQ_F(F_r, r, Q, Sinf):

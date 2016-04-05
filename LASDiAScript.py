@@ -54,30 +54,30 @@ from modules.IgorFunctions import *
 # from cmath import exp, pi
 
 if __name__ == '__main__':
-    N = 3 # sc.N_A
+    N = 1 # sc.N_A
     smooth_factor = 0.25
     damp_factor = 1
     iteration = 2
     rmin = 0.22
-    xyz_file = "./xyzFiles/co2.xyz"
-    # xyz_file = "./xyzFiles/argon.xyz"
+    # xyz_file = "./xyzFiles/co2.xyz"
+    xyz_file = "./xyzFiles/argon.xyz"
 
     # Q, I_Q = read_file("./HT2_034T++.chi")
     # Qbkg, I_Qbkg = read_file("./HT2_036T++.chi")
-    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
-    Q, I_Q = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
-    Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
+    Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
+    Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
+    # Q, I_Q = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
+    # Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
     # Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
     
     
     # Ar
-    # minQ = 3
-    # maxQ = 109
+    minQ = 3
+    maxQ = 109
     # CO2
-    minQ = 8.005
-    maxQ = 100
+    # minQ = 8.005
+    # maxQ = 100
     QmaxIntegrate = 90
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)
@@ -85,15 +85,15 @@ if __name__ == '__main__':
     # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
 
-    # elementList = {"Ar":1}
-    elementList = {"C":1,"O":2}
+    elementList = {"Ar":1}
+    # elementList = {"C":1,"O":2}
 
     # test values
     # Ar
     # s = np.arange(0.2, 1.0, 0.1)
     # CO2
-    s = np.arange(0.60, 1.05, 0.01)
-    rho0 = np.arange(20, 31, 1)
+    # s = np.arange(0.60, 1.05, 0.01)
+    # rho0 = np.arange(20, 31, 1)
 
     # # real values
     # # s = np.arange(0.2, 0.8, 0.01)
@@ -101,8 +101,8 @@ if __name__ == '__main__':
 
     # best values
     # Ar
-    # s = np.array([0.57])
-    # rho0 = np.array([26.1])
+    s = np.array([0.57])
+    rho0 = np.array([26.1])
     # CO2
     # s = np.array([0.984228])
     # rho0 = np.array([29.6625])
@@ -134,55 +134,95 @@ if __name__ == '__main__':
             S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
             newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, 550)
             S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
-
+            
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
             i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
-
+            
+            # write_file("../Results/Ar/Qi_Q_Ar.txt", newQ, Qi_Q)
+            
+            # plt.figure('Q')
+            # plt.plot(newQ, Qi_Q, label='F_r')
+            # plt.xlabel('r')
+            # plt.ylabel('F(r)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show
+            
             validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
             min_indexSmooth, max_indexSmooth = calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
-
-            r = calc_r(newQ)
-            F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
-
-            numAtoms, element, x, y, z = read_xyz_file(xyz_file)
-            iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z)
-            Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
-            Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
-            # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l])
-
-            Iincoh_QSmooth = calc_Iincoh(elementList, newQ)
-            J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
-
-            F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin)
-            # write_file("../Results/CO2/F_rCorr.txt", r, F_rIt)
-
-            maskIt = np.where((r>0) & (r < rmin))
-            rIt = r[maskIt]
-            deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0[i])
             
-            chi2[i][j] = simps(deltaF_r**2, r[maskIt])
-            print(i, j, val_rho0, val_s)
-            print("chi2 ", chi2[i][j])
+            # plt.figure('QiQ')
+            # plt.plot(newQ, Qi_Q, label='F_r')
+            # plt.xlabel('r')
+            # plt.ylabel('F(r)')
+            # plt.legend()
+            # plt.grid()
+            # plt.show
+            
+            r, r2 = calc_r(newQ)
+            F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+            F_r2, F_r3 = calc_Fr2(newQ, Qi_Q)
+            
+            # print("r ", type(r), len(r))
+            # print("r2 ", type(r2), len(r2))
+            # print("newQ ", type(newQ), len(newQ))
+            print("F_r ", len(F_r))
+            print("F_r2 ", len(F_r2))
+            print("F_r3 ", len(F_r3))
+            
+            # r2 = fftpack.fftshift(r2)
+            mask = np.where(r2>0)
+            
+            plt.figure('F_r')
+            plt.plot(r, F_r, label='F_r')
+            plt.plot(r2[mask], F_r2[mask], label='F_r2')
+            plt.plot(r2[mask], F_r3[mask], label='F_r3')
+            # plt.plot(r2, F_r4, label='F_r4')
+            plt.xlabel('r')
+            plt.ylabel('F(r)')
+            plt.legend()
+            plt.grid()
+            plt.show()
+            
+            # numAtoms, element, x, y, z = read_xyz_file(xyz_file)
+            # iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z)
+            # Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
+            # Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
+            # # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l])
+
+            # Iincoh_QSmooth = calc_Iincoh(elementList, newQ)
+            # J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
+
+            # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin)
+            # # write_file("../Results/CO2/F_rCorr.txt", r, F_rIt)
+
+            # maskIt = np.where((r>0) & (r < rmin))
+            # rIt = r[maskIt]
+            # deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0[i])
+            
+            # chi2[i][j] = simps(deltaF_r**2, r[maskIt])
+            # print(i, j, val_rho0, val_s)
+            # print("chi2 ", chi2[i][j])
 
     # take min of chi2
-    minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
-    print("chi2 min ", chi2[minIndxRho0][minIndxS])
-    print("rho0 ", rho0[minIndxRho0], "s ", s[minIndxS])
+    # minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
+    # print("chi2 min ", chi2[minIndxRho0][minIndxS])
+    # print("rho0 ", rho0[minIndxRho0], "s ", s[minIndxS])
     
-    # plot 2d chi2
-    plt.figure('chi2s')
-    plt.plot(s,chi2[0, : ])
-    plt.xlabel('s')
-    plt.ylabel('chi2')
-    plt.grid()
-    plt.show
+    # # plot 2d chi2
+    # plt.figure('chi2s')
+    # plt.plot(s,chi2[0, : ])
+    # plt.xlabel('s')
+    # plt.ylabel('chi2')
+    # plt.grid()
+    # plt.show
 
-    plt.figure('chi2rho0')
-    plt.plot(rho0,chi2[ : ,0])
-    plt.xlabel('rho0')
-    plt.ylabel('chi2')
-    plt.grid()
-    plt.show()
+    # plt.figure('chi2rho0')
+    # plt.plot(rho0,chi2[ : ,0])
+    # plt.xlabel('rho0')
+    # plt.ylabel('chi2')
+    # plt.grid()
+    # plt.show()
 
     
     # for QmaxIntegrate
