@@ -1,0 +1,36 @@
+# Input file format for LASDiA software
+#
+# Variable                              Value
+#
+# Samples files
+data file path:
+bkg file path:
+#
+# Sample composition
+XYZ file path:
+Parameters file path:
+#
+# Analysis parameters
+minQ:
+maxQ:
+QmaxIntegrate:
+#
+Smooth factor:
+Damping factor:
+#
+# s initial value:
+# rho0 initial value:
+#
+# F(r) optimization
+Iteration:
+r min:
+#
+# Chi2 minimization
+s min:
+s max:
+s step:
+#
+rho0 min:
+rho0 max:
+rho0 step:
+#

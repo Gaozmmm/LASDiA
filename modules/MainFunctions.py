@@ -45,6 +45,9 @@ from scipy import fftpack
 from scipy.integrate import simps
 from scipy.interpolate import UnivariateSpline
 
+from modules.Utility import *
+from modules.UtilityAnalysis import *
+
 
 def calc_aff(element, Q):
     """Function to calculate the Atomic Form Factor.
@@ -425,18 +428,36 @@ def calc_Fr2(Q, Qi_Q):
     
     # F_r2 = np.fft.fft(Qi_Q)
     F_r2 = fftpack.fft(Qi_Q)
-    
-    F_r2imag = np.imag(F_r2)
-    # F_r2imag = np.array(F_r2imag).copy()
-    F_r2imag *= DeltaQ[0] *2/np.pi
+    F_r2 = np.imag(F_r2)
+    F_r2 *= DeltaQ[0] *2/np.pi
     
     F_r3 = fftpack.dst(Qi_Q)
-    F_r3 *= DeltaQ[0] * 2/np.pi
+    # F_r3 *= DeltaQ[0] * 2/np.pi
     
     # for i in range(len(F_r2)):
         # print(F_r2[i], "----", F_r2imag[i], "----", F_r3[i])
     
     return (F_r2, F_r3)
+    
+    
+def calc_NewDimFFT(newQ, maxQ, QmaxIntegrate, Qi_Q):
+    """Function to redefine the array dimension to use the FFT
+    """
+    
+    idx, elem = find_nearest(newQ, QmaxIntegrate)
+    newDim = 2*2*2**math.ceil(math.log(5*(idx+1))/math.log(2))
+    Qi_Q2 = np.resize(Qi_Q, newDim)
+    Qi_Q2[idx:] = 0.0
+    
+    print(len(Qi_Q2))
+    print(newDim)
+    
+    newQ2 = np.linspace(np.amin(newQ), maxQ, newDim, endpoint=True)
+    print(len(newQ2))
+    # DeltaQ = np.diff(newQ)
+    # deltaR = 2*np.pi/(DeltaQ[0]*newDim)
+    
+    return (newQ2, Qi_Q2)
     
     
 def calc_SQ_F(F_r, r, Q, Sinf):
