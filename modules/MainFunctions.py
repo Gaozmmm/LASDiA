@@ -388,7 +388,7 @@ def calc_r(Q):
     r = fftpack.fftfreq(Q.size, meanDeltaQ)
     mask = np.where(r>=0)
     
-    return r[mask], r
+    return (r[mask], r, mask)
     
     
 def calc_Fr(r, Q, Qi_Q):
@@ -412,7 +412,7 @@ def calc_Fr(r, Q, Qi_Q):
     return F_r
     
     
-def calc_Fr2(Q, Qi_Q):
+def calc_Fr2(Q, Qi_Q, QmaxIntegrate):
     """Function to calculate F(r) (eq. 20)
     
     arguments:
@@ -426,13 +426,19 @@ def calc_Fr2(Q, Qi_Q):
     
     DeltaQ = np.diff(Q)
     
+    # mask = np.where(Q<=QmaxIntegrate)
+    # print(len(mask[0]))
+    # print(len(Qi_Q))
+    # zeroPad = np.zeros(2**275)
+    # Qi_Q = np.concatenate([Qi_Q, zeroPad])
+    
     # F_r2 = np.fft.fft(Qi_Q)
-    F_r2 = fftpack.fft(Qi_Q)
+    F_r2 = fftpack.fft(Qi_Q, 2**12)
     F_r2 = np.imag(F_r2)
     F_r2 *= DeltaQ[0] *2/np.pi
     
-    F_r3 = fftpack.dst(Qi_Q)
-    # F_r3 *= DeltaQ[0] * 2/np.pi
+    F_r3 = fftpack.dst(Qi_Q, type=2, n=2**11)
+    F_r3 *= DeltaQ[0] * 2/np.pi
     
     # for i in range(len(F_r2)):
         # print(F_r2[i], "----", F_r2imag[i], "----", F_r3[i])
