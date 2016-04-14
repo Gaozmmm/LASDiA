@@ -49,6 +49,7 @@ import math
 import random
 from collections import Counter
 import re
+import imp
 
 def read_file(path):
     """Read the file and return x and y as numpy vectors
@@ -143,7 +144,7 @@ def molToelemList(molecule):
     elementList = dict(zip(elemlist[0::2], elemlist[1::2]))
 
     elementList = dict((k,int(v)) for k,v in elementList.items())
-    
+
     return elementList
 
 def path_xyz_file(molecule):
@@ -203,3 +204,10 @@ def calc_distMol(x1, y1, z1, x2, y2, z2):
     d = np.sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
 
     return d
+
+
+def getVarFromFile(filename):
+    f = open(filename)
+    data = imp.load_source('data', '', f)
+    f.close()
+    return data

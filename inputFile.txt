@@ -1,0 +1,44 @@
+# Input file format for LASDiA software
+# The cells starting with the hash tag (#) are commented
+
+# Path sample and bkg file
+data_file = ''
+bkg_file = ''
+
+# Sample composition
+xyz_file = '' # Path for the XYZ file
+params_file = '' # Path molecule parameters file
+
+# Analysis parameters
+minQ = # Minimum Q value in data interpolation waves,,
+maxQ = # Maximum Q value in data interpolation waves,,
+QmaxIntegrate = # Qmax for all integration operations (FT, and valid S(Q) etc.)
+
+smooth_factor = # Smoothing factor for cubic spline smoothing of S(Q) (Larger is smoother--usually between 1 and 3)
+damp_factor = # Exponential damping factor == A*Qmax^2,  Warren says to try to keep <1.5, Others say set to ln(10)=2.3
+
+s = # Scale factor initial value
+rho0 = # Density initial value
+
+# F(r) optimization
+# iteration = # Number of iteration for F(r) optimization
+# rmin = # The distance below which no peaks in F(r) may occur
+
+# Chi2 minimization
+# s_min = # Scale factor minimum value for the minimization
+# s_max = # Scale factor maximum  value for the minimization
+# s_step = # Scale factor step value for the minimization
+
+# rho0_min = # Density minimum value for the minimization
+# rho0_max = # Density maximum  value for the minimization
+# rho0_step = # Density step value for the minimization
+
+# Ploting/Writing variables
+# plot_raw_data = 'N'
+# plot_S_Q = 'N'
+# plot_S_Qsmoothed_damped = 'N'
+# plot_F_r = 'N'
+# plot_F_r_corr = 'N'
+# plot_S_Q_corr = 'N'
+# plot_s_chi2 = 'N'
+# plot_rho0_chi2 = 'N'
