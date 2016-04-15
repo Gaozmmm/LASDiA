@@ -124,14 +124,14 @@ def read_file(path):
     return (xVect, yVect)
 
 
-def write_file(path, Q, I_Q):
-    """Function to write into file
+def write_file(path, x, y):
+    """Function to write on file
     """
 
     file = open(path, "w")
     file_name = file.name
 
-    output = np.column_stack((Q.flatten(),I_Q.flatten()))
+    output = np.column_stack((x.flatten(),y.flatten()))
     np.savetxt(file_name,output,delimiter='\t')
     file.close()
 
@@ -146,7 +146,8 @@ def molToelemList(molecule):
     elementList = dict((k,int(v)) for k,v in elementList.items())
 
     return elementList
-
+    
+    
 def path_xyz_file(molecule):
     """Function to determinate the xyz file path from the molecule
     """
@@ -154,8 +155,8 @@ def path_xyz_file(molecule):
     path = "./xyzFiles/" + molecule + ".xyz"
 
     return path
-
-
+    
+    
 def read_xyz_file(path):
     """Function to read the xyz file
     """
@@ -195,8 +196,8 @@ def read_xyz_file(path):
         # elementPosition[elem] = [x, y, z]
 
     return (numAtoms, element, xVect, yVect, zVect)
-
-
+    
+    
 def calc_distMol(x1, y1, z1, x2, y2, z2):
     """Function to calculate di distance between 2 points
     """
@@ -204,10 +205,25 @@ def calc_distMol(x1, y1, z1, x2, y2, z2):
     d = np.sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
 
     return d
-
-
-def getVarFromFile(filename):
-    f = open(filename)
-    data = imp.load_source('data', '', f)
-    f.close()
-    return data
+    
+    
+def read_inputFile(path):
+    """Function to read variables from the inputFile.txt
+    """
+    
+    file = open(path)
+    variables = imp.load_source('data', '', file)
+    file.close()
+    return variables
+    
+    
+def setArray(min, max, step):
+    """Function to generate the numpy array for s and rho0
+    """
+    
+    if min == max:
+        a = np.arange(min, max+step, step)
+    else:
+        a = np.arange(min, max, step)
+        
+    return a
