@@ -119,8 +119,6 @@ def read_file(path):
 #    xVect /= scale_factor
     yVect = np.array(y)
 
-#    plot_data(xVect, yVect,  "Q", "I(Q)", "Data")
-
     return (xVect, yVect)
 
 
@@ -146,17 +144,17 @@ def molToelemList(molecule):
     elementList = dict((k,int(v)) for k,v in elementList.items())
 
     return elementList
-    
-    
+
+
 def path_xyz_file(molecule):
-    """Function to determinate the xyz file path from the molecule
+    """Function for the GUI to determinate the xyz file path from the molecule
     """
 
     path = "./xyzFiles/" + molecule + ".xyz"
 
     return path
-    
-    
+
+
 def read_xyz_file(path):
     """Function to read the xyz file
     """
@@ -196,8 +194,8 @@ def read_xyz_file(path):
         # elementPosition[elem] = [x, y, z]
 
     return (numAtoms, element, xVect, yVect, zVect)
-    
-    
+
+
 def calc_distMol(x1, y1, z1, x2, y2, z2):
     """Function to calculate di distance between 2 points
     """
@@ -205,25 +203,38 @@ def calc_distMol(x1, y1, z1, x2, y2, z2):
     d = np.sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
 
     return d
-    
-    
+
+
 def read_inputFile(path):
     """Function to read variables from the inputFile.txt
     """
-    
+
     file = open(path)
     variables = imp.load_source('data', '', file)
     file.close()
     return variables
-    
-    
+
+
 def setArray(min, max, step):
     """Function to generate the numpy array for s and rho0
     """
-    
+
     if min == max:
         a = np.arange(min, max+step, step)
     else:
         a = np.arange(min, max, step)
-        
+
     return a
+
+
+def plot_data(xVar, yVar, xName, yName, plotName):
+    """Function to plot
+    """
+
+    plt.figure(plotName)
+    plt.plot(xVar, yVar, label=yName)
+    plt.xlabel(xName)
+    plt.ylabel(yName)
+    plt.legend()
+    plt.grid()
+    plt.show()

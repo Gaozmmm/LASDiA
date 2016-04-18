@@ -2,8 +2,8 @@
 # The lines with the hash tag (#) are comments
 
 # Path sample and bkg file
-data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
-bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
+data_file = "./HT2_034T++.chi"
+bkg_file = "./HT2_036T++.chi"
 
 # Sample composition
 xyz_file = "./xyzFiles/argon.xyz"         # Path for the XYZ file
