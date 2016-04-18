@@ -36,20 +36,25 @@ import matplotlib.pyplot as plt
 from modules.MainFunctions import *
 from modules.Utility import *
 # from modules.UtilityAnalysis import *
-# from modules.Optimization import *
+from modules.Optimization import *
 # from modules.Minimization import *
 # from modules.Formalism import *
 # from modules.IgorFunctions import *
 
 
 if __name__ == "__main__":
-    N = 1 # sc.N_A
-
+    
     variables = read_inputFile("inputFile.txt")
-
+    
     elementList = molToelemList(variables.molecule)
+    numAtoms, element, x, y, z = read_xyz_file(variables.xyz_file)
+    
     Q, I_Q = read_file(variables.data_file)
     Qbkg, I_Qbkg = read_file(variables.bkg_file)
+    
+    if variables.pw_raw_data[0].lower() == "y":
+        plot_data(Q, I_Q, "raw_data", "Q($nm^{-1}$)", "I(Q)", "I(Q)")
+        plot_data(Qbkg, I_Qbkg, "raw_data", "Q($nm^{-1}$)", "I(Q)", "I(Q) bkg")
 
     fe_Q, Ztot = calc_eeff(elementList, Q)
     Iincoh_Q = calc_Iincoh(elementList, Q)
@@ -68,20 +73,46 @@ if __name__ == "__main__":
         for j, val_s in enumerate(scale_factor):
             Isample_Q = calc_IsampleQ(I_Q, scale_factor[j], I_Qbkg)
             alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, rho0[i])
-            Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
+            Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
 
-            S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
+            S_Q = calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
             newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, variables.smooth_factor, min_index, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 550)
             S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, variables.QmaxIntegrate, variables.damp_factor)
+            
+            Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
+            i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
+            
+            validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+            min_indexSmooth, max_indexSmooth = calc_indices(newQ, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+            
+            r = calc_r(newQ)
+            F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+            
+            iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z)
+            Qiintradamp = calc_iintradamp(iintra_Q, newQ, variables.QmaxIntegrate, variables.damp_factor)
+            Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
+            # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l])
+            
+            Iincoh_QSmooth = calc_Iincoh(elementList, newQ)
+            J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
 
-            plot_data(newQ, S_QsmoothedDamp, "Q($nm^{-1}$)", "S(Q)", "S_Q")
-            plot_data(Q[validation_index], S_Q, "Q($nm^{-1}$)", "S(Q)", "S_Q")
-
-            # plt.figure("S_Q")
-            # plt.plot(Q[validation_index], S_Q, label="S_Q")
-            # plt.plot(newQ, S_QsmoothedDamp, label="S_Q")
-            # plt.xlabel("Q")
-            # plt.ylabel("S(Q)")
-            # plt.legend()
-            # plt.grid()
-            # plt.show()
+            F_rIt = calc_optimize_Fr(variables.iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, variables.rmin, variables.pw_F_r_iter[0])
+            
+            
+            
+            if variables.pw_S_Q[0].lower() == "y":
+                plot_data(Q[validation_index], S_Q, "S_Q", "Q($nm^{-1}$)", "S(Q)", "S(Q)")
+            if variables.pw_S_Q[1].lower() == "y":
+                write_file(variables.pw_S_Q[2], Q[validation_index], S_Q, "Q($nm^{-1}$)", "S(Q)")
+                
+            if variables.pw_S_Qsmoothed_damped[0].lower() == "y":
+                plot_data(newQ, S_QsmoothedDamp, "S_Q", "Q($nm^{-1}$)", "S(Q)", "S(Q) smooth-damp")
+            if variables.pw_S_Qsmoothed_damped[1].lower() == "y":
+                write_file(variables.pw_S_Qsmoothed_damped[2], newQ, S_QsmoothedDamp, "Q($nm^{-1}$)", "S(Q) smooth-damp")
+            
+            if variables.pw_F_r[0].lower() == "y":
+                plot_data(r, F_r, "F_r", "r($nm$)", "F(r)", "F(r)")
+            if variables.pw_F_r[1].lower() == "y":
+                write_file(variables.pw_F_r[2], r, F_r, "r($nm$)", "F(r)")
+            
+            plt.show()

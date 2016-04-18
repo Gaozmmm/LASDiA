@@ -370,3 +370,16 @@ def calc_iintra(Q, max_index):
     iintra_Q[max_index] = 0.0
     
     return iintra_Q
+    
+    
+def calc_r(Q):
+    """Function to calculate the r value and range used into F(r) calculation
+    
+    """
+    
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    r = fftpack.fftfreq(Q.size, meanDeltaQ)
+    mask = np.where(r>=0)
+    
+    return (r[mask], r, mask)

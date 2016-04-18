@@ -2,8 +2,8 @@
 # The lines with the hash tag (#) are comments
 
 # Path sample and bkg file
-data_file = "./HT2_034T++.chi"
-bkg_file = "./HT2_036T++.chi"
+data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
+bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
 
 # Sample composition
 xyz_file = "./xyzFiles/argon.xyz"         # Path for the XYZ file
@@ -18,12 +18,9 @@ maxQ = 109                                # Maximum Q value in data interpolatio
 smooth_factor = 0.25                      # Smoothing factor for cubic spline
 damp_factor = 1                           # Exponential damping factor == A*Qmax^2
 
-# s = 0.57                                  # Scale factor initial value
-# rho0 = 26.1                               # Density initial value
-
 # F(r) optimization
-# iteration = 2                           # Number of iteration for F(r) optimization
-# rmin = 0.22                             # The distance below which no peaks in F(r) may occur
+iteration = 2                           # Number of iteration for F(r) optimization
+rmin = 0.22                             # The distance below which no peaks in F(r) may occur
 
 # Chi2 minimization
 s_min = 0.57                              # Scale factor minimum value for the minimization
@@ -34,12 +31,15 @@ rho0_min = 26.1                           # Density minimum value for the minimi
 rho0_max = 26.1                           # Density maximum  value for the minimization
 rho0_step = 1                             # Density step value for the minimization
 
-# Ploting/Writing variables: [Plot, Write] Y/N
-# plot_raw_data = ["N", "N"]
-# plot_S_Q = ["N", "N"]
-# plot_S_Qsmoothed_damped = ["N", "N"]
-# plot_F_r = ["N", "N"]
-# plot_F_r_corr = ["N", "N"]
-# plot_S_Q_corr = ["N", "N"]
-# plot_s_chi2 = ["N", "N"]
-# plot_rho0_chi2 = ["N", "N"]
+# Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path] 
+pw_raw_data = ["y"]
+pw_S_Q = ["n", "n", "./test/SQ.txt"]
+pw_S_Qsmoothed_damped = ["n", "n", "./test/SQsmooth.txt"]
+pw_F_r = ["N", "N", "./test/Fr.txt"]
+
+pw_F_r_iter = ["n"]
+
+pw_F_r_corr = ["N", "N", "./test/Fr_corr.txt"]
+pw_S_Q_corr = ["N", "N", "./test/SQcorr.txt"]
+pw_s_chi2 = ["N", "N", "./test/sChi2.txt"]
+pw_rho0_chi2 = ["N", "N", "./test/rho0Chi2.txt"]

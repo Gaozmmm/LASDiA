@@ -388,7 +388,7 @@ def calc_r(Q):
     r = fftpack.fftfreq(Q.size, meanDeltaQ)
     mask = np.where(r>=0)
     
-    return (r[mask], r, mask)
+    return r[mask]
     
     
 def calc_Fr(r, Q, Qi_Q):

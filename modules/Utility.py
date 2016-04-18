@@ -122,15 +122,21 @@ def read_file(path):
     return (xVect, yVect)
 
 
-def write_file(path, x, y):
+def write_file(path, xVar, yVar, xName, yName):
     """Function to write on file
     """
-
+    
+    dir = os.path.dirname(path)
+    
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    
     file = open(path, "w")
     file_name = file.name
 
-    output = np.column_stack((x.flatten(),y.flatten()))
-    np.savetxt(file_name,output,delimiter='\t')
+    output = np.column_stack((xVar.flatten(), yVar.flatten()))
+    file.write(xName + " \t " + yName + "\n")
+    np.savetxt(file_name, output, delimiter='\t')
     file.close()
 
 
@@ -227,14 +233,15 @@ def setArray(min, max, step):
     return a
 
 
-def plot_data(xVar, yVar, xName, yName, plotName):
+def plot_data(xVar, yVar, plotName, xName, yName, labName):
     """Function to plot
     """
 
     plt.figure(plotName)
-    plt.plot(xVar, yVar, label=yName)
+    plt.plot(xVar, yVar, label=labName)
     plt.xlabel(xName)
     plt.ylabel(yName)
     plt.legend()
-    plt.grid()
-    plt.show()
+    plt.grid(True)
+    plt.draw()
+    # plt.show()
