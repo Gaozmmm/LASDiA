@@ -49,12 +49,12 @@ from modules.MainFunctions import *
 from modules.Utility import *
 
 
-def calc_iintra(Q, max_index, elementList, element, x, y, z):
+def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_path):
     """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
 
     """
 
-    fe_Q, Ztot = calc_eeff(elementList, Q)
+    fe_Q, Ztot = calc_eeff(elementList, Q, incoh_path, aff_path)
 
     # numAtoms, element, x, y, z = read_xyz_file(path)
     iintra_Q = np.zeros(Q.size)
@@ -63,7 +63,7 @@ def calc_iintra(Q, max_index, elementList, element, x, y, z):
     for ielem in range(len(element)):
         for jelem in range(len(element)):
             if ielem != jelem:
-                KK = calc_Kp(fe_Q, element[ielem], Q) * calc_Kp(fe_Q, element[jelem], Q)
+                KK = calc_Kp(fe_Q, element[ielem], Q, aff_path) * calc_Kp(fe_Q, element[jelem], Q, aff_path)
                 d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
                 if d != 0.0:
                     iintra_Q += KK * np.sin(d*Q) / (d*Q)
@@ -75,7 +75,7 @@ def calc_iintra(Q, max_index, elementList, element, x, y, z):
     return (iintra_Q, fe_Q)
 
 
-def calc_Fintra(r, Q, QmaxIntegrate):
+def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
     """Function to calculate the intramolecular contribution of F(r) (eq. 42)
 
     To implemente!!! -> For now just for CO2!!!
@@ -88,8 +88,8 @@ def calc_Fintra(r, Q, QmaxIntegrate):
 
     elementList = {"C":1,"O":2}
     fe_Q, Ztot = calc_eeff(elementList, Q)
-    KC = calc_Kp(fe_Q, "C", Q)
-    KO = calc_Kp(fe_Q, "O", Q)
+    KC = calc_Kp(fe_Q, "C", Q, aff_path)
+    KO = calc_Kp(fe_Q, "O", Q, aff_path)
 
     constCO = 4/(np.pi * Ztot**2 * dCO)
     constOO = 2/(np.pi * Ztot**2 * dOO)
@@ -173,12 +173,12 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
     
     if varPlot.lower() == "y":
         plt.ion()
-        plt.figure('F_r')
+        plt.figure('F_rIt')
         plt.plot(r, F_r, label='F(r)')
         plt.xlabel('r (nm)')
         plt.ylabel('F(r)')
         plt.legend()
-        plt.grid()
+        plt.grid(True)
 
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
@@ -188,7 +188,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
         
         if varPlot.lower() == "y":
             j = i+1
-            plt.figure('F_r')
+            plt.figure('F_rIt')
             plt.plot(r, F_r, label='%s iteration F(r)' %j)
             plt.legend()
             plt.draw()

@@ -383,3 +383,21 @@ def calc_r(Q):
     mask = np.where(r>=0)
     
     return (r[mask], r, mask)
+    
+    
+def calc_deltaMinim(N, r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot, Fintra):
+    """Function to minimize the density
+    
+    """
+    #numAtoms = sc.N_A
+    Isample = I_Q - s * I_Qbkg
+    alpha = calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0)
+    Icoh = (N * alpha * Isample) - (N * Iincoh)
+    S_Q = calc_SQ(Icoh, Ztot, fe_Q)
+    i_Q = calc_iQ(S_Q, Sinf)
+    F_r = calc_Fr(r, Q, i_Q)
+    observed = F_r
+    excepted = Fintra - (4*np.pi*rho0)
+    
+    chi2, p = chisquare(observed, f_exp=excepted)
+    return chi2

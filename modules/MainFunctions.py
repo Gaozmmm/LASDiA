@@ -49,7 +49,7 @@ from modules.Utility import *
 from modules.UtilityAnalysis import *
 
 
-def calc_aff(element, Q):
+def calc_aff(element, Q, aff_path):
     """Function to calculate the Atomic Form Factor.
     The atomic form factor is calculated with the formula from:
     http://lampx.tugraz.at/~hadley/ss1/crystaldiffraction/atomicformfactors/formfactors.php
@@ -67,7 +67,8 @@ def calc_aff(element, Q):
     
     # open, read and close the parameters file
     # the first line contain the header and it is useless for the calculation
-    file = open("./affParamCEA.txt", "r")
+    # file = open("./affParamCEA.txt", "r")
+    file = open(aff_path, "r")
     header1 = file.readline()
     lines = file.readlines()
     file.close()
@@ -101,7 +102,7 @@ def calc_aff(element, Q):
     return f_Q
     
     
-def calc_eeff(elementList, Q):
+def calc_eeff(elementList, Q, incoh_path, aff_path):
     """Function to calculate the effective electron Form Factor, fe (eq. 10)
     
     arguments:
@@ -120,7 +121,8 @@ def calc_eeff(elementList, Q):
     fe_Q = 0
     Ztot = 0
 
-    file = open("./incohParamCEA.txt", "r")
+    # file = open("./incohParamCEA.txt", "r")
+    file = open(incoh_path, "r")
     header1 = file.readline()
     lines = file.readlines()
     file.close()
@@ -137,14 +139,14 @@ def calc_eeff(elementList, Q):
     # print (Ztot)
     
     for element, multiplicity in elementList.items():
-        fe_Q += multiplicity * calc_aff(element, Q)
+        fe_Q += multiplicity * calc_aff(element, Q, aff_path)
     
     fe_Q /= Ztot
 
     return (fe_Q, Ztot)
     
     
-def calc_Iincoh(elementList, Q):
+def calc_Iincoh(elementList, Q, incoh_path, aff_path):
     """Function to calculate the incoherent scattering intensity Iincoh(Q)
     The incoherent scattering intensity is calculated with the formula from the article:
     Hajdu Acta Cryst. (1972). A28, 250
@@ -161,7 +163,8 @@ def calc_Iincoh(elementList, Q):
     Iincoh_Q: incoherent scattering intensity - array
     """
     
-    file = open("./incohParamCEA.txt", "r")
+    # file = open("./incohParamCEA.txt", "r")
+    file = open(incoh_path, "r")
     header1 = file.readline()
     lines = file.readlines()
     file.close()
@@ -170,7 +173,7 @@ def calc_Iincoh(elementList, Q):
     
     # scan the lines and when it find the right element take the Z number
     for element, multiplicity in elementList.items():
-        aff = calc_aff(element, Q)
+        aff = calc_aff(element, Q, aff_path)
         for line in lines:
             columns = line.split()
             if columns[0] == element:
@@ -202,7 +205,7 @@ def calc_JQ(Iincoh_Q, Ztot, fe_Q):
     return J_Q
     
     
-def calc_Kp(fe_Q, element, Q):
+def calc_Kp(fe_Q, element, Q, aff_path):
     """Function to calculate the average of effective atomic number Kp (eq. 11, 14)
 
     arguments:
@@ -218,7 +221,7 @@ def calc_Kp(fe_Q, element, Q):
     """
 
     # effective atomic number
-    Kp_Q = calc_aff(element,Q)/fe_Q
+    Kp_Q = calc_aff(element, Q, aff_path)/fe_Q
     
     # average effective atomic number
     Kp = np.mean(Kp_Q)
@@ -226,7 +229,7 @@ def calc_Kp(fe_Q, element, Q):
     return Kp
 
 
-def calc_Sinf(elementList, fe_Q, Q, Ztot):
+def calc_Sinf(elementList, fe_Q, Q, Ztot, aff_path):
     """Function to calculate Sinf (eq. 19)
     
     arguments:
@@ -247,7 +250,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot):
     sum_Kp2 = 0
 
     for element, multiplicity in elementList.items():
-        sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q)**2
+        sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q, aff_path)**2
     
     Sinf = sum_Kp2 / Ztot**2
 
@@ -466,9 +469,8 @@ def calc_NewDimFFT(newQ, maxQ, QmaxIntegrate, Qi_Q):
     return (newQ2, Qi_Q2)
     
     
-def calc_SQ_F(F_r, r, Q, Sinf):
-    """Function to calculate S(Q) from F(r)
-
+def calc_SQCorr(F_r, r, Q, Sinf):
+    """Function to calculate S(Q) Corr from F(r) Optimal
     """
 
     # Qi_Q =  simps(F_r * (np.array(np.sin(np.mat(r).T *  np.mat(Q)))).T, r)

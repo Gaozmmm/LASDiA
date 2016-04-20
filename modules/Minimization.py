@@ -45,26 +45,29 @@ from scipy import fftpack
 from scipy.integrate import simps
 from scipy.stats import chisquare
 
-from modules.MainFunctions import *
+from modules.Optimization import *
 
-def calc_deltaMinim(N, r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot, Fintra):
-    """Function to minimize the density
-    
+
+def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
     """
-    #numAtoms = sc.N_A
-    Isample = I_Q - s * I_Qbkg
-    alpha = calc_alpha(J_Q, Sinf, Q, I_Q, fe_Q, Ztot, rho0)
-    Icoh = (N * alpha * Isample) - (N * Iincoh)
-    S_Q = calc_SQ(Icoh, Ztot, fe_Q)
-    i_Q = calc_iQ(S_Q, Sinf)
-    F_r = calc_Fr(r, Q, i_Q)
-    observed = F_r
-    excepted = Fintra - (4*np.pi*rho0)
+    """
     
-    chi2, p = chisquare(observed, f_exp=excepted)
+    maskIt = np.where((r>0) & (r < rmin))
+    rIt = r[maskIt]
+    deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0)
+    
+    chi2 = simps(deltaF_r**2, r[maskIt])
+    
     return chi2
     
     
-
-
-
+def calc_min_chi2(s, rho0, chi2):
+    """
+    """
+    
+    # take min of chi2
+    minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
+    # print("chi2 min ", chi2[minIndxRho0][minIndxS])
+    # print("rho0 ", rho0[minIndxRho0], "s ", s[minIndxS])
+    
+    return (chi2[minIndxRho0][minIndxS], s[minIndxS], rho0[minIndxRho0])

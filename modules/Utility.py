@@ -35,6 +35,7 @@ otherwise it is symbolized with just its name.
 """
 
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 import sys
 import os
@@ -50,6 +51,8 @@ import random
 from collections import Counter
 import re
 import imp
+import time
+import datetime
 
 def read_file(path):
     """Read the file and return x and y as numpy vectors
@@ -137,6 +140,20 @@ def write_file(path, xVar, yVar, xName, yName):
     output = np.column_stack((xVar.flatten(), yVar.flatten()))
     file.write(xName + " \t " + yName + "\n")
     np.savetxt(file_name, output, delimiter='\t')
+    file.close()
+
+
+def write_results(path, molecule, scale_factor, rho0):
+    """Function to write scale factor and rho0 on file
+    """
+    
+    file = open(path, "a")
+    file_name = file.name
+    
+    ts = time.time()
+    timeStamp = datetime.datetime.fromtimestamp(ts).strftime("%Y%m%d_%H:%M:%S")
+    
+    file.write(timeStamp + " \t " + molecule + " \t " + str(scale_factor) + " \t " + str(rho0) + "\n")
     file.close()
 
 
@@ -233,7 +250,7 @@ def setArray(min, max, step):
     return a
 
 
-def plot_data(xVar, yVar, plotName, xName, yName, labName):
+def plot_raw_data(xVar, yVar, plotName, xName, yName, labName):
     """Function to plot
     """
 
@@ -244,4 +261,59 @@ def plot_data(xVar, yVar, plotName, xName, yName, labName):
     plt.legend()
     plt.grid(True)
     plt.draw()
-    # plt.show()
+    # plt.show
+    
+    
+def plot_data(xVar, yVar, plotName, xName, yName, labName):
+    """Function to plot
+    """
+
+    plt.figure(plotName)
+    plt.clf()
+    plt.plot(xVar, yVar, label=labName)
+    plt.xlabel(xName)
+    plt.ylabel(yName)
+    plt.legend()
+    plt.grid(True)
+    plt.draw()
+    
+    
+def plot_chi2(s, rho0, chi2):
+    """
+    """
+    
+    # plot 2d chi2
+    plt.figure('chi2s')
+    plt.plot(s,chi2[0, : ])
+    plt.xlabel('s')
+    plt.ylabel('chi2')
+    plt.grid()
+    plt.show
+
+    plt.figure('chi2rho0')
+    plt.plot(rho0,chi2[ : ,0])
+    plt.xlabel('rho0')
+    plt.ylabel('chi2')
+    plt.grid()
+    plt.draw()
+    
+    
+def plot3d_chi2(s, rho0, chi2):
+    """
+    """
+    
+    # plot the 3d chi2 and its profile
+    x, y = np.meshgrid(s, rho0)
+    fig = plt.figure('chi2 3D')
+    ax = Axes3D(fig)
+    ax.set_xlabel('s')
+    ax.set_ylabel(r'$\rho_0$ (atoms/$nm^3$)')
+    ax.set_zlabel(r'$\chi^2$')
+    ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
+
+    plt.figure('chi2 Profile')
+    plt.contour(s, rho0, chi2, 200)
+    plt.xlabel('s')
+    plt.ylabel(r'$\rho_0$ (atoms/$nm^3$)')
+    plt.draw()
+        
