@@ -6,14 +6,14 @@
 # calculates all the physical quantities just for those ones.
 
 # Path sample and bkg file
-data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
-bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
+data_file = "C:/Users/devoto/work/ID27/data/cea_files/Ar/HT2_034T++_rem.chi"
+bkg_file = "C:/Users/devoto/work/ID27/data/cea_files/Ar/HT2_036T++_rem.chi"
 
 # Sample composition
-xyz_file = "./xyzFiles/argon.xyz"                               # Path for the XYZ file
+xyz_file = "C:/Users/devoto/work/ID27/LASDiA/xyzFiles/argon.xyz"                               # Path for the XYZ file
 molecule = "Ar"                                                 # Molecular composition: Ar, CO2, N2
-aff_params = "./affParamCEA.txt"                                # Path atomic form factor parameters file
-incoh_params = "./incohParamCEA.txt"                            # Path incoherent parameters file
+aff_params = "C:/Users/devoto/work/ID27/LASDiA/affParamCEA.txt"                                # Path atomic form factor parameters file
+incoh_params = "C:/Users/devoto/work/ID27/LASDiA/incohParamCEA.txt"                            # Path incoherent parameters file
 
 # Analysis parameters
 minQ = 3                                                        # Minimum Q value in data interpolation waves
@@ -37,7 +37,7 @@ rho0_max = 31                                                   # Density maximu
 rho0_step = 1                                                   # Density step value for the minimization
 
 # Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path] 
-pw_raw_data = ["n"]                                             # Plot the Raw Data
+pw_raw_data = ["y"]                                             # Plot the Raw Data
 
 pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)    
 pw_F_r = ["n", "N", "./test/Fr.txt"]                            # Plot and save F(r)
