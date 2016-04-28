@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2016 Francesco Devoto
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -70,4 +70,4 @@ def calc_min_chi2(s, rho0, chi2):
     # print("chi2 min ", chi2[minIndxRho0][minIndxS])
     # print("rho0 ", rho0[minIndxRho0], "s ", s[minIndxS])
     
-    return (chi2[minIndxRho0][minIndxS], s[minIndxS], rho0[minIndxRho0])
+    return (chi2[minIndxRho0][minIndxS], s[minIndxS], minIndxS, rho0[minIndxRho0], minIndxRho0)

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2015 Francesco Devoto
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -64,11 +64,11 @@ def read_file(path):
     xVect: abscissa values - array
     yVect: ordinate values - array
     """
-
+    
     file = open(path, "r")
     file_name = file.name
     ext = os.path.splitext(file_name)[1]
-
+    
     dimension = "nano"
     scale_factor = 1
 
@@ -278,27 +278,27 @@ def plot_data(xVar, yVar, plotName, xName, yName, labName):
     plt.draw()
     
     
-def plot_chi2(s, rho0, chi2):
+def plot_chi2(chi2, s, s_idx, rho0, rho0_idx):
     """
     """
     
     # plot 2d chi2
     plt.figure('chi2s')
-    plt.plot(s,chi2[0, : ])
+    plt.plot(s,chi2[rho0_idx, : ])
     plt.xlabel('s')
     plt.ylabel('chi2')
     plt.grid()
     plt.show
 
     plt.figure('chi2rho0')
-    plt.plot(rho0,chi2[ : ,0])
+    plt.plot(rho0,chi2[ : ,s_idx])
     plt.xlabel('rho0')
     plt.ylabel('chi2')
     plt.grid()
     plt.draw()
     
     
-def plot3d_chi2(s, rho0, chi2):
+def plot3d_chi2(chi2, s, rho0):
     """
     """
     
@@ -312,7 +312,7 @@ def plot3d_chi2(s, rho0, chi2):
     ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
 
     plt.figure('chi2 Profile')
-    plt.contour(s, rho0, chi2, 200)
+    plt.contour(s, rho0, chi2, 1000)
     plt.xlabel('s')
     plt.ylabel(r'$\rho_0$ (atoms/$nm^3$)')
     plt.draw()

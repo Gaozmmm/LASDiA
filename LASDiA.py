@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2016 Francesco Devoto
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,9 @@
 This script is mainly used for testing the software, but it can be used to run LASDiA in text mode.
 The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105
 """
+
+# __authors__ = "Francesco Devoto"
+# __license__ = "MIT"
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
@@ -116,6 +119,8 @@ if __name__ == "__main__":
             F_rIt = calc_optimize_Fr(variables.iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, variables.rmin, variables.pw_F_r_iter[0])
             
             chi2[i][j] = calc_chi2(r, variables.rmin, F_rIt, Fintra_r, rho0[i])
+            print(i, j, val_rho0, val_s)
+            print("chi2 ", chi2[i][j])
             if chi2[i][j] < valChi2:
                 valChi2 = chi2[i][j]
                 F_rOpt = F_rIt
@@ -140,7 +145,10 @@ if __name__ == "__main__":
     if variables.pw_S_QCorr[0].lower() == "y":
         write_file(variables.pw_S_QCorr[2], newQ, S_QCorr, "Q($nm^{-1}$))", "S(Q)")
     
-    chi2Min, sBest, rho0Best = calc_min_chi2(scale_factor, rho0, chi2)
+    print(chi2.shape)
+    
+    chi2Min, sBest, sBestIdx, rho0Best, rho0BestIdx = calc_min_chi2(scale_factor, rho0, chi2)
+    print(sBestIdx, rho0BestIdx)
     if variables.pw_results[0].lower() == "y":
         write_results(variables.pw_results[1], variables.molecule, sBest, rho0Best)
         print("chi2 min ", chi2Min)
@@ -152,8 +160,8 @@ if __name__ == "__main__":
         print("Best rho0 density ", rho0Best)
     
     if variables.pw_chi2[0].lower() == "y":
-        plot_chi2(scale_factor, rho0, chi2)
-        plot3d_chi2(scale_factor, rho0, chi2)
+        plot_chi2(chi2, scale_factor, sBestIdx, rho0, rho0BestIdx)
+        plot3d_chi2(chi2, scale_factor, rho0)
     
     plt.ioff()
     plt.show()
