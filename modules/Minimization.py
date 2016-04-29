@@ -67,6 +67,9 @@ def calc_min_chi2(s, rho0, chi2):
     
     # take min of chi2
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
+    # maxIndxRho0, maxIndxS = np.unravel_index(chi2.argmax(), chi2.shape)
+    # print(chi2[minIndxRho0][minIndxS])
+    # print(chi2[maxIndxRho0][maxIndxS])
     # print("chi2 min ", chi2[minIndxRho0][minIndxS])
     # print("rho0 ", rho0[minIndxRho0], "s ", s[minIndxS])
     

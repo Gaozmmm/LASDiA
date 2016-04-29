@@ -119,8 +119,8 @@ if __name__ == "__main__":
             F_rIt = calc_optimize_Fr(variables.iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, variables.rmin, variables.pw_F_r_iter[0])
             
             chi2[i][j] = calc_chi2(r, variables.rmin, F_rIt, Fintra_r, rho0[i])
-            print(i, j, val_rho0, val_s)
-            print("chi2 ", chi2[i][j])
+            # print(i, j, val_rho0, val_s)
+            # print("chi2 ", chi2[i][j])
             if chi2[i][j] < valChi2:
                 valChi2 = chi2[i][j]
                 F_rOpt = F_rIt

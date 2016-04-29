@@ -30,7 +30,7 @@ rmin = 0.22                                                     # The distance b
 # Scale factor and density parameters
 s_min = 0.2                                                     # Scale factor minimum value for the minimization
 s_max = 1.0                                                     # Scale factor maximum  value for the minimization
-s_step = 0.05                                                    # Scale factor step value for the minimization
+s_step = 0.1                                                    # Scale factor step value for the minimization
 
 rho0_min = 20                                                   # Density minimum value for the minimization
 rho0_max = 31                                                   # Density maximum  value for the minimization

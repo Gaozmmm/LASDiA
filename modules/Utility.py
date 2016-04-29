@@ -251,7 +251,7 @@ def setArray(min, max, step):
 
 
 def plot_raw_data(xVar, yVar, plotName, xName, yName, labName):
-    """Function to plot
+    """Function to plot the raw data
     """
 
     plt.figure(plotName)
@@ -265,7 +265,7 @@ def plot_raw_data(xVar, yVar, plotName, xName, yName, labName):
     
     
 def plot_data(xVar, yVar, plotName, xName, yName, labName):
-    """Function to plot
+    """Function to plot the data
     """
 
     plt.figure(plotName)
@@ -279,7 +279,7 @@ def plot_data(xVar, yVar, plotName, xName, yName, labName):
     
     
 def plot_chi2(chi2, s, s_idx, rho0, rho0_idx):
-    """
+    """Function to plot the 2D graph of chi2 with scale factor and density
     """
     
     # plot 2d chi2
@@ -299,7 +299,7 @@ def plot_chi2(chi2, s, s_idx, rho0, rho0_idx):
     
     
 def plot3d_chi2(chi2, s, rho0):
-    """
+    """Function to plot the 3D graph of chi2 and its profile
     """
     
     # plot the 3d chi2 and its profile
@@ -310,9 +310,16 @@ def plot3d_chi2(chi2, s, rho0):
     ax.set_ylabel(r'$\rho_0$ (atoms/$nm^3$)')
     ax.set_zlabel(r'$\chi^2$')
     ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
+    
+    # nLevel = int(chi2Max - chi2Min)
+    # minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
+    # maxIndxRho0, maxIndxS = np.unravel_index(chi2.argmax(), chi2.shape)
+    # chi2Min = chi2[minIndxRho0][minIndxS]
+    # chi2Max = chi2[maxIndxRho0][maxIndxS]
+    # levels = np.linspace(0, chi2Max, int(chi2Max - chi2Min))
 
     plt.figure('chi2 Profile')
-    plt.contour(s, rho0, chi2, 1000)
+    plt.contour(s, rho0, chi2, 150)
     plt.xlabel('s')
     plt.ylabel(r'$\rho_0$ (atoms/$nm^3$)')
     plt.draw()
