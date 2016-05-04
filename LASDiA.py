@@ -55,6 +55,9 @@ if __name__ == "__main__":
     Q, I_Q = read_file(variables.data_file)
     Qbkg, I_Qbkg = read_file(variables.bkg_file)
     
+    # print(I_Q.size)
+    # print(I_Qbkg.size)
+    
     plt.ion()
     if variables.pw_raw_data[0].lower() == "y":
         plot_raw_data(Q, I_Q, "raw_data", "Q($nm^{-1}$)", "I(Q)", "I(Q)")
@@ -145,10 +148,10 @@ if __name__ == "__main__":
     if variables.pw_S_QCorr[0].lower() == "y":
         write_file(variables.pw_S_QCorr[2], newQ, S_QCorr, "Q($nm^{-1}$))", "S(Q)")
     
-    print(chi2.shape)
+    # print(chi2.shape)
     
     chi2Min, sBest, sBestIdx, rho0Best, rho0BestIdx = calc_min_chi2(scale_factor, rho0, chi2)
-    print(sBestIdx, rho0BestIdx)
+    # print(sBestIdx, rho0BestIdx)
     if variables.pw_results[0].lower() == "y":
         write_results(variables.pw_results[1], variables.molecule, sBest, rho0Best)
         print("chi2 min ", chi2Min)

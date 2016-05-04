@@ -6,19 +6,19 @@
 # calculates all the physical quantities just for those ones.
 
 # Path sample and bkg file
-data_file = r"C:\Users\devoto\work\ID27\data\cea_files\Ar\HT2_034T++_rem.chi"
-bkg_file = r"C:/Users/devoto/work/ID27/data/cea_files/Ar/HT2_036T++_rem.chi"
+data_file = "C:/Users/devoto/work/ID27/data/cea_files/CO2/WO2_007BBin.chi"
+bkg_file = "C:/Users/devoto/work/ID27/data/cea_files/CO2/WO2_013BBin.chi"
 
 # Sample composition
-xyz_file = r"C:/Users/devoto/work/ID27/LASDiA/xyzFiles/argon.xyz"                               # Path for the XYZ file
-molecule = "Ar"                                                                                 # Molecular composition: Ar, CO2, N2
-aff_params = r"C:/Users/devoto/work/ID27/LASDiA/affParamCEA.txt"                                # Path atomic form factor parameters file
-incoh_params = r"C:/Users/devoto/work/ID27/LASDiA/incohParamCEA.txt"                            # Path incoherent parameters file
+xyz_file = "C:/Users/devoto/work/ID27/LASDiA/xyzFiles/co2.xyz"                               # Path for the XYZ file
+molecule = "CO2"                                                                                 # Molecular composition: Ar, CO2, N2
+aff_params = "C:/Users/devoto/work/ID27/LASDiA/affParamCEA.txt"                                # Path atomic form factor parameters file
+incoh_params = "C:/Users/devoto/work/ID27/LASDiA/incohParamCEA.txt"                            # Path incoherent parameters file
 
 # Analysis parameters
-minQ = 3                                                        # Minimum Q value in data interpolation waves
+minQ = 8.005                                                   # Minimum Q value in data interpolation waves
 QmaxIntegrate = 90                                              # Qmax for all integration operations
-maxQ = 109                                                      # Maximum Q value in data interpolation waves
+maxQ = 100                                                     # Maximum Q value in data interpolation waves
 
 smooth_factor = 0.25                                            # Smoothing factor for cubic spline
 damp_factor = 1                                                 # Exponential damping factor == A*Qmax^2
