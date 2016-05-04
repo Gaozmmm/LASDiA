@@ -55,8 +55,8 @@ if __name__ == "__main__":
     Q, I_Q = read_file(variables.data_file)
     Qbkg, I_Qbkg = read_file(variables.bkg_file)
     
-    # print(I_Q.size)
-    # print(I_Qbkg.size)
+    print(I_Q.size)
+    print(I_Qbkg.size)
     
     plt.ion()
     if variables.pw_raw_data[0].lower() == "y":
