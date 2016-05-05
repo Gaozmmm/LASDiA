@@ -1,3 +1,25 @@
+# The MIT License (MIT)
+
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 # Input file format for LASDiA software
 # The lines with the hash tag (#) are comments
 #
@@ -36,10 +58,10 @@ rho0_min = 20                                                   # Density minimu
 rho0_max = 31                                                   # Density maximum  value for the minimization
 rho0_step = 1                                                   # Density step value for the minimization
 
-# Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path] 
+# Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path]
 pw_raw_data = ["n"]                                             # Plot the Raw Data
 
-pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)    
+pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)
 pw_F_r = ["n", "N", "./test/Fr.txt"]                            # Plot and save F(r)
 
 pw_F_r_iter = ["n"]                                             # Plot the iterations for the F(r) optimization

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2016 Francesco Devoto
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -170,7 +170,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
     returns:
     F_r: optimazed F(r) - array
     """
-    
+
     if varPlot.lower() == "y":
         plt.ion()
         plt.figure('F_rIt')
@@ -185,7 +185,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         i_Q[0] = 0.0
         F_r = calc_Fr(r, Q, Q*i_Q)
-        
+
         if varPlot.lower() == "y":
             j = i+1
             plt.figure('F_rIt')

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2016 Francesco Devoto
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -53,75 +53,75 @@ import math
 
 def ALtoFZ(N1, N2, S11, S12, S22):
     """Function to transform the AL to FZ (eq 1.2.17)
-    
+
     arguments:
     N1:
     N2:
     S11:
     S12:
     S22:
-    
+
     returns:
     a11:
     a12:
     a22:
     """
-    
+
     c1 = N1/(N1+N2)
     c2 = N2/(N1+N2)
-    
+
     a11_Q = (S11 - c2)/c1
     a12_Q = S12/math.sqrt(c1*c2) + 1
     a22_Q = (S22 - c1)/c2
-    
+
     return (a11_Q, a12_Q, a22_Q)
-    
-    
+
+
 def FZtoAL(N1, N2, a11, a12, a22):
     """Function to transform the AL to FZ (eq 1.2.17)
-    
+
     arguments:
     N1:
     N2:
     a11:
     a12:
     a22:
-    
+
     returns:
     S11:
     S12:
     S22:
     """
-    
+
     c1 = N1/(N1+N2)
     c2 = N2/(N1+N2)
-    
+
     S11_Q = 1 + c1*(a11_Q - 1)
     S12_Q = math.sqrt(c1*c2) * (a12_Q - 1)
     S11_Q = 1 + c2*(a22_Q - 1)
-    
+
     return (S11_Q, S12_Q, S22_Q)
-    
-    
+
+
 def FaberZiman(Icoh_Q, Q, Sinf, min_index, max_index, calculation_index):
     """Function to calculate S(Q) with Faber-Ziman formalism (eq )
-    
+
     """
-    
+
     N = 3
     c1 = 1/N
     c2 = 2/N
-    
+
     f2 = c1*calc_aff('C', Q[calculation_index])**2 + c2*calc_aff('O',Q[calculation_index])**2
     f = c1*calc_aff('C', Q[calculation_index]) + c2*calc_aff('O',Q[calculation_index])
-    
+
     S_Q = (Icoh_Q[calculation_index] - (f2 - f**2)) / (N*f**2)
-    
+
     S_Qmin = np.zeros(Q[min_index].size)
     S_Q = np.concatenate([S_Qmin, S_Q])
-    
+
     S_Qmax = np.zeros(Q[max_index].size)
     S_Qmax.fill(Sinf)
     S_Q = np.concatenate([S_Q, S_Qmax])
-    
+
     return S_Q

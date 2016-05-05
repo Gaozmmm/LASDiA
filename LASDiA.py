@@ -21,8 +21,6 @@
 # SOFTWARE.
 
 """LASDiA main script file.
-This script is mainly used for testing the software, but it can be used to run LASDiA in text mode.
-The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105
 """
 
 # __authors__ = "Francesco Devoto"
@@ -46,23 +44,23 @@ from modules.Minimization import *
 
 
 if __name__ == "__main__":
-    
+
     variables = read_inputFile("./inputFile.txt")
-    
+
     elementList = molToelemList(variables.molecule)
     numAtoms, element, x, y, z = read_xyz_file(variables.xyz_file)
-    
+
     Q, I_Q = read_file(variables.data_file)
     Qbkg, I_Qbkg = read_file(variables.bkg_file)
-    
+
     print(I_Q.size)
     print(I_Qbkg.size)
-    
+
     plt.ion()
     if variables.pw_raw_data[0].lower() == "y":
         plot_raw_data(Q, I_Q, "raw_data", "Q($nm^{-1}$)", "I(Q)", "I(Q)")
         plot_raw_data(Qbkg, I_Qbkg, "raw_data", "Q($nm^{-1}$)", "I(Q)", "I(Q) bkg")
-    
+
     fe_Q, Ztot = calc_eeff(elementList, Q, variables.incoh_params, variables.aff_params)
     Iincoh_Q = calc_Iincoh(elementList, Q, variables.incoh_params, variables.aff_params)
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
@@ -87,7 +85,7 @@ if __name__ == "__main__":
             S_Q = calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
             newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, variables.smooth_factor, min_index, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 550)
             S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, variables.QmaxIntegrate, variables.damp_factor)
-            
+
             if variables.pw_S_Q[0].lower() == "y":
                 plot_data(Q[validation_index], S_Q, "S_Q", "Q($nm^{-1}$)", "S(Q)", "S(Q)")
             # if variables.pw_S_Q[1].lower() == "y":
@@ -96,31 +94,31 @@ if __name__ == "__main__":
                 # plot_data(newQ, S_QsmoothedDamp, "S_Q", "Q($nm^{-1}$)", "S(Q)", "S(Q) smooth-damp")
             # if variables.pw_S_Qsmoothed_damped[1].lower() == "y":
                 # write_file(variables.pw_S_Qsmoothed_damped[2], newQ, S_QsmoothedDamp, "Q($nm^{-1}$)", "S(Q) smooth-damp")
-            
+
             Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
             i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
-            
+
             validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
             min_indexSmooth, max_indexSmooth = calc_indices(newQ, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-            
+
             r = calc_r(newQ)
             F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
-            
+
             if variables.pw_F_r[0].lower() == "y":
                 plot_data(r, F_r, "F_r", "r($nm$)", "F(r)", "F(r)")
             # if variables.pw_F_r[1].lower() == "y":
                 # write_file(variables.pw_F_r[2], r, F_r, "r($nm$)", "F(r)")
-            
+
             iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, variables.incoh_params, variables.aff_params)
             Qiintradamp = calc_iintradamp(iintra_Q, newQ, variables.QmaxIntegrate, variables.damp_factor)
             Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
             # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l], variables.aff_params)
-            
+
             Iincoh_QSmooth = calc_Iincoh(elementList, newQ, variables.incoh_params, variables.aff_params)
             J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
 
             F_rIt = calc_optimize_Fr(variables.iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, variables.rmin, variables.pw_F_r_iter[0])
-            
+
             chi2[i][j] = calc_chi2(r, variables.rmin, F_rIt, Fintra_r, rho0[i])
             # print(i, j, val_rho0, val_s)
             # print("chi2 ", chi2[i][j])
@@ -129,27 +127,27 @@ if __name__ == "__main__":
                 F_rOpt = F_rIt
                 # print(i, j, val_rho0, val_s)
                 # print("chi2 ", chi2[i][j])
-            
+
             # if variables.pw_F_rIt[0].lower() == "y":
                 # plot_data(r, F_rIt, "F_rIt", "r($nm$)", "F(r)", "F(r)")
             # if variables.pw_F_rIt[1].lower() == "y":
                 # write_file(variables.pw_F_rIt[2], r, F_rIt, "r($nm$)", "F(r)")
-    
-    
+
+
     if variables.pw_F_rOpt[0].lower() == "y":
         plot_data(r, F_rOpt, "F_rOpt", "r($nm$)", "F(r)", "F(r) Optimal")
     if variables.pw_F_rOpt[0].lower() == "y":
         write_file(variables.pw_F_rOpt[2], r, F_rOpt, "r($nm$)", "F(r)")
-    
+
     S_QCorr = calc_SQCorr(F_rOpt, r, newQ, Sinf)
-    
+
     if variables.pw_S_QCorr[0].lower() == "y":
         plot_data(newQ, S_QCorr, "S_QCorr", "Q($nm^{-1}$)", "S(Q)", "S(Q) Corrected")
     if variables.pw_S_QCorr[0].lower() == "y":
         write_file(variables.pw_S_QCorr[2], newQ, S_QCorr, "Q($nm^{-1}$))", "S(Q)")
-    
+
     # print(chi2.shape)
-    
+
     chi2Min, sBest, sBestIdx, rho0Best, rho0BestIdx = calc_min_chi2(scale_factor, rho0, chi2)
     # print(sBestIdx, rho0BestIdx)
     if variables.pw_results[0].lower() == "y":
@@ -161,10 +159,10 @@ if __name__ == "__main__":
         print("chi2 min ", chi2Min)
         print("Best scale factor ", sBest)
         print("Best rho0 density ", rho0Best)
-    
+
     if variables.pw_chi2[0].lower() == "y":
         plot_chi2(chi2, scale_factor, sBestIdx, rho0, rho0BestIdx)
         plot3d_chi2(chi2, scale_factor, rho0)
-    
+
     plt.ioff()
     plt.show()

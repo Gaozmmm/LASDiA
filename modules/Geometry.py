@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module containing the geometric correction: Diamond and Soller SLit corrections.
+"""Module containing the geometric correction: Diamond and Soller Slit.
 
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
@@ -35,3 +35,7 @@ otherwise it is symbolized with just its name.
 """
 
 def diamond():
+    """Function to calculate the diamond correction.
+    """
+
+    
