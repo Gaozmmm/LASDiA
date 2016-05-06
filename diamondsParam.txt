@@ -1,0 +1,12 @@
+Type    Dimension (mm)
+http://www.almax-easylab.com/DiamondSelectionPage.aspx
+P01035  2.40
+P01036  1.72
+P01037  1.70
+P01039  1.95
+P00539  1.44
+P01063  1.95
+P01064  1.72
+P01065  1.70
+P01067  1.95
+P01066  1.44

@@ -34,8 +34,44 @@ if the variable symbolizes a mathematical function, its argument is preceded by 
 otherwise it is symbolized with just its name.
 """
 
-def diamond():
-    """Function to calculate the diamond correction.
-    """
+import numpy as np
 
+def diamond(path, type, Q, I_Q, diamond_angle):
+    """Function to calculate the diamond correction.
+    http://physics.nist.gov/PhysRefData/XrayMassCoef/ElemTab/z06.html
+    """
+    
+    file = open(path, "r")
+    header1 = file.readline()
+    header2 = file.readline()
+    lines = file.readlines()
+    file.close()
+    
+    for line in lines:
+        columns = line.split()
+        if columns[0] == type:
+            dimension = float(columns[1])
+            break
+            
+    # for now...
+    mu = 0.2562
+    wavelenght = 0.03738
+    theta_angle = np.arcsin(wavelenght*Q/(4*np.pi))
+    path_lenght = dimension / np.cos(theta_angle + diamond_angle)
+    
+    corr_factor = np.exp(mu * path_lenght)
+    
+    I_Qeff = corr_factor * I_Q
+    
+    return I_Qeff
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
