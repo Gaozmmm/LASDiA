@@ -221,3 +221,14 @@ def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
     S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
 
     return S_Qdamp
+
+    
+def Qto2theta(Q):
+    """Function to convert Q into 2theta
+    """
+    
+    wavelenght = 0.03738
+    theta = np.arcsin(wavelenght *Q /(4*np.pi))
+    theta2 = 2*theta
+    
+    return theta2

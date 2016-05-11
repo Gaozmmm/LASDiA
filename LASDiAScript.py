@@ -62,34 +62,64 @@ if __name__ == '__main__':
     xyz_file = "./xyzFiles/argon.xyz"
     numAtoms, element, x, y, z = read_xyz_file(xyz_file)
 
-    # Q, I_Q = read_file("./HT2_034T++.chi")
-    # Qbkg, I_Qbkg = read_file("./HT2_036T++.chi")
-    Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
-    Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
-    # Q, I_Q = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
-    # Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
+    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
+    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
+    
+    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
+    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
+    
+    Q1, I_Q1 = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
+    Qbkg1, I_Qbkg1 = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
+    
+    Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
+    Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
+    
+    # print(Q.shape, I_Q.shape)
+    # print(Q.shape, len(I_Q))
+    # print(Qbkg.shape, I_Qbkg.shape)
     
     
-    plt.figure("data")
-    plt.plot(Q, I_Q, label="measured")
-    plt.plot(Qbkg, I_Qbkg, label="bkg")
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('I(Q)')
-    plt.grid()
-    plt.show()
     
     # Ar
-    minQ = 3
-    maxQ = 109
+    # minQ = 3
+    # maxQ = 109
     # CO2
-    # minQ = 8.005
-    # maxQ = 100
+    minQ = 8.005
+    maxQ = 100
     QmaxIntegrate = 90
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)
-
+    
+    
+    
+    if len(Q) != len(Qbkg):
+        print(len(Q), len(Qbkg))
+        min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
+        print(min_len)
+        Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
+        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
+    
+    plt.figure("data")
+    plt.plot(Q1, I_Q1, label="measured Ibin")
+    plt.plot(Qbkg1, I_Qbkg1, label="bkg Ibin")
+    plt.plot(Q, I_Q, label="measured Lbin")
+    plt.plot(Qbkg, I_Qbkg, label="bkg Lbin")
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('I(Q)')
+    plt.legend()
+    plt.grid()
+    plt.show
+    
+    theta2 = np.degrees(Qto2theta(Q))
+    
+    plt.figure("2theta")
+    plt.plot(Q, theta2, label="2theta")
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('2theta')
+    plt.legend()
+    plt.grid()
+    plt.show()
+    
     # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
 

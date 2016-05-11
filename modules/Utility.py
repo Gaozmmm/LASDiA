@@ -324,3 +324,34 @@ def plot3d_chi2(chi2, s, rho0):
     plt.ylabel(r'$\rho_0$ (atoms/$nm^3$)')
     plt.draw()
         
+        
+# Test function
+def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
+    """Function for the rebinning
+    """
+
+    newf_X = interpolate.interp1d(X, f_X)
+    ShitX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
+    ShitY = newf_X(ShitX)
+
+    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
+    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
+    BinX = np.linspace(min, max, Num, endpoint=True)
+    BinY = np.zeros(Num)
+
+    for i in range(BinNum):
+        for j in range(0, Num):
+            BinY[j] += ShitY[j*BinNum+i]
+
+    BinY /= BinNum
+
+    mask = np.where(BinX<=minQ)
+    BinY[mask] = 0.0
+
+    # lenX = len(X)
+    # numX = 2**int(math.log(lenX,2))
+    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    # if min < np.amin(X):
+        # min = np.amin(X)
+
+    return (BinX, BinY)
