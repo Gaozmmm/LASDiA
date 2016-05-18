@@ -100,12 +100,21 @@ if __name__ == '__main__':
         Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
     
     plt.figure("data")
-    plt.plot(Q1, I_Q1, label="measured Ibin")
-    plt.plot(Qbkg1, I_Qbkg1, label="bkg Ibin")
-    plt.plot(Q, I_Q, label="measured Lbin")
-    plt.plot(Qbkg, I_Qbkg, label="bkg Lbin")
+    plt.plot(Q1, I_Q1, label="measured I bin")
+    plt.plot(Qbkg1, I_Qbkg1, label="bkg I bin")
+    plt.plot(Q, I_Q, label="measured L bin")
+    plt.plot(Qbkg, I_Qbkg, label="bkg L bin")
     plt.xlabel('Q ($nm^{-1}$)')
     plt.ylabel('I(Q)')
+    plt.legend()
+    plt.grid()
+    plt.show
+    
+    plt.figure("data diff")
+    plt.plot(Q, I_Q1 - I_Q, label="measured I-L bin")
+    plt.plot(Qbkg, I_Qbkg1 - I_Qbkg, label="bkg I-L bin")
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('$\Delta$(I(Q))')
     plt.legend()
     plt.grid()
     plt.show
