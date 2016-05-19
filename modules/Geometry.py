@@ -35,6 +35,7 @@ otherwise it is symbolized with just its name.
 """
 
 import numpy as np
+from modules.UtilityAnalysis import Qto2theta
 
 def diamond(path, type, Q, I_Q, diamond_angle):
     """Function to calculate the diamond correction.
@@ -54,16 +55,23 @@ def diamond(path, type, Q, I_Q, diamond_angle):
             break
             
     # for now...
-    mu = 0.2562
-    wavelenght = 0.03738
-    theta_angle = np.arcsin(wavelenght*Q/(4*np.pi))
-    path_lenght = dimension / np.cos(theta_angle + diamond_angle)
+    # mu = 0.2562 # cm2/g
+    wavelenght = 0.03738 # nm
+    # diamond_density = 3.51 # g/cm3
+    # mu_l = mu * diamond_density # cm
+    mu_l = 1/12.08 # mm^-1 at 33 keV
+    # theta_angle = np.arcsin(wavelenght*Q/(4*np.pi))
+    _2theta_angle = Qto2theta(Q) # rad
     
-    corr_factor = np.exp(mu * path_lenght)
+    
+    
+    path_lenght = dimension / np.cos(_2theta_angle)
+    
+    corr_factor = np.exp(mu_l * path_lenght)
     
     I_Qeff = corr_factor * I_Q
     
-    return I_Qeff
+    return (I_Qeff, corr_factor)
     
     
     

@@ -329,10 +329,10 @@ def plot3d_chi2(chi2, s, rho0):
 def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     """Function for the rebinning
     """
-
+    
     newf_X = interpolate.interp1d(X, f_X)
-    ShitX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
-    ShitY = newf_X(ShitX)
+    ShiftX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
+    ShiftY = newf_X(ShiftX)
 
     min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
     max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
@@ -341,7 +341,7 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
 
     for i in range(BinNum):
         for j in range(0, Num):
-            BinY[j] += ShitY[j*BinNum+i]
+            BinY[j] += ShiftY[j*BinNum+i]
 
     BinY /= BinNum
 

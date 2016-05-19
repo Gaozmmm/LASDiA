@@ -228,7 +228,8 @@ def Qto2theta(Q):
     """
     
     wavelenght = 0.03738
-    theta = np.arcsin(wavelenght *Q /(4*np.pi))
-    theta2 = 2*theta
+    theta = np.arcsin((wavelenght*Q) / (4*np.pi))
+    _2theta2 = 2*theta
     
-    return theta2
+    # return np.degrees(theta2)
+    return _2theta

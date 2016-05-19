@@ -49,6 +49,7 @@ from modules.Optimization import *
 from modules.Minimization import *
 from modules.Formalism import *
 from modules.IgorFunctions import *
+from modules.Geometry import *
 
 # import cmath
 # from cmath import exp, pi
@@ -124,10 +125,41 @@ if __name__ == '__main__':
     plt.figure("2theta")
     plt.plot(Q, theta2, label="2theta")
     plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('2theta')
+    plt.ylabel('2theta (deg)')
+    plt.legend()
+    plt.grid()
+    plt.show
+    
+    plt.figure("data 2theta")
+    plt.plot(theta2, I_Q, label="measured")
+    plt.plot(theta2, I_Qbkg, label="bkg")
+    plt.xlabel('2theta (deg)')
+    plt.ylabel('I(Q)')
+    plt.legend()
+    plt.grid()
+    plt.show
+    
+    I_Qcorr, corr_factor_meas = diamond(r"C:\Users\devoto\work\ID27\LASDiA\diamondsParam.txt", "P00539", Q, I_Q, 0)
+    I_Qbkgcorr, corr_factor_bkg = diamond(r"C:\Users\devoto\work\ID27\LASDiA\diamondsParam.txt", "P00539", Qbkg, I_Qbkg, 0)
+    
+    
+    plt.figure("correction")
+    plt.plot(corr_factor_meas)
+    plt.plot(corr_factor_bkg)
+    plt.grid()
+    plt.show
+    
+    plt.figure("diamond correction")
+    plt.plot(Q, I_Q, label="measured")
+    plt.plot(Q, I_Qcorr, label="measured corr")
+    plt.plot(Qbkg, I_Qbkg, label="bkg")
+    plt.plot(Qbkg, I_Qbkgcorr, label="bkg corr")
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('I(Q)')
     plt.legend()
     plt.grid()
     plt.show()
+    
     
     # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
