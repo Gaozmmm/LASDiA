@@ -65,22 +65,22 @@ if __name__ == '__main__':
 
     # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
-    
+
     # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
     # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
-    
+
     Q1, I_Q1 = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
     Qbkg1, I_Qbkg1 = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
-    
+
     Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
     Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
-    
+
     # print(Q.shape, I_Q.shape)
     # print(Q.shape, len(I_Q))
     # print(Qbkg.shape, I_Qbkg.shape)
-    
-    
-    
+
+
+
     # Ar
     # minQ = 3
     # maxQ = 109
@@ -90,16 +90,16 @@ if __name__ == '__main__':
     QmaxIntegrate = 90
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)
-    
-    
-    
+
+
+
     if len(Q) != len(Qbkg):
         print(len(Q), len(Qbkg))
         min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
         print(min_len)
         Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
         Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
-    
+
     plt.figure("data")
     plt.plot(Q1, I_Q1, label="measured I bin")
     plt.plot(Qbkg1, I_Qbkg1, label="bkg I bin")
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid()
     plt.show
-    
+
     plt.figure("data diff")
     plt.plot(Q, I_Q1 - I_Q, label="measured I-L bin")
     plt.plot(Qbkg, I_Qbkg1 - I_Qbkg, label="bkg I-L bin")
@@ -119,9 +119,9 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid()
     plt.show
-    
+
     theta2 = np.degrees(Qto2theta(Q))
-    
+
     plt.figure("2theta")
     plt.plot(Q, theta2, label="2theta")
     plt.xlabel('Q ($nm^{-1}$)')
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid()
     plt.show
-    
+
     plt.figure("data 2theta")
     plt.plot(theta2, I_Q, label="measured")
     plt.plot(theta2, I_Qbkg, label="bkg")
@@ -138,17 +138,17 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid()
     plt.show
-    
-    I_Qcorr, corr_factor_meas = diamond(r"C:\Users\devoto\work\ID27\LASDiA\diamondsParam.txt", "P00539", Q, I_Q, 0)
-    I_Qbkgcorr, corr_factor_bkg = diamond(r"C:\Users\devoto\work\ID27\LASDiA\diamondsParam.txt", "P00539", Qbkg, I_Qbkg, 0)
-    
-    
+
+    I_Qcorr, corr_factor_meas = diamond("./diamondsParam.txt", "P00539", Q, I_Q, 0)
+    I_Qbkgcorr, corr_factor_bkg = diamond("./diamondsParam.txt", "P00539", Qbkg, I_Qbkg, 0)
+
+
     plt.figure("correction")
     plt.plot(corr_factor_meas)
     plt.plot(corr_factor_bkg)
     plt.grid()
     plt.show
-    
+
     plt.figure("diamond correction")
     plt.plot(Q, I_Q, label="measured")
     plt.plot(Q, I_Qcorr, label="measured corr")
@@ -159,8 +159,8 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid()
     plt.show()
-    
-    
+
+
     # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
 
@@ -257,13 +257,13 @@ if __name__ == '__main__':
     # plt.show()
 
 
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
 
 
 
