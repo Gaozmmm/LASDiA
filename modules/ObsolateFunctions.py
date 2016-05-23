@@ -401,3 +401,40 @@ def calc_deltaMinim(N, r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot
 
     chi2, p = chisquare(observed, f_exp=excepted)
     return chi2
+
+
+def diamond(path, type, Q, I_Q, diamond_angle):
+    """Function to calculate the diamond correction.
+    http://physics.nist.gov/PhysRefData/XrayMassCoef/ElemTab/z06.html
+    """
+    
+    file = open(path, "r")
+    header1 = file.readline()
+    header2 = file.readline()
+    lines = file.readlines()
+    file.close()
+    
+    for line in lines:
+        columns = line.split()
+        if columns[0] == type:
+            dimension = float(columns[1])
+            break
+            
+    # for now...
+    # mu = 0.2562 # cm2/g
+    wavelenght = 0.03738 # nm
+    # diamond_density = 3.51 # g/cm3
+    # mu_l = mu * diamond_density # cm
+    mu_l = 1/12.08 # mm^-1 at 33 keV
+    # theta_angle = np.arcsin(wavelenght*Q/(4*np.pi))
+    _2theta_angle = Qto2theta(Q) # rad
+    
+    
+    
+    path_lenght = dimension / np.cos(_2theta_angle)
+    
+    corr_factor = np.exp(mu_l * path_lenght)
+    
+    I_Qeff = corr_factor * I_Q
+    
+    return (I_Qeff, corr_factor)

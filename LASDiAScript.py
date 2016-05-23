@@ -100,62 +100,76 @@ if __name__ == '__main__':
         Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
         Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
 
-    plt.figure("data")
-    plt.plot(Q1, I_Q1, label="measured I bin")
-    plt.plot(Qbkg1, I_Qbkg1, label="bkg I bin")
-    plt.plot(Q, I_Q, label="measured L bin")
-    plt.plot(Qbkg, I_Qbkg, label="bkg L bin")
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('I(Q)')
-    plt.legend()
-    plt.grid()
-    plt.show
+    # plt.figure("data")
+    # plt.plot(Q1, I_Q1, label="measured I bin")
+    # plt.plot(Qbkg1, I_Qbkg1, label="bkg I bin")
+    # plt.plot(Q, I_Q, label="measured L bin")
+    # plt.plot(Qbkg, I_Qbkg, label="bkg L bin")
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('I(Q)')
+    # plt.legend()
+    # plt.grid()
+    # plt.show
 
-    plt.figure("data diff")
-    plt.plot(Q, I_Q1 - I_Q, label="measured I-L bin")
-    plt.plot(Qbkg, I_Qbkg1 - I_Qbkg, label="bkg I-L bin")
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('$\Delta$(I(Q))')
-    plt.legend()
-    plt.grid()
-    plt.show
+    # plt.figure("data diff")
+    # plt.plot(Q, I_Q1 - I_Q, label="measured I-L bin")
+    # plt.plot(Qbkg, I_Qbkg1 - I_Qbkg, label="bkg I-L bin")
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('$\Delta$(I(Q))')
+    # plt.legend()
+    # plt.grid()
+    # plt.show
 
     theta2 = np.degrees(Qto2theta(Q))
 
-    plt.figure("2theta")
-    plt.plot(Q, theta2, label="2theta")
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('2theta (deg)')
-    plt.legend()
-    plt.grid()
-    plt.show
+    # plt.figure("2theta")
+    # plt.plot(Q, theta2, label="2theta")
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('2theta (deg)')
+    # plt.legend()
+    # plt.grid()
+    # plt.show
 
-    plt.figure("data 2theta")
-    plt.plot(theta2, I_Q, label="measured")
-    plt.plot(theta2, I_Qbkg, label="bkg")
-    plt.xlabel('2theta (deg)')
-    plt.ylabel('I(Q)')
-    plt.legend()
-    plt.grid()
-    plt.show
+    # plt.figure("data 2theta")
+    # plt.plot(theta2, I_Q, label="measured")
+    # plt.plot(theta2, I_Qbkg, label="bkg")
+    # plt.xlabel('2theta (deg)')
+    # plt.ylabel('I(Q)')
+    # plt.legend()
+    # plt.grid()
+    # plt.show
 
-    I_Qcorr, corr_factor_meas = diamond("./diamondsParam.txt", "P00539", Q, I_Q, 0)
-    I_Qbkgcorr, corr_factor_bkg = diamond("./diamondsParam.txt", "P00539", Qbkg, I_Qbkg, 0)
+    I_Qcorr20, corr_factor_meas = diamond(1.44, Q, I_Q, 20)
+    I_Qbkgcorr20, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 20)
+    
+    I_Qcorr, corr_factor_meas = diamond(1.44, Q, I_Q, 0)
+    I_Qbkgcorr, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 0)
 
 
-    plt.figure("correction")
-    plt.plot(corr_factor_meas)
-    plt.plot(corr_factor_bkg)
-    plt.grid()
-    plt.show
+    # plt.figure("correction")
+    # plt.plot(corr_factor_meas)
+    # plt.plot(corr_factor_bkg)
+    # plt.grid()
+    # plt.show
 
     plt.figure("diamond correction")
-    plt.plot(Q, I_Q, label="measured")
+    # plt.plot(Q, I_Q, label="measured")
     plt.plot(Q, I_Qcorr, label="measured corr")
-    plt.plot(Qbkg, I_Qbkg, label="bkg")
+    plt.plot(Q, I_Qcorr20, label="measured corr 20")
+    # plt.plot(Qbkg, I_Qbkg, label="bkg")
     plt.plot(Qbkg, I_Qbkgcorr, label="bkg corr")
+    plt.plot(Qbkg, I_Qbkgcorr20, label="bkg corr 20")
     plt.xlabel('Q ($nm^{-1}$)')
     plt.ylabel('I(Q)')
+    plt.legend()
+    plt.grid()
+    plt.show
+    
+    plt.figure("corr diff")
+    plt.plot(Q, I_Qcorr - I_Qcorr20, label="measured")
+    plt.plot(Qbkg, I_Qbkgcorr - I_Qbkgcorr20, label="bkg")
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('$\Delta$(I(Q))')
     plt.legend()
     plt.grid()
     plt.show()
