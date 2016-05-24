@@ -58,5 +58,24 @@ def diamond(dimension, Q, I_Q, diamond_angle):
 
 
 def SollerSlits():
-    """Function to calculate the Soller SLits correction.
+    """Function to calculate the Soller Slits correction.
     """
+    
+    diamond(path, type, Q, I_Q, diamond_angle):
+    """Function to calculate the diamond correction.
+    http://physics.nist.gov/PhysRefData/XrayMassCoef/ElemTab/z06.html
+    """
+    
+    file = open(path, "r")
+    header1 = file.readline()
+    lines = file.readlines()
+    file.close()
+    
+    for line in lines:
+        columns = line.split()
+        if columns[0] == type:
+            ws1 = float(columns[1])
+            ws2 = float(columns[2])
+            r1 = float(columns[3])
+            r2 = float(columns[4])
+            break
