@@ -355,3 +355,25 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
         # min = np.amin(X)
 
     return (BinX, BinY)
+    
+    
+def read_MCC_file(path, type):
+    """Function to read the MCC file with Soller Slits characteristics.
+    """
+    
+    file = open(path, "r")
+    header1 = file.readline()
+    lines = file.readlines()
+    file.close()
+    
+    for line in lines:
+        columns = line.split()
+        if columns[0] == type:
+            ws1 = float(columns[1])
+            ws2 = float(columns[2])
+            r1 = float(columns[3])
+            r2 = float(columns[4])
+            d = float(columns[5])
+            break
+            
+    return (ws1, ws2, r1, r2, d)

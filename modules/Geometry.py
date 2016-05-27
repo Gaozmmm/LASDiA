@@ -45,10 +45,10 @@ def diamond(dimension, Q, I_Q, diamond_angle):
     # for now...
     wavelenght = 0.03738 # nm
     mu_l = 1/12.08 # mm^-1 at 33 keV
-    _2theta_angle = Qto2theta(Q) # rad
+    _2theta = Qto2theta(Q) # rad
     diamond_angle = np.radians(diamond_angle)
     
-    path_lenght = dimension / np.cos(_2theta_angle - diamond_angle)
+    path_lenght = dimension / np.cos(_2theta - diamond_angle)
     
     corr_factor = np.exp(mu_l * path_lenght)
     
@@ -57,25 +57,15 @@ def diamond(dimension, Q, I_Q, diamond_angle):
     return (I_Qeff, corr_factor)
 
 
-def SollerSlits():
-    """Function to calculate the Soller Slits correction.
+def psi_angle(ws1, ws2, r1, r2, d, _2theta, sth):
+    """Function to calculate dispersion angle for the Soller Slits correction.
     """
     
-    diamond(path, type, Q, I_Q, diamond_angle):
-    """Function to calculate the diamond correction.
-    http://physics.nist.gov/PhysRefData/XrayMassCoef/ElemTab/z06.html
-    """
+    gamma = 2*np.arcsin(w1/(2*r1))
     
-    file = open(path, "r")
-    header1 = file.readline()
-    lines = file.readlines()
-    file.close()
+    alpha = arctan( r1 * np.sin(_2theta + gamma/2)   / (sth + r1*np.cos(_2theta + gamma/2)  )
+    beta = arctan( (r2+d) * np.sin(_2theta - gamma/2)   / (sth + (r2+d)*np.cos(_2theta - gamma/2)  )
     
-    for line in lines:
-        columns = line.split()
-        if columns[0] == type:
-            ws1 = float(columns[1])
-            ws2 = float(columns[2])
-            r1 = float(columns[3])
-            r2 = float(columns[4])
-            break
+    psi = alpha - beta
+    
+    return psi

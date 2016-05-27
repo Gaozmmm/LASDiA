@@ -1,2 +1,2 @@
-Model   ws1     ws2     r1  r2
-A       0.005   0.02    5   20
+Model   ws1     ws2    r1   r2   d      cm
+A       0.005   0.02   5    20   1
