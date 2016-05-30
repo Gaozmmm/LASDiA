@@ -162,7 +162,7 @@ if __name__ == "__main__":
 
     if variables.pw_chi2[0].lower() == "y":
         plot_chi2(chi2, scale_factor, sBestIdx, rho0, rho0BestIdx)
-        plot3d_chi2(chi2, scale_factor, rho0)
+        plot3d(scale_factor, rho0, chi2, "s", r"$\rho_0$ (atoms/$nm^3$)", r"$\chi^2$")
 
     plt.ioff()
     plt.show()

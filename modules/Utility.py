@@ -298,30 +298,34 @@ def plot_chi2(chi2, s, s_idx, rho0, rho0_idx):
     plt.draw()
     
     
-def plot3d_chi2(chi2, s, rho0):
+def plot3d(x_val, y_val, z_val, x_label, y_label, z_label):
     """Function to plot the 3D graph of chi2 and its profile
     """
-    
-    # plot the 3d chi2 and its profile
-    x, y = np.meshgrid(s, rho0)
-    fig = plt.figure('chi2 3D')
+    print(x_val.shape)
+    print(y_val.shape)
+    # plot the 3d and its profile
+    x, y = np.meshgrid(x_val, y_val)
+    print(x.shape)
+    print(y.shape)
+    print(z_val.shape)
+    fig = plt.figure('3D')
     ax = Axes3D(fig)
-    ax.set_xlabel('s')
-    ax.set_ylabel(r'$\rho_0$ (atoms/$nm^3$)')
-    ax.set_zlabel(r'$\chi^2$')
-    ax.plot_surface(x, y, chi2, rstride=1, cstride=1, cmap='rainbow')
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_zlabel(z_label)
+    ax.plot_surface(x, y, z_val, rstride=1, cstride=1, cmap='rainbow')
     
     # nLevel = int(chi2Max - chi2Min)
-    # minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
-    # maxIndxRho0, maxIndxS = np.unravel_index(chi2.argmax(), chi2.shape)
-    # chi2Min = chi2[minIndxRho0][minIndxS]
-    # chi2Max = chi2[maxIndxRho0][maxIndxS]
+    # minIndxRho0, minIndxS = np.unravel_index(z_val.argmin(), z_val.shape)
+    # maxIndxRho0, maxIndxS = np.unravel_index(z_val.argmax(), z_val.shape)
+    # chi2Min = z_val[minIndxRho0][minIndxS]
+    # chi2Max = z_val[maxIndxRho0][maxIndxS]
     # levels = np.linspace(0, chi2Max, int(chi2Max - chi2Min))
 
-    plt.figure('chi2 Profile')
-    plt.contour(s, rho0, chi2, 150)
-    plt.xlabel('s')
-    plt.ylabel(r'$\rho_0$ (atoms/$nm^3$)')
+    plt.figure('Profile')
+    plt.contour(x_val, y_val, z_val, 150)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.draw()
         
         

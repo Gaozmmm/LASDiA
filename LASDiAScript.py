@@ -94,9 +94,9 @@ if __name__ == '__main__':
 
 
     if len(Q) != len(Qbkg):
-        print(len(Q), len(Qbkg))
+        # print(len(Q), len(Qbkg))
         min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
-        print(min_len)
+        # print(min_len)
         Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
         Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
 
@@ -121,7 +121,45 @@ if __name__ == '__main__':
     # plt.show
 
     theta2 = np.degrees(Qto2theta(Q))
-
+    
+    ws1 = 0.005
+    ws2 = 0.005
+    r1 = 5
+    r2 = 20
+    d = 1
+    
+    _2theta = 30
+    
+    # print(theta2[1])
+    # print(theta2[500])
+    # print(theta2[1000])
+    # print(theta2[1500])
+    # print(theta2[1999])
+    
+    sth = np.linspace(0.02, -0.02, num=1000)
+    # psi_angle = np.zeros((sth.size, _2theta.size))
+    phi_angle = np.zeros(sth.size)
+    psi_angle = np.zeros(sth.size)
+    print(psi_angle.shape)
+    
+    for i, val_sth in enumerate(sth):
+        phi_angle[i], psi_angle[i] = calc_psi_angle(ws1, ws2, r1, r2, d, _2theta, sth[i])
+        # for j, val_theta2 in enumerate(_2theta):
+            # # print(i, j)
+            # psi_angle[i][j] = calc_psi_angle(ws1, ws2, r1, r2, d, _2theta[j], sth[i])
+    
+    # plot3d(theta2, sth, psi_angle, "Diffraction angle", "x(cm)", "Dispersion angle")
+    # plt.show()
+    
+    plt.figure("2theta")
+    plt.plot(sth, phi_angle, label="phi")
+    plt.plot(sth, psi_angle, label="psi")
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('2theta (deg)')
+    plt.legend()
+    plt.grid()
+    plt.show()
+    
     # plt.figure("2theta")
     # plt.plot(Q, theta2, label="2theta")
     # plt.xlabel('Q ($nm^{-1}$)')
@@ -139,11 +177,11 @@ if __name__ == '__main__':
     # plt.grid()
     # plt.show
 
-    I_Qcorr20, corr_factor_meas = diamond(1.44, Q, I_Q, 20)
-    I_Qbkgcorr20, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 20)
+    # I_Qcorr20, corr_factor_meas = diamond(1.44, Q, I_Q, 20)
+    # I_Qbkgcorr20, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 20)
     
-    I_Qcorr, corr_factor_meas = diamond(1.44, Q, I_Q, 0)
-    I_Qbkgcorr, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 0)
+    # I_Qcorr, corr_factor_meas = diamond(1.44, Q, I_Q, 0)
+    # I_Qbkgcorr, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 0)
 
 
     # plt.figure("correction")
@@ -152,29 +190,30 @@ if __name__ == '__main__':
     # plt.grid()
     # plt.show
 
-    plt.figure("diamond correction")
-    # plt.plot(Q, I_Q, label="measured")
-    plt.plot(Q, I_Qcorr, label="measured corr")
-    plt.plot(Q, I_Qcorr20, label="measured corr 20")
-    # plt.plot(Qbkg, I_Qbkg, label="bkg")
-    plt.plot(Qbkg, I_Qbkgcorr, label="bkg corr")
-    plt.plot(Qbkg, I_Qbkgcorr20, label="bkg corr 20")
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('I(Q)')
-    plt.legend()
-    plt.grid()
-    plt.show
+    # plt.figure("diamond correction")
+    # # plt.plot(Q, I_Q, label="measured")
+    # plt.plot(Q, I_Qcorr, label="measured corr")
+    # plt.plot(Q, I_Qcorr20, label="measured corr 20")
+    # # plt.plot(Qbkg, I_Qbkg, label="bkg")
+    # plt.plot(Qbkg, I_Qbkgcorr, label="bkg corr")
+    # plt.plot(Qbkg, I_Qbkgcorr20, label="bkg corr 20")
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('I(Q)')
+    # plt.legend()
+    # plt.grid()
+    # plt.show
     
-    plt.figure("corr diff")
-    plt.plot(Q, I_Qcorr - I_Qcorr20, label="measured")
-    plt.plot(Qbkg, I_Qbkgcorr - I_Qbkgcorr20, label="bkg")
-    plt.xlabel('Q ($nm^{-1}$)')
-    plt.ylabel('$\Delta$(I(Q))')
-    plt.legend()
-    plt.grid()
-    plt.show()
-
-
+    # plt.figure("corr diff")
+    # plt.plot(Q, I_Qcorr - I_Qcorr20, label="measured")
+    # plt.plot(Qbkg, I_Qbkgcorr - I_Qbkgcorr20, label="bkg")
+    # plt.xlabel('Q ($nm^{-1}$)')
+    # plt.ylabel('$\Delta$(I(Q))')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+    
+    
+    
     # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
 
@@ -267,7 +306,7 @@ if __name__ == '__main__':
     # sBest, rho0Best = calc_min_chi2(s, rho0, chi2)
 
     # plot_chi2(s, rho0, chi2)
-    # plot3d_chi2(s, rho0, chi2)
+    # plot3d(s, rho0, chi2)
     # plt.show()
 
 

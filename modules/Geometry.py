@@ -57,15 +57,23 @@ def diamond(dimension, Q, I_Q, diamond_angle):
     return (I_Qeff, corr_factor)
 
 
-def psi_angle(ws1, ws2, r1, r2, d, _2theta, sth):
+def calc_psi_angle(ws1, ws2, r1, r2, d, _2theta, sth):
     """Function to calculate dispersion angle for the Soller Slits correction.
     """
     
-    gamma = 2*np.arcsin(w1/(2*r1))
+    gamma_2 = np.arcsin(ws1/(2*r1))
     
-    alpha = arctan( r1 * np.sin(_2theta + gamma/2)   / (sth + r1*np.cos(_2theta + gamma/2)  )
-    beta = arctan( (r2+d) * np.sin(_2theta - gamma/2)   / (sth + (r2+d)*np.cos(_2theta - gamma/2)  )
+    alpha1 = np.arctan( r1 * np.sin(_2theta + gamma_2) / (r1*np.cos(_2theta + gamma_2) - sth ))
+    alpha2 = np.arctan( r1 * np.sin(_2theta - gamma_2) / (r1*np.cos(_2theta - gamma_2) - sth ))
     
-    psi = alpha - beta
+    beta1 = np.arctan( (r2+d) * np.sin(_2theta + gamma_2) / ((r2+d)*np.cos(_2theta + gamma_2) - sth ))
+    beta2 = np.arctan( (r2+d) * np.sin(_2theta - gamma_2) / ((r2+d)*np.cos(_2theta - gamma_2) - sth ))
     
-    return psi
+    phi = min(alpha1, beta1) - max(alpha2, beta2)
+    psi = max(0, phi)
+    
+    # print(phi, psi)
+    
+    return (phi, psi)
+    
+    
