@@ -119,8 +119,6 @@ if __name__ == '__main__':
     # plt.legend()
     # plt.grid()
     # plt.show
-
-    theta2 = np.degrees(Qto2theta(Q))
     
     ws1 = 0.005
     ws2 = 0.005
@@ -128,7 +126,9 @@ if __name__ == '__main__':
     r2 = 20
     d = 1
     
-    _2theta = 30
+    # _2theta = 30
+    # _2theta = np.degrees(Qto2theta(Q))
+    _2theta = Qto2theta(Q)
     
     # print(theta2[1])
     # print(theta2[500])
@@ -136,29 +136,52 @@ if __name__ == '__main__':
     # print(theta2[1500])
     # print(theta2[1999])
     
-    sth = np.linspace(0.02, -0.02, num=1000)
-    # psi_angle = np.zeros((sth.size, _2theta.size))
-    phi_angle = np.zeros(sth.size)
-    psi_angle = np.zeros(sth.size)
-    print(psi_angle.shape)
+    sth = np.linspace(0.02, -0.02, num=100)
+    phi_angle = np.zeros((sth.size, _2theta.size))
+    psi_angle = np.zeros((sth.size, _2theta.size))
+    # phi_angle = np.zeros(sth.size)
+    # psi_angle = np.zeros(sth.size)
+    # print(phi_angle.shape)
+    # print(np.size(phi_angle, 0))
+    # print(np.size(phi_angle, 1))
     
     for i, val_sth in enumerate(sth):
-        phi_angle[i], psi_angle[i] = calc_psi_angle(ws1, ws2, r1, r2, d, _2theta, sth[i])
-        # for j, val_theta2 in enumerate(_2theta):
+        # psi_angle[i], phi_angle[i] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, sth[i])
+        for j, val_theta2 in enumerate(_2theta):
             # # print(i, j)
-            # psi_angle[i][j] = calc_psi_angle(ws1, ws2, r1, r2, d, _2theta[j], sth[i])
+            psi_angle[i][j], phi_angle[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], sth[i])
     
-    # plot3d(theta2, sth, psi_angle, "Diffraction angle", "x(cm)", "Dispersion angle")
+    T_MCC_samp = calc_T_MCC_samp(phi_angle)
+    T_MCC_samp2 = calc_T_MCC_samp2(phi_angle, sth)
+    
+    # print(T_MCC_samp.shape)
+    # print(T_MCC_samp2.shape)
+    
+    # plot3d(_2theta, sth, phi_angle, "Diffraction angle", "x(cm)", "Dispersion angle")
     # plt.show()
     
-    plt.figure("2theta")
-    plt.plot(sth, phi_angle, label="phi")
-    plt.plot(sth, psi_angle, label="psi")
+    # plt.figure("sum")
+    # plt.plot(T_MCC_samp, label="sum")
+    # # plt.plot(T_MCC_samp2, label="simps")
+    # plt.legend()
+    # plt.grid()
+    # plt.show
+    
+    # plt.figure("simps")
+    # # plt.plot(T_MCC_samp, label="sum")
+    # plt.plot(T_MCC_samp2, label="simps")
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+    
+    # plt.figure("2theta")
+    # plt.plot(sth, psi_angle, label="psi")
+    # plt.plot(sth, phi_angle, label="phi")
     # plt.xlabel('Q ($nm^{-1}$)')
     # plt.ylabel('2theta (deg)')
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
     
     # plt.figure("2theta")
     # plt.plot(Q, theta2, label="2theta")

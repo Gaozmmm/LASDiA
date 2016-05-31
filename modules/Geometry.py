@@ -23,7 +23,8 @@
 """Module containing the geometric correction: Diamond and Soller Slit.
 
 The nomenclature and the procedure follow the article:
-Eggert et al. 2002 PRB, 65, 174105.
+Weck et al. Rev. Sci. Instrum. 84, 063901 (2013)
+Yaoita et al. Rev. Sci. Instrum. 68, 2106 (1997)
 
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
@@ -36,6 +37,9 @@ otherwise it is symbolized with just its name.
 
 import numpy as np
 from modules.UtilityAnalysis import Qto2theta
+# from modules.Utility import write_file
+from scipy.integrate import simps
+import matplotlib.pyplot as plt
 
 def diamond(dimension, Q, I_Q, diamond_angle):
     """Function to calculate the diamond correction.
@@ -57,11 +61,13 @@ def diamond(dimension, Q, I_Q, diamond_angle):
     return (I_Qeff, corr_factor)
 
 
-def calc_psi_angle(ws1, ws2, r1, r2, d, _2theta, sth):
+def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, sth):
     """Function to calculate dispersion angle for the Soller Slits correction.
     """
     
     gamma_2 = np.arcsin(ws1/(2*r1))
+    
+    # _2theta = np.radians(_2theta)
     
     alpha1 = np.arctan( r1 * np.sin(_2theta + gamma_2) / (r1*np.cos(_2theta + gamma_2) - sth ))
     alpha2 = np.arctan( r1 * np.sin(_2theta - gamma_2) / (r1*np.cos(_2theta - gamma_2) - sth ))
@@ -69,11 +75,37 @@ def calc_psi_angle(ws1, ws2, r1, r2, d, _2theta, sth):
     beta1 = np.arctan( (r2+d) * np.sin(_2theta + gamma_2) / ((r2+d)*np.cos(_2theta + gamma_2) - sth ))
     beta2 = np.arctan( (r2+d) * np.sin(_2theta - gamma_2) / ((r2+d)*np.cos(_2theta - gamma_2) - sth ))
     
-    phi = min(alpha1, beta1) - max(alpha2, beta2)
-    psi = max(0, phi)
+    psi = min(alpha1, beta1) - max(alpha2, beta2)
+    phi = max(0, psi)
     
     # print(phi, psi)
     
-    return (phi, psi)
+    return (psi, phi)
     
     
+def calc_T_MCC_samp(phi):
+    """Function to calculate the MCC transmission for the sample.
+    """
+    
+    print("phi ", phi.shape)
+    DeltaPhi = np.diff(phi, axis=0)
+    print("DeltaPhi ", DeltaPhi.shape)
+    meanDeltaPhi = np.mean(DeltaPhi, axis=0)
+    print("meanDeltaPhi ", meanDeltaPhi.shape)
+    T_MCC_samp = np.sum(phi, axis=0) * meanDeltaPhi
+    
+    plt.figure("DeltaPhi")
+    plt.plot(DeltaPhi[:,1999])
+    plt.grid()
+    plt.show()
+        
+    return T_MCC_samp
+    
+    
+def calc_T_MCC_samp2(phi, sth):
+    """Function to calculate the MCC transmission for the sample.
+    """
+    
+    T_MCC_samp = simps(phi, sth, axis=0)
+        
+    return T_MCC_samp
