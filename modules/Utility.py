@@ -179,7 +179,8 @@ def path_xyz_file(molecule):
 
 
 def read_xyz_file(path):
-    """Function to read the xyz file
+    """Function to read the xyz file.
+    The atom location is in Angstrom, the function converts them in nanometer.
     """
 
     file = open(path, "r")
@@ -301,13 +302,10 @@ def plot_chi2(chi2, s, s_idx, rho0, rho0_idx):
 def plot3d(x_val, y_val, z_val, x_label, y_label, z_label):
     """Function to plot the 3D graph of chi2 and its profile
     """
-    print(x_val.shape)
-    print(y_val.shape)
+    
     # plot the 3d and its profile
     x, y = np.meshgrid(x_val, y_val)
-    print(x.shape)
-    print(y.shape)
-    print(z_val.shape)
+    
     fig = plt.figure('3D')
     ax = Axes3D(fig)
     ax.set_xlabel(x_label)

@@ -28,11 +28,11 @@ The nomenclature and the procedure follow the book:
 Waseda - The Structure of Non-Crystalline Materials.
 
 For the functions arguments and the returns I followed this convetion for the notes:
-arguments: description - type
-returns: description - type.
+argument: description - type
+return: description - type.
 
 For the variables name I used this convention:
-if the variable symbolizes a function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
 otherwise it is just the name.
 """
 
@@ -51,6 +51,52 @@ from modules.MainFunctions import *
 
 import math
 
+
+def FaberZiman(Icoh_Q, Q, Sinf, min_index, max_index, calculation_index):
+    """Function to calculate S(Q) with Faber-Ziman formalism.
+    
+    Parameters
+    ----------
+    Icoh_Q            : numpy array (nm)
+                        coherent scattering intensity
+    Q                 : numpy array
+                        momentum transfer (nm)
+    Sinf              : float
+                        Sinf
+    min_index         : numpy array
+                        array index of element with Q<=minQ
+    max_index         : numpy array
+                        array index of element with Q>QmaxIntegrate & Q<=maxQ
+    calculation_index : numpy array
+                        range where S(Q) is calculated
+    
+    
+    Returns
+    -------
+    S_Q               : numpy array
+                        structure factor in FZ formalism
+    """
+
+    N = 3
+    c1 = 1/N
+    c2 = 2/N
+
+    f2 = c1*calc_aff('C', Q[calculation_index])**2 + c2*calc_aff('O',Q[calculation_index])**2
+    f = c1*calc_aff('C', Q[calculation_index]) + c2*calc_aff('O',Q[calculation_index])
+
+    S_Q = (Icoh_Q[calculation_index] - (f2 - f**2)) / (N*f**2)
+
+    S_Qmin = np.zeros(Q[min_index].size)
+    S_Q = np.concatenate([S_Qmin, S_Q])
+
+    S_Qmax = np.zeros(Q[max_index].size)
+    S_Qmax.fill(Sinf)
+    S_Q = np.concatenate([S_Q, S_Qmax])
+
+    return S_Q
+
+
+# Functions to jump from a formalism to another, need to be fixed!
 def ALtoFZ(N1, N2, S11, S12, S22):
     """Function to transform the AL to FZ (eq 1.2.17)
 
@@ -101,27 +147,3 @@ def FZtoAL(N1, N2, a11, a12, a22):
     S11_Q = 1 + c2*(a22_Q - 1)
 
     return (S11_Q, S12_Q, S22_Q)
-
-
-def FaberZiman(Icoh_Q, Q, Sinf, min_index, max_index, calculation_index):
-    """Function to calculate S(Q) with Faber-Ziman formalism (eq )
-
-    """
-
-    N = 3
-    c1 = 1/N
-    c2 = 2/N
-
-    f2 = c1*calc_aff('C', Q[calculation_index])**2 + c2*calc_aff('O',Q[calculation_index])**2
-    f = c1*calc_aff('C', Q[calculation_index]) + c2*calc_aff('O',Q[calculation_index])
-
-    S_Q = (Icoh_Q[calculation_index] - (f2 - f**2)) / (N*f**2)
-
-    S_Qmin = np.zeros(Q[min_index].size)
-    S_Q = np.concatenate([S_Qmin, S_Q])
-
-    S_Qmax = np.zeros(Q[max_index].size)
-    S_Qmax.fill(Sinf)
-    S_Q = np.concatenate([S_Q, S_Qmax])
-
-    return S_Q

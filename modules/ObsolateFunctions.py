@@ -438,3 +438,14 @@ def diamond(path, type, Q, I_Q, diamond_angle):
     I_Qeff = corr_factor * I_Q
     
     return (I_Qeff, corr_factor)
+    
+    
+def calc_T_MCC_samp(phi, sth):
+    """Function to calculate the MCC transmission for the sample.
+    """
+    
+    DeltaSth = np.diff(sth)
+    meanDeltaSth = np.mean(DeltaSth)
+    T_MCC_samp = np.sum(phi, axis=0) * meanDeltaSth
+    
+    return T_MCC_samp

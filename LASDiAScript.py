@@ -92,114 +92,47 @@ if __name__ == '__main__':
     # QmaxIntegrate = np.arange(90)
 
 
-
+    # create a function for the data lenght check and rebinning
     if len(Q) != len(Qbkg):
         # print(len(Q), len(Qbkg))
         min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
         # print(min_len)
         Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
         Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
-
-    # plt.figure("data")
-    # plt.plot(Q1, I_Q1, label="measured I bin")
-    # plt.plot(Qbkg1, I_Qbkg1, label="bkg I bin")
-    # plt.plot(Q, I_Q, label="measured L bin")
-    # plt.plot(Qbkg, I_Qbkg, label="bkg L bin")
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('I(Q)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show
-
-    # plt.figure("data diff")
-    # plt.plot(Q, I_Q1 - I_Q, label="measured I-L bin")
-    # plt.plot(Qbkg, I_Qbkg1 - I_Qbkg, label="bkg I-L bin")
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('$\Delta$(I(Q))')
-    # plt.legend()
-    # plt.grid()
-    # plt.show
-    
+        
+    # cm
     ws1 = 0.005
     ws2 = 0.005
     r1 = 5
     r2 = 20
     d = 1
+    sample_thickness = 0.04 # cm
+    dac_thickness = 0.144 # cm
     
-    # _2theta = 30
     # _2theta = np.degrees(Qto2theta(Q))
     _2theta = Qto2theta(Q)
     
-    # print(theta2[1])
-    # print(theta2[500])
-    # print(theta2[1000])
-    # print(theta2[1500])
-    # print(theta2[1999])
+    phi_angle = calc_phi_matrix(sample_thickness/2, _2theta, ws1, ws2, r1, r2, d)    
+    T_MCC_sample = calc_T_MCC_sample(phi_angle)
     
-    sth = np.linspace(0.02, -0.02, num=100)
-    phi_angle = np.zeros((sth.size, _2theta.size))
-    psi_angle = np.zeros((sth.size, _2theta.size))
-    # phi_angle = np.zeros(sth.size)
-    # psi_angle = np.zeros(sth.size)
-    # print(phi_angle.shape)
-    # print(np.size(phi_angle, 0))
-    # print(np.size(phi_angle, 1))
+    phi_angle_dac = calc_phi_matrix(sample_thickness/2+dac_thickness, _2theta, ws1, ws2, r1, r2, d)    
+    T_MCC_ALL, T_MCC_DAC = calc_T_MCC_DAC(phi_angle_dac, T_MCC_sample)
     
-    for i, val_sth in enumerate(sth):
-        # psi_angle[i], phi_angle[i] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, sth[i])
-        for j, val_theta2 in enumerate(_2theta):
-            # # print(i, j)
-            psi_angle[i][j], phi_angle[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], sth[i])
-    
-    T_MCC_samp = calc_T_MCC_samp(phi_angle)
-    T_MCC_samp2 = calc_T_MCC_samp2(phi_angle, sth)
-    
-    # print(T_MCC_samp.shape)
-    # print(T_MCC_samp2.shape)
-    
-    # plot3d(_2theta, sth, phi_angle, "Diffraction angle", "x(cm)", "Dispersion angle")
+    # plot3d(_2theta, sth, phi_angle, r"2$\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)")
     # plt.show()
     
-    # plt.figure("sum")
-    # plt.plot(T_MCC_samp, label="sum")
-    # # plt.plot(T_MCC_samp2, label="simps")
-    # plt.legend()
-    # plt.grid()
-    # plt.show
+    plt.figure("simps")
+    plt.plot(_2theta, T_MCC_sample, label="sample")
+    plt.plot(_2theta, T_MCC_ALL, label="ALL")
+    plt.plot(_2theta, T_MCC_DAC, label="DAC")
+    plt.xlabel(r"2$\vartheta$ (rad)")
+    plt.ylabel(r"$T^{MCC}(2\vartheta, s_{th})$")
+    plt.legend()
+    plt.grid()
+    plt.show()
     
-    # plt.figure("simps")
-    # # plt.plot(T_MCC_samp, label="sum")
-    # plt.plot(T_MCC_samp2, label="simps")
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
     
-    # plt.figure("2theta")
-    # plt.plot(sth, psi_angle, label="psi")
-    # plt.plot(sth, phi_angle, label="phi")
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('2theta (deg)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
     
-    # plt.figure("2theta")
-    # plt.plot(Q, theta2, label="2theta")
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('2theta (deg)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show
-
-    # plt.figure("data 2theta")
-    # plt.plot(theta2, I_Q, label="measured")
-    # plt.plot(theta2, I_Qbkg, label="bkg")
-    # plt.xlabel('2theta (deg)')
-    # plt.ylabel('I(Q)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show
-
     # I_Qcorr20, corr_factor_meas = diamond(1.44, Q, I_Q, 20)
     # I_Qbkgcorr20, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 20)
     
