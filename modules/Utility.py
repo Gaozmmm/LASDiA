@@ -22,9 +22,6 @@
 
 """Module containing useful functions used in LASDiA.
 
-The nomenclature and the procedure follow the article:
-Eggert et al. 2002 PRB, 65, 174105.
-
 For the functions arguments and the returns I followed this convetion for the notes:
 arguments: description - type
 returns: description - type.
@@ -55,14 +52,21 @@ import time
 import datetime
 
 def read_file(path):
-    """Read the file and return x and y as numpy vectors
-
-    arguments:
-    path: file path to read - string
-
-    returns:
-    xVect: abscissa values - array
-    yVect: ordinate values - array
+    """Function to read the data file.
+    This function can read a .chi and a .xy file.
+    In our case the function returns are Q and I(Q).
+    
+    Parameters
+    ----------
+    path : string
+           path of the data file
+    
+    Returns
+    -------
+    xVal : numpy array
+           abscissa values
+    yVal : numpy array
+           ordinate values
     """
     
     file = open(path, "r")
@@ -118,15 +122,27 @@ def read_file(path):
         y.append(float(columns[1]))
 
     # Modify the variables as numpy array:
-    xVect = np.array(x)
-#    xVect /= scale_factor
-    yVect = np.array(y)
+    xVal = np.array(x)
+    yVal = np.array(y)
 
-    return (xVect, yVect)
+    return (xVal, yVal)
 
 
-def write_file(path, xVar, yVar, xName, yName):
-    """Function to write on file
+def write_file(path, xVal, yVal, xName, yName):
+    """Function to write on file.
+    
+    Parameters
+    ----------
+    path  : string
+            path of the file
+    xVal  : numpy array
+            abscissa values
+    yVal  : numpy array
+            ordinate values
+    xName : string
+            abscissa name
+    yName : string
+            ordinate name
     """
     
     dir = os.path.dirname(path)
@@ -137,14 +153,25 @@ def write_file(path, xVar, yVar, xName, yName):
     file = open(path, "w")
     file_name = file.name
 
-    output = np.column_stack((xVar.flatten(), yVar.flatten()))
+    output = np.column_stack((xVal.flatten(), yVal.flatten()))
     file.write(xName + " \t " + yName + "\n")
     np.savetxt(file_name, output, delimiter='\t')
     file.close()
 
 
 def write_results(path, molecule, scale_factor, rho0):
-    """Function to write scale factor and rho0 on file
+    """Function to write scale factor and atomic density on file.
+    
+    Parameters
+    ----------
+    path         : string
+                   path of the file
+    molecule     : string
+                   molecule analyzed
+    scale_factor : float
+                   scale factor value
+    rho0         : float
+                   atomic density value
     """
     
     file = open(path, "a")
@@ -158,7 +185,21 @@ def write_results(path, molecule, scale_factor, rho0):
 
 
 def molToelemList(molecule):
-    """Function from molecule to elementList
+    """Function to convert the molecule name to dictionary.
+    
+    Parameters
+    ----------
+    molecule    : string
+                  molecule name
+    
+    Returns
+    -------
+    elementList : dictionary("element": multiplicity)
+                  chemical elements of the sample with their multiplicity
+                  element      : string
+                                 chemical element
+                  multiplicity : int
+                                 chemical element multiplicity
     """
 
     elemlist = re.findall('[A-Z][a-z]*|\d+', re.sub('[A-Z][a-z]*(?![\da-z])', '\g<0>1', molecule))
@@ -170,7 +211,17 @@ def molToelemList(molecule):
 
 
 def path_xyz_file(molecule):
-    """Function for the GUI to determinate the xyz file path from the molecule
+    """Function for the GUI to determinate the xyz file path from the molecule name.
+    
+    Parameters
+    ----------
+    molecule : string
+               molecule name
+    
+    Returns
+    -------
+    path     : string
+               path of the xyz file
     """
 
     path = "./xyzFiles/" + molecule + ".xyz"
@@ -180,7 +231,21 @@ def path_xyz_file(molecule):
 
 def read_xyz_file(path):
     """Function to read the xyz file.
-    The atom location is in Angstrom, the function converts them in nanometer.
+    The atomic coordinates are in Angstrom, the function converts them in nanometer.
+    
+    Parameters
+    ----------
+    path : string
+           path of the xyz file
+    
+    Returns
+    -------
+    numAtoms         : int
+                       number of atoms in the molecule
+    element          : array
+                       array of the elements in the molecule
+    xPos, yPos, zPos : array
+                       element x, y and z position
     """
 
     file = open(path, "r")
@@ -205,23 +270,37 @@ def read_xyz_file(path):
         y.append(float(columns[2]))
         z.append(float(columns[3]))
 
-    xVect = np.array(x)
-    xVect /= 10.0
-    yVect = np.array(y)
-    yVect /= 10.0
-    zVect = np.array(z)
-    zVect /= 10.0
+    xPos = np.array(x)
+    xPos /= 10.0
+    yPos = np.array(y)
+    yPos /= 10.0
+    zPos = np.array(z)
+    zPos /= 10.0
     # elementPosition = {}
 
     # for line in lines:
         # elem, x, y, z = line.split()
         # elementPosition[elem] = [x, y, z]
 
-    return (numAtoms, element, xVect, yVect, zVect)
+    return (numAtoms, element, xPos, yPos, zPos)
 
 
 def calc_distMol(x1, y1, z1, x2, y2, z2):
-    """Function to calculate di distance between 2 points
+    """Function to calculate the distance between 2 points.
+    
+    Parameters
+    ----------
+    x1, x2 : float
+             x coordinates of the two points (nm)
+    y1, y2 : float
+             y coordinates of the two points (nm)
+    z1, z2 : float
+             z coordinates of the two points (nm)
+    
+    Returns
+    -------
+    d       : float
+              distance between two points (nm)
     """
 
     d = np.sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
@@ -230,33 +309,72 @@ def calc_distMol(x1, y1, z1, x2, y2, z2):
 
 
 def read_inputFile(path):
-    """Function to read variables from the inputFile.txt
+    """Function to read variables from the inputFile.txt.
+    
+    Parameters
+    ----------
+    path : string
+            path of the input file
+    
+    Returns
+    -------
+    variables : 
+                variables setted by the user
     """
 
     file = open(path)
-    variables = imp.load_source('data', '', file)
+    variables = imp.load_source("data", "", file)
     file.close()
     return variables
 
 
-def setArray(min, max, step):
-    """Function to generate the numpy array for s and rho0
+def setArray(minVal, maxVal, stepVal):
+    """Function to generate the numpy array for the scale factor and the atomic density.
+    
+    Parameters
+    ----------
+    minVal   : float
+               minimum value of the array
+    maxVal   : float
+               maximum value of the array
+    stepVal  : float
+               step of the array
+    
+    Returns
+    -------
+    arrayVal : numpy array
+               array with setted values
     """
 
-    if min == max:
-        a = np.arange(min, max+step, step)
+    if minVal == maxVal:
+        arrayVal = np.arange(minVal, maxVal+stepVal, stepVal)
     else:
-        a = np.arange(min, max, step)
+        arrayVal = np.arange(minVal, maxVal, stepVal)
 
-    return a
+    return arrayVal
 
 
-def plot_raw_data(xVar, yVar, plotName, xName, yName, labName):
-    """Function to plot the raw data
+def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
+    """Function to plot the raw data.
+    
+    Parameters
+    ----------
+    xVal     : numpy array
+               abscissa values
+    yVal     : numpy array
+               ordinate values
+    plotName : string
+               canvas name
+    xName    : string
+               abscissa name
+    yName    : string
+               ordinate name
+    labName  : string
+               label name
     """
 
     plt.figure(plotName)
-    plt.plot(xVar, yVar, label=labName)
+    plt.plot(xVal, yVal, label=labName)
     plt.xlabel(xName)
     plt.ylabel(yName)
     plt.legend()
@@ -265,13 +383,28 @@ def plot_raw_data(xVar, yVar, plotName, xName, yName, labName):
     # plt.show
     
     
-def plot_data(xVar, yVar, plotName, xName, yName, labName):
-    """Function to plot the data
+def plot_data(xVal, yVal, plotName, xName, yName, labName):
+    """Function to plot the data.
+    
+    Parameters
+    ----------
+    xVal     : numpy array
+               abscissa values
+    yVal     : numpy array
+               ordinate values
+    plotName : string
+               canvas name
+    xName    : string
+               abscissa name
+    yName    : string
+               ordinate name
+    labName  : string
+               label name
     """
 
     plt.figure(plotName)
     plt.clf()
-    plt.plot(xVar, yVar, label=labName)
+    plt.plot(xVal, yVal, label=labName)
     plt.xlabel(xName)
     plt.ylabel(yName)
     plt.legend()
@@ -279,39 +412,65 @@ def plot_data(xVar, yVar, plotName, xName, yName, labName):
     plt.draw()
     
     
-def plot_chi2(chi2, s, s_idx, rho0, rho0_idx):
-    """Function to plot the 2D graph of chi2 with scale factor and density
+def plot_chi2(chi2, scale_factor, scale_factor_idx, rho0, rho0_idx):
+    """Function to plot the 2D graph of chi2 with the scale factor and the atomic density.
+    
+    chi2             : 2D numpy array
+                       chi2 values
+    scale_factor     : numpy array
+                       scale factor
+    scale_factor_idx : int
+                       scale factor best value index
+    rho0             : numpy array
+                       average atomic density
+    rho0_idx         : int
+                       atomic density best value index
     """
     
     # plot 2d chi2
     plt.figure('chi2s')
-    plt.plot(s,chi2[rho0_idx, : ])
-    plt.xlabel('s')
+    plt.plot(scale_factor,chi2[rho0_idx, : ])
+    plt.xlabel('scale factor')
     plt.ylabel('chi2')
     plt.grid()
     plt.show
 
     plt.figure('chi2rho0')
-    plt.plot(rho0,chi2[ : ,s_idx])
+    plt.plot(rho0,chi2[ : ,scale_factor_idx])
     plt.xlabel('rho0')
     plt.ylabel('chi2')
     plt.grid()
     plt.draw()
     
     
-def plot3d(x_val, y_val, z_val, x_label, y_label, z_label):
-    """Function to plot the 3D graph of chi2 and its profile
+def plot3d(xVal, yVal, zVal, xName, yName, zName):
+    """Function to plot the 3D graph of chi2 and its profile.
+    
+    Parameters
+    ----------
+    xVal  : numpy array
+            abscissa values
+    yVal  : numpy array
+            ordinate values
+    zVal  : numpy array
+            applicate values
+    xName : string
+            abscissa name
+    yName : string
+            ordinate name
+    zName : string
+            applicate name
     """
     
     # plot the 3d and its profile
-    x, y = np.meshgrid(x_val, y_val)
+    x, y = np.meshgrid(xVal, yVal)
     
     fig = plt.figure('3D')
     ax = Axes3D(fig)
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    ax.set_zlabel(z_label)
-    ax.plot_surface(x, y, z_val, rstride=1, cstride=1, cmap='rainbow')
+    ax.set_xlabel(xName)
+    ax.set_ylabel(yName)
+    ax.set_zlabel(zName)
+    ax.plot_surface(x, y, zVal, rstride=1, cstride=1, cmap='rainbow')
     
     # nLevel = int(chi2Max - chi2Min)
     # minIndxRho0, minIndxS = np.unravel_index(z_val.argmin(), z_val.shape)
@@ -321,15 +480,37 @@ def plot3d(x_val, y_val, z_val, x_label, y_label, z_label):
     # levels = np.linspace(0, chi2Max, int(chi2Max - chi2Min))
 
     plt.figure('Profile')
-    plt.contour(x_val, y_val, z_val, 150)
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
+    plt.contour(xVal, yVal, zVal, 150)
+    # plt.colorbar()
+    plt.xlabel(xName)
+    plt.ylabel(yName)
     plt.draw()
-        
-        
-# Test function
+
+
 def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
-    """Function for the rebinning
+    """Function for the rebinning.
+    
+    Parameters
+    ----------
+    X      : numpy array
+             abscissa to rebin
+    f_X    : numpy array
+             ordinate to interpolate
+    BinNum : int
+             number of points to bin together
+    Num    : int
+             number of points in data interpolation
+    maxQ   : float
+             maximum Q value
+    minQ   : float
+             minimum Q value
+    
+    Returns
+    -------
+    BinX   : numpy array
+             rebinned abscissa
+    BinY   : numpy array
+             rebinned ordinate
     """
     
     newf_X = interpolate.interp1d(X, f_X)
@@ -361,6 +542,26 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     
 def read_MCC_file(path, type):
     """Function to read the MCC file with Soller Slits characteristics.
+    
+    Parameters
+    ----------
+    path : string
+           path of the file
+    type : string
+           MCC model
+    
+    Returns
+    -------
+    ws1  : float
+           width of the inner slit (cm)
+    ws2  : float
+           width of the outer slit (cm)
+    r1   : float
+           curvature radius of first slit (cm)
+    r2   : float
+           curvature radius of second slit (cm)
+    d    : float
+           slit thickness (cm)
     """
     
     file = open(path, "r")

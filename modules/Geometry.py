@@ -63,7 +63,6 @@ def calc_diamond_absorption(wavelenght, abs_length, _2theta, dimension, Q, I_Q, 
     diamond_angle : float
                     diamond rotation angle respect the XRay beam (deg)
     
-    
     Returns
     -------
     I_Qeff        : numpy array
@@ -108,7 +107,6 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
     xth     : float
               positin of i-th point on x-axis (cm)
     
-    
     Returns
     -------
     phi     : float
@@ -150,7 +148,6 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d):
     d          : float
                  slit thickness (cm)
     
-    
     Returns
     -------
     phi_matrix : 2D numpy array
@@ -175,7 +172,6 @@ def calc_T_MCC_sample(phi_matrix):
     phi_matrix : 2D numpy array
                  dispersion angle matrix (rad)
     
-    
     Returns
     -------
     T_MCC_sample : numpy array
@@ -196,7 +192,6 @@ def calc_T_MCC_DAC(phi_matrix, T_MCC_samp):
                  dispersion angle matrix (rad)
     T_MCC_samp : numpy array
                  MCC sample transfer function
-    
     
     Returns
     -------

@@ -50,8 +50,37 @@ from modules.Utility import *
 
 
 def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_path):
-    """Function to calculate the intramolecular contribution of i(Q) (eq. 41)
-
+    """Function to calculate the intramolecular contribution of i(Q) (eq. 41).
+    
+    Parameters
+    ----------
+    Q, max_index, elementList, element, x, y, z, incoh_path, aff_path
+    
+    Q           : numpy array
+                  momentum transfer (nm^-1)
+    max_index   : numpy array 
+                  index of element with Q>QmaxIntegrate & Q<=maxQ
+    elementList : dictionary("element": multiplicity)
+                  chemical elements of the sample with their multiplicity
+                  element      : string
+                                 chemical element
+                  multiplicity : int
+                                 chemical element multiplicity
+    element     : string array
+                  array with the elements in the xyz_file
+    x, y, z     : float
+                  atomic coordinate in the xyz_file (nm)
+    incoh_path  : string
+                  path of incoherent scattered intensities parameters
+    aff_path    : string
+                  path of atomic scattering form factor parameters
+    
+    Returns
+    -------
+    iintra_Q    : numpy array
+                  intramolecular contribution of i(Q)
+    fe_Q        : numpy array
+                  effective electric form factor
     """
 
     fe_Q, Ztot = calc_eeff(elementList, Q, incoh_path, aff_path)
@@ -76,9 +105,26 @@ def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_pat
 
 
 def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
-    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
-
+    """Function to calculate the intramolecular contribution of F(r) (eq. 42).
     To implemente!!! -> For now just for CO2!!!
+    For now I calculate Fintra from iintra.
+    
+    Parameters
+    ----------
+    r             : numpy array
+                    atomic distance (nm)
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    QmaxIntegrate : float
+                    maximum Q value for the intagration
+    aff_path      : string
+                    path of atomic scattering form factor parameters
+    
+    
+    Returns
+    -------
+    Fintra_r      : numpy array
+                    intramolecular contribution of F(r)
     """
 
     # Fintra_r = np.zeros(r.size)
@@ -106,16 +152,23 @@ def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
 
 
 def calc_deltaFr(F_r, Fintra_r, r, rho0):
-    """Function to calculate deltaF(r) (eq. 44, 48)
+    """Function to calculate deltaF(r) (eq. 44, 48).
 
-    arguments:
-    F_r: F(r) - array
-    Fintra_r: intramolecular contribution of F(r) - array
-    r: radius - array
-    rho0: average atomic density - number
-
-    return:
-    deltaF_r: deltaF(r) - array
+    Parameters
+    ----------
+    F_r      : numpy array
+               F(r)
+    Fintra_r : numpy array
+               intramolecular contribution of F(r)
+    r        : numpy array
+               atomic distance (nm)
+    rho0     : float
+               atomic density
+    
+    Returns
+    -------
+    deltaF_r : numpy array
+               difference between F(r) and its theoretical value
     """
 
     deltaF_r = F_r - (Fintra_r - 4*np.pi*r*rho0)
@@ -124,18 +177,29 @@ def calc_deltaFr(F_r, Fintra_r, r, rho0):
 
 
 def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
-    """Function to calculate the i-th iteration of i(Q) (eq. 46, 49)
+    """Function to calculate the i-th iteration of i(Q) (eq. 46, 49).
 
-    arguments:
-    i_Q: i(Q) - array
-    Q: momentum transfer - array
-    Sinf: Sinf - number
-    J_Q: J(Q) - array
-    deltaF_r: deltaF(r) - array
-    rmin: value of r cutoff - number
-
-    returns:
-    i_Qi: i-th iteration of i(Q) - array
+    Parameters
+    ----------
+    i_Q      : numpy array
+               i(Q)
+    Q        : numpy array
+               momentum transfer (nm^-1)
+    Sinf     : float
+               Sinf
+    J_Q      : numpy array
+               J(Q)
+    deltaF_r : numpy array
+               difference between F(r) and its theoretical value
+    r        : numpy array
+               atomic distance (nm)
+    rmin     : float
+               r cut-off value (nm)
+    
+    Returns
+    -------
+    i_Qi     : numpy array
+               i-th iteration of i(Q)
     """
 
     mask = np.where(r < rmin)
@@ -154,21 +218,35 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
 
 
 def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin, varPlot):
-    """Function to calculate the F(r) optimization (eq 47, 48, 49)
-
-    arguments:
-    iteration: number of iteration - number
-    F_r: initial value of F(r) - array
-    rho0: average atomic density - number
-    i_Q: i(Q) - array
-    Q: momentum transfer - array
-    Sinf: Sinf - number
-    J_Q: J(Q) - array
-    r: radius - array
-    rmin: value of r cutoff - number
-
-    returns:
-    F_r: optimazed F(r) - array
+    """Function to calculate the F(r) optimization (eq 47, 48, 49).
+    
+    Parameters
+    ----------
+    iteration : int
+                number of iterations
+    F_r       : numpy array
+                F(r)
+    rho0      : float
+                atomic density
+    i_Q       : numpy array
+                i(Q)
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    Sinf      : float
+                Sinf
+    J_Q       : numpy array
+                J(Q)
+    r         : numpy array
+                atomic distance (nm)
+    rmin      : float
+                r cut-off value (nm)
+    varPlot   : string
+                flag to plot the F(r) iterations
+    
+    Returns
+    -------
+    F_r       : numpy array
+                optimazed F(r)
     """
 
     if varPlot.lower() == "y":

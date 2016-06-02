@@ -225,6 +225,17 @@ def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
 
 def Qto2theta(Q):
     """Function to convert Q into 2theta
+    
+    Parameters
+    ----------
+    Q       : numpy array
+              momentum transfer (nm^-1)
+    
+    
+    Returns
+    -------
+    _2theta : numpy array
+              2theta angle (rad)
     """
 
     wavelenght = 0.03738
