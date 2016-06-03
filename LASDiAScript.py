@@ -90,15 +90,8 @@ if __name__ == '__main__':
     QmaxIntegrate = 90
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)
-
-
-    # create a function for the data lenght check and rebinning
-    if len(Q) != len(Qbkg):
-        # print(len(Q), len(Qbkg))
-        min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
-        # print(min_len)
-        Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
-        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
+    
+    Q, I_Q, Qbkg, I_Qbkg = check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ)
         
     # cm
     ws1 = 0.005
@@ -112,63 +105,69 @@ if __name__ == '__main__':
     # _2theta = np.degrees(Qto2theta(Q))
     _2theta = Qto2theta(Q)
     
-    phi_angle = calc_phi_matrix(sample_thickness/2, _2theta, ws1, ws2, r1, r2, d)    
-    T_MCC_sample = calc_T_MCC_sample(phi_angle)
+    # phi_angle = calc_phi_matrix(sample_thickness/2, _2theta, ws1, ws2, r1, r2, d)    
+    # T_MCC_sample = calc_T_MCC_sample(phi_angle)
     
-    phi_angle_dac = calc_phi_matrix(sample_thickness/2+dac_thickness, _2theta, ws1, ws2, r1, r2, d)    
-    T_MCC_ALL, T_MCC_DAC = calc_T_MCC_DAC(phi_angle_dac, T_MCC_sample)
+    # phi_angle_dac = calc_phi_matrix(sample_thickness/2+dac_thickness, _2theta, ws1, ws2, r1, r2, d)    
+    # T_MCC_ALL, T_MCC_DAC = calc_T_MCC_DAC(phi_angle_dac, T_MCC_sample)
     
-    # plot3d(_2theta, sth, phi_angle, r"2$\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)")
-    # plt.show()
+    # # plot3d(_2theta, sth, phi_angle, r"2$\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)")
+    # # plt.show()
     
-    plt.figure("simps")
-    plt.plot(_2theta, T_MCC_sample, label="sample")
-    plt.plot(_2theta, T_MCC_ALL, label="ALL")
-    plt.plot(_2theta, T_MCC_DAC, label="DAC")
-    plt.xlabel(r"2$\vartheta$ (rad)")
-    plt.ylabel(r"$T^{MCC}(2\vartheta, s_{th})$")
-    plt.legend()
-    plt.grid()
-    plt.show()
-    
-    
-    
-    # I_Qcorr20, corr_factor_meas = diamond(1.44, Q, I_Q, 20)
-    # I_Qbkgcorr20, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 20)
-    
-    # I_Qcorr, corr_factor_meas = diamond(1.44, Q, I_Q, 0)
-    # I_Qbkgcorr, corr_factor_bkg = diamond(1.44, Qbkg, I_Qbkg, 0)
-
-
-    # plt.figure("correction")
-    # plt.plot(corr_factor_meas)
-    # plt.plot(corr_factor_bkg)
-    # plt.grid()
-    # plt.show
-
-    # plt.figure("diamond correction")
-    # # plt.plot(Q, I_Q, label="measured")
-    # plt.plot(Q, I_Qcorr, label="measured corr")
-    # plt.plot(Q, I_Qcorr20, label="measured corr 20")
-    # # plt.plot(Qbkg, I_Qbkg, label="bkg")
-    # plt.plot(Qbkg, I_Qbkgcorr, label="bkg corr")
-    # plt.plot(Qbkg, I_Qbkgcorr20, label="bkg corr 20")
-    # plt.xlabel('Q ($nm^{-1}$)')
-    # plt.ylabel('I(Q)')
+    # plt.figure("simps")
+    # plt.plot(_2theta, T_MCC_sample, label="sample")
+    # plt.plot(_2theta, T_MCC_ALL, label="ALL")
+    # plt.plot(_2theta, T_MCC_DAC, label="DAC")
+    # plt.xlabel(r"2$\vartheta$ (rad)")
+    # plt.ylabel(r"$T^{MCC}(2\vartheta, s_{th})$")
     # plt.legend()
     # plt.grid()
-    # plt.show
+    # plt.show()
     
-    # plt.figure("corr diff")
+    
+    abs_length = 1.208
+    I_Qcorr, corr_factor_meas = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Q, 0)
+    I_Qbkgcorr, corr_factor_bkg = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Qbkg, 0)
+    
+    I_Qcorr10, corr_factor_meas10 = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Q, 10)
+    I_Qbkgcorr10, corr_factor_bkg10 = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Qbkg, 10)
+    
+    I_Qcorr20, corr_factor_meas20 = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Q, 20)
+    I_Qbkgcorr20, corr_factor_bkg20 = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Qbkg, 20)
+    
+    # plt.figure("diamond correction factor")
+    # plt.plot(_2theta, corr_factor_meas, label="0")
+    # plt.plot(_2theta, corr_factor_meas10, label="10")
+    # plt.plot(_2theta, corr_factor_meas20, label="20")
+    # plt.xlabel(r"2$\theta$ (rad)")
+    # plt.ylabel("Abs correction factor")
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+    
+    plt.figure("diamond correction")
+    plt.plot(Q, I_Q, label="measured")
+    plt.plot(Q, I_Qcorr, label="corr 0")
+    plt.plot(Q, I_Qcorr10, label="corr 10")
+    plt.plot(Q, I_Qcorr20, label="corr 20")
+    plt.plot(Qbkg, I_Qbkg, label="bkg")
+    plt.plot(Qbkg, I_Qbkgcorr, label="bkg corr")
+    plt.plot(Qbkg, I_Qbkgcorr20, label="bkg corr 20")
+    plt.xlabel('Q ($nm^{-1}$)')
+    plt.ylabel('I(Q)')
+    plt.legend()
+    plt.grid()
+    plt.show
+    
+    # plt.figure("diamond correction diff")
     # plt.plot(Q, I_Qcorr - I_Qcorr20, label="measured")
-    # plt.plot(Qbkg, I_Qbkgcorr - I_Qbkgcorr20, label="bkg")
+    # plt.plot(Q, I_Qcorr - I_Qcorr20, label="measured")
+    # # plt.plot(Qbkg, I_Qbkgcorr - I_Qbkgcorr20, label="bkg")
     # plt.xlabel('Q ($nm^{-1}$)')
     # plt.ylabel('$\Delta$(I(Q))')
     # plt.legend()
     # plt.grid()
     # plt.show()
-    
-    
     
     # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module containing useful functions used in LASDiA.
+"""Module containing useful functions for the analysis used in LASDiA.
 
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
@@ -48,18 +48,28 @@ from scipy import signal
 import math
 import random
 
+from modules.Utility import *
+
 def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
-    """Function to calculate the ranges where S(Q) is constant
-
-    arguments:
-    Q: momentum transfer - array
-    minQ: minimum Q value - number
-    maxQ: maximum Q value - number
-    QmaxIntegrate: maximum Q value for the intagrations - number
-
-    returns:
-    min_index: array index of element with Q<=minQ - array
-    max_index: array index of element with Q>QmaxIntegrate & Q<=maxQ - array
+    """Function to calculate the Q ranges where S(Q) is constant.
+    
+    Parameters
+    ----------
+    Q             : numpy array 
+                    momentum transfer (nm^-1)
+    minQ          : float
+                    minimum Q value
+    maxQ          : float
+                    maximum Q value
+    QmaxIntegrate : float
+                    maximum Q value for the intagrations
+    
+    Returns
+    -------
+    min_index     : numpy array
+                    indices of elements with Q<=minQ
+    max_index     : numpy array
+                    indices of elements with Q>QmaxIntegrate & Q<=maxQ
     """
 
     min_index = np.where(Q<=minQ)
@@ -69,18 +79,27 @@ def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
 
 
 def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
-    """Function to calculate the ranges used in the program
-
-    arguments:
-    Q: momentum transfer - array
-    minQ: minimum Q value - number
-    maxQ: maximum Q value - number
-    QmaxIntegrate: maximum Q value for the intagrations - number
-
-    returns:
-    validation_index: range of valide Q
-    integration_index: range of integration
-    calculation_index: range where S(Q) is calculated
+    """Function to calculate the Q ranges used in the program.
+    
+    Parameters
+    ----------
+    Q                 : numpy array 
+                        momentum transfer (nm^-1)
+    minQ              : float
+                        minimum Q value
+    maxQ              : float
+                        maximum Q value
+    QmaxIntegrate     : float
+                        maximum Q value for the intagrations
+    
+    Returns
+    -------
+    validation_index  : numpy array
+                        range of valide Q
+    integration_index : numpy array
+                        range where the integration is calculated
+    calculation_index : numpy array
+                        range where S(Q) is calculated
     """
 
     validation_index = np.where(Q<=maxQ)
@@ -92,22 +111,35 @@ def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
 
 def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
     """Function for smoothing S(Q).
-    This function smooths S(Q) and resets the number of points for the variable Q
-
-    arguments:
-    Q: momentum transfer - array
-    S_Q: structure factor - array
-    Sinf: Sinf - number
-    smooth_factor: smoothing factor - number
-    min_index: array index of element with Q<=minQ - array
-    minQ: minimum Q value - number
-    maxQ: maximum Q value - number
-    QmaxIntegrate: maximum Q value for the intagrations - number
-    NumPoints: number of points in the smoothed S(Q) - number
-
-    returns:
-    newQ: new set of Q with NumPoints dimension - array
-    S_Qsmoothed: smoothed S(Q) with NumPoints dimension - array
+    This function smooths S(Q) and resets the number of points for the variable Q.
+    
+    Parameters
+    ----------
+    Q             : numpy array 
+                    momentum transfer (nm^-1)
+    S_Q           : numpy array 
+                    structure factor
+    Sinf          : float
+                    Sinf
+    smooth_factor : float
+                    smoothing factor
+    min_index     : numpy array 
+                    indices of elements with Q<=minQ
+    minQ          : float
+                    minimum Q value
+    maxQ          : float
+                    maximum Q value
+    QmaxIntegrate : float
+                    maximum Q value for the intagrations
+    NumPoints     : int
+                    number of points in the smoothed S(Q)
+    
+    Returns
+    -------
+    newQ          : numpy array 
+                    new set of Q with NumPoints dimension 
+    S_Qsmoothed   : numpy array
+                    smoothed S(Q) with NumPoints dimension
     """
 
     mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
@@ -128,9 +160,30 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate
 
 
 def fitline(Q, I_Q, index1, element1, index2, element2):
-    """Function to flat the peak
+    """Function to calculate the fit line between two points.
+    This function is used to flat the peaks in the raw data with a first order polynomial.
+    
+    Parameters
+    ----------
+    Q        : numpy array 
+               momentum transfer (nm^-1)
+    I_Q      : numpy array
+               measured scattering intensity
+    index1   : int
+               first point index
+    element1 : float
+               first point value
+    index2   : int
+               second point index
+    element2 : float
+               second point value
+    
+    Returns
+    -------
+    y_axis   : numpy array
+               ordinate values of fitted curve
     """
-
+    
     xpoints = [element1, element2]
     ypoints = [I_Q[index1], I_Q[index2]]
 
@@ -142,15 +195,21 @@ def fitline(Q, I_Q, index1, element1, index2, element2):
 
 
 def find_nearest(array, value):
-    """Function to find the nearest array element of a given value
-
-    arguments:
-    array: array of which it wants to find the nearest element - array
-    value: comparing element - number
-
-    returns:
-    index: index of the nearest element - number
-    element: nearest element - number
+    """Function to find the nearest array element of a given value.
+    
+    Parameters
+    ----------
+    array   : numpy array
+              array of which it wants to find the nearest element
+    value   : float
+              comparing element
+    
+    Returns
+    -------
+    index   : int
+              index of the nearest element
+    element : float
+              nearest element
     """
 
     index = (np.abs(array-value)).argmin()
@@ -160,14 +219,19 @@ def find_nearest(array, value):
 
 
 def remove_peaks(Q, I_Q):
-    """Function to remove Bragg's peaks
-
-    arguments:
-    Q: momentum transfer - array
-    I_Q: measured scattering intensity - array
-
-    returns:
-    I_Q: measured scattering intensity without peaks - array
+    """Function to remove Bragg's peaks.
+    
+    Parameters
+    ----------
+    Q   : numpy array
+          momentum transfer (nm^-1)
+    I_Q : numpy array
+          measured scattering intensity
+    
+    Returns
+    -------
+    I_Q : numpy array 
+          measured scattering intensity without peaks
     """
 
     plt.figure('Remove Peaks')
@@ -197,8 +261,23 @@ def remove_peaks(Q, I_Q):
 
 
 def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
-    """Function to calculate the damping function
-
+    """Function to apply the damping factor to iintra(Q) function.
+    
+    Parameters
+    ----------
+    iintra_Q       : numpy array
+                     intramolecular contribution of i(Q)
+    Q              : numpy array
+                     momentum transfer (nm^-1)
+    QmaxIntegrate  : float
+                     maximum Q value for the intagrations
+    damping_factor : float
+                     damping factor
+    
+    Returns
+    -------
+    Qiintra_Q      : numpy array
+                     intramolecular contribution of i(Q) multiplied by Q and the damping function
     """
 
     # damping_factor = 0.5 # np.log(10)
@@ -212,7 +291,25 @@ def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
 
 
 def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
-    """
+    """Function to apply the damping factor to the structure factor.
+    
+    Parameters
+    ----------
+    S_Q            : numpy array 
+                     structure factor
+    Q              : numpy array
+                     momentum transfer (nm^-1)
+    Sinf           : float
+                     Sinf
+    QmaxIntegrate  : float
+                     maximum Q value for the intagrations
+    damping_factor : float
+                     damping factor
+    
+    Returns
+    -------
+    S_Qdamp        : numpy array
+                     damped structure factor
     """
 
     exponent_factor = damping_factor / QmaxIntegrate**2
@@ -224,7 +321,7 @@ def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
 
 
 def Qto2theta(Q):
-    """Function to convert Q into 2theta
+    """Function to convert Q into 2theta.
     
     Parameters
     ----------
@@ -244,3 +341,41 @@ def Qto2theta(Q):
 
     # return np.degrees(theta2)
     return _2theta
+
+
+def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
+    """Function to check the data length and, in case, rebin them.
+    
+    Parameters
+    ----------
+    Q      : numpy array
+             momentum transfer (nm^-1)
+    I_Q    : numpy array
+             measured scattering intensity
+    Qbkg   : numpy array
+             background momentum transfer (nm^-1)
+    I_Qbkg : numpy array
+             background scattering intensity
+    minQ   : float
+             minimum Q value
+    maxQ   : float
+             maximum Q value
+    
+    Returns
+    -------
+    Q      : numpy array
+             rebinned momentum transfer (nm^-1)
+    I_Q    : numpy array
+             rebinned measured scattering intensity
+    Qbkg   : numpy array
+             rebinned background momentum transfer (nm^-1)
+    I_Qbkg : numpy array
+             rebinned background scattering intensity
+    """
+    
+    if len(Q) != len(Qbkg):
+        min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
+        Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
+        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
+    
+    return (Q, I_Q, Qbkg, I_Qbkg)

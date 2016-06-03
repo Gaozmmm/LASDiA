@@ -41,44 +41,44 @@ from modules.UtilityAnalysis import Qto2theta
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
 
-def calc_diamond_absorption(wavelenght, abs_length, _2theta, dimension, Q, I_Q, diamond_angle):
-    """Function to calculate the diamond absorption correction.
-    Diamond characteristics can be found here:
+def calc_absorption_correction(abs_length, _2theta, dimension, I_Q, angle):
+    """Function to calculate the absorption correction.
+    This function can be used for the diamond absorption correction or for any other one.
+    
+    The characteristics for some diamond can be found here:
     http://www.almax-easylab.com/DiamondSelectionPage.aspx
     
     Parameters
     ----------
-    wavelenght    : float
-                    XRay beam wavelenght, @ESRF ID27 0.03738nm (nm)
-    abs_length    : float
-                    absorption length, @33keV 12.08mm (mm)
-    _2theta       : numpy array
-                    diffraction angle (rad)
-    dimension     : float
-                    diamond dimension (mm)
-    Q             : numpy array
-                    momentum transfer (nm)
-    I_Q           : numpy array
-                    measured scattering intensity (nm)
-    diamond_angle : float
-                    diamond rotation angle respect the XRay beam (deg)
+    abs_length  : float
+                  absorption length  (cm), @33keV 1.208cm
+    _2theta     : numpy array
+                  diffraction angle (rad)
+    dimension   : float
+                  object dimension (cm)
+    I_Q         : numpy array
+                  measured scattering intensity
+    angle       : float
+                  object rotation angle respect the XRay beam (deg)
     
     Returns
     -------
-    I_Qeff        : numpy array
-                    corrected scattering intensity (nm)
-    corr_factor   : numpy array
-                    correction factor
+    I_Qeff      : numpy array
+                  corrected scattering intensity (nm)
+    corr_factor : numpy array
+                  correction factor
     """
     
     # for now...
+    # wavelenght  : float
+                  # XRay beam wavelenght (nm), @ESRF ID27 0.03738nm
     # wavelenght = 0.03738 # nm
     # _2theta = Qto2theta(Q) # rad
     
-    mu_l = 1/abs_length # mm^-1 at 33 keV
-    diamond_angle = np.radians(diamond_angle)
+    mu_l = 1/abs_length
+    angle = np.radians(angle)
     
-    path_lenght = dimension / np.cos(_2theta - diamond_angle)
+    path_lenght = dimension / np.cos(_2theta - angle)
     
     corr_factor = np.exp(mu_l * path_lenght)
     
@@ -134,7 +134,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d):
     Parameters
     ----------
     thickness  : float
-                 thickness of the sample (or sample+DAC)
+                 object thickness (sample or sample+DAC)
     _2theta    : numpy array
                  diffraction angle (rad)
     ws1        : float
