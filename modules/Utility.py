@@ -443,7 +443,7 @@ def plot_chi2(chi2, scale_factor, scale_factor_idx, rho0, rho0_idx):
     plt.draw()
     
     
-def plot3d(xVal, yVal, zVal, xName, yName, zName):
+def plot3d(xVal, yVal, zVal, xName, yName, zName, figName):
     """Function to plot the 3D graph of chi2 and its profile.
     
     Parameters
@@ -465,12 +465,12 @@ def plot3d(xVal, yVal, zVal, xName, yName, zName):
     # plot the 3d and its profile
     x, y = np.meshgrid(xVal, yVal)
     
-    fig = plt.figure('3D')
-    ax = Axes3D(fig)
-    ax.set_xlabel(xName)
-    ax.set_ylabel(yName)
-    ax.set_zlabel(zName)
-    ax.plot_surface(x, y, zVal, rstride=1, cstride=1, cmap='rainbow')
+    # # # fig = plt.figure('3D')
+    # # # ax = Axes3D(fig)
+    # # # ax.set_xlabel(xName)
+    # # # ax.set_ylabel(yName)
+    # # # ax.set_zlabel(zName)
+    # # # ax.plot_surface(x, y, zVal, rstride=1, cstride=1, cmap='rainbow')
     
     # nLevel = int(chi2Max - chi2Min)
     # minIndxRho0, minIndxS = np.unravel_index(z_val.argmin(), z_val.shape)
@@ -479,9 +479,9 @@ def plot3d(xVal, yVal, zVal, xName, yName, zName):
     # chi2Max = z_val[maxIndxRho0][maxIndxS]
     # levels = np.linspace(0, chi2Max, int(chi2Max - chi2Min))
 
-    plt.figure('Profile')
+    plt.figure(figName)
     plt.contour(xVal, yVal, zVal, 150)
-    # plt.colorbar()
+    plt.colorbar()
     plt.xlabel(xName)
     plt.ylabel(yName)
     plt.draw()

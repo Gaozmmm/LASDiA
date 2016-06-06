@@ -127,41 +127,43 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
     return phi
     
     
-def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d):
+def calc_phi_matrix(thickness_value, _2theta, ws1, ws2, r1, r2, d, sampling):
     """Function to calculate the dispersion angle matrix.
     half_thick in cm
     
     Parameters
     ----------
-    thickness  : float
-                 object thickness (sample or sample+DAC)
-    _2theta    : numpy array
-                 diffraction angle (rad)
-    ws1        : float
-                 width of the inner slit (cm)
-    ws2        : float
-                 width of the outer slit (cm)
-    r1         : float
-                 curvature radius of first slit (cm)
-    r2         : float
-                 curvature radius of second slit (cm)
-    d          : float
-                 slit thickness (cm)
+    thickness_value : float
+                      object thickness (sample or sample+DAC)
+    _2theta         : numpy array
+                      diffraction angle (rad)
+    ws1             : float
+                      width of the inner slit (cm)
+    ws2             : float
+                      width of the outer slit (cm)
+    r1              : float
+                      curvature radius of first slit (cm)
+    r2              : float
+                      curvature radius of second slit (cm)
+    d               : float
+                      slit thickness (cm)
     
     Returns
     -------
-    phi_matrix : 2D numpy array
-                 dispersion angle matrix (rad)
+    array_thickness : numpy array
+                      array with the thickness values
+    phi_matrix      : 2D numpy array
+                      dispersion angle matrix (rad)
     """
     
-    sth = np.linspace(-thickness, thickness, num=100)
-    phi_matrix = np.zeros((sth.size, _2theta.size))
+    array_thickness = np.linspace(-thickness_value, thickness_value, num=sampling) # num=500)
+    phi_matrix = np.zeros((array_thickness.size, _2theta.size))
     
-    for i, val_sth in enumerate(sth):
+    for i, val_sth in enumerate(array_thickness):
         for j, val_theta2 in enumerate(_2theta):
-            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], sth[i])
+            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], array_thickness[i])
     
-    return phi_matrix
+    return (array_thickness, phi_matrix)
     
     
 def calc_T_MCC_sample(phi_matrix):
