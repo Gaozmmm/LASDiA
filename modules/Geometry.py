@@ -41,7 +41,7 @@ from modules.UtilityAnalysis import Qto2theta
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
 
-def calc_absorption_correction(abs_length, _2theta, dimension, I_Q, angle):
+def calc_absorption_correction(abs_length, _2theta, thickness, I_Q, angle):
     """Function to calculate the absorption correction.
     This function can be used to calculate the absorption correction for the diamond 
     or for any other object between the sample and the detector.
@@ -55,8 +55,8 @@ def calc_absorption_correction(abs_length, _2theta, dimension, I_Q, angle):
                   absorption length  (cm), @33keV 1.208cm
     _2theta     : numpy array
                   diffraction angle (rad)
-    dimension   : float
-                  object dimension (cm)
+    thickness   : float
+                  object thickness (cm)
     I_Q         : numpy array
                   measured scattering intensity
     angle       : float
@@ -79,7 +79,7 @@ def calc_absorption_correction(abs_length, _2theta, dimension, I_Q, angle):
     mu_l = 1/abs_length
     angle = np.radians(angle)
     
-    path_lenght = dimension / np.cos(_2theta - angle)
+    path_lenght = thickness / np.cos(_2theta - angle)
     
     corr_factor = np.exp(mu_l * path_lenght)
     
@@ -128,120 +128,77 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
     return phi
 
 
-def calc_phi_matrix(thickness_value, _2theta, ws1, ws2, r1, r2, d, sampling):
+def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
     """Function to calculate the dispersion angle matrix.
     half_thick in cm
     
     Parameters
     ----------
-    thickness_value : float
-                      object thickness (sample or sample+DAC)
-    _2theta         : numpy array
-                      diffraction angle (rad)
-    ws1             : float
-                      width of the inner slit (cm)
-    ws2             : float
-                      width of the outer slit (cm)
-    r1              : float
-                      curvature radius of first slit (cm)
-    r2              : float
-                      curvature radius of second slit (cm)
-    d               : float
-                      slit thickness (cm)
-    sampling        : int
-                      number of point for the thickness array
+    thickness_value    : float
+                         object thickness (sample or sample+DAC)
+    _2theta            : numpy array
+                         diffraction angle (rad)
+    ws1                : float
+                         width of the inner slit (cm)
+    ws2                : float
+                         width of the outer slit (cm)
+    r1                 : float
+                         curvature radius of first slit (cm)
+    r2                 : float
+                         curvature radius of second slit (cm)
+    d                  : float
+                         slit thickness (cm)
+    num_point          : int
+                         number of point for the thickness array
     
     Returns
     -------
-    array_thickness : numpy array
-                      array with the thickness values
-    phi_matrix      : 2D numpy array
-                      dispersion angle matrix (rad)
+    thickness_sampling : numpy array
+                         array with the thickness values
+    phi_matrix         : 2D numpy array
+                         dispersion angle matrix (rad)
     """
     
-    array_thickness = np.linspace(-thickness_value, thickness_value, num=sampling) # num=500)
-    phi_matrix = np.zeros((array_thickness.size, _2theta.size))
+    thickness_sampling = np.linspace(-thickness, thickness, num=num_point) # num=500)
+    phi_matrix = np.zeros((thickness_sampling.size, _2theta.size))
     
-    for i, val_sth in enumerate(array_thickness):
+    for i, val_sth in enumerate(thickness_sampling):
         for j, val_2theta in enumerate(_2theta):
-            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], array_thickness[i])
+            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], thickness_sampling[i])
     
-    return (array_thickness, phi_matrix)
+    return (thickness_sampling, phi_matrix)
 
 
-def calc_T_MCC_sample(phi_matrix):
-    """Function to calculate the MCC sample transfer function.
+def calc_T_MCC(sample_thickness, all_thickness_sampling, all_phi_angle_matrix):
+    """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC.
     
     Parameters
     ----------
-    phi_matrix : 2D numpy array
-                 dispersion angle matrix (rad)
+    sample_thickness             : float
+                                   sample thickness
+    all_thickness_sampling       : numpy array
+                                   array with the thickness values for sample+DAC
+    all_phi_angle_matrix         : 2D numpy array
+                                   dispersion angle matrix for sample+DAC (rad)
     
     Returns
     -------
-    T_MCC_sample : numpy array
-                 MCC sample transfer function
+    T_MCC_sample                 : numpy array
+                                   MCC sample transfer function
+    T_MCC_DAC                    : numpy array
+                                   MCC DAC transfer function
+    T_MCC_ALL                    : numpy array
+                                   MCC sample+DAC transfer function
+    all_thickness_sampling[mask] : numpy array
+                                   array with the thickness values for sample
+    all_phi_angle_matrix[mask]   : 2D numpy array
+                                   dispersion angle matrix for sample (rad)
     """
     
-    T_MCC_sample = simps(phi_matrix, axis=0, even="first")
-        
-    return T_MCC_sample
-
-
-def calc_T_MCC_DAC(phi_matrix, T_MCC_sample):
-    """Function to calculate the MCC DAC transfer function.
+    mask = (all_thickness_sampling>= -sample_thickness/2) & (all_thickness_sampling <=sample_thickness/2)
     
-    Parameters
-    ----------
-    phi_matrix   : 2D numpy array
-                   dispersion angle matrix (rad)
-    T_MCC_sample : numpy array
-                   MCC sample transfer function
-    
-    Returns
-    -------
-    T_MCC_DAC    : numpy array
-                   MCC DAC transfer function
-    """
-    
-    T_MCC_ALL = simps(phi_matrix, axis=0, even="first") 
+    T_MCC_ALL = simps(all_phi_angle_matrix, axis=0, even="first")
+    T_MCC_sample = simps(all_phi_angle_matrix[mask], axis=0, even="first")
     T_MCC_DAC = T_MCC_ALL - T_MCC_sample
         
-    return (T_MCC_ALL, T_MCC_DAC)
-
-
-def calc_T_MCC(sample_thickness_value, all_array_thickness, phi_matrix):
-    """Function to calculate the MCC transfer function.
-    
-    Parameters
-    ----------
-    sample_thickness_value  : float
-                              sample thickness
-    all_array_thickness     : numpy array
-                              array with the thickness values for sample+DAC
-    phi_matrix              : 2D numpy array
-                              dispersion angle matrix (rad)
-    T_MCC_samp              : numpy array
-                              MCC sample transfer function
-    
-    Returns
-    -------
-    T_MCC_sample  : numpy array
-                 MCC sample transfer function
-    T_MCC_DAC  : numpy array
-                 MCC DAC transfer function
-    T_MCC_ALL  : numpy array
-                 MCC sample+DAC transfer function
-    ----            : numpy array
-                  sample thickness
-    ----            : 2D numpy array
-                  dispersion angle matrix (rad)
-    """
-    
-    mask = (all_array_thickness>= -sample_thickness_value/2) & (all_array_thickness <=sample_thickness_value/2)
-    
-    T_MCC_ALL = simps(phi_matrix, axis=0, even="first")
-    T_MCC_sample = simps(phi_matrix[mask], axis=0, even="first")
-    T_MCC_DAC = T_MCC_ALL - T_MCC_sample
-        
-    return (T_MCC_sample, T_MCC_DAC, T_MCC_ALL, all_array_thickness[mask], phi_matrix[mask])
+    return (T_MCC_sample, T_MCC_DAC, T_MCC_ALL, all_thickness_sampling[mask], all_phi_angle_matrix[mask])

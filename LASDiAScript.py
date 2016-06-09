@@ -74,13 +74,8 @@ if __name__ == '__main__':
 
     Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
     Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
-
-    # print(Q.shape, I_Q.shape)
-    # print(Q.shape, len(I_Q))
-    # print(Qbkg.shape, I_Qbkg.shape)
-
-
-
+    
+    
     # Ar
     # minQ = 3
     # maxQ = 109
@@ -99,58 +94,32 @@ if __name__ == '__main__':
     r1 = 5
     r2 = 20
     d = 1
-    sample_thickness = 0.04 # 0.005 # cm (0.04)
-    dac_thickness = 0.144 # 0.04 # cm (0.144)
+    sample_thickness = 0.04 # 0.005 # cm
+    dac_thickness = 0.144 # 0.04 # cm
     
     # _2theta = np.degrees(Qto2theta(Q))
-    _2theta = Qto2theta(Q)
+    _2theta = Qto2theta(Q) # rad
     
-    # print(_2theta.shape)
+    all_thickness_sampling, all_phi_angle_matrix = calc_phi_matrix(dac_thickness+sample_thickness/2, _2theta, ws1, ws2, r1, r2, d, 1000)
     
-    # sth, phi_angle = calc_phi_matrix(sample_thickness/2, _2theta, ws1, ws2, r1, r2, d, 100)
-    # T_MCC_sample = calc_T_MCC_sample(phi_angle)
+    T_MCC_sample, T_MCC_DAC, T_MCC_ALL, sample_thickness_sampling, sample_phi_angle_matrix = calc_T_MCC(sample_thickness, all_thickness_sampling, all_phi_angle_matrix)
     
-    sth_all, phi_angle_all = calc_phi_matrix(dac_thickness+sample_thickness/2, _2theta, ws1, ws2, r1, r2, d, 1000)
-    # T_MCC_DAC = calc_T_MCC_sample(phi_angle_all)
-    # T_MCC_ALL, T_MCC_DAC = calc_T_MCC_DAC(phi_angle_all, T_MCC_sample)
-    
-    # print(phi_angle_all.shape)
-    # print(phi_angle_all)
-    # mask = np.where(( sth_all>= -sample_thickness/2) & (sth_all <=sample_thickness/2))
-    # phimmm = phi_angle_all[mask,:]
-    # print(phimmm.shape)
-    # print(phimmm)
-    
-    T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2, sth_sample, phi_angle_sample = calc_T_MCC(sample_thickness, sth_all, phi_angle_all)
-    
-    # plot3d(_2theta, sth, phi_angle, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "Sample")
-    plot3d(_2theta, sth_sample, phi_angle_sample, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "sample")
-    plot3d(_2theta, sth_all, phi_angle_all, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "ALL")
-    # plot3d(_2theta, sth2, phi_angle_all, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "ALL")
+    plot3d(_2theta, sample_thickness_sampling, sample_phi_angle_matrix, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "sample")
+    plot3d(_2theta, all_thickness_sampling, all_phi_angle_matrix, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "ALL")
     plt.show
     
     plt.figure("TMCC")
-    # plt.plot(_2theta, T_MCC_sample, label="sample")
-    plt.plot(_2theta, T_MCC_sample2, label="sample")
-    # plt.plot(_2theta, T_MCC_ALL, label="ALL")
-    plt.plot(_2theta, T_MCC_ALL2, label="ALL")
-    # plt.plot(_2theta, T_MCC_DAC, label="DAC")
-    plt.plot(_2theta, T_MCC_DAC2, label="DAC")
+    plt.plot(_2theta, T_MCC_sample, label="sample")
+    plt.plot(_2theta, T_MCC_ALL, label="ALL")
+    plt.plot(_2theta, T_MCC_DAC, label="DAC")
     plt.xlabel(r"$2\vartheta$ (rad)")
     plt.ylabel(r"$T^{MCC}(2\vartheta, s_{th})$")
     plt.legend()
     plt.grid()
     plt.show()
     
-    # plt.figure("TMCC var")
-    # plt.plot(_2theta, T_MCC_sample - T_MCC_sample2, label="sample")
-    # plt.plot(_2theta, T_MCC_ALL - T_MCC_ALL2, label="ALL")
-    # plt.plot(_2theta, T_MCC_DAC - T_MCC_DAC2, label="DAC")
-    # plt.xlabel(r"$2\vartheta$ (rad)")
-    # plt.ylabel(r"$\Delta T^{MCC}(2\vartheta, s_{th})$")
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    
+    
     
     
     # abs_length = 1.208

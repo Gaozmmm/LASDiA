@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Module containing the obsolate functions used in LASDiA.
+These functions were used to test some part of the code or they were substituted by a new version.
 
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
@@ -449,3 +450,44 @@ def calc_T_MCC_samp(phi, sth):
     T_MCC_samp = np.sum(phi, axis=0) * meanDeltaSth
     
     return T_MCC_samp
+
+
+def calc_T_MCC_sample(phi_matrix):
+    """Function to calculate the MCC sample transfer function.
+    
+    Parameters
+    ----------
+    phi_matrix : 2D numpy array
+                 dispersion angle matrix (rad)
+    
+    Returns
+    -------
+    T_MCC_sample : numpy array
+                 MCC sample transfer function
+    """
+    
+    T_MCC_sample = simps(phi_matrix, axis=0, even="first")
+        
+    return T_MCC_sample
+
+
+def calc_T_MCC_DAC(phi_matrix, T_MCC_sample):
+    """Function to calculate the MCC DAC transfer function.
+    
+    Parameters
+    ----------
+    phi_matrix   : 2D numpy array
+                   dispersion angle matrix (rad)
+    T_MCC_sample : numpy array
+                   MCC sample transfer function
+    
+    Returns
+    -------
+    T_MCC_DAC    : numpy array
+                   MCC DAC transfer function
+    """
+    
+    T_MCC_ALL = simps(phi_matrix, axis=0, even="first") 
+    T_MCC_DAC = T_MCC_ALL - T_MCC_sample
+        
+    return (T_MCC_ALL, T_MCC_DAC)
