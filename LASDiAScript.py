@@ -59,8 +59,8 @@ if __name__ == '__main__':
     damp_factor = 1
     iteration = 2
     rmin = 0.22
-    # xyz_file = "./xyzFiles/co2.xyz"
-    xyz_file = "./xyzFiles/argon.xyz"
+    xyz_file = "./xyzFiles/co2.xyz"
+    # xyz_file = "./xyzFiles/argon.xyz"
     numAtoms, element, x, y, z = read_xyz_file(xyz_file)
 
     # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # QmaxIntegrate = np.arange(90)
     
     Q, I_Q, Qbkg, I_Qbkg = check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ)
-        
+    
     # cm
     ws1 = 0.005
     ws2 = 0.005
@@ -99,23 +99,17 @@ if __name__ == '__main__':
     
     # _2theta = np.degrees(Qto2theta(Q))
     _2theta = Qto2theta(Q) # rad
-    
     all_thickness_sampling, all_phi_angle_matrix = calc_phi_matrix(dac_thickness+sample_thickness/2, _2theta, ws1, ws2, r1, r2, d, 1000)
-    
     T_MCC_sample, T_MCC_DAC, T_MCC_ALL, sample_thickness_sampling, sample_phi_angle_matrix = calc_T_MCC(sample_thickness, all_thickness_sampling, all_phi_angle_matrix)
     
-    plot3d(_2theta, sample_thickness_sampling, sample_phi_angle_matrix, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "sample")
-    plot3d(_2theta, all_thickness_sampling, all_phi_angle_matrix, r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)", "ALL")
-    plt.show
+    # plot3d(_2theta, sample_thickness_sampling, sample_phi_angle_matrix, "sample", r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)")
+    # plot3d(_2theta, all_thickness_sampling, all_phi_angle_matrix, "ALL", r"$2\vartheta$ (rad)", "x(cm)", r"$\varphi(2\vartheta,x)$ (rad)")
+    # plt.show
     
-    plt.figure("TMCC")
-    plt.plot(_2theta, T_MCC_sample, label="sample")
-    plt.plot(_2theta, T_MCC_ALL, label="ALL")
-    plt.plot(_2theta, T_MCC_DAC, label="DAC")
-    plt.xlabel(r"$2\vartheta$ (rad)")
-    plt.ylabel(r"$T^{MCC}(2\vartheta, s_{th})$")
-    plt.legend()
-    plt.grid()
+    plot_data(_2theta, T_MCC_sample, "TMCC", r"$2\vartheta$ (rad)", r"$T^{MCC}(2\vartheta, s_{th})$", "sample", "y")
+    plot_data(_2theta, T_MCC_ALL, "TMCC", r"$2\vartheta$ (rad)", r"$T^{MCC}(2\vartheta, s_{th})$", "ALL", "y")
+    plot_data(_2theta, T_MCC_DAC, "TMCC", r"$2\vartheta$ (rad)", r"$T^{MCC}(2\vartheta, s_{th})$", "DAC", "y")
+    
     plt.show()
     
     

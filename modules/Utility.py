@@ -383,27 +383,30 @@ def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
     # plt.show
     
     
-def plot_data(xVal, yVal, plotName, xName, yName, labName):
+def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     """Function to plot the data.
     
     Parameters
     ----------
-    xVal     : numpy array
-               abscissa values
-    yVal     : numpy array
-               ordinate values
-    plotName : string
-               canvas name
-    xName    : string
-               abscissa name
-    yName    : string
-               ordinate name
-    labName  : string
-               label name
+    xVal        : numpy array
+                  abscissa values
+    yVal        : numpy array
+                  ordinate values
+    plotName    : string
+                  canvas name
+    xName       : string
+                  abscissa name
+    yName       : string
+                  ordinate name
+    labName     : string
+                  label name
+    overlapping : string
+                  flag for the overlapping
     """
 
     plt.figure(plotName)
-    plt.clf()
+    if overlapping.lower() == "n":
+        plt.clf()
     plt.plot(xVal, yVal, label=labName)
     plt.xlabel(xName)
     plt.ylabel(yName)
@@ -443,23 +446,25 @@ def plot_chi2(chi2, scale_factor, scale_factor_idx, rho0, rho0_idx):
     plt.draw()
     
     
-def plot3d(xVal, yVal, zVal, xName, yName, zName, figName):
+def plot3d(xVal, yVal, zVal, plotName, xName, yName, zName):
     """Function to plot the 3D graph of chi2 and its profile.
     
     Parameters
     ----------
-    xVal  : numpy array
-            abscissa values
-    yVal  : numpy array
-            ordinate values
-    zVal  : numpy array
-            applicate values
-    xName : string
-            abscissa name
-    yName : string
-            ordinate name
-    zName : string
-            applicate name
+    xVal     : numpy array
+               abscissa values
+    yVal     : numpy array
+               ordinate values
+    zVal     : numpy array
+               applicate values
+    plotName : string
+               canvas name
+    xName    : string
+               abscissa name
+    yName    : string
+               ordinate name
+    zName    : string
+               applicate name
     """
     
     # plot the 3d and its profile
@@ -479,7 +484,7 @@ def plot3d(xVal, yVal, zVal, xName, yName, zName, figName):
     # chi2Max = z_val[maxIndxRho0][maxIndxS]
     # levels = np.linspace(0, chi2Max, int(chi2Max - chi2Min))
 
-    plt.figure(figName)
+    plt.figure(plotName)
     plt.contour(xVal, yVal, zVal, 150)
     plt.colorbar()
     plt.xlabel(xName)
