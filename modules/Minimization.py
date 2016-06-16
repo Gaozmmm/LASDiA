@@ -80,7 +80,7 @@ def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
     return chi2
     
     
-def calc_min_chi2(scale_factor, rho0, chi2):
+def calc_min_chi2(scale_factor, rho0, sample_thickness, chi2):
     """Function to calculate the minimum of chi2 matrix
     
     Parameters
@@ -107,6 +107,6 @@ def calc_min_chi2(scale_factor, rho0, chi2):
                                   atomic density minimum value index
     """
     
-    minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
+    minIndxRho0, minIndxS, minIndxSth = np.unravel_index(chi2.argmin(), chi2.shape)
     
-    return (chi2[minIndxRho0][minIndxS], s[minIndxS], minIndxS, rho0[minIndxRho0], minIndxRho0)
+    return (chi2[minIndxRho0][minIndxS][minIndxSth], scale_factor[minIndxS], minIndxS, rho0[minIndxRho0], minIndxRho0, sample_thickness[minIndxSth], minIndxSth)

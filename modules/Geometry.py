@@ -170,7 +170,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
 
 
 def calc_T_MCC(sample_thickness, all_thickness_sampling, all_phi_angle_matrix):
-    """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC.
+    """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC (W. eq. 10, 11)
     
     Parameters
     ----------
@@ -202,3 +202,34 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, all_phi_angle_matrix):
     T_MCC_DAC = T_MCC_ALL - T_MCC_sample
         
     return (T_MCC_sample, T_MCC_DAC, T_MCC_ALL, all_thickness_sampling[mask], all_phi_angle_matrix[mask])
+
+
+def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
+    """Function to calculate the bkg correction for the MCC (W. eq. 12)
+    
+    Parameters
+    ----------
+    I_Qbkg         : numpy array
+                     measured scattering intensity for the bkg
+    T_DAC_MCC_sth  : numpy array
+                     MCC DAC transfer function
+    T_DAC_MCC_s0th : numpy array
+                     MCC DAC transfer function with sample thickness for the reference spectra
+    
+    Returns
+    -------
+    I_Qbkg_corr    : numpy array
+                     corrected scattering intensity for the bkg
+    """
+    
+    corr_factor = np.zeros(T_DAC_MCC_sth.size)
+    
+    for i in range(len(T_DAC_MCC_sth)):
+        if (T_DAC_MCC_sth[i] == 0.0 or T_DAC_MCC_s0th[i] == 0.0):
+            corr_factor[i] = 1
+        else:
+            corr_factor[i] = T_DAC_MCC_sth[i] / T_DAC_MCC_s0th[i]
+    
+    I_Qbkg_corr = corr_factor * I_Qbkg
+    
+    return (corr_factor, I_Qbkg_corr)
