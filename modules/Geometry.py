@@ -218,19 +218,16 @@ def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
     
     Returns
     -------
+    corr_factor    : numpy array
+                     the correction factor
     I_Qbkg_corr    : numpy array
                      corrected scattering intensity for the bkg
     """
     
-    
-    
-    corr_factor = np.zeros(T_DAC_MCC_sth.size)
-    
-    for i in range(len(T_DAC_MCC_sth)):
-        if (T_DAC_MCC_sth[i] == 0.0 or T_DAC_MCC_s0th[i] == 0.0):
-            corr_factor[i] = 1
-        else:
-            corr_factor[i] = T_DAC_MCC_sth[i] / T_DAC_MCC_s0th[i]
+    np.seterr(divide="ignore")
+    corr_factor = T_DAC_MCC_sth / T_DAC_MCC_s0th
+    corr_factor[T_DAC_MCC_sth == 0.0] = 1
+    corr_factor[T_DAC_MCC_s0th == 0.0] = 1
     
     I_Qbkg_corr = corr_factor * I_Qbkg
     
