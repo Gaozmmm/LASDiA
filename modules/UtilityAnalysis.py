@@ -344,7 +344,8 @@ def Qto2theta(Q):
 
 
 def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
-    """Function to check the data length and, in case, rebin them.
+    """Function to check if the raw data of measured and the background have the same numeber of points.
+    If the number is different the function rebin them.
     
     Parameters
     ----------

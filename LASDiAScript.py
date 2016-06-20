@@ -55,28 +55,20 @@ from modules.Geometry import *
 # from cmath import exp, pi
 
 if __name__ == '__main__':
+    molecule = "CO2"
+    elementList = molToelemList(molecule)
+    elementParameters = read_parameters(elementList, "./elementParameters.txt")
+    
     smooth_factor = 0.25
     damp_factor = 1
     iteration = 2
     rmin = 0.22
-    xyz_file = "./xyzFiles/co2.xyz"
-    # xyz_file = "./xyzFiles/argon.xyz"
-    numAtoms, element, x, y, z = read_xyz_file(xyz_file)
+    numAtoms, element, x, y, z = read_xyz_file("./xyzFiles/co2.xyz")
     aff_params = "./affParamCEA.txt"
     incoh_params = "./incohParamCEA.txt"
-
-    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++.chi")
-
-    # Q, I_Q = read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
-    # Qbkg, I_Qbkg = read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
-
-    # Q1, I_Q1 = read_file("../data/cea_files/CO2/WO2_007BBin.chi")
-    # Qbkg1, I_Qbkg1 = read_file("../data/cea_files/CO2/WO2_013BBin.chi")
-
+    
     Q, I_Q = read_file("../data/cea_files/CO2/WO2_007T++.chi")
     Qbkg, I_Qbkg = read_file("../data/cea_files/CO2/WO2_013T++.chi")
-    
     
     # Ar
     # minQ = 3
@@ -90,7 +82,8 @@ if __name__ == '__main__':
     
     Q, I_Q, Qbkg, I_Qbkg = check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ)
     
-    # plot_data(Q, I_Qbkg, "$I_{bkg}(Q)$", "Q($nm^{-1}$)", "I(Q)", "$I_{bkg}^{Raw}(Q)$", "y")
+    min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
+    validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
     
     # cm
     ws1 = 0.005
@@ -109,65 +102,23 @@ if __name__ == '__main__':
     I_Q, corr_factor_meas = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Q, 0)
     I_Qbkg, corr_factor_bkg = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Qbkg, 0)
     
-    # plot_data(Q, I_Qbkg, "$I_{bkg}(Q)$", "Q($nm^{-1}$)", "I(Q)", "$I_{bkg}^{Abs}(Q)$", "y")
+    # test values
+    # Ar
+    # s = np.arange(0.2, 1.0, 0.1)
+    # CO2
+    s = np.arange(0.7, 1.0, 0.5)
+    rho0 = np.arange(25, 30, 1)
+    sth = np.arange(0.02, 0.06, 0.01)
     
-    all_thickness_sampling4, all_phi_angle_matrix4 = calc_phi_matrix(dac_thickness+sample_thickness/2, _2theta, ws1, ws2, r1, r2, d, 1000)
-    T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4, sample_thickness_sampling4, sample_phi_angle_matrix4 = calc_T_MCC(sample_thickness, all_thickness_sampling4, all_phi_angle_matrix4)
-    
-    all_thickness_sampling2, all_phi_angle_matrix2 = calc_phi_matrix(dac_thickness+0.02/2, _2theta, ws1, ws2, r1, r2, d, 1000)
-    T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2, sample_thickness_sampling2, sample_phi_angle_matrix2 = calc_T_MCC(0.02, all_thickness_sampling2, all_phi_angle_matrix2)
-    
-    all_thickness_sampling6, all_phi_angle_matrix6 = calc_phi_matrix(dac_thickness+0.06/2, _2theta, ws1, ws2, r1, r2, d, 1000)
-    T_MCC_sample6, T_MCC_DAC6, T_MCC_ALL4, sample_thickness_sampling6, sample_phi_angle_matrix6 = calc_T_MCC(0.06, all_thickness_sampling6, all_phi_angle_matrix6)
-    
-    corr_factor2, I_QbkgSth2 = calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_MCC_DAC2, T_MCC_DAC4)
-    corr_factor6, I_QbkgSth6 = calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_MCC_DAC6, T_MCC_DAC4)
-    
-    # plot_data(Q, I_QbkgSth, "I_{bkg}(Q)", "Q($nm^{-1}$)", "I(Q)", "$I_{bkg}^{MCC}(Q)$", "y")
+    chi2 = np.zeros((rho0.size, s.size, sth.size))
 
-    # plot_data(_2theta, T_MCC_DAC2, r"$T_{DAC}^{MCC}$", r"$2\vartheta$(rad)", r"$T_{DAC}^{MCC}(2\vartheta, s_{th})$", r"$s_{th}=0.02$", "y")    
-    # plot_data(_2theta, T_MCC_DAC4, r"$T_{DAC}^{MCC}$", r"$2\vartheta$(rad)", r"$T_{DAC}^{MCC}(2\vartheta, s_{th})$", r"$s_{th}=0.04$", "y")
-    # plot_data(_2theta, T_MCC_DAC6, r"$T_{DAC}^{MCC}$", r"$2\vartheta$(rad)", r"$T_{DAC}^{MCC}(2\vartheta, s_{th})$", r"$s_{th}=0.06$", "y")
+    # remember the electron unit in atomic form factor!!!
+    fe_Q, Ztot = calc_eeff(elementList, Q, elementParameters)
+    Iincoh_Q = calc_Iincoh(elementList, Q, elementParameters)
+    J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+
     
-    # plot_data(_2theta, corr_factor2, "corr_factor", r"$2\vartheta$(rad)", r"$T_{DAC}^{MCC}(2\vartheta, s_{th})$", r"corr_factor2", "y")
-    plot_data(_2theta, corr_factor6, "corr_factor", r"$2\vartheta$(rad)", r"$T_{DAC}^{MCC}(2\vartheta, s_{th})$", r"corr_factor6", "y")
-    plt.show()
-    
-    
-    
-    # # # # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
-    # # # # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
-
-    # # # # # elementList = {"Ar":1}
-    # # # # elementList = {"C":1,"O":2}
-
-    # # # # # test values
-    # # # # # Ar
-    # # # # # s = np.arange(0.2, 1.0, 0.1)
-    # # # # # CO2
-    # # # # s = np.arange(0.7, 1.0, 0.5)
-    # # # # rho0 = np.arange(25, 30, 1)
-    # # # # sth = np.arange(0.02, 0.06, 0.01)
-
-    # # # # # # real values
-    # # # # # # s = np.arange(0.2, 0.8, 0.01)
-    # # # # # # rho0 = np.arange(24.0, 28.0, 0.1)
-
-    # # # # # best values
-    # # # # # Ar
-    # # # # # s = np.array([0.57])
-    # # # # # rho0 = np.array([26.1])
-    # # # # # CO2
-    # # # # # s = np.array([0.984228])
-    # # # # # rho0 = np.array([29.6625])
-
-    # # # # chi2 = np.zeros((rho0.size, s.size, sth.size))
-
-    # # # # # remember the electron unit in atomic form factor!!!
-    # # # # fe_Q, Ztot = calc_eeff(elementList, Q, incoh_params, aff_params)
-    # # # # Iincoh_Q = calc_Iincoh(elementList, Q, incoh_params, aff_params)
-    # # # # J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    # # # # Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot, aff_params)
     
 
     # # # # for i, val_rho0 in enumerate(rho0):

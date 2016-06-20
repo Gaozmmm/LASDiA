@@ -128,6 +128,63 @@ def read_file(path):
     return (xVal, yVal)
 
 
+def read_parameters(elementList, path):
+    """Function to read the file containing the atomic form factor and incoherent parameters.
+    
+    Parameters
+    ----------
+    elementList       : dictionary("element": multiplicity)
+                        chemical elements of the sample with their multiplicity
+                        element      : string
+                                       chemical element
+                        multiplicity : int
+                                       chemical element multiplicity
+    path              : string
+                        path of elements parameters
+    
+    Returns
+    -------
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameter
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
+    """
+    
+    file = open(path, "r")
+    header1 = file.readline()
+    lines = file.readlines()
+    file.close()
+    
+    elementParameters = {}
+    
+    for element, multiplicity in elementList.items():
+        for line in lines:
+            columns = line.split()
+            if element not in elementParameters:
+                if columns[0] == element:
+                    Z = float(columns[1])
+                    a1 = float(columns[2])
+                    b1 = float(columns[3])
+                    a2 = float(columns[4])
+                    b2 = float(columns[5])
+                    a3 = float(columns[6])
+                    b3 = float(columns[7])
+                    a4 = float(columns[8])
+                    b4 = float(columns[9])
+                    c = float(columns[10])
+                    M = float(columns[11])
+                    K = float(columns[12])
+                    L = float(columns[13])
+                    param = [Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L]
+                    elementParameters[element] = param
+                    break
+    
+    return elementParameters
+
+
 def write_file(path, xVal, yVal, xName, yName):
     """Function to write on file.
     
@@ -235,8 +292,8 @@ def read_xyz_file(path):
     
     Parameters
     ----------
-    path : string
-           path of the xyz file
+    path            : string
+                       path of the xyz file
     
     Returns
     -------

@@ -49,7 +49,7 @@ from modules.Utility import *
 from modules.UtilityAnalysis import *
 
 
-def calc_aff(element, Q, aff_path):
+def calc_aff(element, Q, elementParameters):
     """Function to calculate the Atomic Form Factor.
     The atomic form factor is calculated with the formula from:
     http://lampx.tugraz.at/~hadley/ss1/crystaldiffraction/atomicformfactors/formfactors.php
@@ -59,15 +59,67 @@ def calc_aff(element, Q, aff_path):
 
     Parameters
     ----------
-    element : string
-              chemical element
-    Q       : numpy array
-              momentum transfer (nm^-1)
+    element           : string
+                        chemical element
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameter
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
     -------
-    f_Q     : numpy array
-              atomic form factor
+    f_Q              : numpy array
+                       atomic form factor
+    """
+    
+    for elementDict, paramList in elementParameters.items():
+        if elementDict == element:
+            a1 = paramList[1]
+            b1 = paramList[2]
+            a2 = paramList[3]
+            b2 = paramList[4]
+            a3 = paramList[5]
+            b3 = paramList[6]
+            a4 = paramList[7]
+            b4 = paramList[8]
+            c = paramList[9]
+            
+    f1_Q = a1 * np.exp(-b1 * (Q/(4*10*np.pi))**2)
+    f2_Q = a2 * np.exp(-b2 * (Q/(4*10*np.pi))**2)
+    f3_Q = a3 * np.exp(-b3 * (Q/(4*10*np.pi))**2)
+    f4_Q = a4 * np.exp(-b4 * (Q/(4*10*np.pi))**2)
+
+    f_Q = f1_Q + f2_Q + f3_Q + f4_Q + c
+
+    return f_Q
+
+
+def calc_affXXX(element, Q, aff_path):
+    """Function to calculate the Atomic Form Factor.
+    The atomic form factor is calculated with the formula from:
+    http://lampx.tugraz.at/~hadley/ss1/crystaldiffraction/atomicformfactors/formfactors.php
+
+    and the parameters from the article:
+    Hajdu Acta Cryst. (1972). A28, 250
+
+    Parameters
+    ----------
+    element  : string
+               chemical element
+    Q        : numpy array
+               momentum transfer (nm^-1)
+    aff_path : string
+               path of atomic scattering form factor parameters
+    
+    Returns
+    -------
+    f_Q      : numpy array
+               atomic form factor
     """
 
     # open, read and close the parameters file
@@ -107,100 +159,92 @@ def calc_aff(element, Q, aff_path):
     return f_Q
 
 
-def calc_eeff(elementList, Q, incoh_path, aff_path):
+
+def calc_eeff(elementList, Q, elementParameters):
     """Function to calculate the effective electron Form Factor, fe (eq. 10).
 
     Parameters
     ----------
-    elementList  : dictionary("element": multiplicity)
-                   chemical elements of the sample with their multiplicity
-                   element      : string
-                                  chemical element
-                   multiplicity : int
-                                  chemical element multiplicity
-    Q            : numpy array
-                   momentum transfer (nm^-1)
-    incoh_path   : string
-                   path of incoherent scattered intensities parameters
-    aff_path     : string
-                   path of atomic scattering form factor parameters
+    elementList       : dictionary("element": multiplicity)
+                        chemical elements of the sample with their multiplicity
+                        element      : string
+                                       chemical element
+                        multiplicity : int
+                                       chemical element multiplicity
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameter
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
     -------
-    fe_Q         : numpy array
-                   effective electric form factor
-    Ztot         : int
-                   total Z number
+    fe_Q              : numpy array
+                        effective electric form factor
+    Ztot              : int
+                        total Z number
     """
 
-    fe_Q = 0
+    fe_Q = np.zeros(Q.size)
     Ztot = 0
-
-    # file = open("./incohParamCEA.txt", "r")
-    file = open(incoh_path, "r")
-    header1 = file.readline()
-    lines = file.readlines()
-    file.close()
-
-    # scan the lines and when it find the right element take the Z number
+    
     for element, multiplicity in elementList.items():
-        # print (element, multiplicity)
-        for line in lines:
-            columns = line.split()
-            if columns[0] == element:
-                Ztot += multiplicity * float(columns[1])
-                break
-
-    # print (Ztot)
-
-    for element, multiplicity in elementList.items():
-        fe_Q += multiplicity * calc_aff(element, Q, aff_path)
+        for elementDict, paramList in elementParameters.items():
+            if elementDict == element:
+                Ztot += multiplicity * paramList[0]
+        fe_Q += multiplicity * calc_aff(element, Q, elementParameters)
 
     fe_Q /= Ztot
 
     return (fe_Q, Ztot)
 
 
-def calc_Iincoh(elementList, Q, incoh_path, aff_path):
+def calc_Iincoh(elementList, Q, elementParameters):
     """Function to calculate the incoherent scattering intensity Iincoh(Q).
     The incoherent scattering intensity is calculated with the formula from the article:
     Hajdu Acta Cryst. (1972). A28, 250
 
     Parameters
     ----------
-    elementList  : dictionary("element": multiplicity)
-                   chemical elements of the sample with their multiplicity
-                   element      : string
-                                  chemical element
-                   multiplicity : int
-                                  chemical element multiplicity
-    Q            : numpy array
-                   momentum transfer (nm^-1)
+    elementList       : dictionary("element": multiplicity)
+                        chemical elements of the sample with their multiplicity
+                        element      : string
+                                       chemical element
+                        multiplicity : int
+                                       chemical element multiplicity
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameter
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
     -------
-    Iincoh_Q     : numpy array
-                   incoherent scattering intensity
+    Iincoh_Q         : numpy array
+                       incoherent scattering intensity
     """
     
-    # file = open("./incohParamCEA.txt", "r")
-    file = open(incoh_path, "r")
-    header1 = file.readline()
-    lines = file.readlines()
-    file.close()
-    
-    Iincoh_Q = 0
+    Iincoh_Q = np.zeros(Q.size)
     
     # scan the lines and when it find the right element take the Z number
     for element, multiplicity in elementList.items():
-        aff = calc_aff(element, Q, aff_path)
-        for line in lines:
-            columns = line.split()
-            if columns[0] == element:
-                Z = float(columns[1])
-                M = float(columns[2])
-                K = float(columns[3])
-                L = float(columns[4])
+        aff = calc_aff(element, Q, elementParameters)
+        
+        for elementDict, paramList in elementParameters.items():
+            if elementDict == element:
+                Z = paramList[0]
+                M = paramList[10]
+                K = paramList[11]
+                L = paramList[12]
                 break
         
         Iincoh_Q += multiplicity * ((Z - aff**2/Z ) * (1 - M * (np.exp(-K*Q/(4*10*np.pi)) - np.exp(-L*Q/(4*10*np.pi)))))
@@ -231,26 +275,33 @@ def calc_JQ(Iincoh_Q, Ztot, fe_Q):
     return J_Q
 
 
-def calc_Kp(fe_Q, element, Q, aff_path):
+def calc_Kp(fe_Q, element, Q, elementParameters):
     """Function to calculate the average of effective atomic number Kp (eq. 11, 14).
 
     Parameters
     ----------
-    fe_Q    : numpy array
-              effective electric form factor
-    element : string
-              chemical element of the sample
-    Q       : numpy array
-              momentum transfer (nm^-1)
+    fe_Q              : numpy array
+                        effective electric form factor
+    element           : string
+                        chemical element of the sample
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameter
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
     -------
-    Kp      : float
-              average of effective atomic number
+    Kp                : float
+                        average of effective atomic number
     """
 
     # effective atomic number
-    Kp_Q = calc_aff(element, Q, aff_path)/fe_Q
+    Kp_Q = calc_aff(element, Q, elementParameters)/fe_Q
 
     # average effective atomic number
     Kp = np.mean(Kp_Q)
@@ -258,34 +309,41 @@ def calc_Kp(fe_Q, element, Q, aff_path):
     return Kp
 
 
-def calc_Sinf(elementList, fe_Q, Q, Ztot, aff_path):
+def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     """Function to calculate Sinf (eq. 19).
 
     Parameters
     ----------
-    elementList  : dictionary("element": multiplicity)
-                   chemical elements of the sample with their multiplicity
-                   element      : string
-                                  chemical element
-                   multiplicity : int
-                                  chemical element multiplicity
-    fe_Q         : numpy array
-                   effective electric form factor
-    Q            : numpy array
-                   momentum transfer (nm^-1)
-    Ztot         : int
-                   total Z number
+    elementList       : dictionary("element": multiplicity)
+                        chemical elements of the sample with their multiplicity
+                        element      : string
+                                       chemical element
+                        multiplicity : int
+                                       chemical element multiplicity
+    fe_Q              : numpy array
+                        effective electric form factor
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    Ztot              : int
+                        total Z number
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameter
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
     -------
-    Sinf         : float
-                   Sinf
+    Sinf              : float
+                        Sinf
     """
     
     sum_Kp2 = 0
     
     for element, multiplicity in elementList.items():
-        sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q, aff_path)**2
+        sum_Kp2 += multiplicity * calc_Kp2(fe_Q, element, Q, elementParameters)**2
 
     Sinf = sum_Kp2 / Ztot**2
 
