@@ -81,11 +81,11 @@ def calc_absorption_correction(abs_length, _2theta, thickness, I_Q, angle):
     
     path_lenght = thickness / np.cos(_2theta - angle)
     
-    corr_factor = np.exp(mu_l * path_lenght)
+    corr_factor = np.exp(-mu_l * path_lenght)
     
-    I_Qeff = corr_factor * I_Q
+    # I_Qeff = corr_factor * I_Q
     
-    return (I_Qeff, corr_factor)
+    return corr_factor
 
 
 def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
