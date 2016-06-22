@@ -100,77 +100,70 @@ if __name__ == '__main__':
     
     abs_length = 1.208
     corr_factor_meas0 = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Q, 0)
-    corr_factor_meas10 = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Q, 10)
-    corr_factor_meas20 = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Q, 20)
     
-    plot_data(_2theta, 1/corr_factor_meas0, "corr factor", r"$2\vartheta$(rad)", "Inverse Abs correction factor", "0 deg", "y")
-    plot_data(_2theta, 1/corr_factor_meas10, "corr factor", r"$2\vartheta$(rad)", "Inverse Abs correction factor", "10 deg", "y")
-    plot_data(_2theta, 1/corr_factor_meas20, "corr factor", r"$2\vartheta$(rad)", "Inverse Abs correction factor", "20 deg", "y")
-    plt.show()
+    I_Qbkg, corr_factor_bkg = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Qbkg, 0)
     
-    # # # # # I_Qbkg, corr_factor_bkg = calc_absorption_correction(abs_length, _2theta, dac_thickness, I_Qbkg, 0)
+    # test values
+    # Ar
+    # s = np.arange(0.2, 1.0, 0.1)
+    # CO2
+    s = np.arange(0.7, 1.0, 0.5)
+    rho0 = np.arange(25, 30, 1)
+    sth = np.arange(0.02, 0.06, 0.01)
     
-    # # # # # # test values
-    # # # # # # Ar
-    # # # # # # s = np.arange(0.2, 1.0, 0.1)
-    # # # # # # CO2
-    # # # # # s = np.arange(0.7, 1.0, 0.5)
-    # # # # # rho0 = np.arange(25, 30, 1)
-    # # # # # sth = np.arange(0.02, 0.06, 0.01)
+    chi2 = np.zeros((rho0.size, s.size))
     
-    # # # # # chi2 = np.zeros((rho0.size, s.size))
-    
-    # # # # # fe_Q, Ztot = calc_eeff(elementList, Q, elementParameters)
-    # # # # # Iincoh_Q = calc_Iincoh(elementList, Q, elementParameters)
-    # # # # # J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    # # # # # Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+    fe_Q, Ztot = calc_eeff(elementList, Q, elementParameters)
+    Iincoh_Q = calc_Iincoh(elementList, Q, elementParameters)
+    J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
     
     
-    # # # # # for i, val_rho0 in enumerate(rho0):
-        # # # # # for j, val_s in enumerate(s):
-            # # # # # for k, val_sth in enumerate(sth):
-                # # # # # print(val_rho0, val_s, val_sth)
-                # # # # # all_thickness_sampling, all_phi_angle_matrix = calc_phi_matrix(dac_thickness+sth[k]/2, _2theta, ws1, ws2, r1, r2, d, 1000)
-                # # # # # T_MCC_sample, T_MCC_DAC, T_MCC_ALL, sample_thickness_sampling, sample_phi_angle_matrix = calc_T_MCC(sth[k], all_thickness_sampling, all_phi_angle_matrix)
+    for i, val_rho0 in enumerate(rho0):
+        for j, val_s in enumerate(s):
+            for k, val_sth in enumerate(sth):
+                print(val_rho0, val_s, val_sth)
+                all_thickness_sampling, all_phi_angle_matrix = calc_phi_matrix(dac_thickness+sth[k]/2, _2theta, ws1, ws2, r1, r2, d, 1000)
+                T_MCC_sample, T_MCC_DAC, T_MCC_ALL, sample_thickness_sampling, sample_phi_angle_matrix = calc_T_MCC(sth[k], all_thickness_sampling, all_phi_angle_matrix)
                 
-                # # # # # I_QbkgSth = T_MCC_DAC/T_MCC_DAC0 * I_Qbkg
+                I_QbkgSth = T_MCC_DAC/T_MCC_DAC0 * I_Qbkg
                 
-                # # # # # Isample_Q = calc_IsampleQ(I_Q, s[j], I_QbkgSth)
-                # # # # # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, rho0[i])
-                # # # # # Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-                # # # # # # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_QIgor[integration_index], fe_Q[integration_index], Ztot, rho0[i])
-                # # # # # # Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_QIgor, Iincoh_Q)
+                Isample_Q = calc_IsampleQ(I_Q, s[j], I_QbkgSth)
+                alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, rho0[i])
+                Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
+                # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_QIgor[integration_index], fe_Q[integration_index], Ztot, rho0[i])
+                # Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_QIgor, Iincoh_Q)
 
-                # # # # # S_Q = calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
-                # # # # # newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, 550)
-                # # # # # S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
+                S_Q = calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
+                newQ, S_Qsmoothed = calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, 550)
+                S_QsmoothedDamp = calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
 
-                # # # # # Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
-                # # # # # i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
+                Qi_Q = calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
+                i_Q = calc_iQ(S_QsmoothedDamp, Sinf)
 
-                # # # # # validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
-                # # # # # min_indexSmooth, max_indexSmooth = calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
+                validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
+                min_indexSmooth, max_indexSmooth = calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
 
-                # # # # # r = calc_r(newQ)
-                # # # # # F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+                r = calc_r(newQ)
+                F_r = calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
 
-                # # # # # iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, incoh_params, aff_params)
-                # # # # # Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
-                # # # # # Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
-                # # # # # # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l])
+                iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, incoh_params, aff_params)
+                Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
+                Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
+                # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l])
 
 
-                # # # # # Iincoh_QSmooth = calc_Iincoh(elementList, newQ, incoh_params, aff_params)
-                # # # # # J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
+                Iincoh_QSmooth = calc_Iincoh(elementList, newQ, incoh_params, aff_params)
+                J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
 
-                # # # # # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin, "n")
+                F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin, "n")
                 
-                # # # # # maskIt = np.where((r>0) & (r < rmin))
-                # # # # # rIt = r[maskIt]
-                # # # # # deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0[i])
+                maskIt = np.where((r>0) & (r < rmin))
+                rIt = r[maskIt]
+                deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0[i])
 
-                # # # # # chi2[i][j][k] = simps(deltaF_r**2, r[maskIt])
+                # # # chi2[i][j][k] = simps(deltaF_r**2, r[maskIt])
                 # print(i, j, val_rho0, val_s)
                 # print("chi2 ", chi2[i][j])
 
