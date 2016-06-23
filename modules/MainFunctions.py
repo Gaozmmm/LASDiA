@@ -343,7 +343,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     sum_Kp2 = 0
     
     for element, multiplicity in elementList.items():
-        sum_Kp2 += multiplicity * calc_Kp2(fe_Q, element, Q, elementParameters)**2
+        sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q, elementParameters)**2
 
     Sinf = sum_Kp2 / Ztot**2
 

@@ -41,7 +41,7 @@ from modules.UtilityAnalysis import Qto2theta
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
 
-def calc_absorption_correction(abs_length, _2theta, thickness, I_Q, angle):
+def calc_absorption_correction(abs_length, _2theta, thickness, angle):
     """Function to calculate the absorption correction.
     This function can be used to calculate the absorption correction for the diamond 
     or for any other object between the sample and the detector.
@@ -57,8 +57,6 @@ def calc_absorption_correction(abs_length, _2theta, thickness, I_Q, angle):
                   diffraction angle (rad)
     thickness   : float
                   object thickness (cm)
-    I_Q         : numpy array
-                  measured scattering intensity
     angle       : float
                   object rotation angle respect the XRay beam (deg)
     
@@ -169,7 +167,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
     return (thickness_sampling, phi_matrix)
 
 
-def calc_T_MCC(sample_thickness, all_thickness_sampling, all_phi_angle_matrix):
+def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm):
     """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC (W. eq. 10, 11)
     
     Parameters
@@ -197,11 +195,15 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, all_phi_angle_matrix):
     
     mask = (all_thickness_sampling>= -sample_thickness/2) & (all_thickness_sampling <=sample_thickness/2)
     
-    T_MCC_ALL = simps(all_phi_angle_matrix, axis=0, even="first")
-    T_MCC_sample = simps(all_phi_angle_matrix[mask], axis=0, even="first")
+    T_MCC_ALL = simps(phi_angle_matrix, axis=0, even="first")
+    T_MCC_sample = simps(phi_angle_matrix[mask], axis=0, even="first")
     T_MCC_DAC = T_MCC_ALL - T_MCC_sample
-        
-    return (T_MCC_sample, T_MCC_DAC, T_MCC_ALL, all_thickness_sampling[mask], all_phi_angle_matrix[mask])
+    
+    if norm.lower() == "y":
+        T_MCC_sample /= T_MCC_sample[0]
+        T_MCC_DAC /= T_MCC_DAC[0]
+    
+    return (T_MCC_sample, T_MCC_DAC, T_MCC_ALL)
 
 
 def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
