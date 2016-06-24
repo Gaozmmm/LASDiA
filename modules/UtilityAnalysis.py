@@ -95,11 +95,11 @@ def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
     Returns
     -------
     validation_index  : numpy array
-                        range of valide Q
+                        range of valide Q (Q<=maxQ)
     integration_index : numpy array
-                        range where the integration is calculated
+                        range where the integration is calculated (Q<=QmaxIntegrate)
     calculation_index : numpy array
-                        range where S(Q) is calculated
+                        range where S(Q) is calculated (minQ<Q<=QmaxIntegrate)
     """
 
     validation_index = np.where(Q<=maxQ)

@@ -52,7 +52,8 @@ from modules.MainFunctions import *
 import math
 
 
-def FaberZiman(Icoh_Q, Q, Sinf, min_index, max_index, calculation_index):
+
+def calc_S_QFZ(N, Icoh_Q, Q, elementParameters):
     """Function to calculate S(Q) with Faber-Ziman formalism.
     
     Parameters
@@ -76,24 +77,39 @@ def FaberZiman(Icoh_Q, Q, Sinf, min_index, max_index, calculation_index):
     S_Q               : numpy array
                         structure factor in FZ formalism
     """
+    
+    f2 = calc_aff('C', Q, elementParameters)**2 + 2*calc_aff('O',Q, elementParameters)**2
+    f2 /= N
+    f = calc_aff('C', Q, elementParameters)*calc_aff('C', Q, elementParameters) + 4*calc_aff('C', Q, elementParameters)*calc_aff('O',Q, elementParameters) + 4*calc_aff('O',Q, elementParameters)*calc_aff('O',Q, elementParameters)
+    f /= N
+   
+    S_Q = (Icoh_Q - (f2 - f)) / (f)
 
-    N = 3
-    c1 = 1/N
-    c2 = 2/N
+    # S_Qmin = np.zeros(Q[min_index].size)
+    # S_Q = np.concatenate([S_Qmin, S_Q])
 
-    f2 = c1*calc_aff('C', Q[calculation_index])**2 + c2*calc_aff('O',Q[calculation_index])**2
-    f = c1*calc_aff('C', Q[calculation_index]) + c2*calc_aff('O',Q[calculation_index])
-
-    S_Q = (Icoh_Q[calculation_index] - (f2 - f**2)) / (N*f**2)
-
-    S_Qmin = np.zeros(Q[min_index].size)
-    S_Q = np.concatenate([S_Qmin, S_Q])
-
-    S_Qmax = np.zeros(Q[max_index].size)
-    S_Qmax.fill(Sinf)
-    S_Q = np.concatenate([S_Q, S_Qmax])
+    # S_Qmax = np.ones(Q[max_index].size)
+    # # S_Qmax.fill(Sinf)
+    # S_Q = np.concatenate([S_Q, S_Qmax])
 
     return S_Q
+
+
+def calc_alphaFZ(N, Q, Isample_Q, Iincoh_Q, rho0, elementParameters):
+    """Function to calcultate alpha for the FZ formalism.
+    
+    """
+    
+    f2 = calc_aff('C', Q, elementParameters)**2 + 2*calc_aff('O',Q, elementParameters)**2
+    f2 /= N
+    f = calc_aff('C', Q, elementParameters)*calc_aff('C', Q, elementParameters) + 4*calc_aff('C', Q, elementParameters)*calc_aff('O',Q, elementParameters) + 4*calc_aff('O',Q, elementParameters)*calc_aff('O',Q, elementParameters)
+    f /= N
+    
+    Integral1 = simps((Iincoh_Q + (f2/f)) * Q**2, Q)
+    Integral2 = simps((Isample_Q/f) * Q**2,Q)
+    alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
+    
+    return alpha
 
 
 # Functions to jump from a formalism to another, need to be fixed!

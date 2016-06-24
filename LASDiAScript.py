@@ -118,30 +118,31 @@ if __name__ == '__main__':
     J_Q = calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
-    all_thickness_sampling, phi_matrix = calc_phi_matrix(phi_matrix_thickness, _2theta, ws1, ws2, r1, r2, d, 1000)
+    # all_thickness_sampling, phi_matrix = calc_phi_matrix(phi_matrix_thickness, _2theta, ws1, ws2, r1, r2, d, 1000)
+    # plot3d(_2theta, all_thickness_sampling, phi_matrix, "phi_matrix", r"$2\vartheta (rad)$", "x(cm)", "phi")
     
-    T_MCC_sample1, T_MCC_DAC1, T_MCC_ALL1 = calc_T_MCC(0.001, all_thickness_sampling, phi_matrix, "y")
-    T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2 = calc_T_MCC(0.002, all_thickness_sampling, phi_matrix, "y")
-    T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = calc_T_MCC(0.003, all_thickness_sampling, phi_matrix, "y")
-    T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = calc_T_MCC(0.004, all_thickness_sampling, phi_matrix, "y")
+    # test FZ formalism
+    Isample_Q = calc_IsampleQ(I_Q, 1, I_Qbkg)
+    alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, 29)
+    Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
+    S_Q = calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
     
-    plot_data(_2theta, T_MCC_sample1, "T_MCC_sample", r"$2\vartheta$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    plot_data(_2theta, T_MCC_sample2, "T_MCC_sample", r"$2\vartheta$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    plot_data(_2theta, T_MCC_sample3, "T_MCC_sample", r"$2\vartheta$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    plot_data(_2theta, T_MCC_sample4, "T_MCC_sample", r"$2\vartheta$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    # FZ formalism
+    alphaFZ = calc_alphaFZ(numAtoms, Q, Isample_Q, Iincoh_Q, 29, elementParameters)
+    Icoh_QFZ = calc_Icoh(numAtoms, alphaFZ, Isample_Q, Iincoh_Q)
+    S_QFZ = calc_S_QFZ(numAtoms, Icoh_QFZ, Q, elementParameters)
+    
+    plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"S(Q)", "S(Q)", "y")
+    plot_data(Q, S_QFZ, "S_Q", r"$Q(nm^{-1})$", r"S(Q)", "S(Q)FZ", "y")
     plt.show()
-    
-    
     
     # # # # for i, val_rho0 in enumerate(rho0):
         # # # # for j, val_s in enumerate(s):
             # # # # for k, val_sth in enumerate(sth):
-                # # # # print(val_rho0, val_s, val_sth)
-                # # # # T_MCC_sample, T_MCC_DAC, T_MCC_ALL, sample_thickness_sampling, sample_phi_angle_matrix = calc_T_MCC(sth[k], all_thickness_sampling, all_phi_angle_matrix)
                 
-                # # # # I_QbkgSth = T_MCC_DAC/T_MCC_DAC0 * I_Qbkg
+                # # # # # I_QbkgSth = T_MCC_DAC/T_MCC_DAC0 * I_Qbkg
                 
-                # # # # Isample_Q = calc_IsampleQ(I_Q, s[j], I_QbkgSth)
+                # # # # Isample_Q = calc_IsampleQ(I_Q, s[j], I_Qbkg)
                 # # # # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, rho0[i])
                 # # # # Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
                 # # # # # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_QIgor[integration_index], fe_Q[integration_index], Ztot, rho0[i])
@@ -195,6 +196,58 @@ if __name__ == '__main__':
 
 
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # T_MCC_sample1, T_MCC_DAC1, T_MCC_ALL1 = calc_T_MCC(0.001, all_thickness_sampling, phi_matrix, "y")
+    # T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2 = calc_T_MCC(0.002, all_thickness_sampling, phi_matrix, "y")
+    # T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = calc_T_MCC(0.003, all_thickness_sampling, phi_matrix, "y")
+    # T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = calc_T_MCC(0.004, all_thickness_sampling, phi_matrix, "y")
+    
+    # plot_data(_2theta, T_MCC_ALL1, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # plot_data(_2theta, T_MCC_ALL2, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # plot_data(_2theta, T_MCC_ALL3, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # plot_data(_2theta, T_MCC_ALL4, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    
+    # plot_data(_2theta, T_MCC_sample1, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # plot_data(_2theta, T_MCC_sample2, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # plot_data(_2theta, T_MCC_sample3, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # plot_data(_2theta, T_MCC_sample4, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    
+    # plot_data(_2theta, T_MCC_DAC1, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # plot_data(_2theta, T_MCC_DAC2, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # plot_data(_2theta, T_MCC_DAC3, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # plot_data(_2theta, T_MCC_DAC4, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    
+    
+    # plot_data(_2theta, T_MCC_ALL4, "T_MCC", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})$", "ALL", "y")
+    # plot_data(_2theta, T_MCC_sample4, "T_MCC", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})$", "Sample", "y")
+    # plot_data(_2theta, T_MCC_DAC4, "T_MCC", r"$2\vartheta (rad)$", r"$T^{MCC}{2\vartheta, s_{th})$", "DAC", "y")
+    
+    # TMCC_corr_factor_bkg1 = calc_T_DAC_MCC_bkg_corr(T_MCC_DAC1, T_MCC_DAC3)
+    # TMCC_corr_factor_bkg2 = calc_T_DAC_MCC_bkg_corr(T_MCC_DAC2, T_MCC_DAC3)
+    # TMCC_corr_factor_bkg3 = calc_T_DAC_MCC_bkg_corr(T_MCC_DAC3, T_MCC_DAC3)
+    # TMCC_corr_factor_bkg4 = calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
+    
+    # plot_data(_2theta, TMCC_corr_factor_bkg1, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # plot_data(_2theta, TMCC_corr_factor_bkg2, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # plot_data(_2theta, TMCC_corr_factor_bkg3, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # plot_data(_2theta, TMCC_corr_factor_bkg4, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    
+    # plt.show()
     
     
     

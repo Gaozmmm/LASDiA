@@ -745,3 +745,33 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, aff_path):
     Sinf = sum_Kp2 / Ztot**2
 
     return Sinf
+
+
+def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
+    """Function to calculate the bkg correction for the MCC (W. eq. 12)
+    
+    Parameters
+    ----------
+    I_Qbkg         : numpy array
+                     measured scattering intensity for the bkg
+    T_DAC_MCC_sth  : numpy array
+                     MCC DAC transfer function
+    T_DAC_MCC_s0th : numpy array
+                     MCC DAC transfer function with sample thickness for the reference spectra
+    
+    Returns
+    -------
+    corr_factor    : numpy array
+                     the correction factor
+    I_Qbkg_corr    : numpy array
+                     corrected scattering intensity for the bkg
+    """
+    
+    np.seterr(divide="ignore")
+    corr_factor = T_DAC_MCC_sth / T_DAC_MCC_s0th
+    corr_factor[T_DAC_MCC_sth == 0.0] = 1
+    corr_factor[T_DAC_MCC_s0th == 0.0] = 1
+    
+    I_Qbkg_corr = corr_factor * I_Qbkg
+    
+    return (corr_factor, I_Qbkg_corr)

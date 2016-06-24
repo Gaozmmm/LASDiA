@@ -157,7 +157,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
                          dispersion angle matrix (rad)
     """
     
-    thickness_sampling = np.linspace(-thickness, thickness, num=num_point) # num=500)
+    thickness_sampling = np.linspace(-thickness/2, thickness/2, num=num_point) # num=500)
     phi_matrix = np.zeros((thickness_sampling.size, _2theta.size))
     
     for i, val_sth in enumerate(thickness_sampling):
@@ -202,17 +202,16 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm)
     if norm.lower() == "y":
         T_MCC_sample /= T_MCC_sample[0]
         T_MCC_DAC /= T_MCC_DAC[0]
+        T_MCC_ALL /= T_MCC_ALL[0]
     
     return (T_MCC_sample, T_MCC_DAC, T_MCC_ALL)
 
 
-def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
-    """Function to calculate the bkg correction for the MCC (W. eq. 12)
+def calc_T_DAC_MCC_bkg_corr(T_DAC_MCC_sth, T_DAC_MCC_s0th):
+    """Function to calculate the bkg correction factor for the MCC (W. eq. 12)
     
     Parameters
     ----------
-    I_Qbkg         : numpy array
-                     measured scattering intensity for the bkg
     T_DAC_MCC_sth  : numpy array
                      MCC DAC transfer function
     T_DAC_MCC_s0th : numpy array
@@ -222,15 +221,8 @@ def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
     -------
     corr_factor    : numpy array
                      the correction factor
-    I_Qbkg_corr    : numpy array
-                     corrected scattering intensity for the bkg
     """
     
-    np.seterr(divide="ignore")
     corr_factor = T_DAC_MCC_sth / T_DAC_MCC_s0th
-    corr_factor[T_DAC_MCC_sth == 0.0] = 1
-    corr_factor[T_DAC_MCC_s0th == 0.0] = 1
     
-    I_Qbkg_corr = corr_factor * I_Qbkg
-    
-    return (corr_factor, I_Qbkg_corr)
+    return corr_factor
