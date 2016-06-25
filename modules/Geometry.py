@@ -43,12 +43,12 @@ import matplotlib.pyplot as plt
 
 def calc_absorption_correction(abs_length, _2theta, thickness, angle):
     """Function to calculate the absorption correction.
-    This function can be used to calculate the absorption correction for the diamond 
+    This function can be used to calculate the absorption correction for the diamond
     or for any other object between the sample and the detector.
-    
+
     The characteristics for some diamonds can be found here:
     http://www.almax-easylab.com/DiamondSelectionPage.aspx
-    
+
     Parameters
     ----------
     abs_length  : float
@@ -59,7 +59,7 @@ def calc_absorption_correction(abs_length, _2theta, thickness, angle):
                   object thickness (cm)
     angle       : float
                   object rotation angle respect the XRay beam (deg)
-    
+
     Returns
     -------
     I_Qeff      : numpy array
@@ -67,28 +67,28 @@ def calc_absorption_correction(abs_length, _2theta, thickness, angle):
     corr_factor : numpy array
                   correction factor
     """
-    
+
     # for now...
     # wavelenght  : float
     #               XRay beam wavelenght (nm), @ESRF ID27 0.03738nm
     # wavelenght = 0.03738 # nm
     # _2theta = Qto2theta(Q) # rad
-    
+
     mu_l = 1/abs_length
     angle = np.radians(angle)
-    
+
     path_lenght = thickness / np.cos(_2theta - angle)
-    
+
     corr_factor = np.exp(-mu_l * path_lenght)
-    
+
     # I_Qeff = corr_factor * I_Q
-    
+
     return corr_factor
 
 
 def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
     """Function to calculate the dispersion angle for the Soller Slits correction.
-    
+
     Parameters
     ----------
     ws1     : float
@@ -105,31 +105,31 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
               diffraction angle (rad)
     xth     : float
               positin of i-th point on x-axis (cm)
-    
+
     Returns
     -------
     phi     : float
               dispersion angle (rad)
     """
-    
+
     gamma_2 = np.arcsin(ws1/(2*r1))
-    
+
     alpha1 = np.arctan( r1 * np.sin(_2theta + gamma_2) / (r1*np.cos(_2theta + gamma_2) - xth ))
     alpha2 = np.arctan( r1 * np.sin(_2theta - gamma_2) / (r1*np.cos(_2theta - gamma_2) - xth ))
-    
+
     beta1 = np.arctan( (r2+d) * np.sin(_2theta + gamma_2) / ((r2+d)*np.cos(_2theta + gamma_2) - xth ))
     beta2 = np.arctan( (r2+d) * np.sin(_2theta - gamma_2) / ((r2+d)*np.cos(_2theta - gamma_2) - xth ))
-    
+
     psi = min(alpha1, beta1) - max(alpha2, beta2)
     phi = max(0, psi)
-    
+
     return phi
 
 
 def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
     """Function to calculate the dispersion angle matrix.
     half_thick in cm
-    
+
     Parameters
     ----------
     thickness_value    : float
@@ -148,7 +148,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
                          slit thickness (cm)
     num_point          : int
                          number of point for the thickness array
-    
+
     Returns
     -------
     thickness_sampling : numpy array
@@ -156,20 +156,21 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
     phi_matrix         : 2D numpy array
                          dispersion angle matrix (rad)
     """
-    
-    thickness_sampling = np.linspace(-thickness/2, thickness/2, num=num_point) # num=500)
+
+    # thickness_sampling = np.linspace(-thickness/2, thickness/2, num=num_point) # num=500)
+    thickness_sampling = np.linspace(0, thickness/2, num=num_point) # num=500)
     phi_matrix = np.zeros((thickness_sampling.size, _2theta.size))
-    
+
     for i, val_sth in enumerate(thickness_sampling):
         for j, val_2theta in enumerate(_2theta):
             phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], thickness_sampling[i])
-    
+
     return (thickness_sampling, phi_matrix)
 
 
 def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm):
     """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC (W. eq. 10, 11)
-    
+
     Parameters
     ----------
     sample_thickness             : float
@@ -178,7 +179,7 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm)
                                    array with the thickness values for sample+DAC
     all_phi_angle_matrix         : 2D numpy array
                                    dispersion angle matrix for sample+DAC (rad)
-    
+
     Returns
     -------
     T_MCC_sample                 : numpy array
@@ -192,37 +193,38 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm)
     all_phi_angle_matrix[mask]   : 2D numpy array
                                    dispersion angle matrix for sample (rad)
     """
-    
-    mask = (all_thickness_sampling>= -sample_thickness/2) & (all_thickness_sampling <=sample_thickness/2)
-    
-    T_MCC_ALL = simps(phi_angle_matrix, axis=0, even="first")
-    T_MCC_sample = simps(phi_angle_matrix[mask], axis=0, even="first")
+
+    # mask = (all_thickness_sampling>= -sample_thickness/2) & (all_thickness_sampling <=sample_thickness/2)
+    mask = (all_thickness_sampling>= 0) & (all_thickness_sampling <=sample_thickness/2)
+
+    T_MCC_ALL = 2*simps(phi_angle_matrix, axis=0, even="first")
+    T_MCC_sample = 2*simps(phi_angle_matrix[mask], axis=0, even="first")
     T_MCC_DAC = T_MCC_ALL - T_MCC_sample
-    
+
     if norm.lower() == "y":
         T_MCC_sample /= T_MCC_sample[0]
         T_MCC_DAC /= T_MCC_DAC[0]
         T_MCC_ALL /= T_MCC_ALL[0]
-    
+
     return (T_MCC_sample, T_MCC_DAC, T_MCC_ALL)
 
 
 def calc_T_DAC_MCC_bkg_corr(T_DAC_MCC_sth, T_DAC_MCC_s0th):
     """Function to calculate the bkg correction factor for the MCC (W. eq. 12)
-    
+
     Parameters
     ----------
     T_DAC_MCC_sth  : numpy array
                      MCC DAC transfer function
     T_DAC_MCC_s0th : numpy array
                      MCC DAC transfer function with sample thickness for the reference spectra
-    
+
     Returns
     -------
     corr_factor    : numpy array
-                     the correction factor
+                     the bkg correction factor
     """
-    
+
     corr_factor = T_DAC_MCC_sth / T_DAC_MCC_s0th
-    
+
     return corr_factor
