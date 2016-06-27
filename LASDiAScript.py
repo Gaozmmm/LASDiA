@@ -119,8 +119,8 @@ if __name__ == '__main__':
     T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = Geometry.calc_T_MCC(0.003, all_thickness_sampling, phi_matrix, "y")
     T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = Geometry.calc_T_MCC(0.004, all_thickness_sampling, phi_matrix, "y")
 
-    Utility.write_file("./T_MCC_sample4.txt", Q, T_MCC_sample4, "Q", "T_MCC_sample4")
-    Utility.write_file("./T_MCC_DAC4.txt", Q, T_MCC_DAC4, "Q", "T_MCC_DAC4")
+    Utility.write_file("./T_MCC_sample4a.txt", Q, T_MCC_sample4, "Q", "T_MCC_sample4")
+    Utility.write_file("./T_MCC_DAC4a.txt", Q, T_MCC_DAC4, "Q", "T_MCC_DAC4")
 
     Utility.plot_data(Q, T_MCC_ALL1, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
     Utility.plot_data(Q, T_MCC_ALL2, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.002 cm", "y")
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     T_MCC_corr_factor_bkg3 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC3, T_MCC_DAC3)
     T_MCC_corr_factor_bkg4 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
 
-    Utility.write_file("./T_MCC_corr_factor_bkg4.txt", Q, T_MCC_corr_factor_bkg4, "Q", "T_MCC_corr_factor_bkg4")
+    Utility.write_file("./T_MCC_corr_factor_bkg4a.txt", Q, T_MCC_corr_factor_bkg4, "Q", "T_MCC_corr_factor_bkg4")
 
     Utility.plot_data(Q, T_MCC_corr_factor_bkg1, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.001 cm", "y")
     Utility.plot_data(Q, T_MCC_corr_factor_bkg2, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.002 cm", "y")

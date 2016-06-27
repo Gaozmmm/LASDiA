@@ -158,7 +158,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
     """
 
     # thickness_sampling = np.linspace(-thickness/2, thickness/2, num=num_point) # num=500)
-    thickness_sampling = np.linspace(0, thickness/2, num=num_point) # num=500)
+    thickness_sampling = np.linspace(0, thickness, num=num_point) # num=500)
     phi_matrix = np.zeros((thickness_sampling.size, _2theta.size))
 
     for i, val_sth in enumerate(thickness_sampling):
@@ -194,11 +194,11 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm)
                                    dispersion angle matrix for sample (rad)
     """
 
-    # mask = (all_thickness_sampling>= -sample_thickness/2) & (all_thickness_sampling <=sample_thickness/2)
-    mask = (all_thickness_sampling>= 0) & (all_thickness_sampling <=sample_thickness/2)
+    # mask = (all_thickness_sampling >= -sample_thickness/2) & (all_thickness_sampling <= sample_thickness/2)
+    mask = (all_thickness_sampling >= 0) & (all_thickness_sampling <= sample_thickness/2)
 
-    T_MCC_ALL = 2*simps(phi_angle_matrix, axis=0, even="first")
-    T_MCC_sample = 2*simps(phi_angle_matrix[mask], axis=0, even="first")
+    T_MCC_ALL = simps(phi_angle_matrix, axis=0, even="first")
+    T_MCC_sample = simps(phi_angle_matrix[mask], axis=0, even="first")
     T_MCC_DAC = T_MCC_ALL - T_MCC_sample
 
     if norm.lower() == "y":

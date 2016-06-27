@@ -55,12 +55,12 @@ def read_file(path):
     """Function to read the data file.
     This function can read a .chi and a .xy file.
     In our case the function returns are Q and I(Q).
-    
+
     Parameters
     ----------
     path : string
            path of the data file
-    
+
     Returns
     -------
     xVal : numpy array
@@ -68,11 +68,11 @@ def read_file(path):
     yVal : numpy array
            ordinate values
     """
-    
+
     file = open(path, "r")
     file_name = file.name
     ext = os.path.splitext(file_name)[1]
-    
+
     dimension = "nano"
     scale_factor = 1
 
@@ -130,7 +130,7 @@ def read_file(path):
 
 def read_parameters(elementList, path):
     """Function to read the file containing the atomic form factor and incoherent parameters.
-    
+
     Parameters
     ----------
     elementList       : dictionary("element": multiplicity)
@@ -141,7 +141,7 @@ def read_parameters(elementList, path):
                                        chemical element multiplicity
     path              : string
                         path of elements parameters
-    
+
     Returns
     -------
     elementParameters : dictionary("element": parameters)
@@ -152,14 +152,14 @@ def read_parameters(elementList, path):
                                      list of the parameter
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     """
-    
+
     file = open(path, "r")
     header1 = file.readline()
     lines = file.readlines()
     file.close()
-    
+
     elementParameters = {}
-    
+
     for element, multiplicity in elementList.items():
         for line in lines:
             columns = line.split()
@@ -181,13 +181,13 @@ def read_parameters(elementList, path):
                     param = [Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L]
                     elementParameters[element] = param
                     break
-    
+
     return elementParameters
 
 
 def write_file(path, xVal, yVal, xName, yName):
     """Function to write on file.
-    
+
     Parameters
     ----------
     path  : string
@@ -201,24 +201,24 @@ def write_file(path, xVal, yVal, xName, yName):
     yName : string
             ordinate name
     """
-    
+
     dir = os.path.dirname(path)
-    
+
     if not os.path.exists(dir):
         os.makedirs(dir)
-    
+
     file = open(path, "w")
     file_name = file.name
 
     output = np.column_stack((xVal.flatten(), yVal.flatten()))
-    file.write(xName + " \t " + yName + "\n")
+    # file.write(xName + " \t " + yName + "\n")
     np.savetxt(file_name, output, delimiter='\t')
     file.close()
 
 
 def write_results(path, molecule, scale_factor, rho0):
     """Function to write scale factor and atomic density on file.
-    
+
     Parameters
     ----------
     path         : string
@@ -230,25 +230,25 @@ def write_results(path, molecule, scale_factor, rho0):
     rho0         : float
                    atomic density value
     """
-    
+
     file = open(path, "a")
     file_name = file.name
-    
+
     ts = time.time()
     timeStamp = datetime.datetime.fromtimestamp(ts).strftime("%Y%m%d_%H:%M:%S")
-    
+
     file.write(timeStamp + " \t " + molecule + " \t " + str(scale_factor) + " \t " + str(rho0) + "\n")
     file.close()
 
 
 def molToelemList(molecule):
     """Function to convert the molecule name to dictionary.
-    
+
     Parameters
     ----------
     molecule    : string
                   molecule name
-    
+
     Returns
     -------
     elementList : dictionary("element": multiplicity)
@@ -269,12 +269,12 @@ def molToelemList(molecule):
 
 def path_xyz_file(molecule):
     """Function for the GUI to determinate the xyz file path from the molecule name.
-    
+
     Parameters
     ----------
     molecule : string
                molecule name
-    
+
     Returns
     -------
     path     : string
@@ -289,12 +289,12 @@ def path_xyz_file(molecule):
 def read_xyz_file(path):
     """Function to read the xyz file.
     The atomic coordinates are in Angstrom, the function converts them in nanometer.
-    
+
     Parameters
     ----------
     path            : string
                        path of the xyz file
-    
+
     Returns
     -------
     numAtoms         : int
@@ -344,7 +344,7 @@ def read_xyz_file(path):
 
 def calc_distMol(x1, y1, z1, x2, y2, z2):
     """Function to calculate the distance between 2 points.
-    
+
     Parameters
     ----------
     x1, x2 : float
@@ -353,7 +353,7 @@ def calc_distMol(x1, y1, z1, x2, y2, z2):
              y coordinates of the two points (nm)
     z1, z2 : float
              z coordinates of the two points (nm)
-    
+
     Returns
     -------
     d       : float
@@ -367,15 +367,15 @@ def calc_distMol(x1, y1, z1, x2, y2, z2):
 
 def read_inputFile(path):
     """Function to read variables from the inputFile.txt.
-    
+
     Parameters
     ----------
     path : string
             path of the input file
-    
+
     Returns
     -------
-    variables : 
+    variables :
                 variables setted by the user
     """
 
@@ -387,7 +387,7 @@ def read_inputFile(path):
 
 def setArray(minVal, maxVal, stepVal):
     """Function to generate the numpy array for the scale factor and the atomic density.
-    
+
     Parameters
     ----------
     minVal   : float
@@ -396,7 +396,7 @@ def setArray(minVal, maxVal, stepVal):
                maximum value of the array
     stepVal  : float
                step of the array
-    
+
     Returns
     -------
     arrayVal : numpy array
@@ -413,7 +413,7 @@ def setArray(minVal, maxVal, stepVal):
 
 def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
     """Function to plot the raw data.
-    
+
     Parameters
     ----------
     xVal     : numpy array
@@ -438,11 +438,11 @@ def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
     plt.grid(True)
     plt.draw()
     # plt.show
-    
-    
+
+
 def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     """Function to plot the data.
-    
+
     Parameters
     ----------
     xVal        : numpy array
@@ -470,11 +470,11 @@ def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     plt.legend()
     plt.grid(True)
     plt.draw()
-    
-    
+
+
 def plot_chi2(chi2, scale_factor, scale_factor_idx, rho0, rho0_idx):
     """Function to plot the 2D graph of chi2 with the scale factor and the atomic density.
-    
+
     chi2             : 2D numpy array
                        chi2 values
     scale_factor     : numpy array
@@ -486,7 +486,7 @@ def plot_chi2(chi2, scale_factor, scale_factor_idx, rho0, rho0_idx):
     rho0_idx         : int
                        atomic density best value index
     """
-    
+
     # plot 2d chi2
     plt.figure('chi2s')
     plt.plot(scale_factor,chi2[rho0_idx, : ])
@@ -501,11 +501,11 @@ def plot_chi2(chi2, scale_factor, scale_factor_idx, rho0, rho0_idx):
     plt.ylabel('chi2')
     plt.grid()
     plt.draw()
-    
-    
+
+
 def plot3d(xVal, yVal, zVal, plotName, xName, yName, zName):
     """Function to plot the 3D graph of chi2 and its profile.
-    
+
     Parameters
     ----------
     xVal     : numpy array
@@ -523,17 +523,17 @@ def plot3d(xVal, yVal, zVal, plotName, xName, yName, zName):
     zName    : string
                applicate name
     """
-    
+
     # plot the 3d and its profile
     x, y = np.meshgrid(xVal, yVal)
-    
+
     # # # fig = plt.figure('3D')
     # # # ax = Axes3D(fig)
     # # # ax.set_xlabel(xName)
     # # # ax.set_ylabel(yName)
     # # # ax.set_zlabel(zName)
     # # # ax.plot_surface(x, y, zVal, rstride=1, cstride=1, cmap='rainbow')
-    
+
     # nLevel = int(chi2Max - chi2Min)
     # minIndxRho0, minIndxS = np.unravel_index(z_val.argmin(), z_val.shape)
     # maxIndxRho0, maxIndxS = np.unravel_index(z_val.argmax(), z_val.shape)
@@ -551,7 +551,7 @@ def plot3d(xVal, yVal, zVal, plotName, xName, yName, zName):
 
 def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     """Function for the rebinning.
-    
+
     Parameters
     ----------
     X      : numpy array
@@ -566,7 +566,7 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
              maximum Q value
     minQ   : float
              minimum Q value
-    
+
     Returns
     -------
     BinX   : numpy array
@@ -574,7 +574,7 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     BinY   : numpy array
              rebinned ordinate
     """
-    
+
     newf_X = interpolate.interp1d(X, f_X)
     ShiftX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
     ShiftY = newf_X(ShiftX)
@@ -600,18 +600,18 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
         # min = np.amin(X)
 
     return (BinX, BinY)
-    
-    
+
+
 def read_MCC_file(path, type):
     """Function to read the MCC file with Soller Slits characteristics.
-    
+
     Parameters
     ----------
     path : string
            path of the file
     type : string
            MCC model
-    
+
     Returns
     -------
     ws1  : float
@@ -625,12 +625,12 @@ def read_MCC_file(path, type):
     d    : float
            slit thickness (cm)
     """
-    
+
     file = open(path, "r")
     header1 = file.readline()
     lines = file.readlines()
     file.close()
-    
+
     for line in lines:
         columns = line.split()
         if columns[0] == type:
@@ -640,5 +640,5 @@ def read_MCC_file(path, type):
             r2 = float(columns[4])
             d = float(columns[5])
             break
-            
+
     return (ws1, ws2, r1, r2, d)
