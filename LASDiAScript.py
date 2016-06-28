@@ -114,6 +114,9 @@ if __name__ == '__main__':
     # I_Qbkg = I_Qbkg / corr_factor_bkg
 
     all_thickness_sampling, phi_matrix = Geometry.calc_phi_matrix(phi_matrix_thickness, _2theta, ws1, ws2, r1, r2, d, 1000)
+
+    Utility.plot3d(_2theta, all_thickness_sampling, phi_matrix, "phi_matrix", "2theta", "x(cm)", "phi")
+
     T_MCC_sample1, T_MCC_DAC1, T_MCC_ALL1 = Geometry.calc_T_MCC(0.001, all_thickness_sampling, phi_matrix, "y")
     T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2 = Geometry.calc_T_MCC(0.002, all_thickness_sampling, phi_matrix, "y")
     T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = Geometry.calc_T_MCC(0.003, all_thickness_sampling, phi_matrix, "y")
@@ -122,24 +125,24 @@ if __name__ == '__main__':
     Utility.write_file("./T_MCC_sample4a.txt", Q, T_MCC_sample4, "Q", "T_MCC_sample4")
     Utility.write_file("./T_MCC_DAC4a.txt", Q, T_MCC_DAC4, "Q", "T_MCC_DAC4")
 
-    Utility.plot_data(Q, T_MCC_ALL1, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_ALL2, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_ALL3, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_ALL4, "T_MCC_all", r"$2\vartheta (rad)$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    Utility.plot_data(Q, T_MCC_ALL1, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    Utility.plot_data(Q, T_MCC_ALL2, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    Utility.plot_data(Q, T_MCC_ALL3, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    Utility.plot_data(Q, T_MCC_ALL4, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.004 cm", "y")
 
-    Utility.plot_data(Q, T_MCC_sample1, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_sample2, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_sample3, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_sample4, "T_MCC_sample", r"$2\vartheta (rad)$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    Utility.plot_data(Q, T_MCC_sample1, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    Utility.plot_data(Q, T_MCC_sample2, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    Utility.plot_data(Q, T_MCC_sample3, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    Utility.plot_data(Q, T_MCC_sample4, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.004 cm", "y")
 
-    Utility.plot_data(Q, T_MCC_DAC1, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_DAC2, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_DAC3, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_DAC4, "T_MCC_DAC", r"$2\vartheta (rad)$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    Utility.plot_data(Q, T_MCC_DAC1, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    Utility.plot_data(Q, T_MCC_DAC2, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    Utility.plot_data(Q, T_MCC_DAC3, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    Utility.plot_data(Q, T_MCC_DAC4, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.004 cm", "y")
 
-    Utility.plot_data(Q, T_MCC_ALL4, "T_MCC", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})$", "ALL", "y")
-    Utility.plot_data(Q, T_MCC_sample4, "T_MCC", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})$", "Sample", "y")
-    Utility.plot_data(Q, T_MCC_DAC4, "T_MCC", r"$2\vartheta (rad)$", r"$T^{MCC}{2\vartheta, s_{th})$", "DAC", "y")
+    Utility.plot_data(Q, T_MCC_ALL4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "ALL", "y")
+    Utility.plot_data(Q, T_MCC_sample4, "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "Sample", "y")
+    Utility.plot_data(Q, T_MCC_DAC4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}{2\vartheta, s_{th})$", "DAC", "y")
 
     T_MCC_corr_factor_bkg1 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC1, T_MCC_DAC3)
     T_MCC_corr_factor_bkg2 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC2, T_MCC_DAC3)
@@ -148,10 +151,10 @@ if __name__ == '__main__':
 
     Utility.write_file("./T_MCC_corr_factor_bkg4a.txt", Q, T_MCC_corr_factor_bkg4, "Q", "T_MCC_corr_factor_bkg4")
 
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg1, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg2, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg3, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg4, "T_MCC_bkg", r"$2\vartheta (rad)$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.004 cm", "y")
+    Utility.plot_data(Q, T_MCC_corr_factor_bkg1, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    Utility.plot_data(Q, T_MCC_corr_factor_bkg2, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    Utility.plot_data(Q, T_MCC_corr_factor_bkg3, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    Utility.plot_data(Q, T_MCC_corr_factor_bkg4, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.004 cm", "y")
 
     plt.show()
 
