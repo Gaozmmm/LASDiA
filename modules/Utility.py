@@ -411,35 +411,6 @@ def setArray(minVal, maxVal, stepVal):
     return arrayVal
 
 
-def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
-    """Function to plot the raw data.
-
-    Parameters
-    ----------
-    xVal     : numpy array
-               abscissa values
-    yVal     : numpy array
-               ordinate values
-    plotName : string
-               canvas name
-    xName    : string
-               abscissa name
-    yName    : string
-               ordinate name
-    labName  : string
-               label name
-    """
-
-    plt.figure(plotName)
-    plt.plot(xVal, yVal, label=labName)
-    plt.xlabel(xName)
-    plt.ylabel(yName)
-    plt.legend()
-    plt.grid(True)
-    plt.draw()
-    # plt.show
-
-
 def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     """Function to plot the data.
 

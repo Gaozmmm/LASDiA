@@ -775,3 +775,31 @@ def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
     I_Qbkg_corr = corr_factor * I_Qbkg
     
     return (corr_factor, I_Qbkg_corr)
+
+
+def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
+    """Function to plot the raw data.
+
+    Parameters
+    ----------
+    xVal     : numpy array
+               abscissa values
+    yVal     : numpy array
+               ordinate values
+    plotName : string
+               canvas name
+    xName    : string
+               abscissa name
+    yName    : string
+               ordinate name
+    labName  : string
+               label name
+    """
+
+    plt.figure(plotName)
+    plt.plot(xVal, yVal, label=labName)
+    plt.xlabel(xName)
+    plt.ylabel(yName)
+    plt.legend()
+    plt.grid(True)
+    plt.draw()

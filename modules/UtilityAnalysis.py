@@ -48,7 +48,7 @@ from scipy import signal
 import math
 import random
 
-from modules.Utility import *
+from modules import Utility
 
 def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
     """Function to calculate the Q ranges where S(Q) is constant.
@@ -376,7 +376,7 @@ def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
     
     if len(Q) != len(Qbkg):
         min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
-        Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
-        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
+        Q, I_Q = Utility.rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
+        Qbkg, I_Qbkg = Utility.rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
     
     return (Q, I_Q, Qbkg, I_Qbkg)
