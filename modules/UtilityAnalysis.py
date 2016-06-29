@@ -59,10 +59,10 @@ def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
                     momentum transfer (nm^-1)
     minQ          : float
                     minimum Q value
-    maxQ          : float
-                    maximum Q value
     QmaxIntegrate : float
                     maximum Q value for the intagrations
+    maxQ          : float
+                    maximum Q value
     
     Returns
     -------
@@ -87,10 +87,10 @@ def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
                         momentum transfer (nm^-1)
     minQ              : float
                         minimum Q value
-    maxQ              : float
-                        maximum Q value
     QmaxIntegrate     : float
                         maximum Q value for the intagrations
+    maxQ              : float
+                        maximum Q value
     
     Returns
     -------
@@ -109,7 +109,7 @@ def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
     return(validation_index, integration_index, calculation_index)
 
 
-def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
+def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, NumPoints):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q.
     
@@ -141,21 +141,14 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate
     S_Qsmoothed   : numpy array
                     smoothed S(Q) with NumPoints dimension
     """
-
-    mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
-    smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smooth_factor)
+    
+    smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
     newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
     S_Qsmoothed = smooth(newQ)
-
-    # mask_low = np.where(Q<=minQ)
-    num_low = S_Qsmoothed[newQ<minQ].size
-    smooth = interpolate.UnivariateSpline(Q[min_index], S_Q[min_index], k=3, s=smooth_factor)
-    newQLow = np.linspace(np.amin(newQ), minQ, num_low, endpoint=True)
-    S_QsmoothLow = smooth(newQLow)
-
-    S_Qsmoothed[newQ<minQ] = S_QsmoothLow
+    
+    S_Qsmoothed[newQ<minQ] = 0
     S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
-
+    
     return (newQ, S_Qsmoothed)
 
 
@@ -376,7 +369,70 @@ def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
     
     if len(Q) != len(Qbkg):
         min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
-        Q, I_Q = Utility.rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
-        Qbkg, I_Qbkg = Utility.rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
+        Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
+        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
     
     return (Q, I_Q, Qbkg, I_Qbkg)
+
+
+def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
+    """Function for the rebinning.
+
+    Parameters
+    ----------
+    X      : numpy array
+             abscissa to rebin
+    f_X    : numpy array
+             ordinate to interpolate
+    BinNum : int
+             number of points to bin together
+    Num    : int
+             number of points in data interpolation
+    maxQ   : float
+             maximum Q value
+    minQ   : float
+             minimum Q value
+
+    Returns
+    -------
+    BinX   : numpy array
+             rebinned abscissa
+    BinY   : numpy array
+             rebinned ordinate
+    """
+
+    newf_X = interpolate.interp1d(X, f_X)
+    ShiftX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
+    ShiftY = newf_X(ShiftX)
+
+    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
+    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
+    BinX = np.linspace(min, max, Num, endpoint=True)
+    BinY = np.zeros(Num)
+
+    for i in range(BinNum):
+        for j in range(0, Num):
+            BinY[j] += ShiftY[j*BinNum+i]
+
+    BinY /= BinNum
+
+    mask = np.where(BinX<=minQ)
+    BinY[mask] = 0.0
+
+    # lenX = len(X)
+    # numX = 2**int(math.log(lenX,2))
+    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    # if min < np.amin(X):
+        # min = np.amin(X)
+
+    return (BinX, BinY)
+
+
+def interpolation_after_smoothing(Q, newQ, fe_Q):
+    """Function to interpolate the data.
+    """
+    
+    newf_X = interpolate.interp1d(Q, fe_Q)
+    ShiftY = newf_X(newQ)
+    
+    return ShiftY

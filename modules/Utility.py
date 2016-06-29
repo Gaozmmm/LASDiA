@@ -520,59 +520,6 @@ def plot3d(xVal, yVal, zVal, plotName, xName, yName, zName):
     plt.draw()
 
 
-def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
-    """Function for the rebinning.
-
-    Parameters
-    ----------
-    X      : numpy array
-             abscissa to rebin
-    f_X    : numpy array
-             ordinate to interpolate
-    BinNum : int
-             number of points to bin together
-    Num    : int
-             number of points in data interpolation
-    maxQ   : float
-             maximum Q value
-    minQ   : float
-             minimum Q value
-
-    Returns
-    -------
-    BinX   : numpy array
-             rebinned abscissa
-    BinY   : numpy array
-             rebinned ordinate
-    """
-
-    newf_X = interpolate.interp1d(X, f_X)
-    ShiftX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
-    ShiftY = newf_X(ShiftX)
-
-    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
-    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
-    BinX = np.linspace(min, max, Num, endpoint=True)
-    BinY = np.zeros(Num)
-
-    for i in range(BinNum):
-        for j in range(0, Num):
-            BinY[j] += ShiftY[j*BinNum+i]
-
-    BinY /= BinNum
-
-    mask = np.where(BinX<=minQ)
-    BinY[mask] = 0.0
-
-    # lenX = len(X)
-    # numX = 2**int(math.log(lenX,2))
-    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
-    # if min < np.amin(X):
-        # min = np.amin(X)
-
-    return (BinX, BinY)
-
-
 def read_MCC_file(path, type):
     """Function to read the MCC file with Soller Slits characteristics.
 

@@ -36,6 +36,7 @@ from scipy import fftpack
 from scipy import signal
 from scipy.integrate import simps
 from scipy.interpolate import UnivariateSpline
+from scipy import interpolate
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 import numpy as np
@@ -89,12 +90,13 @@ if __name__ == '__main__':
     QmaxIntegrate = 90
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)
-
+    
     Q, I_Q, Qbkg, I_Qbkg = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ)
-
+    
     min_index, max_index = UtilityAnalysis.calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     validation_index, integration_index, calculation_index = UtilityAnalysis.calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
-
+    
+    
     # cm
     ws1 = 0.005
     ws2 = 0.005
@@ -104,60 +106,6 @@ if __name__ == '__main__':
     sth = np.arange(0.02, 0.06, 0.01)
     dac_thickness = 0.144 # 0.04 # cm
     phi_matrix_thickness = 0.17 #0.04 # cm
-
-    # Geometrical correction
-    _2theta = UtilityAnalysis.Qto2theta(Q) # rad
-
-    # abs_length = 1.208
-    # corr_factor_meas0 = Geometry.calc_absorption_correction(abs_length, _2theta, dac_thickness, 0)
-    # I_Q = I_Q / corr_factor_bkg
-    # I_Qbkg = I_Qbkg / corr_factor_bkg
-
-    all_thickness_sampling, phi_matrix = Geometry.calc_phi_matrix(phi_matrix_thickness, _2theta, ws1, ws2, r1, r2, d, 1000)
-
-    Utility.plot3d(_2theta, all_thickness_sampling, phi_matrix, "phi_matrix", "2theta", "x(cm)", "phi")
-
-    T_MCC_sample1, T_MCC_DAC1, T_MCC_ALL1 = Geometry.calc_T_MCC(0.001, all_thickness_sampling, phi_matrix, "y")
-    T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2 = Geometry.calc_T_MCC(0.002, all_thickness_sampling, phi_matrix, "y")
-    T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = Geometry.calc_T_MCC(0.003, all_thickness_sampling, phi_matrix, "y")
-    T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = Geometry.calc_T_MCC(0.004, all_thickness_sampling, phi_matrix, "y")
-
-    Utility.write_file("./T_MCC_sample4a.txt", Q, T_MCC_sample4, "Q", "T_MCC_sample4")
-    Utility.write_file("./T_MCC_DAC4a.txt", Q, T_MCC_DAC4, "Q", "T_MCC_DAC4")
-
-    Utility.plot_data(Q, T_MCC_ALL1, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_ALL2, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_ALL3, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_ALL4, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    Utility.plot_data(Q, T_MCC_sample1, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_sample2, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_sample3, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_sample4, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    Utility.plot_data(Q, T_MCC_DAC1, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_DAC2, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_DAC3, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_DAC4, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    Utility.plot_data(Q, T_MCC_ALL4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "ALL", "y")
-    Utility.plot_data(Q, T_MCC_sample4, "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "Sample", "y")
-    Utility.plot_data(Q, T_MCC_DAC4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}{2\vartheta, s_{th})$", "DAC", "y")
-
-    T_MCC_corr_factor_bkg1 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC1, T_MCC_DAC3)
-    T_MCC_corr_factor_bkg2 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC2, T_MCC_DAC3)
-    T_MCC_corr_factor_bkg3 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC3, T_MCC_DAC3)
-    T_MCC_corr_factor_bkg4 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
-
-    Utility.write_file("./T_MCC_corr_factor_bkg4a.txt", Q, T_MCC_corr_factor_bkg4, "Q", "T_MCC_corr_factor_bkg4")
-
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg1, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg2, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg3, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    Utility.plot_data(Q, T_MCC_corr_factor_bkg4, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    plt.show()
-
 
     # test values
     # Ar
@@ -181,54 +129,41 @@ if __name__ == '__main__':
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
-
-    # # all_thickness_sampling, phi_matrix = calc_phi_matrix(phi_matrix_thickness, _2theta, ws1, ws2, r1, r2, d, 1000)
-    # # plot3d(_2theta, all_thickness_sampling, phi_matrix, "phi_matrix", r"$2\vartheta (rad)$", "x(cm)", "phi")
-    #
-    # # test FZ formalism
-    # Isample_Q = calc_IsampleQ(I_Q, 1, I_Qbkg)
-    # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, 29)
-    # Icoh_Q = calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-    # S_Q = calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
-    #
-    # # FZ formalism
-    # alphaFZ = calc_alphaFZ(numAtoms, Q, Isample_Q, Iincoh_Q, 29, elementParameters)
-    # Icoh_QFZ = calc_Icoh(numAtoms, alphaFZ, Isample_Q, Iincoh_Q)
-    # S_QFZ = calc_S_QFZ(numAtoms, Icoh_QFZ, Q, elementParameters)
-    #
-    # plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"S(Q)", "S(Q)", "y")
-    # plot_data(Q, S_QFZ, "S_Q", r"$Q(nm^{-1})$", r"S(Q)", "S(Q)FZ", "y")
-    # plt.show()
-    #
-    # for i, val_rho0 in enumerate(rho0):
-    #     for j, val_s in enumerate(s):
-    #         Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s[j], I_Qbkg)
-    #         alpha = MainFunctions.calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, rho0[i])
-    #         Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-    #         # alpha = MainFunctions.calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_QIgor[integration_index], fe_Q[integration_index], Ztot, rho0[i])
-    #         # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_QIgor, Iincoh_Q)
-    #
-    #         S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
-    #         newQ, S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q[validation_index], S_Q[validation_index], Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, 550)
-    #         S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
-    #
-    #         Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"S(Q)", "S(Q)", "y")
-    #         Utility.plot_data(newQ, S_Qsmoothed, "S_Q", r"$Q(nm^{-1})$", r"S(Q)", "S(Q) smoothed", "y")
-    #         Utility.plot_data(newQ, S_QsmoothedDamp, "S_Q", r"$Q(nm^{-1})$", r"S(Q)", "S(Q) smoothed damp", "y")
-    #
-    #         Qi_Q = MainFunctions.calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
-    #         # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
-    #
-    #         Utility.plot_data(newQ, Qi_Q, "Qi_Q", r"$Q(nm^{-1})$", r"Qi(Q)", "Qi(Q)", "y")
-    #         Utility.plot_data(newQ, newQ*i_Q, "Qi_Q", r"$Q(nm^{-1})$", r"Qi(Q)", "i(Q)", "y")
-    #
-    #         validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = UtilityAnalysis.calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
-    #         min_indexSmooth, max_indexSmooth = UtilityAnalysis.calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
-    #
-    #         r = MainFunctions.calc_r(newQ)
-    #         F_r = MainFunctions.calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
-    #         Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"F(r)", "F(r)", "n")
-    #         plt.show()
+    
+    
+    for i, val_rho0 in enumerate(rho0):
+        for j, val_s in enumerate(s):
+            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s[j], I_Qbkg)
+            alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, Q[Q<=QmaxIntegrate], \
+                Isample_Q[Q<=QmaxIntegrate], fe_Q[Q<=QmaxIntegrate], Ztot, rho0[i])
+            Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
+            
+            S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ)
+            
+            newQ, S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing2(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, 550)
+            S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
+                        
+            # Utility.plot_data(Q, S_Q, "S_Q", r"$Q (nm^{-1})$", r"S_Q", "S_Q", "y")
+            # Utility.plot_data(newQ, S_Qsmoothed, "S_Q", r"$Q (nm^{-1})$", r"S_Q", "S_Q", "y")
+            Utility.plot_data(newQ2, S_Qsmoothed-S_Qsmoothed2, "S_Q", r"$Q (nm^{-1})$", r"S_Q", "S_Q2", "y")
+            
+            plt.show()
+            
+            
+            
+            
+            newfe_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, fe_Q)
+            
+            # Qi_Q = MainFunctions.calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
+            # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
+            
+            # validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = UtilityAnalysis.calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
+            # min_indexSmooth, max_indexSmooth = UtilityAnalysis.calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
+    
+            # r = MainFunctions.calc_r(newQ)
+            # F_r = MainFunctions.calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+            # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"F(r)", "F(r)", "n")
+            # plt.show()
 
             # iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, incoh_params, aff_params)
             # Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
@@ -273,6 +208,60 @@ if __name__ == '__main__':
 
 
 
+    # Geometrical correction
+    # _2theta = UtilityAnalysis.Qto2theta(Q) # rad
+    
+    # abs_length = 1.208
+    # corr_factor_meas0 = Geometry.calc_absorption_correction(abs_length, _2theta, dac_thickness, 0)
+    # I_Q = I_Q / corr_factor_bkg
+    # I_Qbkg = I_Qbkg / corr_factor_bkg
+
+    # all_thickness_sampling, phi_matrix = Geometry.calc_phi_matrix(phi_matrix_thickness, _2theta, ws1, ws2, r1, r2, d, 1000)
+
+    # Utility.plot3d(_2theta, all_thickness_sampling, phi_matrix, "phi_matrix", "2theta", "x(cm)", "phi")
+
+    # T_MCC_sample1, T_MCC_DAC1, T_MCC_ALL1 = Geometry.calc_T_MCC(0.001, all_thickness_sampling, phi_matrix, "y")
+    # T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2 = Geometry.calc_T_MCC(0.002, all_thickness_sampling, phi_matrix, "y")
+    # T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = Geometry.calc_T_MCC(0.003, all_thickness_sampling, phi_matrix, "y")
+    # T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = Geometry.calc_T_MCC(0.004, all_thickness_sampling, phi_matrix, "y")
+
+    # Utility.write_file("./T_MCC_sample4a.txt", Q, T_MCC_sample4, "Q", "T_MCC_sample4")
+    # Utility.write_file("./T_MCC_DAC4a.txt", Q, T_MCC_DAC4, "Q", "T_MCC_DAC4")
+
+    # Utility.plot_data(Q, T_MCC_ALL1, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # Utility.plot_data(Q, T_MCC_ALL2, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # Utility.plot_data(Q, T_MCC_ALL3, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # Utility.plot_data(Q, T_MCC_ALL4, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.004 cm", "y")
+
+    # Utility.plot_data(Q, T_MCC_sample1, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # Utility.plot_data(Q, T_MCC_sample2, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # Utility.plot_data(Q, T_MCC_sample3, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # Utility.plot_data(Q, T_MCC_sample4, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.004 cm", "y")
+
+    # Utility.plot_data(Q, T_MCC_DAC1, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # Utility.plot_data(Q, T_MCC_DAC2, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # Utility.plot_data(Q, T_MCC_DAC3, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # Utility.plot_data(Q, T_MCC_DAC4, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.004 cm", "y")
+
+    # Utility.plot_data(Q, T_MCC_ALL4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "ALL", "y")
+    # Utility.plot_data(Q, T_MCC_sample4, "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "Sample", "y")
+    # Utility.plot_data(Q, T_MCC_DAC4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}{2\vartheta, s_{th})$", "DAC", "y")
+
+    # T_MCC_corr_factor_bkg1 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC1, T_MCC_DAC3)
+    # T_MCC_corr_factor_bkg2 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC2, T_MCC_DAC3)
+    # T_MCC_corr_factor_bkg3 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC3, T_MCC_DAC3)
+    # T_MCC_corr_factor_bkg4 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
+
+    # Utility.write_file("./T_MCC_corr_factor_bkg4a.txt", Q, T_MCC_corr_factor_bkg4, "Q", "T_MCC_corr_factor_bkg4")
+
+    # Utility.plot_data(Q, T_MCC_corr_factor_bkg1, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.001 cm", "y")
+    # Utility.plot_data(Q, T_MCC_corr_factor_bkg2, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.002 cm", "y")
+    # Utility.plot_data(Q, T_MCC_corr_factor_bkg3, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.003 cm", "y")
+    # Utility.plot_data(Q, T_MCC_corr_factor_bkg4, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.004 cm", "y")
+
+    # plt.show()
+
+    
 
 
 

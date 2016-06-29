@@ -77,6 +77,45 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_in
     return S_Q
 
 
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
+    """Function to calculate the structure factor S(Q) (eq. 18) with Igor range.
+    This function doesn't set the value 0 for Q<minQ!!!
+    
+    Parameters
+    ----------
+    N                 : int
+                        number of atoms
+    Icoh_Q            : numpy array
+                        cohrent scattering intensity
+    Ztot              : int
+                        total Z number
+    fe_Q              : numpy array 
+                        effective electric form factor
+    Sinf              : float
+                        Sinf
+    Q                 : numpy array 
+                        momentum transfer (nm^-1)
+    max_index         : numpy array 
+                        index of element with Q>QmaxIntegrate & Q<=maxQ
+    integration_index : numpy array 
+                        index of element in the integration range Q<=QmaxIntegrate
+    
+    Returns
+    -------
+    S_Q               : numpy array
+                        structure factor
+    """
+    
+    S_Q = Icoh_Q[integration_index] / (N * Ztot**2 * fe_Q[integration_index]**2)
+    
+    S_Qmax = np.zeros(Q[max_index].size)
+    S_Qmax.fill(Sinf)
+    S_Q = np.concatenate([S_Q, S_Qmax])
+    
+    return S_Q
+
+
+
 def interpolation(X, f_X, rebinnedX):
     """Function for the interpolation
     """
@@ -803,3 +842,53 @@ def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
     plt.legend()
     plt.grid(True)
     plt.draw()
+
+
+def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
+    """Function for smoothing S(Q).
+    This function smooths S(Q) and resets the number of points for the variable Q.
+    
+    Parameters
+    ----------
+    Q             : numpy array 
+                    momentum transfer (nm^-1)
+    S_Q           : numpy array 
+                    structure factor
+    Sinf          : float
+                    Sinf
+    smooth_factor : float
+                    smoothing factor
+    min_index     : numpy array 
+                    indices of elements with Q<=minQ
+    minQ          : float
+                    minimum Q value
+    maxQ          : float
+                    maximum Q value
+    QmaxIntegrate : float
+                    maximum Q value for the intagrations
+    NumPoints     : int
+                    number of points in the smoothed S(Q)
+    
+    Returns
+    -------
+    newQ          : numpy array 
+                    new set of Q with NumPoints dimension 
+    S_Qsmoothed   : numpy array
+                    smoothed S(Q) with NumPoints dimension
+    """
+    
+    mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
+    smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smooth_factor)
+    newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
+    S_Qsmoothed = smooth(newQ)
+    
+    # mask_low = np.where(Q<=minQ)
+    num_low = S_Qsmoothed[newQ<minQ].size
+    smooth = interpolate.UnivariateSpline(Q[min_index], S_Q[min_index], k=3, s=smooth_factor)
+    newQLow = np.linspace(np.amin(newQ), minQ, num_low, endpoint=True)
+    S_QsmoothLow = smooth(newQLow)
+    
+    S_Qsmoothed[newQ<minQ] = S_QsmoothLow
+    S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
+    
+    return (newQ, S_Qsmoothed)

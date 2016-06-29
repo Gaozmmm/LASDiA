@@ -99,67 +99,6 @@ def calc_aff(element, Q, elementParameters):
     return f_Q
 
 
-def calc_affXXX(element, Q, aff_path):
-    """Function to calculate the Atomic Form Factor.
-    The atomic form factor is calculated with the formula from:
-    http://lampx.tugraz.at/~hadley/ss1/crystaldiffraction/atomicformfactors/formfactors.php
-
-    and the parameters from the article:
-    Hajdu Acta Cryst. (1972). A28, 250
-
-    Parameters
-    ----------
-    element  : string
-               chemical element
-    Q        : numpy array
-               momentum transfer (nm^-1)
-    aff_path : string
-               path of atomic scattering form factor parameters
-    
-    Returns
-    -------
-    f_Q      : numpy array
-               atomic form factor
-    """
-
-    # open, read and close the parameters file
-    # the first line contain the header and it is useless for the calculation
-    # file = open("./affParamCEA.txt", "r")
-    file = open(aff_path, "r")
-    header1 = file.readline()
-    lines = file.readlines()
-    file.close()
-
-    # scan the lines and when it find the right element, save the parameters in variables
-    for line in lines:
-        columns = line.split()
-        if columns[0] == element:
-            a1 = float(columns[1])
-            b1 = float(columns[2])
-            a2 = float(columns[3])
-            b2 = float(columns[4])
-            a3 = float(columns[5])
-            b3 = float(columns[6])
-            a4 = float(columns[7])
-            b4 = float(columns[8])
-            c = float(columns[9])
-            break
-
-    # Calculate the atomic form factor as:
-    # f(Q) = f1(Q) + f2(Q) + f3(Q) + f4(Q) + c
-    # fi(Q) = ai * exp(-bi * (Q/4pi)^2)
-
-    f1_Q = a1 * np.exp(-b1 * (Q/(4*10*np.pi))**2)
-    f2_Q = a2 * np.exp(-b2 * (Q/(4*10*np.pi))**2)
-    f3_Q = a3 * np.exp(-b3 * (Q/(4*10*np.pi))**2)
-    f4_Q = a4 * np.exp(-b4 * (Q/(4*10*np.pi))**2)
-
-    f_Q = f1_Q + f2_Q + f3_Q + f4_Q + c
-
-    return f_Q
-
-
-
 def calc_eeff(elementList, Q, elementParameters):
     """Function to calculate the effective electron Form Factor, fe (eq. 10).
 
@@ -402,13 +341,7 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     Integral1 = simps((J_Q + Sinf) * Q**2, Q)
     Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
     alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
-
-    # DeltaQ = np.diff(Q)
-    # meanDeltaQ = np.mean(DeltaQ)
-    # Int1 = np.sum((J_Q + Sinf) * Q**2) * meanDeltaQ
-    # Int2 = np.sum( (Isample_Q/fe_Q**2) * Q**2  ) * meanDeltaQ
-    # alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Int1) / Int2)
-
+    
     return alpha
 
 
@@ -437,41 +370,40 @@ def calc_Icoh(N, alpha, Isample_Q, Iincoh_Q):
     return Icoh_Q
 
 
-def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
+def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
     """Function to calculate the structure factor S(Q) (eq. 18) with Igor range.
-    This function doesn't set the value 0 for Q<minQ!!!
-
+    
     Parameters
     ----------
-    N                 : int
-                        number of atoms
-    Icoh_Q            : numpy array
-                        cohrent scattering intensity
-    Ztot              : int
-                        total Z number
-    fe_Q              : numpy array 
-                        effective electric form factor
-    Sinf              : float
-                        Sinf
-    Q                 : numpy array 
-                        momentum transfer (nm^-1)
-    max_index         : numpy array 
-                        index of element with Q>QmaxIntegrate & Q<=maxQ
-    integration_index : numpy array 
-                        index of element in the integration range Q<=QmaxIntegrate
+    N             : int
+                    number of atoms
+    Icoh_Q        : numpy array
+                    cohrent scattering intensity
+    Ztot          : int
+                    total Z number
+    fe_Q          : numpy array 
+                    effective electric form factor
+    Sinf          : float
+                    Sinf
+    Q             : numpy array 
+                    momentum transfer (nm^-1)
+    minQ          : float
+                    minimum Q value
+    QmaxIntegrate : float
+                    maximum Q value for the intagrations
+    maxQ          : float
+                    maximum Q value
     
     Returns
     -------
-    S_Q               : numpy array
-                        structure factor
+    S_Q           : numpy array
+                    structure factor
     """
-
-    S_Q = Icoh_Q[integration_index] / (N * Ztot**2 * fe_Q[integration_index]**2)
-
-    S_Qmax = np.zeros(Q[max_index].size)
-    S_Qmax.fill(Sinf)
-    S_Q = np.concatenate([S_Q, S_Qmax])
-
+    
+    S_Q = np.zeros(Q.size)
+    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] / (N * Ztot**2 * fe_Q[(Q>minQ) & (Q<=QmaxIntegrate)]**2)
+    S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
+    
     return S_Q
 
 
