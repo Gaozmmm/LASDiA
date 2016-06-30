@@ -892,3 +892,50 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate
     S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
     
     return (newQ, S_Qsmoothed)
+
+
+def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
+    """Function to calculate the intramolecular contribution of F(r) (eq. 42).
+    To implemente!!! -> For now just for CO2!!!
+    For now I calculate Fintra from iintra.
+    
+    Parameters
+    ----------
+    r             : numpy array
+                    atomic distance (nm)
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    QmaxIntegrate : float
+                    maximum Q value for the intagration
+    aff_path      : string
+                    path of atomic scattering form factor parameters
+    
+    
+    Returns
+    -------
+    Fintra_r      : numpy array
+                    intramolecular contribution of F(r)
+    """
+
+    # Fintra_r = np.zeros(r.size)
+
+    dCO = 0.1165 # nm
+    dOO = 2 * dCO
+
+    elementList = {"C":1,"O":2}
+    fe_Q, Ztot = calc_eeff(elementList, Q)
+    KC = calc_Kp(fe_Q, "C", Q, aff_path)
+    KO = calc_Kp(fe_Q, "O", Q, aff_path)
+
+    constCO = 4/(np.pi * Ztot**2 * dCO)
+    constOO = 2/(np.pi * Ztot**2 * dOO)
+
+    Fintra_r_CO = constCO * KC * KO * \
+        ((np.sin((r - dCO)*QmaxIntegrate)) / (r - dCO) - (np.sin((r + dCO)*QmaxIntegrate)) / (r + dCO))
+
+    Fintra_r_OO = constOO * KO * KO * \
+        ((np.sin((r - dOO)*QmaxIntegrate)) / (r - dOO) - (np.sin((r + dOO)*QmaxIntegrate)) / (r + dOO))
+
+    Fintra_r = Fintra_r_CO + Fintra_r_OO
+
+    return Fintra_r

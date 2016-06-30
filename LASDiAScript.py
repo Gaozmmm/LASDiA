@@ -130,6 +130,7 @@ if __name__ == '__main__':
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
+    iintra_Q2 = Optimization.calc_iintra2(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters)
     
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
@@ -140,37 +141,35 @@ if __name__ == '__main__':
             
             S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ)
             
-            newQ, S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing2(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, 550)
+            newQ, S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, 550)
             S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
-                        
-            # Utility.plot_data(Q, S_Q, "S_Q", r"$Q (nm^{-1})$", r"S_Q", "S_Q", "y")
-            # Utility.plot_data(newQ, S_Qsmoothed, "S_Q", r"$Q (nm^{-1})$", r"S_Q", "S_Q", "y")
-            Utility.plot_data(newQ2, S_Qsmoothed-S_Qsmoothed2, "S_Q", r"$Q (nm^{-1})$", r"S_Q", "S_Q2", "y")
-            
-            plt.show()
-            
-            
-            
             
             newfe_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, fe_Q)
             
-            # Qi_Q = MainFunctions.calc_QiQ(newQ, S_QsmoothedDamp, Sinf)
-            # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
+            i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
             
-            # validation_indexSmooth, integration_indexSmooth, calculation_indexSmooth = UtilityAnalysis.calc_ranges(newQ, minQ, QmaxIntegrate, maxQ)
-            # min_indexSmooth, max_indexSmooth = UtilityAnalysis.calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
-    
-            # r = MainFunctions.calc_r(newQ)
-            # F_r = MainFunctions.calc_Fr(r, newQ[integration_indexSmooth], Qi_Q[integration_indexSmooth])
+            r = MainFunctions.calc_r(newQ)
+            F_r = MainFunctions.calc_Fr(r, newQ[newQ<=QmaxIntegrate], i_Q[newQ<=QmaxIntegrate])
             # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"F(r)", "F(r)", "n")
             # plt.show()
-
-            # iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, incoh_params, aff_params)
+            
+            min_indexSmooth, max_indexSmooth = UtilityAnalysis.calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
+            iintra_Q, fe_QSmooth = Optimization.calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, incoh_params, aff_params)
             # Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
             # Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
-            # # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l])
-            #
-            #
+            # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate)
+            
+            print(iintra_Q.size)
+            print(iintra_Q2.size)
+            
+            newiintra_Q2 = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, iintra_Q2)
+            print(newiintra_Q2.size)
+            
+            Utility.plot_data(newQ, iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"$i_{intra}(Q)$", "y")
+            Utility.plot_data(Q, iintra_Q2, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"$i_{intra}(Q)2$", "y")
+            Utility.plot_data(newQ, newiintra_Q2, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"new$i_{intra}(Q)2$", "y")
+            plt.show()
+            
             # Iincoh_QSmooth = calc_Iincoh(elementList, newQ, incoh_params, aff_params)
             # J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
             #
@@ -185,6 +184,7 @@ if __name__ == '__main__':
             # print("chi2 ", chi2[i][j])
 
 
+    
     # # # # chi2Min, sBest, sBestIdx, rho0Best, rho0BestIdx, sthBest, sthBestIdx = calc_min_chi2(s, rho0, sth, chi2)
 
     # # # # print(sBest, rho0Best, sthBest)

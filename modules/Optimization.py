@@ -83,7 +83,7 @@ def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_pat
                   effective electric form factor
     """
 
-    fe_Q, Ztot = calc_eeff(elementList, Q, incoh_path, aff_path)
+    fe_Q, Ztot = calc_eeff2(elementList, Q, incoh_path, aff_path)
 
     # numAtoms, element, x, y, z = read_xyz_file(path)
     iintra_Q = np.zeros(Q.size)
@@ -92,7 +92,7 @@ def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_pat
     for ielem in range(len(element)):
         for jelem in range(len(element)):
             if ielem != jelem:
-                KK = calc_Kp(fe_Q, element[ielem], Q, aff_path) * calc_Kp(fe_Q, element[jelem], Q, aff_path)
+                KK = calc_Kp2(fe_Q, element[ielem], Q, aff_path) * calc_Kp2(fe_Q, element[jelem], Q, aff_path)
                 d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
                 if d != 0.0:
                     iintra_Q += KK * np.sin(d*Q) / (d*Q)
@@ -104,51 +104,56 @@ def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_pat
     return (iintra_Q, fe_Q)
 
 
-def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
-    """Function to calculate the intramolecular contribution of F(r) (eq. 42).
-    To implemente!!! -> For now just for CO2!!!
-    For now I calculate Fintra from iintra.
+def calc_iintra2(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters):
+    """Function to calculate the intramolecular contribution of i(Q) (eq. 41).
     
     Parameters
     ----------
-    r             : numpy array
-                    atomic distance (nm)
-    Q             : numpy array
-                    momentum transfer (nm^-1)
-    QmaxIntegrate : float
-                    maximum Q value for the intagration
-    aff_path      : string
-                    path of atomic scattering form factor parameters
+    Q, max_index, elementList, element, x, y, z, incoh_path, aff_path
     
+    Q           : numpy array
+                  momentum transfer (nm^-1)
+    max_index   : numpy array 
+                  index of element with Q>QmaxIntegrate & Q<=maxQ
+    elementList : dictionary("element": multiplicity)
+                  chemical elements of the sample with their multiplicity
+                  element      : string
+                                 chemical element
+                  multiplicity : int
+                                 chemical element multiplicity
+    element     : string array
+                  array with the elements in the xyz_file
+    x, y, z     : float
+                  atomic coordinate in the xyz_file (nm)
+    incoh_path  : string
+                  path of incoherent scattered intensities parameters
+    aff_path    : string
+                  path of atomic scattering form factor parameters
     
     Returns
     -------
-    Fintra_r      : numpy array
-                    intramolecular contribution of F(r)
+    iintra_Q    : numpy array
+                  intramolecular contribution of i(Q)
+    fe_Q        : numpy array
+                  effective electric form factor
     """
+    
+    iintra_Q = np.zeros(Q.size)
+    sinpq = np.zeros(Q.size)
 
-    # Fintra_r = np.zeros(r.size)
+    for ielem in range(len(element)):
+        for jelem in range(len(element)):
+            if ielem != jelem:
+                KK = calc_Kp(fe_Q, element[ielem], Q, elementParameters) * calc_Kp(fe_Q, element[jelem], Q, elementParameters)
+                d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
+                if d != 0.0:
+                    iintra_Q += KK * np.sin(d*Q) / (d*Q)
+                    iintra_Q[Q==0.0] = KK
 
-    dCO = 0.1165 # nm
-    dOO = 2 * dCO
+    iintra_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 0.0
+    iintra_Q /= Ztot**2
 
-    elementList = {"C":1,"O":2}
-    fe_Q, Ztot = calc_eeff(elementList, Q)
-    KC = calc_Kp(fe_Q, "C", Q, aff_path)
-    KO = calc_Kp(fe_Q, "O", Q, aff_path)
-
-    constCO = 4/(np.pi * Ztot**2 * dCO)
-    constOO = 2/(np.pi * Ztot**2 * dOO)
-
-    Fintra_r_CO = constCO * KC * KO * \
-        ((np.sin((r - dCO)*QmaxIntegrate)) / (r - dCO) - (np.sin((r + dCO)*QmaxIntegrate)) / (r + dCO))
-
-    Fintra_r_OO = constOO * KO * KO * \
-        ((np.sin((r - dOO)*QmaxIntegrate)) / (r - dOO) - (np.sin((r + dOO)*QmaxIntegrate)) / (r + dOO))
-
-    Fintra_r = Fintra_r_CO + Fintra_r_OO
-
-    return Fintra_r
+    return iintra_Q
 
 
 def calc_deltaFr(F_r, Fintra_r, r, rho0):
