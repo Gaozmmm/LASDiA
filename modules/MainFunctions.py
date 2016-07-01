@@ -68,7 +68,7 @@ def calc_aff(element, Q, elementParameters):
                         element    : string
                                      chemical element
                         parameters : list
-                                     list of the parameter
+                                     list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
@@ -117,7 +117,7 @@ def calc_eeff(elementList, Q, elementParameters):
                         element    : string
                                      chemical element
                         parameters : list
-                                     list of the parameter
+                                     list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
@@ -304,7 +304,7 @@ def calc_Iincoh(elementList, Q, elementParameters):
                         element    : string
                                      chemical element
                         parameters : list
-                                     list of the parameter
+                                     list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
@@ -371,7 +371,7 @@ def calc_Kp(fe_Q, element, Q, elementParameters):
                         element    : string
                                      chemical element
                         parameters : list
-                                     list of the parameter
+                                     list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
@@ -411,7 +411,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
                         element    : string
                                      chemical element
                         parameters : list
-                                     list of the parameter
+                                     list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns

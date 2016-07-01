@@ -123,14 +123,12 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, Num
                     Sinf
     smooth_factor : float
                     smoothing factor
-    min_index     : numpy array 
-                    indices of elements with Q<=minQ
     minQ          : float
                     minimum Q value
-    maxQ          : float
-                    maximum Q value
     QmaxIntegrate : float
                     maximum Q value for the intagrations
+    maxQ          : float
+                    maximum Q value
     NumPoints     : int
                     number of points in the smoothed S(Q)
     
@@ -324,16 +322,16 @@ def Qto2theta(Q):
     
     Returns
     -------
-    _2theta : numpy array
+    two_theta : numpy array
               2theta angle (rad)
     """
 
     wavelenght = 0.03738
     theta = np.arcsin((wavelenght*Q) / (4*np.pi))
-    _2theta = 2*theta
+    two_theta = 2*theta
 
     # return np.degrees(theta2)
-    return _2theta
+    return two_theta
 
 
 def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):

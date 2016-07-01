@@ -209,16 +209,16 @@ if __name__ == '__main__':
 
 
     # Geometrical correction
-    # _2theta = UtilityAnalysis.Qto2theta(Q) # rad
+    # two_theta = UtilityAnalysis.Qto2theta(Q) # rad
     
     # abs_length = 1.208
-    # corr_factor_meas0 = Geometry.calc_absorption_correction(abs_length, _2theta, dac_thickness, 0)
+    # corr_factor_meas0 = Geometry.calc_absorption_correction(abs_length, two_theta, dac_thickness, 0)
     # I_Q = I_Q / corr_factor_bkg
     # I_Qbkg = I_Qbkg / corr_factor_bkg
 
-    # all_thickness_sampling, phi_matrix = Geometry.calc_phi_matrix(phi_matrix_thickness, _2theta, ws1, ws2, r1, r2, d, 1000)
+    # all_thickness_sampling, phi_matrix = Geometry.calc_phi_matrix(phi_matrix_thickness, two_theta, ws1, ws2, r1, r2, d, 1000)
 
-    # Utility.plot3d(_2theta, all_thickness_sampling, phi_matrix, "phi_matrix", "2theta", "x(cm)", "phi")
+    # Utility.plot3d(two_theta, all_thickness_sampling, phi_matrix, "phi_matrix", "2theta", "x(cm)", "phi")
 
     # T_MCC_sample1, T_MCC_DAC1, T_MCC_ALL1 = Geometry.calc_T_MCC(0.001, all_thickness_sampling, phi_matrix, "y")
     # T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2 = Geometry.calc_T_MCC(0.002, all_thickness_sampling, phi_matrix, "y")
