@@ -25,6 +25,7 @@
 The nomenclature and the procedure follow the articles:
 Weck et al. Rev. Sci. Instrum. 84, 063901 (2013)
 Yaoita et al. Rev. Sci. Instrum. 68, 2106 (1997)
+Eggert et al. 2002 PRB, 65, 174105.
 
 For the functions arguments and the returns I followed this convetion for the notes:
 argument: description - type
@@ -169,7 +170,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
 
 
 def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm):
-    """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC (W. eq. 10, 11)
+    """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC (W. eq. 10, 11).
 
     Parameters
     ----------
@@ -210,7 +211,7 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm)
 
 
 def calc_T_DAC_MCC_bkg_corr(T_DAC_MCC_sth, T_DAC_MCC_s0th):
-    """Function to calculate the bkg correction factor for the MCC (W. eq. 12)
+    """Function to calculate the bkg correction factor for the MCC (W. eq. 12).
 
     Parameters
     ----------
@@ -218,7 +219,7 @@ def calc_T_DAC_MCC_bkg_corr(T_DAC_MCC_sth, T_DAC_MCC_s0th):
                      MCC DAC transfer function
     T_DAC_MCC_s0th : numpy array
                      MCC DAC transfer function with sample thickness for the reference spectra
-
+    
     Returns
     -------
     corr_factor    : numpy array
@@ -228,3 +229,35 @@ def calc_T_DAC_MCC_bkg_corr(T_DAC_MCC_sth, T_DAC_MCC_s0th):
     corr_factor = T_DAC_MCC_sth / T_DAC_MCC_s0th
 
     return corr_factor
+
+
+def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q, mu2):
+    """Function to calculate the empty-cell background from the solid-sample background (E. eq. 32).
+    
+    Parameters
+    ----------
+    Q                       : numpy array
+                              momentum transfer (nm^-1)
+    Ibkg_Q                  : numpy array
+                              background scattering intensity
+    diamond_abs_corr_factor : numpy array
+                              diamond correction factor
+    Iincoh_Q                : numpy array
+                              incoherent scattering intensity
+    Ztot                    : int
+                              total Z number
+    fe_Q                    : numpy array
+                              effective electric form factor
+    mu2                     : float ???
+                              mean-square component of the displacement of the
+                              molecular units in the scattering direction
+    
+    Returns
+    -------
+    Ibkg_empty_Q            : numpy array
+                              empty-cell background scattering intensity
+    """
+    
+    Ibkg_empty_Q = Ibkg_Q - diamond_abs_corr_factor*(Iincoh_Q - Ztot**2*fe_Q**2 * (1-np.exp(-mu2*Q**2)))
+    
+    return Ibkg_empty_Q

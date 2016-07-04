@@ -79,7 +79,7 @@ if __name__ == '__main__':
     incoh_params = "./incohParamCEA.txt"
 
     Q, I_Q = Utility.read_file("../data/cea_files/CO2/WO2_007T++.chi")
-    Qbkg, I_Qbkg = Utility.read_file("../data/cea_files/CO2/WO2_013T++.chi")
+    Qbkg, Ibkg_Q  = Utility.read_file("../data/cea_files/CO2/WO2_013T++.chi")
 
     # Ar
     # minQ = 3
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)
     
-    Q, I_Q, Qbkg, I_Qbkg = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ)
+    Q, I_Q, Qbkg, Ibkg_Q  = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q , minQ, maxQ)
     
     min_index, max_index = UtilityAnalysis.calc_indices(Q, minQ, QmaxIntegrate, maxQ)
     validation_index, integration_index, calculation_index = UtilityAnalysis.calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
-            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s[j], I_Qbkg)
+            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s[j], Ibkg_Q )
             alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, Q[Q<=QmaxIntegrate], \
                 Isample_Q[Q<=QmaxIntegrate], fe_Q[Q<=QmaxIntegrate], Ztot, rho0[i])
             Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     # abs_length = 1.208
     # corr_factor_meas0 = Geometry.calc_absorption_correction(abs_length, two_theta, dac_thickness, 0)
     # I_Q = I_Q / corr_factor_bkg
-    # I_Qbkg = I_Qbkg / corr_factor_bkg
+    # Ibkg_Q  = Ibkg_Q  / corr_factor_bkg
 
     # all_thickness_sampling, phi_matrix = Geometry.calc_phi_matrix(phi_matrix_thickness, two_theta, ws1, ws2, r1, r2, d, 1000)
 
@@ -316,7 +316,7 @@ if __name__ == '__main__':
     # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate[i], maxQ)
     # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate[i], maxQ)
 
-    # Isample_Q = calc_IsampleQ(I_Q, best_rho0_s[i,1], I_Qbkg)
+    # Isample_Q = calc_IsampleQ(I_Q, best_rho0_s[i,1], Ibkg_Q )
     # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, best_rho0)
     # Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
     # S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)

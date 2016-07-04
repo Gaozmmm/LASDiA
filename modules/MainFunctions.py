@@ -430,7 +430,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     return Sinf
 
 
-def calc_IsampleQ(I_Q, s, I_Qbkg):
+def calc_IsampleQ(I_Q, s, Ibkg_Q ):
     """Function to calculate the sample scattering intensity Isample(Q) (eq. 28).
 
     Parameters
@@ -439,7 +439,7 @@ def calc_IsampleQ(I_Q, s, I_Qbkg):
                 measured scattering intensity
     s         : float
                 scale factor
-    I_Qbkg    : numpy array
+    Ibkg_Q     : numpy array
                 background scattering intensity
     
     Returns
@@ -448,7 +448,7 @@ def calc_IsampleQ(I_Q, s, I_Qbkg):
                 sample scattering intensity
     """
 
-    Isample_Q = I_Q - s * I_Qbkg
+    Isample_Q = I_Q - s * Ibkg_Q 
 
     return Isample_Q
 

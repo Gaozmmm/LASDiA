@@ -52,7 +52,6 @@ from modules.MainFunctions import *
 import math
 
 
-
 def calc_S_QFZ(N, Icoh_Q, Q, elementParameters):
     """Function to calculate S(Q) with Faber-Ziman formalism.
     
