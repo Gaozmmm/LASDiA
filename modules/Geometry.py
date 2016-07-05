@@ -258,6 +258,13 @@ def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q
                               empty-cell background scattering intensity
     """
     
-    Ibkg_empty_Q = Ibkg_Q - diamond_abs_corr_factor*(Iincoh_Q - Ztot**2*fe_Q**2 * (1-np.exp(-mu2*Q**2)))
+    FermiWidth=0
+    FermiCutoff=70
+    TDS=(1-1/(1+np.exp(FermiWidth*(Q-FermiCutoff)))) * Ztot**2*fe_Q**2 * (1-np.exp(-mu2*Q^2))
+    
+    # DiffuseIntensity = N/alpha'
+    # Bkgd=BkgdSolid-DiffuseIntensity*AbsRefCalc*(Iincoh+TDS)
+    
+    Ibkg_empty_Q = Ibkg_Q - diamond_abs_corr_factor*(Iincoh_Q - TDS)
     
     return Ibkg_empty_Q

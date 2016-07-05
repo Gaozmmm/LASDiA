@@ -52,7 +52,7 @@ from modules.MainFunctions import *
 import math
 
 
-def calc_S_QFZ(N, Icoh_Q, Q, elementParameters):
+def calc_S_QFZ(N, Icoh_Q, Ztot, Q, elementParameters):
     """Function to calculate S(Q) with Faber-Ziman formalism.
     
     Parameters
@@ -79,10 +79,11 @@ def calc_S_QFZ(N, Icoh_Q, Q, elementParameters):
     
     f2 = calc_aff('C', Q, elementParameters)**2 + 2*calc_aff('O',Q, elementParameters)**2
     f2 /= N
-    f = calc_aff('C', Q, elementParameters)*calc_aff('C', Q, elementParameters) + 4*calc_aff('C', Q, elementParameters)*calc_aff('O',Q, elementParameters) + 4*calc_aff('O',Q, elementParameters)*calc_aff('O',Q, elementParameters)
+    f = calc_aff('C', Q, elementParameters)**2 + 4*calc_aff('C', Q, elementParameters)*calc_aff('O',Q, elementParameters) + 4*calc_aff('O',Q, elementParameters)**2
     f /= N
    
     S_Q = (Icoh_Q - (f2 - f)) / (f)
+    # S_Q /= (N*Ztot**2)
 
     # S_Qmin = np.zeros(Q[min_index].size)
     # S_Q = np.concatenate([S_Qmin, S_Q])
@@ -101,7 +102,7 @@ def calc_alphaFZ(N, Q, Isample_Q, Iincoh_Q, rho0, elementParameters):
     
     f2 = calc_aff('C', Q, elementParameters)**2 + 2*calc_aff('O',Q, elementParameters)**2
     f2 /= N
-    f = calc_aff('C', Q, elementParameters)*calc_aff('C', Q, elementParameters) + 4*calc_aff('C', Q, elementParameters)*calc_aff('O',Q, elementParameters) + 4*calc_aff('O',Q, elementParameters)*calc_aff('O',Q, elementParameters)
+    f = calc_aff('C', Q, elementParameters)**2 + 4*calc_aff('C', Q, elementParameters)*calc_aff('O',Q, elementParameters) + 4*calc_aff('O',Q, elementParameters)**2
     f /= N
     
     Integral1 = simps((Iincoh_Q + (f2/f)) * Q**2, Q)
