@@ -122,6 +122,9 @@ if __name__ == '__main__':
     # CO2
     s = np.array([0.984228])
     rho0 = np.array([29.6625])
+    
+    s_value = 0.98
+    rho0_value = 29
 
     chi2 = np.zeros((rho0.size, s.size))
 
@@ -131,6 +134,21 @@ if __name__ == '__main__':
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
     # iintra_Q2 = Optimization.calc_iintra2(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters)
+    
+    
+    # while True:
+        # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s[j], Ibkg_Q )
+        # alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, Q[Q<=QmaxIntegrate], \
+            # Isample_Q[Q<=QmaxIntegrate], fe_Q[Q<=QmaxIntegrate], Ztot, rho0[i])
+        # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
+        # S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ)
+        
+        # if ...:
+            # break
+    
+    
+    
+    
     
     for i, val_rho0 in enumerate(rho0):
         for j, val_s in enumerate(s):
