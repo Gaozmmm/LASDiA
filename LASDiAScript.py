@@ -66,7 +66,7 @@ from modules import Geometry
 # from cmath import exp, pi
 
 if __name__ == '__main__':
-    molecule = "CO2"
+    molecule = "Ar"
     elementList = Utility.molToelemList(molecule)
     elementParameters = Utility.read_parameters(elementList, "./elementParameters.txt")
 
@@ -77,16 +77,18 @@ if __name__ == '__main__':
     numAtoms, element, x, y, z = Utility.read_xyz_file("./xyzFiles/co2.xyz")
     aff_params = "./affParamCEA.txt"
     incoh_params = "./incohParamCEA.txt"
-
-    Q, I_Q = Utility.read_file("../data/cea_files/CO2/WO2_007T++.chi")
-    Qbkg, Ibkg_Q  = Utility.read_file("../data/cea_files/CO2/WO2_013T++.chi")
+    
+    Q, I_Q = Utility.read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
+    Qbkg, Ibkg_Q = Utility.read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
+    # Q, I_Q = Utility.read_file("../data/cea_files/CO2/WO2_007T++.chi")
+    # Qbkg, Ibkg_Q  = Utility.read_file("../data/cea_files/CO2/WO2_013T++.chi")
 
     # Ar
-    # minQ = 3
-    # maxQ = 109
+    minQ = 3
+    maxQ = 109
     # CO2
-    minQ = 8.005
-    maxQ = 100
+    # minQ = 8.005
+    # maxQ = 100
     QmaxIntegrate = 90
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)

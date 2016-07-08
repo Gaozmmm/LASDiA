@@ -42,7 +42,7 @@ from modules.UtilityAnalysis import Qto2theta
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
 
-def calc_absorption_correction(abs_length, _2theta, thickness, angle):
+def calc_absorption_correction(abs_length, two_theta, thickness, angle):
     """Function to calculate the absorption correction.
     This function can be used to calculate the absorption correction for the diamond
     or for any other object between the sample and the detector.
@@ -54,7 +54,7 @@ def calc_absorption_correction(abs_length, _2theta, thickness, angle):
     ----------
     abs_length  : float
                   absorption length  (cm), @33keV 1.208cm
-    _2theta     : numpy array
+    two_theta     : numpy array
                   diffraction angle (rad)
     thickness   : float
                   object thickness (cm)
@@ -73,12 +73,12 @@ def calc_absorption_correction(abs_length, _2theta, thickness, angle):
     # wavelenght  : float
     #               XRay beam wavelenght (nm), @ESRF ID27 0.03738nm
     # wavelenght = 0.03738 # nm
-    # _2theta = Qto2theta(Q) # rad
+    # two_theta = Qto2theta(Q) # rad
 
     mu_l = 1/abs_length
     angle = np.radians(angle)
 
-    path_lenght = thickness / np.cos(_2theta - angle)
+    path_lenght = thickness / np.cos(two_theta - angle)
 
     corr_factor = np.exp(-mu_l * path_lenght)
 
@@ -87,7 +87,7 @@ def calc_absorption_correction(abs_length, _2theta, thickness, angle):
     return corr_factor
 
 
-def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
+def calc_phi_angle(ws1, ws2, r1, r2, d, two_theta, xth):
     """Function to calculate the dispersion angle for the Soller Slits correction.
 
     Parameters
@@ -102,7 +102,7 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
               curvature radius of second slit (cm)
     d       : float
               slit thickness (cm)
-    _2theta : float
+    two_theta : float
               diffraction angle (rad)
     xth     : float
               positin of i-th point on x-axis (cm)
@@ -115,11 +115,11 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
 
     gamma_2 = np.arcsin(ws1/(2*r1))
 
-    alpha1 = np.arctan( r1 * np.sin(_2theta + gamma_2) / (r1*np.cos(_2theta + gamma_2) - xth ))
-    alpha2 = np.arctan( r1 * np.sin(_2theta - gamma_2) / (r1*np.cos(_2theta - gamma_2) - xth ))
+    alpha1 = np.arctan( r1 * np.sin(two_theta + gamma_2) / (r1*np.cos(two_theta + gamma_2) - xth ))
+    alpha2 = np.arctan( r1 * np.sin(two_theta - gamma_2) / (r1*np.cos(two_theta - gamma_2) - xth ))
 
-    beta1 = np.arctan( (r2+d) * np.sin(_2theta + gamma_2) / ((r2+d)*np.cos(_2theta + gamma_2) - xth ))
-    beta2 = np.arctan( (r2+d) * np.sin(_2theta - gamma_2) / ((r2+d)*np.cos(_2theta - gamma_2) - xth ))
+    beta1 = np.arctan( (r2+d) * np.sin(two_theta + gamma_2) / ((r2+d)*np.cos(two_theta + gamma_2) - xth ))
+    beta2 = np.arctan( (r2+d) * np.sin(two_theta - gamma_2) / ((r2+d)*np.cos(two_theta - gamma_2) - xth ))
 
     psi = min(alpha1, beta1) - max(alpha2, beta2)
     phi = max(0, psi)
@@ -127,7 +127,7 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, _2theta, xth):
     return phi
 
 
-def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
+def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
     """Function to calculate the dispersion angle matrix.
     half_thick in cm
 
@@ -135,7 +135,7 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
     ----------
     thickness_value    : float
                          object thickness (sample or sample+DAC)
-    _2theta            : numpy array
+    two_theta            : numpy array
                          diffraction angle (rad)
     ws1                : float
                          width of the inner slit (cm)
@@ -160,11 +160,11 @@ def calc_phi_matrix(thickness, _2theta, ws1, ws2, r1, r2, d, num_point):
 
     # thickness_sampling = np.linspace(-thickness/2, thickness/2, num=num_point) # num=500)
     thickness_sampling = np.linspace(0, thickness, num=num_point) # num=500)
-    phi_matrix = np.zeros((thickness_sampling.size, _2theta.size))
+    phi_matrix = np.zeros((thickness_sampling.size, two_theta.size))
 
     for i, val_sth in enumerate(thickness_sampling):
-        for j, val_2theta in enumerate(_2theta):
-            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, _2theta[j], thickness_sampling[i])
+        for j, val_2theta in enumerate(two_theta):
+            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, two_theta[j], thickness_sampling[i])
 
     return (thickness_sampling, phi_matrix)
 
