@@ -939,3 +939,67 @@ def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
     Fintra_r = Fintra_r_CO + Fintra_r_OO
 
     return Fintra_r
+
+
+def calc_S_QFZ(numAtoms, Icoh_Q, Ztot, Q, elementParameters):
+    """Function to calculate S(Q) with Faber-Ziman formalism.
+    
+    Parameters
+    ----------
+    Icoh_Q            : numpy array (nm)
+                        coherent scattering intensity
+    Q                 : numpy array
+                        momentum transfer (nm)
+    Sinf              : float
+                        Sinf
+    min_index         : numpy array
+                        array index of element with Q<=minQ
+    max_index         : numpy array
+                        array index of element with Q>QmaxIntegrate & Q<=maxQ
+    calculation_index : numpy array
+                        range where S(Q) is calculated
+    
+    
+    Returns
+    -------
+    S_Q               : numpy array
+                        structure factor in FZ formalism
+    """
+    
+    f2 = MainFunctions.calc_aff('C', Q, elementParameters)**2 + 2*MainFunctions.calc_aff('O',Q, elementParameters)**2
+    f2 /= numAtoms
+    f = MainFunctions.calc_aff('C', Q, elementParameters)**2 + \
+        4*MainFunctions.calc_aff('C', Q, elementParameters)*MainFunctions.calc_aff('O',Q, elementParameters) + \
+        4*MainFunctions.calc_aff('O',Q, elementParameters)**2
+    f /= numAtoms
+   
+    S_Q = (Icoh_Q - (f2 - f)) / (f)
+    # S_Q /= (numAtoms*Ztot**2)
+
+    # S_Qmin = np.zeros(Q[min_index].size)
+    # S_Q = np.concatenate([S_Qmin, S_Q])
+
+    # S_Qmax = np.ones(Q[max_index].size)
+    # # S_Qmax.fill(Sinf)
+    # S_Q = np.concatenate([S_Q, S_Qmax])
+
+    return (S_Q, f2, f)
+
+
+def calc_alphaFZ(numAtoms, Q, Isample_Q, Iincoh_Q, rho0, elementParameters):
+    """Function to calcultate alpha for the FZ formalism.
+    
+    """
+    
+    f2 = MainFunctions.calc_aff('C', Q, elementParameters)**2 + 2*MainFunctions.calc_aff('O',Q, elementParameters)**2
+    f2 /= numAtoms
+    f = MainFunctions.calc_aff('C', Q, elementParameters)**2 + \
+        4*MainFunctions.calc_aff('C', Q, elementParameters)*MainFunctions.calc_aff('O',Q, elementParameters) + \
+        4*MainFunctions.calc_aff('O',Q, elementParameters)**2
+    f /= numAtoms
+    
+    Integral1 = simps((Iincoh_Q + (f2/f)) * Q**2, Q)
+    Integral2 = simps((Isample_Q/f) * Q**2,Q)
+    alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
+    
+    return alpha

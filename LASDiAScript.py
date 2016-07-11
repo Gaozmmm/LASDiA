@@ -66,7 +66,8 @@ from modules import Geometry
 # from cmath import exp, pi
 
 if __name__ == '__main__':
-    molecule = "Ar"
+    # molecule = "Ar"
+    molecule = "CO2"
     elementList = Utility.molToelemList(molecule)
     elementParameters = Utility.read_parameters(elementList, "./elementParameters.txt")
 
@@ -74,21 +75,23 @@ if __name__ == '__main__':
     damp_factor = 1
     iteration = 2
     rmin = 0.22
-    numAtoms, element, x, y, z = Utility.read_xyz_file("./xyzFiles/co2.xyz")
-    aff_params = "./affParamCEA.txt"
-    incoh_params = "./incohParamCEA.txt"
     
-    Q, I_Q = Utility.read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
-    Qbkg, Ibkg_Q = Utility.read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
-    # Q, I_Q = Utility.read_file("../data/cea_files/CO2/WO2_007T++.chi")
-    # Qbkg, Ibkg_Q  = Utility.read_file("../data/cea_files/CO2/WO2_013T++.chi")
+    path = Utility.path_xyz_file(molecule)
+    numAtoms, element, x, y, z = Utility.read_xyz_file(path)
+    # aff_params = "./affParamCEA.txt"
+    # incoh_params = "./incohParamCEA.txt"
+    
+    # Q, I_Q = Utility.read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
+    # Qbkg, Ibkg_Q = Utility.read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
+    Q, I_Q = Utility.read_file("../data/cea_files/CO2/WO2_007T++.chi")
+    Qbkg, Ibkg_Q  = Utility.read_file("../data/cea_files/CO2/WO2_013T++.chi")
 
     # Ar
-    minQ = 3
-    maxQ = 109
+    # minQ = 3
+    # maxQ = 109
     # CO2
-    # minQ = 8.005
-    # maxQ = 100
+    minQ = 8.005
+    maxQ = 100
     QmaxIntegrate = 90
     # QmaxIntegrate = np.arange(60, 100, 2.5)
     # QmaxIntegrate = np.arange(90)
@@ -149,7 +152,13 @@ if __name__ == '__main__':
             # break
     
     
+    eeff_squared_mean = Formalism.calc_eeff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    eeff_mean_squared = Formalism.calc_eeff_mean_squared(numAtoms, elementList, Q, elementParameters)
     
+    Utility.plot_data(Q, numAtoms*fe_Q**2*Ztot**2, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$N(f_e(Q)*Ztot)^2$", "y")
+    # Utility.plot_data(Q, fe_Q, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$f_e(Q)$", "y")
+    Utility.plot_data(Q, eeff_squared_mean, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$<f^2(Q)>$", "y")
+    # Utility.plot_data(Q, eeff_mean_squared, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$<f(Q)>^2$", "y")
     
     
     for i, val_rho0 in enumerate(rho0):
@@ -160,15 +169,43 @@ if __name__ == '__main__':
             Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
             S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ)
             
+            print(alpha)
             
-            alphaFZ = Formalism.calc_alphaFZ(numAtoms, Q, Isample_Q, Iincoh_Q, rho0, elementParameters)
+            alphaFZ = Formalism.calc_alphaFZ(Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate], \
+                Iincoh_Q[Q<=QmaxIntegrate], rho0, eeff_squared_mean[Q<=QmaxIntegrate], eeff_mean_squared[Q<=QmaxIntegrate])
             IcohFZ_Q = MainFunctions.calc_Icoh(numAtoms, alphaFZ, Isample_Q, Iincoh_Q)
-            SFZ_Q = Formalism.calc_S_QFZ(numAtoms, IcohFZ_Q, Ztot, Q, elementParameters)
+            SFZ_Q = Formalism.calc_S_QFZ(Q, IcohFZ_Q, eeff_squared_mean, eeff_mean_squared, minQ, QmaxIntegrate, maxQ)
+            SAL_Q = Formalism.calc_S_QAL(Q, Icoh_Q, Sinf, eeff_squared_mean, minQ, QmaxIntegrate, maxQ)
+            
+            print(alphaFZ)
+            print(np.mean(alphaFZ))
             
             Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
             Utility.plot_data(Q, SFZ_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{FZ}(Q)$", "y")
-            plt.show()
+            Utility.plot_data(Q, SAL_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{AL}(Q)$", "y")
+            # Utility.plot_data(Q, SAL_Q-S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{AL}(Q)$", "y")
+            # plt.show()
             
+            r = MainFunctions.calc_r(Q)
+            i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
+            F_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], i_Q[Q<=QmaxIntegrate])
+            
+            iFZ_Q = MainFunctions.calc_iQ(SFZ_Q, 1)
+            FFZ_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iFZ_Q[Q<=QmaxIntegrate])
+            
+            iAL_Q = MainFunctions.calc_iQ(SAL_Q, Sinf)
+            FAL_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iAL_Q[Q<=QmaxIntegrate])
+            
+            # Utility.plot_data(Q, i_Q, "i_Q", r"$Q(nm^{-1})$", r"$i(Q)$", r"$i(Q)$", "y")
+            # Utility.plot_data(Q, iFZ_Q, "i_Q", r"$Q(nm^{-1})$", r"$i(Q)$", r"$i_{FZ}(Q)$", "y")
+            # Utility.plot_data(Q, iAL_Q, "i_Q", r"$Q(nm^{-1})$", r"$i(Q)$", r"$i_{AL}(Q)$", "y")
+            
+            # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", "$F(r)$", "y")
+            # Utility.plot_data(r, FFZ_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{FZ}(r)$", "y")
+            # Utility.plot_data(r, FAL_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{AL}(r)$", "y")
+            
+            
+            plt.show()
             
             # newQ, S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, 550)
             # S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)

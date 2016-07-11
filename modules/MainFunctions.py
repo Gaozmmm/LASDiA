@@ -628,8 +628,8 @@ def calc_Fr(r, Q, i_Q):
     
     Returns
     -------
-    F_r  : numpy array
-           F(r)
+    F_r : numpy array
+          F(r)
     """
 
     DeltaQ = np.diff(Q)

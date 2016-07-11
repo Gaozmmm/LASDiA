@@ -42,6 +42,7 @@ from modules.UtilityAnalysis import Qto2theta
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
 
+
 def calc_absorption_correction(abs_length, two_theta, thickness, angle):
     """Function to calculate the absorption correction.
     This function can be used to calculate the absorption correction for the diamond
