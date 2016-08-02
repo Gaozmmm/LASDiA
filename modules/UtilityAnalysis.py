@@ -25,28 +25,24 @@
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
 
-For the functions arguments and the returns I followed this convetion for the notes:
-arguments: description - type
-returns: description - type.
-
 For the variables name I used this convention:
-if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
 import matplotlib.pyplot as plt
-
-import sys
-import os
-
 import numpy as np
-import scipy.constants as sc
-from scipy import fftpack
-from scipy.integrate import simps
 from scipy import interpolate
-from scipy import signal
-import math
-import random
+
+# import sys
+# import os
+# import scipy.constants as sc
+# from scipy import fftpack
+# from scipy.integrate import simps
+# from scipy import signal
+# import math
+# import random
 
 from modules import Utility
 
@@ -268,7 +264,8 @@ def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
     Returns
     -------
     Qiintra_Q      : numpy array
-                     intramolecular contribution of i(Q) multiplied by Q and the damping function
+                     intramolecular contribution of i(Q) multiplied by Q and the
+                     damping function
     """
 
     # damping_factor = 0.5 # np.log(10)
@@ -316,14 +313,14 @@ def Qto2theta(Q):
     
     Parameters
     ----------
-    Q       : numpy array
-              momentum transfer (nm^-1)
+    Q         : numpy array
+                momentum transfer (nm^-1)
     
     
     Returns
     -------
     two_theta : numpy array
-              2theta angle (rad)
+                2theta angle (rad)
     """
 
     wavelenght = 0.03738
@@ -335,7 +332,8 @@ def Qto2theta(Q):
 
 
 def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
-    """Function to check if the raw data of measured and the background have the same numeber of points.
+    """Function to check if the raw data of measured and the background have the
+    same numeber of points.
     If the number is different the function rebin them.
     
     Parameters
@@ -375,7 +373,7 @@ def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
 
 def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     """Function for the rebinning.
-
+    
     Parameters
     ----------
     X      : numpy array
@@ -390,7 +388,7 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
              maximum Q value
     minQ   : float
              minimum Q value
-
+    
     Returns
     -------
     BinX   : numpy array
@@ -434,3 +432,28 @@ def interpolation_after_smoothing(Q, newQ, fe_Q):
     ShiftY = newf_X(newQ)
     
     return ShiftY
+
+
+def make_array(var_value, percentage):
+    """Function to create an array given its middle value and the percentage
+    of the extreme.
+    
+    Parameters
+    ----------
+    var_value  : float
+                 variable's value to generate the array
+    percentage : float
+                 percentage to calculate the extreme of the interval
+    
+    Returns
+    -------
+    var_array  : numpy array
+                 final array
+    """
+    
+    low_extreme = var_value - var_value/percentage
+    high_extreme = var_value + var_value/percentage
+    
+    var_array = np.linspace(low_extreme, high_extreme, 10)
+    
+    return var_array

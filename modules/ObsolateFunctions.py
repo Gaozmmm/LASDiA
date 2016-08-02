@@ -35,17 +35,6 @@ if the variable symbolizes a mathematical function, its argument is preceded by 
 otherwise it is symbolized with just its name.
 """
 
-import matplotlib.pyplot as plt
-
-import sys
-import os
-
-import numpy as np
-import scipy.constants as sc
-from scipy import fftpack
-from scipy.integrate import simps
-from scipy.interpolate import UnivariateSpline
-
 
 def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_index):
     """Function to calculate the structure factor S(Q) (eq. 18)
@@ -151,7 +140,7 @@ def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, max_index, validation_ind
     return S_Qsmooth
 
 
-def SQsmoothing2(Q, S_Q, Sinf, smoothfactor, min_index, max_index, calculation_index):
+def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, max_index, calculation_index):
     """Function for smoothing S(Q)
     """
 
@@ -285,7 +274,7 @@ def calc_gr(r, F_r, rho0):
     return g_r
 
 
-def calc_alpha2(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
+def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     """Function to calculate the normalization factor alpha (eq. 34)
 
     arguments:
@@ -339,36 +328,6 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     i_Qi = i_Q - ( 1/Q * ( i_Q / (Sinf + J_Q) + 1)) * integral
 
     return i_Qi
-
-
-def calc_Fintra(r, Q, QmaxIntegrate):
-    """Function to calculate the intramolecular contribution of F(r) (eq. 42)
-
-    To implemente!!! -> For now just for CO2!!!
-    """
-
-    # Fintra_r = np.zeros(r.size)
-
-    dCO = 0.1165 # nm
-    dOO = 2 * dCO
-
-    elementList = {"C":1,"O":2}
-    fe_Q, Ztot = calc_eeff(elementList, Q)
-    KC = calc_Kp(fe_Q, "C", Q)
-    KO = calc_Kp(fe_Q, "O", Q)
-
-    constCO = 4/(np.pi * Ztot**2 * dCO)
-    constOO = 2/(np.pi * Ztot**2 * dOO)
-
-    Fintra_r_CO = constCO * KC * KO * \
-        ((np.sin((r - dCO)*QmaxIntegrate)) / (r - dCO) - (np.sin((r + dCO)*QmaxIntegrate)) / (r + dCO))
-
-    Fintra_r_OO = constOO * KO * KO * \
-        ((np.sin((r - dOO)*QmaxIntegrate)) / (r - dOO) - (np.sin((r + dOO)*QmaxIntegrate)) / (r + dOO))
-
-    Fintra_r = Fintra_r_CO + Fintra_r_OO
-
-    return Fintra_r
 
 
 def calc_iintra(Q, max_index):

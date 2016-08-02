@@ -21,203 +21,120 @@
 # SOFTWARE.
 
 """LASDiA main script file.
-This script is mainly used for testing the software, but it can be used to run LASDiA in text mode.
-The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105
+This script is mainly used for testing the software, but it can be used to run LASDiA 
+in text mode.
+
+The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105.
+
+For the variables name I used this convention:
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
+otherwise it is symbolized with just its name.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
 
-import sys
-import os
-
-import scipy.constants as sc
-from scipy import fftpack
-from scipy import signal
-from scipy.integrate import simps
-from scipy.interpolate import UnivariateSpline
-from scipy import interpolate
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d.axes3d import Axes3D
-import numpy as np
-import time
-import math
-
-# from modules.MainFunctions import *
-# from modules.Utility import *
-# from modules.UtilityAnalysis import *
-# from modules.Optimization import *
-# from modules.Minimization import *
-# from modules.Formalism import *
-# from modules.IgorFunctions import *
-# from modules.Geometry import *
 
 from modules import MainFunctions
+from modules import Minimization
+from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
-from modules import Optimization
-from modules import Minimization
 from modules import Formalism
-from modules import IgorFunctions
 from modules import Geometry
-
-
-# import cmath
-# from cmath import exp, pi
+from modules import IgorFunctions
+from modules import KaplowMethod
 
 if __name__ == '__main__':
-    # molecule = "Ar"
-    molecule = "CO2"
-    elementList = Utility.molToelemList(molecule)
-    elementParameters = Utility.read_parameters(elementList, "./elementParameters.txt")
-
-    smooth_factor = 0.25
-    damp_factor = 1
-    iteration = 2
-    rmin = 0.22
+    variables = Utility.read_inputFile("./inputFile.txt")
     
-    path = Utility.path_xyz_file(molecule)
+    elementList = Utility.molToelemList(variables.molecule)
+    elementParameters = Utility.read_parameters(elementList, variables.element_params)
+    
+    path = Utility.path_xyz_file(variables.molecule)
     numAtoms, element, x, y, z = Utility.read_xyz_file(path)
-    # aff_params = "./affParamCEA.txt"
-    # incoh_params = "./incohParamCEA.txt"
     
-    # Q, I_Q = Utility.read_file("../data/cea_files/Ar/HT2_034T++_rem.chi")
-    # Qbkg, Ibkg_Q = Utility.read_file("../data/cea_files/Ar/HT2_036T++_rem.chi")
-    Q, I_Q = Utility.read_file("../data/cea_files/CO2/WO2_007T++.chi")
-    Qbkg, Ibkg_Q  = Utility.read_file("../data/cea_files/CO2/WO2_013T++.chi")
-
-    # Ar
-    # minQ = 3
-    # maxQ = 109
-    # CO2
-    minQ = 8.005
-    maxQ = 100
-    QmaxIntegrate = 90
-    # QmaxIntegrate = np.arange(60, 100, 2.5)
-    # QmaxIntegrate = np.arange(90)
+    Q, I_Q = Utility.read_file(variables.data_file)
+    Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
     
-    Q, I_Q, Qbkg, Ibkg_Q  = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q , minQ, maxQ)
+    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q , \
+        variables.minQ, variables.maxQ)
     
-    min_index, max_index = UtilityAnalysis.calc_indices(Q, minQ, QmaxIntegrate, maxQ)
-    validation_index, integration_index, calculation_index = UtilityAnalysis.calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
+    # chi2 = np.zeros((rho0.size, s.size))
     
+    aff_path = "C:/Users/devoto/work/ID27/LASDiA/affParamCEA.txt"
+    incoh_path = "C:/Users/devoto/work/ID27/LASDiA/incohParamCEA.txt" 
     
-    # cm
-    ws1 = 0.005
-    ws2 = 0.005
-    r1 = 5
-    r2 = 20
-    d = 1
-    sth = np.arange(0.02, 0.06, 0.01)
-    dac_thickness = 0.144 # 0.04 # cm
-    phi_matrix_thickness = 0.17 #0.04 # cm
-
-    # test values
-    # Ar
-    # s = np.arange(0.2, 1.0, 0.1)
-    # CO2
-    # s = np.arange(0.7, 1.0, 0.5)
-    # rho0 = np.arange(25, 30, 1)
-    # sth = np.arange(0.002, 0.004, 0.001)
-
-    # best values
-    # Ar
-    # s = np.array([0.57])
-    # rho0 = np.array([26.1])
-    # CO2
-    s = np.array([0.984228])
-    rho0 = np.array([29.6625])
-    
-    s_value = 0.98
-    rho0_value = 29
-
-    chi2 = np.zeros((rho0.size, s.size))
-
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
+    fe_Q2, Ztot2 = MainFunctions.calc_eeff2(elementList, Q, incoh_path, aff_path)
+    
+    # Utility.plot_data(Q, fe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$fe(Q)$", "y")
+    Utility.plot_data(Q, fe_Q-fe_Q2, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$fe(Q)2$", "y")
+    
+    print(MainFunctions.calc_Kp(fe_Q, "C", Q, elementParameters))
+    print(MainFunctions.calc_Kp2(fe_Q, "C", Q, aff_path))
+    
+    
+    
+    
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
-    # iintra_Q2 = Optimization.calc_iintra2(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters)
+    s = variables.s_value
+    rho0 = variables.rho0_value
+    
+    s_array = UtilityAnalysis.make_array(variables.s_value, 20)
+    rho0_array = UtilityAnalysis.make_array(variables.rho0_value, 20)
     
     
-    # while True:
-        # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s[j], Ibkg_Q )
-        # alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, Q[Q<=QmaxIntegrate], \
-            # Isample_Q[Q<=QmaxIntegrate], fe_Q[Q<=QmaxIntegrate], Ztot, rho0[i])
-        # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-        # S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ)
+    # for rho0 in rho0_array:
+        # for s in s_array:
+    # S_Q, r, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, \
+        # Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0)
         
-        # if ...:
-            # break
+    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
     
-    
-    eeff_squared_mean = Formalism.calc_eeff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    eeff_mean_squared = Formalism.calc_eeff_mean_squared(numAtoms, elementList, Q, elementParameters)
-    
-    Utility.plot_data(Q, numAtoms*fe_Q**2*Ztot**2, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$N(f_e(Q)*Ztot)^2$", "y")
-    # Utility.plot_data(Q, fe_Q, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$f_e(Q)$", "y")
-    Utility.plot_data(Q, eeff_squared_mean, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$<f^2(Q)>$", "y")
-    # Utility.plot_data(Q, eeff_mean_squared, "f_Q", r"$Q(nm^{-1})$", r"$f(Q)$", r"$<f(Q)>^2$", "y")
-    
-    
-    for i, val_rho0 in enumerate(rho0):
-        for j, val_s in enumerate(s):
-            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s[j], Ibkg_Q )
-            alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, Q[Q<=QmaxIntegrate], \
-                Isample_Q[Q<=QmaxIntegrate], fe_Q[Q<=QmaxIntegrate], Ztot, rho0[i])
-            Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-            S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ)
-            
-            print(alpha)
-            
-            alphaFZ = Formalism.calc_alphaFZ(Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate], \
-                Iincoh_Q[Q<=QmaxIntegrate], rho0, eeff_squared_mean[Q<=QmaxIntegrate], eeff_mean_squared[Q<=QmaxIntegrate])
-            IcohFZ_Q = MainFunctions.calc_Icoh(numAtoms, alphaFZ, Isample_Q, Iincoh_Q)
-            SFZ_Q = Formalism.calc_S_QFZ(Q, IcohFZ_Q, eeff_squared_mean, eeff_mean_squared, minQ, QmaxIntegrate, maxQ)
-            SAL_Q = Formalism.calc_S_QAL(Q, Icoh_Q, Sinf, eeff_squared_mean, minQ, QmaxIntegrate, maxQ)
-            
-            print(alphaFZ)
-            print(np.mean(alphaFZ))
-            
-            Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-            Utility.plot_data(Q, SFZ_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{FZ}(Q)$", "y")
-            Utility.plot_data(Q, SAL_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{AL}(Q)$", "y")
-            # Utility.plot_data(Q, SAL_Q-S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{AL}(Q)$", "y")
-            # plt.show()
-            
-            r = MainFunctions.calc_r(Q)
-            i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
-            F_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], i_Q[Q<=QmaxIntegrate])
-            
-            iFZ_Q = MainFunctions.calc_iQ(SFZ_Q, 1)
-            FFZ_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iFZ_Q[Q<=QmaxIntegrate])
-            
-            iAL_Q = MainFunctions.calc_iQ(SAL_Q, Sinf)
-            FAL_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iAL_Q[Q<=QmaxIntegrate])
-            
-            # Utility.plot_data(Q, i_Q, "i_Q", r"$Q(nm^{-1})$", r"$i(Q)$", r"$i(Q)$", "y")
-            # Utility.plot_data(Q, iFZ_Q, "i_Q", r"$Q(nm^{-1})$", r"$i(Q)$", r"$i_{FZ}(Q)$", "y")
-            # Utility.plot_data(Q, iAL_Q, "i_Q", r"$Q(nm^{-1})$", r"$i(Q)$", r"$i_{AL}(Q)$", "y")
-            
-            # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", "$F(r)$", "y")
-            # Utility.plot_data(r, FFZ_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{FZ}(r)$", "y")
-            # Utility.plot_data(r, FAL_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{AL}(r)$", "y")
+    plt.show()
             
             
-            plt.show()
             
-            # newQ, S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, 550)
-            # S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, newQ, Sinf, QmaxIntegrate, damp_factor)
             
-            # newfe_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, fe_Q)
             
-            # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
             
-            # r = MainFunctions.calc_r(newQ)
-            # F_r = MainFunctions.calc_Fr(r, newQ[newQ<=QmaxIntegrate], i_Q[newQ<=QmaxIntegrate])
-            # # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"F(r)", "F(r)", "n")
-            # # plt.show()
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+         
             
             # min_indexSmooth, max_indexSmooth = UtilityAnalysis.calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
             # iintra_Q, fe_QSmooth = Optimization.calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, incoh_params, aff_params)

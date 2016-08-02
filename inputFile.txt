@@ -22,27 +22,26 @@
 
 # Input file format for LASDiA software
 # The lines with the hash tag (#) are comments
-#
-# If the min and max of scale factor and rho0 are the same,
-# the software recognizes it as the only possible value and
-# calculates all the physical quantities just for those ones.
 
 # Path sample and bkg file
-data_file = "../data/cea_files/CO2/WO2_007BBin.chi"
-bkg_file = "../data/cea_files/CO2/WO2_013BBin.chi"
+data_file = "../data/cea_files/CO2/WO2_007T++.chi"
+bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
 
 # Sample composition
-xyz_file = "./xyzFiles/co2.xyz"                               # Path for the XYZ file
-molecule = "CO2"                                                                                 # Molecular composition: Ar, CO2, N2
-aff_params = "./affParamCEA.txt"                                # Path atomic form factor parameters file
-incoh_params = "./incohParamCEA.txt"                            # Path incoherent parameters file
+molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
+element_params = "./elementParameters.txt"                      # Path element parameters file
+
+# Geometry corrections
+abs_length = 1.208
+dac_thickness = 0.144
+phi_matrix_thickness = 0.17
 
 # Analysis parameters
-minQ = 5                                                   # Minimum Q value in data interpolation waves
-QmaxIntegrate = 80                                              # Qmax for all integration operations
-maxQ = 100                                                     # Maximum Q value in data interpolation waves
+minQ = 8.005                                                    # Minimum Q value in data interpolation waves
+QmaxIntegrate = 90                                              # Qmax for all integration operations
+maxQ = 100                                                      # Maximum Q value in data interpolation waves
 
-smooth_factor = 0.2                                            # Smoothing factor for cubic spline
+smooth_factor = 0.25                                            # Smoothing factor for cubic spline
 damp_factor = 1                                                 # Exponential damping factor == A*Qmax^2
 
 # F(r) optimization
@@ -50,25 +49,23 @@ iteration = 2                                                   # Number of iter
 rmin = 0.22                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
-s_min = 0.7                                                     # Scale factor minimum value for the minimization
-s_max = 1.0                                                     # Scale factor maximum  value for the minimization
-s_step = 0.05                                                    # Scale factor step value for the minimization
+s_value = 0.98                                                  # Scale factor initial value
+rho0_value = 29                                                 # Sample density initial value
 
-rho0_min = 25                                                   # Density minimum value for the minimization
-rho0_max = 30                                                   # Density maximum  value for the minimization
-rho0_step = 0.1                                                   # Density step value for the minimization
+
+
 
 # Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path]
-pw_raw_data = ["n"]                                             # Plot the Raw Data
+# pw_raw_data = ["n"]                                             # Plot the Raw Data
 
-pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)
-pw_F_r = ["n", "N", "./test/Fr.txt"]                            # Plot and save F(r)
+# pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)
+# pw_F_r = ["n", "N", "./test/Fr.txt"]                            # Plot and save F(r)
 
-pw_F_r_iter = ["n"]                                             # Plot the iterations for the F(r) optimization
+# pw_F_r_iter = ["n"]                                             # Plot the iterations for the F(r) optimization
 
-pw_chi2 = ["y"]                                                 # Plot Chi2 graphs
+# pw_chi2 = ["y"]                                                 # Plot Chi2 graphs
 
-pw_F_rOpt = ["n", "N", "./test/FrOpt.txt"]                      # Plot and save the optimal F(r) with the best scale factor and rho0 density
-pw_S_QCorr = ["n", "N", "./test/SQCorr.txt"]                    # Plot and save the S(Q) corrected
+# pw_F_rOpt = ["n", "N", "./test/FrOpt.txt"]                      # Plot and save the optimal F(r) with the best scale factor and rho0 density
+# pw_S_QCorr = ["n", "N", "./test/SQCorr.txt"]                    # Plot and save the S(Q) corrected
 
-pw_results = ["n", "./results.txt"]                             # Save the scale factor and rho0 density on file otherwise print them
+# pw_results = ["n", "./results.txt"]                             # Save the scale factor and rho0 density on file otherwise print them

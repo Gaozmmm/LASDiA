@@ -22,12 +22,9 @@
 
 """Module containing useful functions used in LASDiA.
 
-For the functions arguments and the returns I followed this convetion for the notes:
-arguments: description - type
-returns: description - type.
-
 For the variables name I used this convention:
-if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
@@ -292,7 +289,7 @@ def read_xyz_file(path):
 
     Parameters
     ----------
-    path            : string
+    path             : string
                        path of the xyz file
 
     Returns
@@ -370,12 +367,12 @@ def read_inputFile(path):
 
     Parameters
     ----------
-    path : string
-            path of the input file
+    path      : string
+                path of the input file
 
     Returns
     -------
-    variables :
+    variables : module
                 variables setted by the user
     """
 
