@@ -853,6 +853,61 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate
     return (newQ, S_Qsmoothed)
 
 
+def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_path):
+    """Function to calculate the intramolecular contribution of i(Q) (eq. 41).
+    
+    Parameters
+    ----------
+    Q, max_index, elementList, element, x, y, z, incoh_path, aff_path
+    
+    Q           : numpy array
+                  momentum transfer (nm^-1)
+    max_index   : numpy array 
+                  index of element with Q>QmaxIntegrate & Q<=maxQ
+    elementList : dictionary("element": multiplicity)
+                  chemical elements of the sample with their multiplicity
+                  element      : string
+                                 chemical element
+                  multiplicity : int
+                                 chemical element multiplicity
+    element     : string array
+                  array with the elements in the xyz_file
+    x, y, z     : float
+                  atomic coordinate in the xyz_file (nm)
+    incoh_path  : string
+                  path of incoherent scattered intensities parameters
+    aff_path    : string
+                  path of atomic scattering form factor parameters
+    
+    Returns
+    -------
+    iintra_Q    : numpy array
+                  intramolecular contribution of i(Q)
+    fe_Q        : numpy array
+                  effective electric form factor
+    """
+
+    fe_Q, Ztot = calc_eeff2(elementList, Q, incoh_path, aff_path)
+
+    # numAtoms, element, x, y, z = read_xyz_file(path)
+    iintra_Q = np.zeros(Q.size)
+    sinpq = np.zeros(Q.size)
+
+    for ielem in range(len(element)):
+        for jelem in range(len(element)):
+            if ielem != jelem:
+                KK = calc_Kp(fe_Q, element[ielem], Q, aff_path) * calc_Kp2(fe_Q, element[jelem], Q, aff_path)
+                d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
+                if d != 0.0:
+                    iintra_Q += KK * np.sin(d*Q) / (d*Q)
+                    iintra_Q[Q==0.0] = KK
+
+    iintra_Q[max_index] = 0.0
+    iintra_Q /= Ztot**2
+
+    return (iintra_Q, fe_Q)
+
+
 def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
     """Function to calculate the intramolecular contribution of F(r) (eq. 42).
     To implemente!!! -> For now just for CO2!!!
@@ -962,3 +1017,62 @@ def calc_alphaFZ(numAtoms, Q, Isample_Q, Iincoh_Q, rho0, elementParameters):
     alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
     
     return alpha
+
+
+def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
+    """Function to calculate the Q ranges where S(Q) is constant.
+    
+    Parameters
+    ----------
+    Q             : numpy array 
+                    momentum transfer (nm^-1)
+    minQ          : float
+                    minimum Q value
+    QmaxIntegrate : float
+                    maximum Q value for the intagrations
+    maxQ          : float
+                    maximum Q value
+    
+    Returns
+    -------
+    min_index     : numpy array
+                    indices of elements with Q<=minQ
+    max_index     : numpy array
+                    indices of elements with Q>QmaxIntegrate & Q<=maxQ
+    """
+
+    min_index = np.where(Q<=minQ)
+    max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
+
+    return (min_index, max_index)
+
+
+def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
+    """Function to calculate the Q ranges used in the program.
+    
+    Parameters
+    ----------
+    Q                 : numpy array 
+                        momentum transfer (nm^-1)
+    minQ              : float
+                        minimum Q value
+    QmaxIntegrate     : float
+                        maximum Q value for the intagrations
+    maxQ              : float
+                        maximum Q value
+    
+    Returns
+    -------
+    validation_index  : numpy array
+                        range of valide Q (Q<=maxQ)
+    integration_index : numpy array
+                        range where the integration is calculated (Q<=QmaxIntegrate)
+    calculation_index : numpy array
+                        range where S(Q) is calculated (minQ<Q<=QmaxIntegrate)
+    """
+
+    validation_index = np.where(Q<=maxQ)
+    integration_index = np.where(Q<=QmaxIntegrate)
+    calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
+
+    return(validation_index, integration_index, calculation_index)

@@ -64,24 +64,20 @@ if __name__ == '__main__':
     
     # chi2 = np.zeros((rho0.size, s.size))
     
-    aff_path = "C:/Users/devoto/work/ID27/LASDiA/affParamCEA.txt"
-    incoh_path = "C:/Users/devoto/work/ID27/LASDiA/incohParamCEA.txt" 
-    
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
-    fe_Q2, Ztot2 = MainFunctions.calc_eeff2(elementList, Q, incoh_path, aff_path)
-    
-    # Utility.plot_data(Q, fe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$fe(Q)$", "y")
-    Utility.plot_data(Q, fe_Q-fe_Q2, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$fe(Q)2$", "y")
-    
-    print(MainFunctions.calc_Kp(fe_Q, "C", Q, elementParameters))
-    print(MainFunctions.calc_Kp2(fe_Q, "C", Q, aff_path))
-    
-    
-    
-    
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+    
+    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
+        variables.maxQ, elementList, element, x, y, z, elementParameters)
+    Qiintradamp = UtilityAnalysis.calc_Qiintradamp(iintra_Q, Q, variables.QmaxIntegrate, \
+        variables.damp_factor)
+    r = MainFunctions.calc_r(Q)
+    Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        Qiintradamp[Q<=variables.QmaxIntegrate])
+    
+    
     
     s = variables.s_value
     rho0 = variables.rho0_value
@@ -89,11 +85,10 @@ if __name__ == '__main__':
     s_array = UtilityAnalysis.make_array(variables.s_value, 20)
     rho0_array = UtilityAnalysis.make_array(variables.rho0_value, 20)
     
-    
     # for rho0 in rho0_array:
         # for s in s_array:
-    # S_Q, r, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, \
-        # Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0)
+    S_Q, r, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, \
+        Ibkg_Q, J_Q, fe_Q, Iincoh_Q, iintra_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
         
     # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
     # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")

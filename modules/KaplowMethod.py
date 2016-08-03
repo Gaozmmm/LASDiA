@@ -36,7 +36,8 @@ from modules import MainFunctions
 from modules import Utility
 from modules import UtilityAnalysis
 
-def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0):
+def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, iintra_Q, \
+    Sinf, Ztot, s, rho0, Fintra_r2, r2):
     """Function to apply the Kaplow method
     """
     
@@ -54,26 +55,42 @@ def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf
     S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, newQ, Sinf, \
         variables.QmaxIntegrate, variables.damp_factor)
     
-    newfe_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, fe_Q)
-        
+    # newfe_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, fe_Q)
+    
     r = MainFunctions.calc_r(newQ)
     i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
-    F_r = MainFunctions.calc_Fr(r, newQ[newQ<=variables.QmaxIntegrate], i_Q[newQ<=variables.QmaxIntegrate])
+    F_r = MainFunctions.calc_Fr(r, newQ[newQ<=variables.QmaxIntegrate], \
+        i_Q[newQ<=variables.QmaxIntegrate])
     
-    iintra_Q, fe_QSmooth = calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z)
-    Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
-    Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
-    # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate[l])
-            
-            
-    Iincoh_QSmooth = calc_Iincoh(elementList, newQ)
-    J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
+    iintra_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, iintra_Q)
+    # Fintra_r2 = UtilityAnalysis.interpolation_after_smoothing(r2, r, Fintra_r2)
+    
+    Qiintradamp = UtilityAnalysis.calc_Qiintradamp(iintra_Q, newQ, variables.QmaxIntegrate, \
+        variables.damp_factor)
+    Fintra_r = MainFunctions.calc_Fr(r, newQ[newQ<=variables.QmaxIntegrate], \
+        Qiintradamp[newQ<=variables.QmaxIntegrate])
+    
+    print(len(Fintra_r))
+    print(len(Fintra_r2))
+    print(len(r))
+    print(len(r2))
+    
+    
+    # Iincoh_QSmooth = calc_Iincoh(elementList, newQ)
+    # J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
 
-    F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin, "n")
+    # F_rIt = calc_optimize_Fr(variables.iteration, F_r, Fintra_r, rho0, i_Q[integration_indexSmooth], \
+        # newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin, "n")
     
     # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
     # Utility.plot_data(newQ, S_QsmoothedDamp, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)SD$", "y")
-    Utility.plot_data(Q, fe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$fe(Q)$", "y")
-    Utility.plot_data(newQ, newfe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$newfe(Q)$", "y")
+    # Utility.plot_data(Q, fe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$fe(Q)$", "y")
+    # Utility.plot_data(newQ, newfe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$newfe(Q)$", "y")
+    # Utility.plot_data(Q, iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$iintra(Q)$", "y")
+    # Utility.plot_data(newQ, iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$iintra(Q)$", r"$iintra(Q)$", "y")
+    # Utility.plot_data(newQ, newQ*iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$iintra(Q)$", r"$Qiintra(Q)$", "y")
+    # Utility.plot_data(newQ, Qiintradamp, "iintra_Q", r"$Q(nm^{-1})$", r"$iintra(Q)$", r"$Qiintra(Q)D$", "y")
+    Utility.plot_data(r, Fintra_r, "Fintra_r", r"$r(nm)$", r"$F_{intra}(r)$", r"$F_{intra}(r)$", "y")
+    Utility.plot_data(r2, Fintra_r2, "Fintra_r", r"$r(nm)$", r"$F_{intra}(r)$", r"$F_{intra}2(r)$", "y")
     
     return (S_Q, r, F_r)

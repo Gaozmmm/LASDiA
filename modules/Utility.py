@@ -296,10 +296,10 @@ def read_xyz_file(path):
     -------
     numAtoms         : int
                        number of atoms in the molecule
-    element          : array
+    element          : string array
                        array of the elements in the molecule
-    xPos, yPos, zPos : array
-                       element x, y and z position
+    xPos, yPos, zPos : float array
+                       atomic coordinate in the xyz_file (nm)
     """
 
     file = open(path, "r")

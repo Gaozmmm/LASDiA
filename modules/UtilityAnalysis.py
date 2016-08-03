@@ -46,64 +46,6 @@ from scipy import interpolate
 
 from modules import Utility
 
-def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
-    """Function to calculate the Q ranges where S(Q) is constant.
-    
-    Parameters
-    ----------
-    Q             : numpy array 
-                    momentum transfer (nm^-1)
-    minQ          : float
-                    minimum Q value
-    QmaxIntegrate : float
-                    maximum Q value for the intagrations
-    maxQ          : float
-                    maximum Q value
-    
-    Returns
-    -------
-    min_index     : numpy array
-                    indices of elements with Q<=minQ
-    max_index     : numpy array
-                    indices of elements with Q>QmaxIntegrate & Q<=maxQ
-    """
-
-    min_index = np.where(Q<=minQ)
-    max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
-
-    return (min_index, max_index)
-
-
-def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
-    """Function to calculate the Q ranges used in the program.
-    
-    Parameters
-    ----------
-    Q                 : numpy array 
-                        momentum transfer (nm^-1)
-    minQ              : float
-                        minimum Q value
-    QmaxIntegrate     : float
-                        maximum Q value for the intagrations
-    maxQ              : float
-                        maximum Q value
-    
-    Returns
-    -------
-    validation_index  : numpy array
-                        range of valide Q (Q<=maxQ)
-    integration_index : numpy array
-                        range where the integration is calculated (Q<=QmaxIntegrate)
-    calculation_index : numpy array
-                        range where S(Q) is calculated (minQ<Q<=QmaxIntegrate)
-    """
-
-    validation_index = np.where(Q<=maxQ)
-    integration_index = np.where(Q<=QmaxIntegrate)
-    calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
-
-    return(validation_index, integration_index, calculation_index)
-
 
 def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, NumPoints):
     """Function for smoothing S(Q).
@@ -136,7 +78,8 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, Num
                     smoothed S(Q) with NumPoints dimension
     """
     
-    smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
+    smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], \
+        S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
     newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
     S_Qsmoothed = smooth(newQ)
     
@@ -227,7 +170,8 @@ def remove_peaks(Q, I_Q):
     plt.xlabel('Q')
     plt.ylabel('I(Q)')
 
-    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, mouse_stop=2))
+    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, \
+        mouse_pop=3, mouse_stop=2))
 
     plt.close()
 
@@ -241,14 +185,15 @@ def remove_peaks(Q, I_Q):
 
     for i in range(0, len(zipped_elem)):
         mask = np.where((Q>=zipped_elem[i,0]) & (Q<=zipped_elem[i,1]))
-        I_Q1 = fitline(Q[mask], I_Q, zipped_idx[i,0], zipped_elem[i,0], zipped_idx[i,1], zipped_elem[i,1])
+        I_Q1 = fitline(Q[mask], I_Q, zipped_idx[i,0], zipped_elem[i,0], zipped_idx[i,1], \
+            zipped_elem[i,1])
         I_Q[mask] = I_Q1
 
     return I_Q
 
 
-def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
-    """Function to apply the damping factor to iintra(Q) function.
+def calc_Qiintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
+    """Function to apply the damping factor to Qiintra(Q) function.
     
     Parameters
     ----------
@@ -424,14 +369,28 @@ def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
     return (BinX, BinY)
 
 
-def interpolation_after_smoothing(Q, newQ, fe_Q):
+def interpolation_after_smoothing(X, newX, f_X):
     """Function to interpolate the data.
+    
+    Parameters
+    ----------
+    X         : numpy array
+                old abscissa
+    interpf_X : numpy array
+                new abscissa
+    f_X       : numpy array
+                old ordinate
+    
+    Returns
+    -------
+    newf_X    : numpy array
+                new ordinate
     """
     
-    newf_X = interpolate.interp1d(Q, fe_Q)
-    ShiftY = newf_X(newQ)
+    interpf_X = interpolate.interp1d(X, f_X)
+    newf_X = interpf_X(newX)
     
-    return ShiftY
+    return newf_X
 
 
 def make_array(var_value, percentage):

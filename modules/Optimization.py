@@ -30,7 +30,8 @@ arguments: description - type
 returns: description - type.
 
 For the variables name I used this convention:
-if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
@@ -49,93 +50,43 @@ from modules.MainFunctions import *
 from modules.Utility import *
 
 
-def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_path):
+def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters):
     """Function to calculate the intramolecular contribution of i(Q) (eq. 41).
     
     Parameters
     ----------
-    Q, max_index, elementList, element, x, y, z, incoh_path, aff_path
-    
-    Q           : numpy array
-                  momentum transfer (nm^-1)
-    max_index   : numpy array 
-                  index of element with Q>QmaxIntegrate & Q<=maxQ
-    elementList : dictionary("element": multiplicity)
-                  chemical elements of the sample with their multiplicity
-                  element      : string
-                                 chemical element
-                  multiplicity : int
-                                 chemical element multiplicity
-    element     : string array
-                  array with the elements in the xyz_file
-    x, y, z     : float
-                  atomic coordinate in the xyz_file (nm)
-    incoh_path  : string
-                  path of incoherent scattered intensities parameters
-    aff_path    : string
-                  path of atomic scattering form factor parameters
-    
-    Returns
-    -------
-    iintra_Q    : numpy array
-                  intramolecular contribution of i(Q)
-    fe_Q        : numpy array
-                  effective electric form factor
-    """
-
-    fe_Q, Ztot = calc_eeff2(elementList, Q, incoh_path, aff_path)
-
-    # numAtoms, element, x, y, z = read_xyz_file(path)
-    iintra_Q = np.zeros(Q.size)
-    sinpq = np.zeros(Q.size)
-
-    for ielem in range(len(element)):
-        for jelem in range(len(element)):
-            if ielem != jelem:
-                KK = calc_Kp2(fe_Q, element[ielem], Q, aff_path) * calc_Kp2(fe_Q, element[jelem], Q, aff_path)
-                d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
-                if d != 0.0:
-                    iintra_Q += KK * np.sin(d*Q) / (d*Q)
-                    iintra_Q[Q==0.0] = KK
-
-    iintra_Q[max_index] = 0.0
-    iintra_Q /= Ztot**2
-
-    return (iintra_Q, fe_Q)
-
-
-def calc_iintra2(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters):
-    """Function to calculate the intramolecular contribution of i(Q) (eq. 41).
-    
-    Parameters
-    ----------
-    Q, max_index, elementList, element, x, y, z, incoh_path, aff_path
-    
-    Q           : numpy array
-                  momentum transfer (nm^-1)
-    max_index   : numpy array 
-                  index of element with Q>QmaxIntegrate & Q<=maxQ
-    elementList : dictionary("element": multiplicity)
-                  chemical elements of the sample with their multiplicity
-                  element      : string
-                                 chemical element
-                  multiplicity : int
-                                 chemical element multiplicity
-    element     : string array
-                  array with the elements in the xyz_file
-    x, y, z     : float
-                  atomic coordinate in the xyz_file (nm)
-    incoh_path  : string
-                  path of incoherent scattered intensities parameters
-    aff_path    : string
-                  path of atomic scattering form factor parameters
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    fe_Q              : numpy array
+                        effective electric form factor
+    Ztot              : int
+                        total Z number
+    QmaxIntegrate     : float
+                        maximum Q value for the intagrations
+    maxQ              : float
+                        maximum Q value
+    elementList       : dictionary("element": multiplicity)
+                        chemical elements of the sample with their multiplicity
+                        element      : string
+                                       chemical element
+                        multiplicity : int
+                                       chemical element multiplicity
+    element           : string array
+                        array with the elements in the xyz_file
+    x, y, z           : float array
+                        atomic coordinate in the xyz_file (nm)
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameters
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     
     Returns
     -------
-    iintra_Q    : numpy array
-                  intramolecular contribution of i(Q)
-    fe_Q        : numpy array
-                  effective electric form factor
+    iintra_Q          : numpy array
+                        intramolecular contribution of i(Q)
     """
     
     iintra_Q = np.zeros(Q.size)
@@ -144,7 +95,8 @@ def calc_iintra2(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y,
     for ielem in range(len(element)):
         for jelem in range(len(element)):
             if ielem != jelem:
-                KK = calc_Kp(fe_Q, element[ielem], Q, elementParameters) * calc_Kp(fe_Q, element[jelem], Q, elementParameters)
+                KK = calc_Kp(fe_Q, element[ielem], Q, elementParameters) * \
+                    calc_Kp(fe_Q, element[jelem], Q, elementParameters)
                 d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
                 if d != 0.0:
                     iintra_Q += KK * np.sin(d*Q) / (d*Q)
