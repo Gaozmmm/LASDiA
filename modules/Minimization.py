@@ -34,18 +34,11 @@ if the variable symbolizes a function, its argument is preceded by an underscore
 otherwise it is just the name.
 """
 
-import matplotlib.pyplot as plt
-
-import sys
-import os
 
 import numpy as np
-import scipy.constants as sc
-from scipy import fftpack
 from scipy.integrate import simps
-from scipy.stats import chisquare
 
-from modules.Optimization import *
+from modules import Optimization
 
 
 def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
@@ -73,7 +66,7 @@ def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
     
     maskIt = np.where((r>0) & (r < rmin))
     rIt = r[maskIt]
-    deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0)
+    deltaF_r = Optimization.calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0)
     
     chi2 = simps(deltaF_r**2, r[maskIt])
     
@@ -109,4 +102,5 @@ def calc_min_chi2(scale_factor, rho0, sample_thickness, chi2):
     
     minIndxRho0, minIndxS, minIndxSth = np.unravel_index(chi2.argmin(), chi2.shape)
     
-    return (chi2[minIndxRho0][minIndxS][minIndxSth], scale_factor[minIndxS], minIndxS, rho0[minIndxRho0], minIndxRho0, sample_thickness[minIndxSth], minIndxSth)
+    return (chi2[minIndxRho0][minIndxS][minIndxSth], scale_factor[minIndxS], \
+        minIndxS, rho0[minIndxRho0], minIndxRho0, sample_thickness[minIndxSth], minIndxSth)

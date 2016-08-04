@@ -34,19 +34,13 @@ if the variable symbolizes a mathematical function, its argument is preceded by 
 otherwise it is symbolized with just its name.
 """
 
-import matplotlib.pyplot as plt
-
-import sys
-import os
 
 import numpy as np
-import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
-from scipy.interpolate import UnivariateSpline
 
-from modules.Utility import *
-from modules.UtilityAnalysis import *
+from modules import Utility
+from modules import UtilityAnalysis
 
 
 def calc_aff(element, Q, elementParameters):
@@ -186,7 +180,8 @@ def calc_Iincoh(elementList, Q, elementParameters):
                 L = paramList[12]
                 break
         
-        Iincoh_Q += multiplicity * ((Z - aff**2/Z ) * (1 - M * (np.exp(-K*Q/(4*10*np.pi)) - np.exp(-L*Q/(4*10*np.pi)))))
+        Iincoh_Q += multiplicity * ((Z - aff**2/Z ) * (1 - M * (np.exp(-K*Q/(4*10*np.pi)) \
+            - np.exp(-L*Q/(4*10*np.pi)))))
 
     return Iincoh_Q
 

@@ -31,23 +31,15 @@ an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import interpolate
 
-# import sys
-# import os
-# import scipy.constants as sc
-# from scipy import fftpack
-# from scipy.integrate import simps
-# from scipy import signal
-# import math
-# import random
-
 from modules import Utility
 
 
-def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, NumPoints):
+def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q.
     
@@ -72,21 +64,18 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ, Num
     
     Returns
     -------
-    newQ          : numpy array 
-                    new set of Q with NumPoints dimension 
     S_Qsmoothed   : numpy array
                     smoothed S(Q) with NumPoints dimension
     """
     
     smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], \
         S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
-    newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
-    S_Qsmoothed = smooth(newQ)
+    S_Qsmoothed = smooth(Q)
     
-    S_Qsmoothed[newQ<minQ] = 0
-    S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
+    S_Qsmoothed[Q<minQ] = 0
+    S_Qsmoothed[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
     
-    return (newQ, S_Qsmoothed)
+    return S_Qsmoothed
 
 
 def fitline(Q, I_Q, index1, element1, index2, element2):
@@ -192,8 +181,8 @@ def remove_peaks(Q, I_Q):
     return I_Q
 
 
-def calc_Qiintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
-    """Function to apply the damping factor to Qiintra(Q) function.
+def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
+    """Function to apply the damping factor to iintra(Q) function.
     
     Parameters
     ----------
@@ -217,10 +206,10 @@ def calc_Qiintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
     exponent_factor = damping_factor / QmaxIntegrate**2
     damp_Q = np.exp(-exponent_factor * Q**2)
 
-    Qiintra_Q = Q*iintra_Q
-    Qiintra_Q = damp_Q*Qiintra_Q
+    # Qiintra_Q = Q*iintra_Q
+    iintra_Q = damp_Q*iintra_Q
 
-    return Qiintra_Q
+    return iintra_Q
 
 
 def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):

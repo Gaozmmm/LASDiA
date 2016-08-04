@@ -36,11 +36,9 @@ if the variable symbolizes a mathematical function, its argument is preceded by 
 otherwise it is symbolized with just its name.
 """
 
+
 import numpy as np
-from modules.UtilityAnalysis import Qto2theta
-# from modules.Utility import write_file
 from scipy.integrate import simps
-import matplotlib.pyplot as plt
 
 
 def calc_absorption_correction(abs_length, two_theta, thickness, angle):

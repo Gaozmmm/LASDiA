@@ -36,20 +36,18 @@ if the variable symbolizes a mathematical function, its argument is preceded by 
 otherwise it is just the name.
 """
 
-import matplotlib.pyplot as plt
 
 import sys
 import os
-
+import math
 import numpy as np
 import scipy.constants as sc
 from scipy import fftpack
 from scipy.integrate import simps
 from scipy.stats import chisquare
+import matplotlib.pyplot as plt
 
 from modules import MainFunctions
-
-import math
 
 
 def calc_alphaFZ(Q, Isample_Q, Iincoh_Q, rho0, eeff_squared_mean, eeff_mean_squared):

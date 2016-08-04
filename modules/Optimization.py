@@ -35,19 +35,16 @@ an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
+
 import matplotlib.pyplot as plt
 
 import sys
 import os
 
 import numpy as np
-import scipy.constants as sc
-import time
-from scipy import fftpack
-from scipy.integrate import simps
 
-from modules.MainFunctions import *
-from modules.Utility import *
+from modules import MainFunctions
+from modules import Utility
 
 
 def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters):
@@ -95,9 +92,9 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
     for ielem in range(len(element)):
         for jelem in range(len(element)):
             if ielem != jelem:
-                KK = calc_Kp(fe_Q, element[ielem], Q, elementParameters) * \
-                    calc_Kp(fe_Q, element[jelem], Q, elementParameters)
-                d = calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
+                KK = MainFunctions.calc_Kp(fe_Q, element[ielem], Q, elementParameters) * \
+                    MainFunctions.calc_Kp(fe_Q, element[jelem], Q, elementParameters)
+                d = Utility.calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
                 if d != 0.0:
                     iintra_Q += KK * np.sin(d*Q) / (d*Q)
                     iintra_Q[Q==0.0] = KK

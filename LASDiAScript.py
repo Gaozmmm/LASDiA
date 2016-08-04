@@ -32,10 +32,12 @@ an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
+
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from modules import MainFunctions
 from modules import Minimization
@@ -46,6 +48,7 @@ from modules import Formalism
 from modules import Geometry
 from modules import IgorFunctions
 from modules import KaplowMethod
+
 
 if __name__ == '__main__':
     variables = Utility.read_inputFile("./inputFile.txt")
@@ -69,14 +72,18 @@ if __name__ == '__main__':
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
+    # newQ = np.linspace(np.amin(Q), variables.maxQ, variables.NumPoints, endpoint=True)
+    # newfe_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, fe_Q)
+    
     iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
         variables.maxQ, elementList, element, x, y, z, elementParameters)
-    Qiintradamp = UtilityAnalysis.calc_Qiintradamp(iintra_Q, Q, variables.QmaxIntegrate, \
+    iintradamp = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, \
         variables.damp_factor)
     r = MainFunctions.calc_r(Q)
     Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        Qiintradamp[Q<=variables.QmaxIntegrate])
+        iintradamp[Q<=variables.QmaxIntegrate])
     
+    Utility.plot_data(Q, iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"$iintra(Q)$", "y")
     
     
     s = variables.s_value
@@ -88,7 +95,7 @@ if __name__ == '__main__':
     # for rho0 in rho0_array:
         # for s in s_array:
     S_Q, r, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, \
-        Ibkg_Q, J_Q, fe_Q, Iincoh_Q, iintra_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
+        Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
         
     # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
     # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
