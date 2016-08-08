@@ -33,7 +33,10 @@ otherwise it is symbolized with just its name.
 """
 
 
+from scipy.integrate import simps
+
 from modules import MainFunctions
+from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
 
@@ -60,34 +63,10 @@ def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         i_Q[Q<=variables.QmaxIntegrate])
     
-    # iintra_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, iintra_Q)
-    # Fintra_r2 = UtilityAnalysis.interpolation_after_smoothing(r2, r, Fintra_r2)
+    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+        Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
     
-    # Qiintradamp = UtilityAnalysis.calc_Qiintradamp(iintra_Q, newQ, variables.QmaxIntegrate, \
-        # variables.damp_factor)
-    # Fintra_r = MainFunctions.calc_Fr(r, newQ[newQ<=variables.QmaxIntegrate], \
-        # Qiintradamp[newQ<=variables.QmaxIntegrate])
-    
-    # F_rIt = calc_optimize_Fr(variables.iteration, F_r, Fintra_r, rho0, i_Q[integration_indexSmooth], \
-        # newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin, "n")
-    
-    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    # Utility.plot_data(Q, S_Qsmoothed, "S_Q S", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$ S no-red", "y")
-    # Utility.plot_data(newQ, S_Qsmoothed2, "S_Q S", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$ S red", "y")
-    # Utility.plot_data(Q, S_QsmoothedDamp, "S_Q SD", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$ SD no-red", "y")
-    # Utility.plot_data(newQ, S_QsmoothedDamp2, "S_Q SD", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$ SD red", "y")
-    # Utility.plot_data(Q, fe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$fe(Q)$", "y")
-    # Utility.plot_data(newQ, newfe_Q, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$newfe(Q)$", "y")
-    # Utility.plot_data(newQ, newfe_Q2, "fe_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$newfe(Q)2$", "y")
-    # Utility.plot_data(Q, iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$fe(Q)$", r"$iintra(Q)$", "y")
-    # Utility.plot_data(newQ, iintra_Q1, "iintra_Q", r"$Q(nm^{-1})$", r"$iintra(Q)$", r"$iintra(Q)1$", "y")
-    # Utility.plot_data(newQ, iintra_Q2, "iintra_Q", r"$Q(nm^{-1})$", r"$iintra(Q)$", r"$iintra(Q)2$", "y")
-    # Utility.plot_data(newQ, newQ*iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$iintra(Q)$", r"$Qiintra(Q)$", "y")
-    # Utility.plot_data(newQ, Qiintradamp, "iintra_Q", r"$Q(nm^{-1})$", r"$iintra(Q)$", r"$Qiintra(Q)D$", "y")
-    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$ no-red", "y")
-    # Utility.plot_data(r2, F_r2, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$ red", "y")
-    # Utility.plot_data(r2, F_r3, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$2", "y")
-    # Utility.plot_data(r, Fintra_r, "Fintra_r", r"$r(nm)$", r"$F_{intra}(r)$", r"$F_{intra}(r)$", "y")
-    # Utility.plot_data(r2, Fintra_r2, "Fintra_r", r"$r(nm)$", r"$F_{intra}(r)$", r"$F_{intra}2(r)$", "y")
+    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
     
     return (S_Q, r, F_r)

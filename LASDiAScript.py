@@ -65,15 +65,10 @@ if __name__ == '__main__':
     Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q , \
         variables.minQ, variables.maxQ)
     
-    # chi2 = np.zeros((rho0.size, s.size))
-    
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
-    
-    # newQ = np.linspace(np.amin(Q), variables.maxQ, variables.NumPoints, endpoint=True)
-    # newfe_Q = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, fe_Q)
     
     iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
         variables.maxQ, elementList, element, x, y, z, elementParameters)
@@ -82,9 +77,6 @@ if __name__ == '__main__':
     r = MainFunctions.calc_r(Q)
     Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         iintradamp[Q<=variables.QmaxIntegrate])
-    
-    Utility.plot_data(Q, iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"$iintra(Q)$", "y")
-    
     
     s = variables.s_value
     rho0 = variables.rho0_value
@@ -96,9 +88,6 @@ if __name__ == '__main__':
         # for s in s_array:
     S_Q, r, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, \
         Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
-        
-    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
     
     plt.show()
             

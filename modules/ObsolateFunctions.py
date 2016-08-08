@@ -548,6 +548,66 @@ def calc_Fr(r, Q, i_Q):
     return (F_r, F_r2)
 
 
+def calc_Fr(Q, Qi_Q, QmaxIntegrate):
+    """Function to calculate F(r) (eq. 20) with the FFT.
+
+    Parameters
+    ----------
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    Qi_Q          : numpy array 
+                    Qi(Q)
+    QmaxIntegrate : float
+                    maximum Q value for the intagration
+    
+    Returns
+    -------
+    F_r  : numpy array
+           F(r)
+    """
+
+    DeltaQ = np.diff(Q)
+
+    # mask = np.where(Q<=QmaxIntegrate)
+    # print(len(mask[0]))
+    # print(len(Qi_Q))
+    # zeroPad = np.zeros(2**275)
+    # Qi_Q = np.concatenate([Qi_Q, zeroPad])
+
+    # F_r2 = np.fft.fft(Qi_Q)
+    F_r2 = fftpack.fft(Qi_Q, 2**12)
+    F_r2 = np.imag(F_r2)
+    F_r2 *= DeltaQ[0] *2/np.pi
+
+    F_r3 = fftpack.dst(Qi_Q, type=2, n=2**11)
+    F_r3 *= DeltaQ[0] * 2/np.pi
+
+    # for i in range(len(F_r2)):
+        # print(F_r2[i], "----", F_r2imag[i], "----", F_r3[i])
+
+    return (F_r2, F_r3)
+
+
+def calc_NewDimFFT(newQ, maxQ, QmaxIntegrate, Qi_Q):
+    """Function to redefine the array dimension to use the FFT.
+    """
+
+    idx, elem = find_nearest(newQ, QmaxIntegrate)
+    newDim = 2*2*2**math.ceil(math.log(5*(idx+1))/math.log(2))
+    Qi_Q2 = np.resize(Qi_Q, newDim)
+    Qi_Q2[idx:] = 0.0
+
+    print(len(Qi_Q2))
+    print(newDim)
+
+    newQ2 = np.linspace(np.amin(newQ), maxQ, newDim, endpoint=True)
+    print(len(newQ2))
+    # DeltaQ = np.diff(newQ)
+    # deltaR = 2*np.pi/(DeltaQ[0]*newDim)
+
+    return (newQ2, Qi_Q2)
+
+
 def calc_gr(r, F_r, rho0):
     """Function to calculate g(r)
 

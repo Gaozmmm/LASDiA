@@ -38,10 +38,8 @@ otherwise it is symbolized with just its name.
 
 import matplotlib.pyplot as plt
 
-import sys
-import os
-
 import numpy as np
+import time
 
 from modules import MainFunctions
 from modules import Utility
@@ -201,6 +199,8 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
     -------
     F_r       : numpy array
                 optimazed F(r)
+    deltaF_r  : numpy array
+                difference between the last F(r) and its theoretical value
     """
 
     if varPlot.lower() == "y":
@@ -211,24 +211,23 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
         plt.ylabel('F(r)')
         plt.legend()
         plt.grid(True)
-
+    
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         i_Q[0] = 0.0
-        F_r = calc_Fr(r, Q, Q*i_Q)
-
+        F_r = MainFunctions.calc_Fr(r, Q, i_Q)
+        
         if varPlot.lower() == "y":
             j = i+1
             plt.figure('F_rIt')
             plt.plot(r, F_r, label='%s iteration F(r)' %j)
             plt.legend()
             plt.draw()
-
+            
             time.sleep(1.0)
-
+    
     if varPlot.lower() == "y":
         plt.ioff()
-        # plt.show()
-
-    return F_r
+    
+    return (F_r, deltaF_r)
