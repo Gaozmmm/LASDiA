@@ -69,4 +69,4 @@ def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     
     chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
     
-    return (S_Q, r, F_r)
+    return (chi2)

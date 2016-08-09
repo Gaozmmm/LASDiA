@@ -43,6 +43,7 @@ import time
 
 from modules import MainFunctions
 from modules import Utility
+from modules import UtilityAnalysis
 
 
 def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters):
@@ -101,6 +102,30 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
     iintra_Q /= Ztot**2
 
     return iintra_Q
+
+
+def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
+    x, y, z, elementParameters, damp_factor):
+    """Function to calculate the intra-molecular components.
+    
+    Parameters
+    ----------
+    
+    Returns
+    -------
+    r        : numpy array
+               atomic distance (nm)
+    Fintra_r : numpy array
+               intramolecular contribution of F(r)
+    """
+    
+    iintra_Q = calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
+        x, y, z, elementParameters)
+    iintradamp = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damp_factor)
+    r = MainFunctions.calc_r(Q)
+    Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iintradamp[Q<=QmaxIntegrate])
+    
+    return (r, Fintra_r)
 
 
 def calc_deltaFr(F_r, Fintra_r, r, rho0):

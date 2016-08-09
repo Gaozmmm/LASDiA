@@ -70,13 +70,10 @@ if __name__ == '__main__':
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
-    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
-        variables.maxQ, elementList, element, x, y, z, elementParameters)
-    iintradamp = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, \
-        variables.damp_factor)
-    r = MainFunctions.calc_r(Q)
-    Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        iintradamp[Q<=variables.QmaxIntegrate])
+    r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
+        variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damp_factor)
+    
+    # Utility.plot_data(r, Fintra_r, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
     
     s = variables.s_value
     rho0 = variables.rho0_value
@@ -86,8 +83,8 @@ if __name__ == '__main__':
     
     # for rho0 in rho0_array:
         # for s in s_array:
-    S_Q, r, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, \
-        Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
+    chi2 = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
+        fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
     
     plt.show()
             
