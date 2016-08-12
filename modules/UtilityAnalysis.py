@@ -226,7 +226,7 @@ def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
     QmaxIntegrate  : float
                      maximum Q value for the intagrations
     damping_factor : float
-                     damping factor
+                     damp factor
     
     Returns
     -------

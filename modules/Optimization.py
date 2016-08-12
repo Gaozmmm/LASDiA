@@ -37,7 +37,6 @@ otherwise it is symbolized with just its name.
 
 
 import matplotlib.pyplot as plt
-
 import numpy as np
 import time
 
@@ -105,23 +104,52 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
 
 
 def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
-    x, y, z, elementParameters, damp_factor):
+    x, y, z, elementParameters, damping_factor):
     """Function to calculate the intra-molecular components.
     
     Parameters
     ----------
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    fe_Q              : numpy array
+                        effective electric form factor
+    Ztot              : int
+                        total Z number
+    QmaxIntegrate     : float
+                        maximum Q value for the intagrations
+    maxQ              : float
+                        maximum Q value
+    elementList       : dictionary("element": multiplicity)
+                        chemical elements of the sample with their multiplicity
+                        element      : string
+                                       chemical element
+                        multiplicity : int
+                                       chemical element multiplicity
+    element           : string array
+                        array with the elements in the xyz_file
+    x, y, z           : float array
+                        atomic coordinate in the xyz_file (nm)
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameters
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
+    damping_factor    : float
+                        damp factor 
     
     Returns
     -------
-    r        : numpy array
-               atomic distance (nm)
-    Fintra_r : numpy array
-               intramolecular contribution of F(r)
+    r                 : numpy array
+                        atomic distance (nm)
+    Fintra_r          : numpy array
+                        intramolecular contribution of F(r)
     """
     
     iintra_Q = calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
         x, y, z, elementParameters)
-    iintradamp = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damp_factor)
+    iintradamp = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor)
     r = MainFunctions.calc_r(Q)
     Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iintradamp[Q<=QmaxIntegrate])
     

@@ -38,16 +38,18 @@ import six
 
 import matplotlib.pyplot as plt
 import numpy as np
+from itertools import product
+from timeit import default_timer as timer
 
+from modules import Formalism
+from modules import Geometry
+from modules import IgorFunctions
+from modules import KaplowMethod
 from modules import MainFunctions
 from modules import Minimization
 from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
-from modules import Formalism
-from modules import Geometry
-from modules import IgorFunctions
-from modules import KaplowMethod
 
 
 if __name__ == '__main__':
@@ -71,22 +73,47 @@ if __name__ == '__main__':
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
     r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
-        variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damp_factor)
+        variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
     
-    # Utility.plot_data(r, Fintra_r, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
     
-    s = variables.s_value
-    rho0 = variables.rho0_value
+    scale_factor = variables.s_value
+    density = variables.rho0_value
+    percentage = 20
     
-    s_array = UtilityAnalysis.make_array(variables.s_value, 20)
-    rho0_array = UtilityAnalysis.make_array(variables.rho0_value, 20)
+    while True:
+        s_array = UtilityAnalysis.make_array(scale_factor, percentage)
+        rho0_array = UtilityAnalysis.make_array(density, percentage)
+        chi2 = np.zeros((rho0_array.size, s_array.size))
     
-    # for rho0 in rho0_array:
-        # for s in s_array:
-    chi2 = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
-        fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
+        for (idx_rho0, rho0), (idx_s, s) in product(enumerate(rho0_array), enumerate(s_array)):
+            chi2[idx_rho0][idx_s] = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
+                fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
+        
+        scale_factor, density = Minimization.calc_min_chi2(s_array, rho0_array, chi2)
+        percentage =/ 2
+        
+        if conditions...
     
-    plt.show()
+    
+    
+    
+    
+    
+    
+    
+    # s_array2 = UtilityAnalysis.make_array(scale_factor, 10)
+    # rho0_array2 = UtilityAnalysis.make_array(density, 10)
+    # chi2_2 = np.zeros((rho0_array2.size, s_array2.size))
+    
+    # for (idx_rho0, rho0), (idx_s, s) in product(enumerate(rho0_array2), enumerate(s_array2)):
+        # chi2_2[idx_rho0][idx_s] = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
+            # fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
+    
+    
+    # val_chi2, scale_factor, minIndxS, rho0, minIndxRho0 = Minimization.calc_min_chi2(s_array2, rho0_array2, chi2_2)
+    
+    
+    # plt.show()
             
             
             
@@ -97,7 +124,13 @@ if __name__ == '__main__':
             
             
             
-            
+# start1 = timer()
+    # for i, val_rho0 in enumerate(rho0_array):
+        # for j, val_s in enumerate(s_array):
+            # chi2a[i][j] = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
+                    # fe_Q, Iincoh_Q, Sinf, Ztot, s_array[j], rho0_array[i], Fintra_r, r)
+    # end1 = timer()
+    # print(end1 - start1)
             
             
             

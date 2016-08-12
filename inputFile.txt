@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Input file format for LASDiA software
-# The lines with the hash tag (#) are comments
+# Input file format for LASDiA software.
+# The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
 data_file = "../data/cea_files/CO2/WO2_007T++.chi"
@@ -43,7 +43,7 @@ maxQ = 100                                                      # Maximum Q valu
 
 # NumPoints = 550                                                 # Number of points for S(Q) smoothing
 smooth_factor = 0.25                                            # Smoothing factor for cubic spline
-damp_factor = 1                                                 # Exponential damping factor == A*Qmax^2
+damping_factor = 1                                                 # Exponential damping factor == A*Qmax^2
 
 # F(r) optimization
 iteration = 2                                                   # Number of iteration for F(r) optimization

@@ -36,44 +36,35 @@ otherwise it is just the name.
 
 
 import numpy as np
-from scipy.integrate import simps
-
-from modules import Optimization
 
 
-def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
-    """Function to calculate the chi2
+def calc_min_chi2(scale_factor, rho0, chi2):
+    """Function to calculate the minimum of chi2 matrix
     
     Parameters
     ----------
-    r        : numpy array
-               atomic distance (nm)
-    rmin     : float
-               r cut-off value (nm)
-    F_rIt    : numpy array
-               i-th iteration of F(r)
-    Fintra_r : numpy array
-               intramolecular contribution of F(r)
-    rho0     : float
-               average atomic density
+    scale_factor                : numpy array
+                                  scale factor
+    rho0                        : numpy array
+                                  average atomic density
+    chi2                        : 2D numpy array
+                                  chi2 values
     
     
     Returns
     -------
-    chi2     : float
-               chi2 value
+    scale_factor[minIndxS]      : float
+                                  scale factor minimum value
+    rho0[minIndxRho0]           : float
+                                  atomic density minimum value
     """
     
-    maskIt = np.where((r>0) & (r < rmin))
-    rIt = r[maskIt]
-    deltaF_r = Optimization.calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0)
+    minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
     
-    chi2 = simps(deltaF_r**2, r[maskIt])
-    
-    return chi2
-    
-    
-def calc_min_chi2(scale_factor, rho0, sample_thickness, chi2):
+    return (scale_factor[minIndxS], rho0[minIndxRho0])
+
+
+def calc_min_chi2_old(scale_factor, rho0, sample_thickness, chi2):
     """Function to calculate the minimum of chi2 matrix
     
     Parameters
