@@ -30,7 +30,8 @@ arguments: description - type
 returns: description - type.
 
 For the variables name I used this convention:
-if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by an
+underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
@@ -341,7 +342,7 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
 
 
 def calc_Icoh(N, alpha, Isample_Q, Iincoh_Q):
-    """Function to calcultate the cohrent scattering intensity Icoh(Q) (eq. 10).
+    """Function to calcultate the cohrent scattering intensity Icoh(Q) (eq. 27).
 
     Parameters
     ----------
@@ -396,7 +397,8 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
     """
     
     S_Q = np.zeros(Q.size)
-    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] / (N * Ztot**2 * fe_Q[(Q>minQ) & (Q<=QmaxIntegrate)]**2)
+    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] \
+        / (N * Ztot**2 * fe_Q[(Q>minQ) & (Q<=QmaxIntegrate)]**2)
     S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
     
     return S_Q

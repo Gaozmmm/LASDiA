@@ -26,6 +26,8 @@
 # Path sample and bkg file
 data_file = "../data/cea_files/CO2/WO2_007T++.chi"
 bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
+# data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
+# bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
 
 # Sample composition
 molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2

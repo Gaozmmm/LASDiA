@@ -80,23 +80,42 @@ if __name__ == '__main__':
     density = variables.rho0_value
     percentage = 20
     
-    while True:
-        s_array = UtilityAnalysis.make_array(scale_factor, percentage)
-        rho0_array = UtilityAnalysis.make_array(density, percentage)
-        chi2 = np.zeros((rho0_array.size, s_array.size))
-    
-        for (idx_rho0, rho0), (idx_s, s) in product(enumerate(rho0_array), enumerate(s_array)):
-            chi2[idx_rho0][idx_s] = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
-                fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+    Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
         
-        scale_factor, density = Minimization.calc_min_chi2(s_array, rho0_array, chi2)
-        percentage =/ 2
-        
-        if conditions...
+    # test formalism
+    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
     
+    S_QFZ = Formalism.calc_S_QFZ(Q, Icoh_Q, aff_sq_mean, aff_mean_sq, variables.minQ, \
+        variables.QmaxIntegrate, variables.maxQ)
+    S_QAL = Formalism.calc_S_QAL(Q, Icoh_Q, aff_sq_mean, variables.minQ, variables.QmaxIntegrate, \
+        variables.maxQ)
     
+    S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+        variables.QmaxIntegrate, variables.maxQ)
     
+    Utility.plot_data(Q, S_QAL, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)^{AL}$", "y")
+    Utility.plot_data(Q, S_QFZ, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)^{FZ}$", "y")
+    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)^{E}$", "y")
     
+    # # while True:
+    # s_array = UtilityAnalysis.make_array(scale_factor, percentage)
+    # rho0_array = UtilityAnalysis.make_array(density, percentage)
+    # chi2 = np.zeros((rho0_array.size, s_array.size))
+
+    # for (idx_rho0, rho0), (idx_s, s) in product(enumerate(rho0_array), enumerate(s_array)):
+        # chi2[idx_rho0][idx_s] = KaplowMethod.Kaplow_method(numAtoms, variables, \
+            # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
+    
+    # scale_factor, density = Minimization.calc_min_chi2(s_array, rho0_array, chi2)
+    # percentage /= 2
+    # # if conditions...
+    
+    plt.show()
     
     
     

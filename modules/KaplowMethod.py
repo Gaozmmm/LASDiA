@@ -44,6 +44,12 @@ from modules import UtilityAnalysis
 def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     Sinf, Ztot, s, rho0, Fintra_r, r):
     """Function to apply the Kaplow method
+    
+    Parameters
+    ----------
+    
+    Returns
+    -------
     """
     
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s, Ibkg_Q)

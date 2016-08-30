@@ -50,23 +50,25 @@ import matplotlib.pyplot as plt
 from modules import MainFunctions
 
 
-def calc_alphaFZ(Q, Isample_Q, Iincoh_Q, rho0, eeff_squared_mean, eeff_mean_squared):
+def calc_alphaFZ(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared):
     """Function to calcultate alpha for the FZ formalism.
     
     """
     
-    Integral1 = simps((Iincoh_Q + (eeff_squared_mean/eeff_mean_squared)) * Q**2, Q)
-    Integral2 = simps((Isample_Q/eeff_mean_squared) * Q**2,Q)
+    Integral1 = simps((Iincoh_Q + (aff_squared_mean/aff_mean_squared)) * Q**2, Q)
+    Integral2 = simps((Isample_Q/aff_mean_squared) * Q**2,Q)
     alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
     
     return alpha
 
 
-def calc_eeff_squared_mean(numAtoms, elementList, Q, elementParameters):
+def calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters):
     """Function to calculate the squared mean effective electron Form Factor, <f^2> (eq. FZ-4).
         
     Parameters
     ----------
+    numAtoms          : int
+                        number of atoms in the molecule
     elementList       : dictionary("element": multiplicity)
                         chemical elements of the sample with their multiplicity
                         element      : string
@@ -85,27 +87,27 @@ def calc_eeff_squared_mean(numAtoms, elementList, Q, elementParameters):
     
     Returns
     -------
-    fe_Q              : numpy array
-                        effective electric form factor
-    Ztot              : int
-                        total Z number
+    aff_squared_mean  : numpy array
+                        mean of the squared form factor: <f^2>
     """
 
-    eeff_squared_mean = np.zeros(Q.size)
+    aff_squared_mean = np.zeros(Q.size)
     
     for element, multiplicity in elementList.items():
-        eeff_squared_mean += multiplicity * MainFunctions.calc_aff(element, Q, elementParameters)**2
+        aff_squared_mean += multiplicity * MainFunctions.calc_aff(element, Q, elementParameters)**2
     
-    eeff_squared_mean /= numAtoms
+    aff_squared_mean /= numAtoms
     
-    return eeff_squared_mean
+    return aff_squared_mean
 
 
-def calc_eeff_mean_squared(numAtoms, elementList, Q, elementParameters):
-    """Function to calculate the mean squared effective electron Form Factor, <f^2> (eq. FZ-5).
+def calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters):
+    """Function to calculate the mean squared effective electron Form Factor, <f>^2 (eq. FZ-5).
         
     Parameters
     ----------
+    numAtoms          : int
+                        number of atoms in the molecule
     elementList       : dictionary("element": multiplicity)
                         chemical elements of the sample with their multiplicity
                         element      : string
@@ -124,41 +126,31 @@ def calc_eeff_mean_squared(numAtoms, elementList, Q, elementParameters):
     
     Returns
     -------
-    fe_Q              : numpy array
-                        effective electric form factor
-    Ztot              : int
-                        total Z number
+    aff_mean_squared : numpy array
+                       squared of the mean form factor: <f>^2
     """
 
-    eeff_mean_squared = np.zeros(Q.size)
+    aff_mean_squared = np.zeros(Q.size)
     
     for element, multiplicity in elementList.items():
-        eeff_mean_squared += multiplicity * MainFunctions.calc_aff(element, Q, elementParameters)
+        aff_mean_squared += multiplicity * MainFunctions.calc_aff(element, Q, elementParameters)
     
-    eeff_mean_squared /= numAtoms
+    aff_mean_squared /= numAtoms
     
-    eeff_mean_squared = eeff_mean_squared**2
+    aff_mean_squared = aff_mean_squared**2
     
-    return eeff_mean_squared
+    return aff_mean_squared
 
 
-def calc_S_QFZ(Q, Icoh_Q, eeff_squared_mean, eeff_mean_squared, minQ, QmaxIntegrate, maxQ):
+def calc_S_QFZ(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, minQ, QmaxIntegrate, maxQ):
     """Function to calculate S(Q) with Faber-Ziman formalism.
     
     Parameters
     ----------
-    Icoh_Q            : numpy array (nm)
-                        coherent scattering intensity
     Q                 : numpy array
                         momentum transfer (nm)
-    Sinf              : float
-                        Sinf
-    min_index         : numpy array
-                        array index of element with Q<=minQ
-    max_index         : numpy array
-                        array index of element with Q>QmaxIntegrate & Q<=maxQ
-    calculation_index : numpy array
-                        range where S(Q) is calculated
+    Icoh_Q            : numpy array (nm)
+                        coherent scattering intensity
     
     
     Returns
@@ -169,13 +161,13 @@ def calc_S_QFZ(Q, Icoh_Q, eeff_squared_mean, eeff_mean_squared, minQ, QmaxIntegr
     
     S_Q = np.zeros(Q.size)
     S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = (Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] - \
-        (eeff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)] - eeff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])) / (eeff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])
+        (aff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)] - aff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])) / (aff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])
     S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 1
     
     return S_Q
 
 
-def calc_S_QAL(Q, Icoh_Q, Sinf, eeff_squared_mean, minQ, QmaxIntegrate, maxQ):
+def calc_S_QAL(Q, Icoh_Q, aff_squared_mean, minQ, QmaxIntegrate, maxQ):
     """Function to calculate S(Q) with Ashcroft-Langreth formalism.
     
     Parameters
@@ -184,8 +176,6 @@ def calc_S_QAL(Q, Icoh_Q, Sinf, eeff_squared_mean, minQ, QmaxIntegrate, maxQ):
                         coherent scattering intensity
     Q                 : numpy array
                         momentum transfer (nm)
-    Sinf              : float
-                        Sinf
     min_index         : numpy array
                         array index of element with Q<=minQ
     max_index         : numpy array
@@ -201,60 +191,7 @@ def calc_S_QAL(Q, Icoh_Q, Sinf, eeff_squared_mean, minQ, QmaxIntegrate, maxQ):
     """
     
     S_Q = np.zeros(Q.size)
-    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] / eeff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)]
-    S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
+    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] / aff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)]
+    S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 1
     
     return S_Q
-
-
-# Functions to jump from a formalism to another, need to be fixed!
-def ALtoFZ(N1, N2, S11, S12, S22):
-    """Function to transform the AL to FZ (eq 1.2.17)
-
-    arguments:
-    N1:
-    N2:
-    S11:
-    S12:
-    S22:
-
-    returns:
-    a11:
-    a12:
-    a22:
-    """
-
-    c1 = N1/(N1+N2)
-    c2 = N2/(N1+N2)
-
-    a11_Q = (S11 - c2)/c1
-    a12_Q = S12/math.sqrt(c1*c2) + 1
-    a22_Q = (S22 - c1)/c2
-
-    return (a11_Q, a12_Q, a22_Q)
-
-
-def FZtoAL(N1, N2, a11, a12, a22):
-    """Function to transform the AL to FZ (eq 1.2.17)
-
-    arguments:
-    N1:
-    N2:
-    a11:
-    a12:
-    a22:
-
-    returns:
-    S11:
-    S12:
-    S22:
-    """
-
-    c1 = N1/(N1+N2)
-    c2 = N2/(N1+N2)
-
-    S11_Q = 1 + c1*(a11_Q - 1)
-    S12_Q = math.sqrt(c1*c2) * (a12_Q - 1)
-    S11_Q = 1 + c2*(a22_Q - 1)
-
-    return (S11_Q, S12_Q, S22_Q)

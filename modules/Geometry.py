@@ -20,7 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Set of modules used in LASDiA to calculate the diamond absorption and Soller Slits correction.
+"""Set of modules used in LASDiA to calculate the diamond absorption and Soller
+Slits correction.
 
 The nomenclature and the procedure follow the articles:
 Weck et al. Rev. Sci. Instrum. 84, 063901 (2013)
@@ -32,7 +33,8 @@ argument: description - type
 return: description - type.
 
 For the variables name I used this convention:
-if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
@@ -81,7 +83,7 @@ def calc_absorption_correction(abs_length, two_theta, thickness, angle):
 
     corr_factor = np.exp(-mu_l * path_lenght)
 
-    # I_Qeff = corr_factor * I_Q
+    # I_Qeff = I_Q / corr_factor
 
     return corr_factor
 
