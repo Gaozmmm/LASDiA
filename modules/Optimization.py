@@ -191,7 +191,7 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     Q        : numpy array
                momentum transfer (nm^-1)
     Sinf     : float
-               Sinf
+               value of S(Q) for Q->inf
     J_Q      : numpy array
                J(Q)
     deltaF_r : numpy array
@@ -238,7 +238,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
     Q         : numpy array
                 momentum transfer (nm^-1)
     Sinf      : float
-                Sinf
+                value of S(Q) for Q->inf
     J_Q       : numpy array
                 J(Q)
     r         : numpy array

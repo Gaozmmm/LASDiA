@@ -42,6 +42,9 @@ otherwise it is symbolized with just its name.
 import numpy as np
 from scipy.integrate import simps
 
+from modules import Utility
+from modules import UtilityAnalysis
+
 
 def calc_absorption_correction(abs_length, two_theta, thickness, angle):
     """Function to calculate the absorption correction.
@@ -54,8 +57,8 @@ def calc_absorption_correction(abs_length, two_theta, thickness, angle):
     Parameters
     ----------
     abs_length  : float
-                  absorption length  (cm), @33keV 1.208cm
-    two_theta     : numpy array
+                  absorption length (cm), @33keV 1.208cm
+    two_theta   : numpy array
                   diffraction angle (rad)
     thickness   : float
                   object thickness (cm)
@@ -64,8 +67,6 @@ def calc_absorption_correction(abs_length, two_theta, thickness, angle):
 
     Returns
     -------
-    I_Qeff      : numpy array
-                  corrected scattering intensity (nm)
     corr_factor : numpy array
                   correction factor
     """
@@ -106,7 +107,7 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, two_theta, xth):
     two_theta : float
               diffraction angle (rad)
     xth     : float
-              positin of i-th point on x-axis (cm)
+              i-th point position on x-axis (cm)
 
     Returns
     -------
@@ -134,9 +135,9 @@ def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
 
     Parameters
     ----------
-    thickness_value    : float
-                         object thickness (sample or sample+DAC)
-    two_theta            : numpy array
+    thickness          : float
+                         object thickness (sample or sample+DAC) (cm)
+    two_theta          : numpy array
                          diffraction angle (rad)
     ws1                : float
                          width of the inner slit (cm)
@@ -154,7 +155,7 @@ def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
     Returns
     -------
     thickness_sampling : numpy array
-                         array with the thickness values
+                         array with the thickness values (cm)
     phi_matrix         : 2D numpy array
                          dispersion angle matrix (rad)
     """
@@ -165,42 +166,42 @@ def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
 
     for i, val_sth in enumerate(thickness_sampling):
         for j, val_2theta in enumerate(two_theta):
-            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, two_theta[j], thickness_sampling[i])
+            phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, two_theta[j], \
+            thickness_sampling[i])
 
     return (thickness_sampling, phi_matrix)
 
 
-def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm):
-    """Function to calculate the MCC transfer function for the sample, the DAC and sample+DAC (W. eq. 10, 11).
+def calc_T_MCC(sample_thickness, thickness_sampling, phi_matrix, norm):
+    """Function to calculate the MCC transfer function for the sample, the DAC 
+        and sample+DAC (W. eq. 10, 11).
 
     Parameters
     ----------
-    sample_thickness             : float
-                                   sample thickness
-    all_thickness_sampling       : numpy array
-                                   array with the thickness values for sample+DAC
-    all_phi_angle_matrix         : 2D numpy array
-                                   dispersion angle matrix for sample+DAC (rad)
+    sample_thickness   : float
+                         sample thickness
+    thickness_sampling : numpy array
+                         array with the thickness values for sample+DAC
+    phi_matrix         : 2D numpy array
+                         dispersion angle matrix for sample+DAC (rad)
+    norm               : string
+                         flag to normalize the MCC transfer function to start to 1
 
     Returns
     -------
-    T_MCC_sample                 : numpy array
-                                   MCC sample transfer function
-    T_MCC_DAC                    : numpy array
-                                   MCC DAC transfer function
-    T_MCC_ALL                    : numpy array
-                                   MCC sample+DAC transfer function
-    all_thickness_sampling[mask] : numpy array
-                                   array with the thickness values for sample
-    all_phi_angle_matrix[mask]   : 2D numpy array
-                                   dispersion angle matrix for sample (rad)
+    T_MCC_sample       : numpy array
+                         MCC sample transfer function
+    T_MCC_DAC          : numpy array
+                         MCC DAC transfer function
+    T_MCC_ALL          : numpy array
+                         MCC sample+DAC transfer function
     """
 
-    # mask = (all_thickness_sampling >= -sample_thickness/2) & (all_thickness_sampling <= sample_thickness/2)
-    mask = (all_thickness_sampling >= 0) & (all_thickness_sampling <= sample_thickness/2)
+    # mask = (thickness_sampling >= -sample_thickness/2) & (thickness_sampling <= sample_thickness/2)
+    mask = (thickness_sampling >= 0) & (thickness_sampling <= sample_thickness/2)
 
-    T_MCC_ALL = simps(phi_angle_matrix, axis=0, even="first")
-    T_MCC_sample = simps(phi_angle_matrix[mask], axis=0, even="first")
+    T_MCC_ALL = simps(phi_matrix, axis=0, even="first")
+    T_MCC_sample = simps(phi_matrix[mask], axis=0, even="first")
     T_MCC_DAC = T_MCC_ALL - T_MCC_sample
 
     if norm.lower() == "y":
@@ -212,19 +213,20 @@ def calc_T_MCC(sample_thickness, all_thickness_sampling, phi_angle_matrix, norm)
 
 
 def calc_T_DAC_MCC_bkg_corr(T_DAC_MCC_sth, T_DAC_MCC_s0th):
-    """Function to calculate the bkg correction factor for the MCC (W. eq. 12).
+    """Function to calculate the background correction factor for the MCC (W. eq. 12).
 
     Parameters
     ----------
     T_DAC_MCC_sth  : numpy array
                      MCC DAC transfer function
     T_DAC_MCC_s0th : numpy array
-                     MCC DAC transfer function with sample thickness for the reference spectra
+                     MCC DAC transfer function with sample thickness for the 
+                     reference spectra
     
     Returns
     -------
     corr_factor    : numpy array
-                     the bkg correction factor
+                     the background correction factor
     """
 
     corr_factor = T_DAC_MCC_sth / T_DAC_MCC_s0th
@@ -233,7 +235,8 @@ def calc_T_DAC_MCC_bkg_corr(T_DAC_MCC_sth, T_DAC_MCC_s0th):
 
 
 def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q, mu2):
-    """Function to calculate the empty-cell background from the solid-sample background (E. eq. 32).
+    """Function to calculate the empty-cell background from the solid-sample 
+       background (E. eq. 32).
     
     Parameters
     ----------
@@ -255,7 +258,7 @@ def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q
     
     Returns
     -------
-    Ibkg_empty_Q            : numpy array
+    Ibkg_Q                  : numpy array
                               empty-cell background scattering intensity
     """
     
@@ -266,6 +269,62 @@ def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q
     # DiffuseIntensity = N/alpha'
     # Bkgd=BkgdSolid-DiffuseIntensity*AbsRefCalc*(Iincoh+TDS)
     
-    Ibkg_empty_Q = Ibkg_Q - diamond_abs_corr_factor*(Iincoh_Q - TDS)
+    Ibkg_Q = Ibkg_Q - diamond_abs_corr_factor*(Iincoh_Q - TDS)
     
-    return Ibkg_empty_Q
+    return Ibkg_Q
+
+
+def geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, calc_phi_matrix):
+    """Function to calcultate all intensity geometrical corrections.
+    
+    Parameters
+    ----------
+    Q               : numpy array
+                      momentum transfer (nm^-1)
+    I_Q             : numpy array
+                      measured scattering intensity
+    Qbkg            : numpy array
+                      background momentum transfer (nm^-1)
+    Ibkg_Q          : numpy array
+                      background scattering intensity
+    variables       : module
+                      input variables setted by the user
+    calc_phi_matrix : string
+                      flag for the phi matrix calculation:
+                      "y": calculate phi matrix and save on file
+                      "n": read the phi matrix from file
+    
+    Returns
+    -------
+    I_Q             : numpy array
+                      corrected measured sample intensity
+    Ibkg_Q          : numpy array
+                      corrected background intensity
+    """
+    
+    two_theta = UtilityAnalysis.Qto2theta(Q)
+    
+    abs_corr_factor = calc_absorption_correction(variables.abs_length, \
+        two_theta, variables.dac_thickness, 0)
+    
+    num_point = 1000
+    
+    if calc_phi_matrix.lower() == "y": 
+        ws1, ws2, r1, r2, d = Utility.read_MCC_file(variables.MCC_path, variables.MCC_type)
+        thickness_sampling, phi_matrix = calc_phi_matrix(variables.phi_matrix_thickness, \
+            two_theta, ws1, ws2, r1, r2, d, num_point)
+        np.save("./phi_matrix", phi_matrix)
+    else:
+        thickness_sampling = np.linspace(0, variables.phi_matrix_thickness, num=num_point)
+        phi_matrix = np.load("./phi_matrix.npy")
+    
+    T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = calc_T_MCC(0.003, thickness_sampling, \
+        phi_matrix, "y")
+    T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = calc_T_MCC(0.004, thickness_sampling, \
+        phi_matrix, "y")
+    T_MCC_corr_factor_bkg = calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
+    
+    I_Q = I_Q /(abs_corr_factor * T_MCC_sample4)
+    Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (abs_corr_factor * T_MCC_sample4)
+    
+    return (I_Q, Ibkg_Q)

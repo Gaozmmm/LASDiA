@@ -364,7 +364,7 @@ def read_inputFile(path):
     Returns
     -------
     variables : module
-                variables setted by the user
+                input variables setted by the user
     """
 
     file = open(path)

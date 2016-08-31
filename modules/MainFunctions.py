@@ -272,7 +272,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     Returns
     -------
     Sinf              : float
-                        Sinf
+                        value of S(Q) for Q->inf
     """
     
     sum_Kp2 = 0
@@ -285,16 +285,16 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     return Sinf
 
 
-def calc_IsampleQ(I_Q, s, Ibkg_Q ):
+def calc_IsampleQ(I_Q, sf, Ibkg_Q ):
     """Function to calculate the sample scattering intensity Isample(Q) (eq. 28).
 
     Parameters
     ----------
     I_Q       : numpy array
                 measured scattering intensity
-    s         : float
+    sf        : float
                 scale factor
-    Ibkg_Q     : numpy array
+    Ibkg_Q    : numpy array
                 background scattering intensity
     
     Returns
@@ -303,7 +303,7 @@ def calc_IsampleQ(I_Q, s, Ibkg_Q ):
                 sample scattering intensity
     """
 
-    Isample_Q = I_Q - s * Ibkg_Q 
+    Isample_Q = I_Q - sf * Ibkg_Q 
 
     return Isample_Q
 
@@ -316,7 +316,7 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     J_Q       : numpy array
                 J(Q)
     Sinf      : float
-                Sinf
+                value of S(Q) for Q->inf
     Q         : numpy array
                 momentum transfer (nm^-1)
     Isample_Q : numpy array
@@ -380,7 +380,7 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
     fe_Q          : numpy array 
                     effective electric form factor
     Sinf          : float
-                    Sinf
+                    value of S(Q) for Q->inf
     Q             : numpy array 
                     momentum transfer (nm^-1)
     minQ          : float
@@ -412,7 +412,7 @@ def calc_iQ(S_Q, Sinf):
     S_Q  : numpy array
            structure factor
     Sinf : float
-           Sinf
+           value of S(Q) for Q->inf
     
     Returns
     -------
@@ -435,7 +435,7 @@ def calc_QiQ(Q, S_Q, Sinf):
     S_Q  : numpy array
            structure factor
     Sinf : float
-           Sinf
+           value of S(Q) for Q->inf
     
     Returns
     -------
@@ -509,7 +509,7 @@ def calc_SQCorr(F_r, r, Q, Sinf):
     Q    : numpy array
            momentum transfer (nm^-1)
     Sinf : float
-           Sinf
+           value of S(Q) for Q->inf
     
     Returns
     -------

@@ -198,7 +198,7 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, aff_path):
     Returns
     -------
     Sinf         : float
-                   Sinf
+                   value of S(Q) for Q->inf
     """
     
     sum_Kp2 = 0
@@ -333,7 +333,7 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
     fe_Q              : numpy array 
                         effective electric form factor
     Sinf              : float
-                        Sinf
+                        value of S(Q) for Q->inf
     Q                 : numpy array 
                         momentum transfer (nm^-1)
     max_index         : numpy array 
@@ -408,7 +408,7 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate
     S_Q           : numpy array 
                     structure factor
     Sinf          : float
-                    Sinf
+                    value of S(Q) for Q->inf
     smooth_factor : float
                     smoothing factor
     min_index     : numpy array 
@@ -458,7 +458,7 @@ def calc_SQsmoothing(Q, newQ, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, max
     S_Q           : numpy array 
                     structure factor
     Sinf          : float
-                    Sinf
+                    value of S(Q) for Q->inf
     smooth_factor : float
                     smoothing factor
     minQ          : float
@@ -870,6 +870,39 @@ def calc_min_chi2(scale_factor, rho0, chi2):
         chi2[minIndxRho0][minIndxS])
 
 
+def calc_min_chi2(scale_factor, rho0, sample_thickness, chi2):
+    """Function to calculate the minimum of chi2 matrix
+    
+    Parameters
+    ----------
+    scale_factor                : numpy array
+                                  scale factor
+    rho0                        : numpy array
+                                  average atomic density
+    chi2                        : 2D numpy array
+                                  chi2 values
+    
+    
+    Returns
+    -------
+    chi2[minIndxRho0][minIndxS] : float
+                                  chi2 minimum value
+    scale_factor[minIndxS]      : float
+                                  scale factor minimum value
+    minIndxS                    : int
+                                  scale factor minimum value index
+    rho0[minIndxRho0]           : float
+                                  atomic density minimum value
+    minIndxRho0                 : int
+                                  atomic density minimum value index
+    """
+    
+    minIndxRho0, minIndxS, minIndxSth = np.unravel_index(chi2.argmin(), chi2.shape)
+    
+    return (chi2[minIndxRho0][minIndxS][minIndxSth], scale_factor[minIndxS], \
+        minIndxS, rho0[minIndxRho0], minIndxRho0, sample_thickness[minIndxSth], minIndxSth)
+
+
 def calc_alphaFZ(numAtoms, Q, Isample_Q, Iincoh_Q, rho0, elementParameters):
     """Function to calcultate alpha for the FZ formalism.
     
@@ -899,7 +932,7 @@ def calc_S_QFZ(numAtoms, Icoh_Q, Ztot, Q, elementParameters):
     Q                 : numpy array
                         momentum transfer (nm)
     Sinf              : float
-                        Sinf
+                        value of S(Q) for Q->inf
     min_index         : numpy array
                         array index of element with Q<=minQ
     max_index         : numpy array

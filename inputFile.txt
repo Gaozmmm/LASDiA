@@ -24,19 +24,21 @@
 # The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-data_file = "../data/cea_files/CO2/WO2_007T++.chi"
-bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
-# data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
-# bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
+# data_file = "../data/cea_files/CO2/WO2_007T++.chi"
+# bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
+data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
+bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
 
 # Sample composition
-molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
+molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
 element_params = "./elementParameters.txt"                      # Path element parameters file
 
 # Geometry corrections
-abs_length = 1.208
-dac_thickness = 0.144
-phi_matrix_thickness = 0.17
+abs_length = 1.208                                              # @33keV 1.208cm
+dac_thickness = 0.144                                           # cm
+phi_matrix_thickness = 0.17                                     # cm
+MCC_path = "./SollerSlits.txt"
+MCC_type = "A"
 
 # Analysis parameters
 minQ = 8.005                                                    # Minimum Q value in data interpolation waves

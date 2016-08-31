@@ -62,36 +62,3 @@ def calc_min_chi2(scale_factor, rho0, chi2):
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
     
     return (scale_factor[minIndxS], rho0[minIndxRho0])
-
-
-def calc_min_chi2_old(scale_factor, rho0, sample_thickness, chi2):
-    """Function to calculate the minimum of chi2 matrix
-    
-    Parameters
-    ----------
-    scale_factor                : numpy array
-                                  scale factor
-    rho0                        : numpy array
-                                  average atomic density
-    chi2                        : 2D numpy array
-                                  chi2 values
-    
-    
-    Returns
-    -------
-    chi2[minIndxRho0][minIndxS] : float
-                                  chi2 minimum value
-    scale_factor[minIndxS]      : float
-                                  scale factor minimum value
-    minIndxS                    : int
-                                  scale factor minimum value index
-    rho0[minIndxRho0]           : float
-                                  atomic density minimum value
-    minIndxRho0                 : int
-                                  atomic density minimum value index
-    """
-    
-    minIndxRho0, minIndxS, minIndxSth = np.unravel_index(chi2.argmin(), chi2.shape)
-    
-    return (chi2[minIndxRho0][minIndxS][minIndxSth], scale_factor[minIndxS], \
-        minIndxS, rho0[minIndxRho0], minIndxRho0, sample_thickness[minIndxSth], minIndxSth)

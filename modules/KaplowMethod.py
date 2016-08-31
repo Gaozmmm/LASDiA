@@ -42,17 +42,47 @@ from modules import UtilityAnalysis
 
 
 def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
-    Sinf, Ztot, s, rho0, Fintra_r, r):
-    """Function to apply the Kaplow method
+    Sinf, Ztot, sf, rho0, Fintra_r, r):
+    """Function to apply the Kaplow method.
     
     Parameters
     ----------
+    numAtoms  : int
+                number of atoms in the molecule
+    variables : module
+                input variables setted by the user
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                measured scattering intensity
+    Ibkg_Q    : numpy array
+                background scattering intensity
+    J_Q      : numpy array
+               J(Q)
+    fe_Q     : numpy array
+               effective electric form factor
+    Iincoh_Q : numpy array
+               incoherent scattering intensity
+    Sinf     : float
+               value of S(Q) for Q->inf
+    Ztot     : int
+               total Z number
+    sf       : float
+               scale factor
+    rho0     : float
+               average atomic density
+    Fintra_r : numpy array
+               intramolecular contribution of F(r)
+    r        : numpy array
+               atomic distance (nm)
     
     Returns
     -------
+    chi2     : float
+               chi2 value
     """
     
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, s, Ibkg_Q)
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
     alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
         Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
         fe_Q[Q<=variables.QmaxIntegrate], Ztot, rho0)
@@ -65,6 +95,8 @@ def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, Sinf, \
         variables.QmaxIntegrate, variables.damping_factor)
     
+    # Utility.plot_data(Q, S_QsmoothedDamp, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    
     i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         i_Q[Q<=variables.QmaxIntegrate])
@@ -75,4 +107,4 @@ def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     
     chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
     
-    return (chi2)
+    return (chi2, S_QsmoothedDamp, F_rIt)

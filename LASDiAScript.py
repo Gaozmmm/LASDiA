@@ -64,8 +64,10 @@ if __name__ == '__main__':
     Q, I_Q = Utility.read_file(variables.data_file)
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
     
-    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q , \
+    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
         variables.minQ, variables.maxQ)
+    
+    I_Q, Ibkg_Q = Geometry.geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, "n")
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
@@ -75,282 +77,71 @@ if __name__ == '__main__':
     r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
         variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
     
-    
     scale_factor = variables.s_value
     density = variables.rho0_value
     percentage = 20
     
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
-    alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
-        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-        fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
-    Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-        
-    # test formalism
-    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    # while True:
+    sf_array = UtilityAnalysis.make_array(scale_factor, percentage)
+    rho0_array = UtilityAnalysis.make_array(density, percentage)
+    chi2 = np.zeros((rho0_array.size, sf_array.size))
     
-    S_QFZ = Formalism.calc_S_QFZ(Q, Icoh_Q, aff_sq_mean, aff_mean_sq, variables.minQ, \
-        variables.QmaxIntegrate, variables.maxQ)
-    S_QAL = Formalism.calc_S_QAL(Q, Icoh_Q, aff_sq_mean, variables.minQ, variables.QmaxIntegrate, \
-        variables.maxQ)
+    chi2_min = 1000000
     
-    S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
-        variables.QmaxIntegrate, variables.maxQ)
+    for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+        chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
+            Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
+        if chi2[idx_rho0][idx_sf] < chi2_min:
+            chi2_min = chi2[idx_rho0][idx_sf]
+            best_sf = sf
+            best_rho0 = rho0
+            FOpt_r = F_r
+            Sbest_Q = S_Q
     
-    Utility.plot_data(Q, S_QAL, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)^{AL}$", "y")
-    Utility.plot_data(Q, S_QFZ, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)^{FZ}$", "y")
-    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)^{E}$", "y")
-    
-    # # while True:
-    # s_array = UtilityAnalysis.make_array(scale_factor, percentage)
-    # rho0_array = UtilityAnalysis.make_array(density, percentage)
-    # chi2 = np.zeros((rho0_array.size, s_array.size))
-
-    # for (idx_rho0, rho0), (idx_s, s) in product(enumerate(rho0_array), enumerate(s_array)):
-        # chi2[idx_rho0][idx_s] = KaplowMethod.Kaplow_method(numAtoms, variables, \
-            # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
-    
-    # scale_factor, density = Minimization.calc_min_chi2(s_array, rho0_array, chi2)
+    scale_factor, density = Minimization.calc_min_chi2(sf_array, rho0_array, chi2)
     # percentage /= 2
-    # # if conditions...
+    # if conditions...
+    
+    print(scale_factor, best_sf)
+    print(density, best_rho0)
+    
+    SOpt_Q = MainFunctions.calc_SQCorr(FOpt_r, r, Q, Sinf)
+    
+    Utility.plot_data(Q, Sbest_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    Utility.plot_data(Q, SOpt_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{Opt}(Q)$", "y")
     
     plt.show()
     
     
     
     
-    # s_array2 = UtilityAnalysis.make_array(scale_factor, 10)
-    # rho0_array2 = UtilityAnalysis.make_array(density, 10)
-    # chi2_2 = np.zeros((rho0_array2.size, s_array2.size))
-    
-    # for (idx_rho0, rho0), (idx_s, s) in product(enumerate(rho0_array2), enumerate(s_array2)):
-        # chi2_2[idx_rho0][idx_s] = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
-            # fe_Q, Iincoh_Q, Sinf, Ztot, s, rho0, Fintra_r, r)
     
     
-    # val_chi2, scale_factor, minIndxS, rho0, minIndxRho0 = Minimization.calc_min_chi2(s_array2, rho0_array2, chi2_2)
+    #-----------------------------------------------------
     
+    # # test formalism
     
-    # plt.show()
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-# start1 = timer()
-    # for i, val_rho0 in enumerate(rho0_array):
-        # for j, val_s in enumerate(s_array):
-            # chi2a[i][j] = KaplowMethod.Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, \
-                    # fe_Q, Iincoh_Q, Sinf, Ztot, s_array[j], rho0_array[i], Fintra_r, r)
-    # end1 = timer()
-    # print(end1 - start1)
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-         
-            
-            # min_indexSmooth, max_indexSmooth = UtilityAnalysis.calc_indices(newQ, minQ, QmaxIntegrate, maxQ)
-            # iintra_Q, fe_QSmooth = Optimization.calc_iintra(newQ, max_indexSmooth, elementList, element, x, y, z, incoh_params, aff_params)
-            # # Qiintradamp = calc_iintradamp(iintra_Q, newQ, QmaxIntegrate, damp_factor)
-            # # Fintra_r = calc_Fr(r, newQ[integration_indexSmooth], Qiintradamp[integration_indexSmooth])
-            # # Fintra_r = calc_Fintra(r, newQ, QmaxIntegrate)
-            
-            # print(iintra_Q.size)
-            # print(iintra_Q2.size)
-            
-            # newiintra_Q2 = UtilityAnalysis.interpolation_after_smoothing(Q, newQ, iintra_Q2)
-            # print(newiintra_Q2.size)
-            
-            # Utility.plot_data(newQ, iintra_Q, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"$i_{intra}(Q)$", "y")
-            # Utility.plot_data(Q, iintra_Q2, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"$i_{intra}(Q)2$", "y")
-            # Utility.plot_data(newQ, newiintra_Q2, "iintra_Q", r"$Q(nm^{-1})$", r"$i_{intra}(Q)$", r"new$i_{intra}(Q)2$", "y")
-            # plt.show()
-            
-            # Iincoh_QSmooth = calc_Iincoh(elementList, newQ, incoh_params, aff_params)
-            # J_QSmooth = calc_JQ(Iincoh_QSmooth, Ztot, fe_QSmooth)
-            #
-            # F_rIt = calc_optimize_Fr(iteration, F_r, Fintra_r, rho0[i], i_Q[integration_indexSmooth], newQ[integration_indexSmooth], Sinf, J_QSmooth[integration_indexSmooth], r, rmin, "n")
-            #
-            # maskIt = np.where((r>0) & (r < rmin))
-            # rIt = r[maskIt]
-            # deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0[i])
-
-            # # # chi2[i][j][k] = simps(deltaF_r**2, r[maskIt])
-            # print(i, j, val_rho0, val_s)
-            # print("chi2 ", chi2[i][j])
-
-
+    # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
+    # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+        # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        # fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+    # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
     
-    # # # # chi2Min, sBest, sBestIdx, rho0Best, rho0BestIdx, sthBest, sthBestIdx = calc_min_chi2(s, rho0, sth, chi2)
-
-    # # # # print(sBest, rho0Best, sthBest)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # Geometrical correction
-    # two_theta = UtilityAnalysis.Qto2theta(Q) # rad
+    # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
     
-    # abs_length = 1.208
-    # corr_factor_meas0 = Geometry.calc_absorption_correction(abs_length, two_theta, dac_thickness, 0)
-    # I_Q = I_Q / corr_factor_bkg
-    # Ibkg_Q  = Ibkg_Q  / corr_factor_bkg
-
-    # all_thickness_sampling, phi_matrix = Geometry.calc_phi_matrix(phi_matrix_thickness, two_theta, ws1, ws2, r1, r2, d, 1000)
-
-    # Utility.plot3d(two_theta, all_thickness_sampling, phi_matrix, "phi_matrix", "2theta", "x(cm)", "phi")
-
-    # T_MCC_sample1, T_MCC_DAC1, T_MCC_ALL1 = Geometry.calc_T_MCC(0.001, all_thickness_sampling, phi_matrix, "y")
-    # T_MCC_sample2, T_MCC_DAC2, T_MCC_ALL2 = Geometry.calc_T_MCC(0.002, all_thickness_sampling, phi_matrix, "y")
-    # T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = Geometry.calc_T_MCC(0.003, all_thickness_sampling, phi_matrix, "y")
-    # T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = Geometry.calc_T_MCC(0.004, all_thickness_sampling, phi_matrix, "y")
-
-    # Utility.write_file("./T_MCC_sample4a.txt", Q, T_MCC_sample4, "Q", "T_MCC_sample4")
-    # Utility.write_file("./T_MCC_DAC4a.txt", Q, T_MCC_DAC4, "Q", "T_MCC_DAC4")
-
-    # Utility.plot_data(Q, T_MCC_ALL1, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    # Utility.plot_data(Q, T_MCC_ALL2, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    # Utility.plot_data(Q, T_MCC_ALL3, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    # Utility.plot_data(Q, T_MCC_ALL4, "T_MCC_all", r"$Q (nm^{-1})$", r"$T^{MCC}_{ALL}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    # Utility.plot_data(Q, T_MCC_sample1, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    # Utility.plot_data(Q, T_MCC_sample2, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    # Utility.plot_data(Q, T_MCC_sample3, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    # Utility.plot_data(Q, T_MCC_sample4, "T_MCC_sample", r"$Q (nm^{-1})$", r"$T^{MCC}_{sample}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    # Utility.plot_data(Q, T_MCC_DAC1, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    # Utility.plot_data(Q, T_MCC_DAC2, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    # Utility.plot_data(Q, T_MCC_DAC3, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    # Utility.plot_data(Q, T_MCC_DAC4, "T_MCC_DAC", r"$Q (nm^{-1})$", r"$T^{MCC}_{DAC}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    # Utility.plot_data(Q, T_MCC_ALL4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "ALL", "y")
-    # Utility.plot_data(Q, T_MCC_sample4, "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})$", "Sample", "y")
-    # Utility.plot_data(Q, T_MCC_DAC4,    "T_MCC", r"$Q (nm^{-1})$", r"$T^{MCC}{2\vartheta, s_{th})$", "DAC", "y")
-
-    # T_MCC_corr_factor_bkg1 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC1, T_MCC_DAC3)
-    # T_MCC_corr_factor_bkg2 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC2, T_MCC_DAC3)
-    # T_MCC_corr_factor_bkg3 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC3, T_MCC_DAC3)
-    # T_MCC_corr_factor_bkg4 = Geometry.calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
-
-    # Utility.write_file("./T_MCC_corr_factor_bkg4a.txt", Q, T_MCC_corr_factor_bkg4, "Q", "T_MCC_corr_factor_bkg4")
-
-    # Utility.plot_data(Q, T_MCC_corr_factor_bkg1, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.001 cm", "y")
-    # Utility.plot_data(Q, T_MCC_corr_factor_bkg2, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.002 cm", "y")
-    # Utility.plot_data(Q, T_MCC_corr_factor_bkg3, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.003 cm", "y")
-    # Utility.plot_data(Q, T_MCC_corr_factor_bkg4, "T_MCC_bkg", r"$Q (nm^{-1})$", r"$T^{MCC}(2\vartheta, s_{th})/T^{MCC}(2\vartheta, s_{th})$", "0.004 cm", "y")
-
-    # plt.show()
-
+    # SFZ_Q = Formalism.calc_SFZ_Q(Q, Icoh_Q, aff_sq_mean, aff_mean_sq, variables.minQ, \
+        # variables.QmaxIntegrate, variables.maxQ)
+    # SAL_Q = Formalism.calc_SAL_Q(Q, Icoh_Q, aff_sq_mean, variables.minQ, variables.QmaxIntegrate, \
+        # variables.maxQ)
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # # QIsample, Isample_QIgor = read_file("../data/cea_files/CO2/WO2_007Subt.chi")
-
-    # # best_rho0_s = np.zeros((len(QmaxIntegrate), 2))
-
-    # # for l, val_QmaxIntegrate in enumerate(QmaxIntegrate):
-    # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate, maxQ)
-    # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate, maxQ)
-
-    # for QmaxIntegrate
-    # best_rho0_s[l][0] = rho0[minIndxRho0]
-    # best_rho0_s[l][1] = s[minIndxS]
-
-    # print(best_rho0_s[l][0], best_rho0_s[l][1])
-
-# plt.figure('QmaxIntegrate rho0')
-# plt.plot(QmaxIntegrate, best_rho0_s[ : ,0])
-# plt.axis([59, 101, 23.9, 25.1])
-# plt.xlabel('QmaxIntegrate($nm^{-1}$)')
-# plt.ylabel('rho0')
-# plt.grid()
-# plt.show
-
-# plt.figure('QmaxIntegrate s')
-# plt.plot(QmaxIntegrate, best_rho0_s[ : ,1])
-# plt.axis([59, 101, 0.59, 0.81])
-# plt.xlabel('QmaxIntegrate($nm^{-1}$)')
-# plt.ylabel('s')
-# plt.grid()
-# plt.show
-
-# best_rho0 = np.mean(best_rho0_s[ : ,0])
-
-# plt.ion()
-# for i in range(len(QmaxIntegrate)):
-    # min_index, max_index = calc_indices(Q, minQ, QmaxIntegrate[i], maxQ)
-    # validation_index, integration_index, calculation_index = calc_ranges(Q, minQ, QmaxIntegrate[i], maxQ)
-
-    # Isample_Q = calc_IsampleQ(I_Q, best_rho0_s[i,1], Ibkg_Q )
-    # alpha = calc_alpha(J_Q[integration_index], Sinf, Q[integration_index], Isample_Q[integration_index], fe_Q[integration_index], Ztot, best_rho0)
-    # Icoh_Q = calc_Icoh(N, alpha, Isample_Q, Iincoh_Q)
-    # S_Q = calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index)
-
-    # plt.figure('S_Q QmaxIntegrate')
-    # plt.plot(Q[validation_index], S_Q, label='%s' %QmaxIntegrate[i])
-    # plt.legend()
-    # plt.draw()
-
-    # time.sleep(1.0)
-
-# plt.grid()
-# plt.ioff()
-# plt.show()
+    # S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+        # variables.QmaxIntegrate, variables.maxQ)
+    
+    # # Utility.plot_data(Q, SAL_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    # # Utility.plot_data(Q, SFZ_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    # # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    
+    # # end formalism test
+    
+    #-----------------------------------------------------

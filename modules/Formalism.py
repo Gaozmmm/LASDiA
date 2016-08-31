@@ -142,7 +142,7 @@ def calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters):
     return aff_mean_squared
 
 
-def calc_S_QFZ(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, minQ, QmaxIntegrate, maxQ):
+def calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, minQ, QmaxIntegrate, maxQ):
     """Function to calculate S(Q) with Faber-Ziman formalism.
     
     Parameters
@@ -167,7 +167,7 @@ def calc_S_QFZ(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, minQ, QmaxIntegrat
     return S_Q
 
 
-def calc_S_QAL(Q, Icoh_Q, aff_squared_mean, minQ, QmaxIntegrate, maxQ):
+def calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, minQ, QmaxIntegrate, maxQ):
     """Function to calculate S(Q) with Ashcroft-Langreth formalism.
     
     Parameters
