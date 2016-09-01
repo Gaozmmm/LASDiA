@@ -41,9 +41,9 @@ MCC_path = "./SollerSlits.txt"
 MCC_type = "A"
 
 # Analysis parameters
-minQ = 8.005                                                    # Minimum Q value in data interpolation waves
-QmaxIntegrate = 90                                              # Qmax for all integration operations
-maxQ = 100                                                      # Maximum Q value in data interpolation waves
+minQ = 3.0 #8.005                                                    # Minimum Q value in data interpolation waves
+QmaxIntegrate = 98.0 #90.0                                              # Qmax for all integration operations
+maxQ = 109.0 #100.0                                                      # Maximum Q value in data interpolation waves
 
 # NumPoints = 550                                                 # Number of points for S(Q) smoothing
 smooth_factor = 0.25                                            # Smoothing factor for cubic spline

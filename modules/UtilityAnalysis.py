@@ -39,43 +39,97 @@ from scipy import interpolate
 from modules import Utility
 
 
-def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
-    """Function for smoothing S(Q).
-    This function smooths S(Q) and resets the number of points for the variable Q.
+def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
+    """Function to check if the raw data of measured and the background have the
+    same numeber of points.
+    If the number is different the function rebin them.
     
     Parameters
     ----------
-    Q             : numpy array 
-                    momentum transfer (nm^-1)
-    S_Q           : numpy array 
-                    structure factor
-    Sinf          : float
-                    value of S(Q) for Q->inf
-    smooth_factor : float
-                    smoothing factor
-    minQ          : float
-                    minimum Q value
-    QmaxIntegrate : float
-                    maximum Q value for the intagrations
-    maxQ          : float
-                    maximum Q value
-    NumPoints     : int
-                    number of points in the smoothed S(Q)
+    Q      : numpy array
+             momentum transfer (nm^-1)
+    I_Q    : numpy array
+             measured scattering intensity
+    Qbkg   : numpy array
+             background momentum transfer (nm^-1)
+    I_Qbkg : numpy array
+             background scattering intensity
+    minQ   : float
+             minimum Q value
+    maxQ   : float
+             maximum Q value
     
     Returns
     -------
-    S_Qsmoothed   : numpy array
-                    smoothed S(Q) with NumPoints dimension
+    Q      : numpy array
+             rebinned momentum transfer (nm^-1)
+    I_Q    : numpy array
+             rebinned measured scattering intensity
+    Qbkg   : numpy array
+             rebinned background momentum transfer (nm^-1)
+    I_Qbkg : numpy array
+             rebinned background scattering intensity
     """
     
-    smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], \
-        S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
-    S_Qsmoothed = smooth(Q)
+    if len(Q) != len(Qbkg):
+        min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
+        Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
+        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
     
-    S_Qsmoothed[Q<minQ] = 0
-    S_Qsmoothed[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
+    return (Q, I_Q, Qbkg, I_Qbkg)
+
+
+def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
+    """Function for the rebinning.
     
-    return S_Qsmoothed
+    Parameters
+    ----------
+    X      : numpy array
+             abscissa to rebin
+    f_X    : numpy array
+             ordinate to interpolate
+    BinNum : int
+             number of points to bin together
+    Num    : int
+             number of points in data interpolation
+    maxQ   : float
+             maximum Q value
+    minQ   : float
+             minimum Q value
+    
+    Returns
+    -------
+    BinX   : numpy array
+             rebinned abscissa
+    BinY   : numpy array
+             rebinned ordinate
+    """
+
+    newf_X = interpolate.interp1d(X, f_X)
+    ShiftX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
+    ShiftY = newf_X(ShiftX)
+
+    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
+    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
+    BinX = np.linspace(min, max, Num, endpoint=True)
+    BinY = np.zeros(Num)
+
+    for i in range(BinNum):
+        for j in range(0, Num):
+            BinY[j] += ShiftY[j*BinNum+i]
+
+    BinY /= BinNum
+
+    mask = np.where(BinX<=minQ)
+    BinY[mask] = 0.0
+
+    # lenX = len(X)
+    # numX = 2**int(math.log(lenX,2))
+    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
+    # if min < np.amin(X):
+        # min = np.amin(X)
+
+    return (BinX, BinY)
 
 
 def fitline(Q, I_Q, index1, element1, index2, element2):
@@ -181,6 +235,29 @@ def remove_peaks(Q, I_Q):
     return I_Q
 
 
+def Qto2theta(Q):
+    """Function to convert Q into 2theta.
+    
+    Parameters
+    ----------
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    
+    
+    Returns
+    -------
+    two_theta : numpy array
+                2theta angle (rad)
+    """
+
+    wavelenght = 0.03738
+    theta = np.arcsin((wavelenght*Q) / (4*np.pi))
+    two_theta = 2*theta
+
+    # return np.degrees(theta2)
+    return two_theta
+
+
 def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
     """Function to apply the damping factor to iintra(Q) function.
     
@@ -212,6 +289,46 @@ def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
     return iintra_Q
 
 
+def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
+    """Function for smoothing S(Q).
+    This function smooths S(Q) and resets the number of points for the variable Q.
+    
+    Parameters
+    ----------
+    Q             : numpy array 
+                    momentum transfer (nm^-1)
+    S_Q           : numpy array 
+                    structure factor
+    Sinf          : float
+                    value of S(Q) for Q->inf
+    smooth_factor : float
+                    smoothing factor
+    minQ          : float
+                    minimum Q value
+    QmaxIntegrate : float
+                    maximum Q value for the intagrations
+    maxQ          : float
+                    maximum Q value
+    NumPoints     : int
+                    number of points in the smoothed S(Q)
+    
+    Returns
+    -------
+    S_Qsmoothed   : numpy array
+                    smoothed S(Q) with NumPoints dimension
+    """
+    
+    smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], \
+        S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
+    S_Qsmoothed = smooth(Q)
+    
+    S_Qsmoothed[Q<minQ] = 0
+    S_Qsmoothed[(Q>QmaxIntegrate)] = Sinf
+    # S_Qsmoothed[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
+    
+    return S_Qsmoothed
+
+
 def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
     """Function to apply the damping factor to the structure factor.
     
@@ -240,122 +357,6 @@ def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
     S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
 
     return S_Qdamp
-
-
-def Qto2theta(Q):
-    """Function to convert Q into 2theta.
-    
-    Parameters
-    ----------
-    Q         : numpy array
-                momentum transfer (nm^-1)
-    
-    
-    Returns
-    -------
-    two_theta : numpy array
-                2theta angle (rad)
-    """
-
-    wavelenght = 0.03738
-    theta = np.arcsin((wavelenght*Q) / (4*np.pi))
-    two_theta = 2*theta
-
-    # return np.degrees(theta2)
-    return two_theta
-
-
-def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
-    """Function to check if the raw data of measured and the background have the
-    same numeber of points.
-    If the number is different the function rebin them.
-    
-    Parameters
-    ----------
-    Q      : numpy array
-             momentum transfer (nm^-1)
-    I_Q    : numpy array
-             measured scattering intensity
-    Qbkg   : numpy array
-             background momentum transfer (nm^-1)
-    I_Qbkg : numpy array
-             background scattering intensity
-    minQ   : float
-             minimum Q value
-    maxQ   : float
-             maximum Q value
-    
-    Returns
-    -------
-    Q      : numpy array
-             rebinned momentum transfer (nm^-1)
-    I_Q    : numpy array
-             rebinned measured scattering intensity
-    Qbkg   : numpy array
-             rebinned background momentum transfer (nm^-1)
-    I_Qbkg : numpy array
-             rebinned background scattering intensity
-    """
-    
-    if len(Q) != len(Qbkg):
-        min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
-        Q, I_Q = rebinning(Q, I_Q, 1, min_len, maxQ, minQ)
-        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, maxQ, minQ)
-    
-    return (Q, I_Q, Qbkg, I_Qbkg)
-
-
-def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
-    """Function for the rebinning.
-    
-    Parameters
-    ----------
-    X      : numpy array
-             abscissa to rebin
-    f_X    : numpy array
-             ordinate to interpolate
-    BinNum : int
-             number of points to bin together
-    Num    : int
-             number of points in data interpolation
-    maxQ   : float
-             maximum Q value
-    minQ   : float
-             minimum Q value
-    
-    Returns
-    -------
-    BinX   : numpy array
-             rebinned abscissa
-    BinY   : numpy array
-             rebinned ordinate
-    """
-
-    newf_X = interpolate.interp1d(X, f_X)
-    ShiftX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
-    ShiftY = newf_X(ShiftX)
-
-    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
-    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
-    BinX = np.linspace(min, max, Num, endpoint=True)
-    BinY = np.zeros(Num)
-
-    for i in range(BinNum):
-        for j in range(0, Num):
-            BinY[j] += ShiftY[j*BinNum+i]
-
-    BinY /= BinNum
-
-    mask = np.where(BinX<=minQ)
-    BinY[mask] = 0.0
-
-    # lenX = len(X)
-    # numX = 2**int(math.log(lenX,2))
-    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
-    # if min < np.amin(X):
-        # min = np.amin(X)
-
-    return (BinX, BinY)
 
 
 def interpolation_after_smoothing(X, newX, f_X):

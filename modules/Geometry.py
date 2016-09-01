@@ -274,7 +274,7 @@ def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q
     return Ibkg_Q
 
 
-def geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, calc_phi_matrix):
+def geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, phi_matrix_flag):
     """Function to calcultate all intensity geometrical corrections.
     
     Parameters
@@ -289,7 +289,7 @@ def geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, calc_phi_matrix):
                       background scattering intensity
     variables       : module
                       input variables setted by the user
-    calc_phi_matrix : string
+    phi_matrix_flag : string
                       flag for the phi matrix calculation:
                       "y": calculate phi matrix and save on file
                       "n": read the phi matrix from file
@@ -309,14 +309,16 @@ def geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, calc_phi_matrix):
     
     num_point = 1000
     
-    if calc_phi_matrix.lower() == "y": 
+    phi_matrix_path = "./phi_matrix_" + variables.molecule
+    
+    if phi_matrix_flag.lower() == "y": 
         ws1, ws2, r1, r2, d = Utility.read_MCC_file(variables.MCC_path, variables.MCC_type)
         thickness_sampling, phi_matrix = calc_phi_matrix(variables.phi_matrix_thickness, \
             two_theta, ws1, ws2, r1, r2, d, num_point)
-        np.save("./phi_matrix", phi_matrix)
+        np.save(phi_matrix_path, phi_matrix)
     else:
         thickness_sampling = np.linspace(0, variables.phi_matrix_thickness, num=num_point)
-        phi_matrix = np.load("./phi_matrix.npy")
+        phi_matrix = np.load(phi_matrix_path + ".npy")
     
     T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = calc_T_MCC(0.003, thickness_sampling, \
         phi_matrix, "y")

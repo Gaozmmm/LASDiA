@@ -95,8 +95,6 @@ def Kaplow_method(numAtoms, variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, Sinf, \
         variables.QmaxIntegrate, variables.damping_factor)
     
-    # Utility.plot_data(Q, S_QsmoothedDamp, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    
     i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         i_Q[Q<=variables.QmaxIntegrate])

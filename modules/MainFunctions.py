@@ -397,9 +397,13 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
     """
     
     S_Q = np.zeros(Q.size)
+    # S_Q = np.empty(Q.size)
+    # S_Q.fill(Sinf)
+    # S_Q[Q<=minQ] = 0.0
     S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] \
         / (N * Ztot**2 * fe_Q[(Q>minQ) & (Q<=QmaxIntegrate)]**2)
-    S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
+    S_Q[Q>QmaxIntegrate] = Sinf
+    # S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
     
     return S_Q
 
