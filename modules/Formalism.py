@@ -50,12 +50,64 @@ import matplotlib.pyplot as plt
 from modules import MainFunctions
 
 
-def calc_alphaFZ(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared):
-    """Function to calcultate alpha for the FZ formalism.
+def calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared):
+    """Function to calcultate alpha with Waseda formula (eq. 2.1.21).
     
+    Parameters
+    ----------
+    Q                : numpy array
+                       momentum transfer (nm^-1)
+    Isample_Q        : numpy array
+                       sample scattering intensity
+    Iincoh_Q         : numpy array
+                       incoherent scattering intensity
+    rho0             : float
+                       average atomic density
+    aff_squared_mean : numpy array
+                        mean of the squared form factor: <f^2>
+    aff_mean_squared : numpy array
+                       squared of the mean form factor: <f>^2
+    
+    Returns
+    -------
+    alpha            : float
+                       normalization factor
     """
     
-    Integral1 = simps((Iincoh_Q + (aff_squared_mean/aff_mean_squared)) * Q**2, Q)
+    gamma = 0.001 # 0.01
+    Integral1 = simps((Iincoh_Q + aff_squared_mean) * np.exp(-gamma*Q**2)/aff_mean_squared * Q**2, Q)
+    Integral2 = simps((Isample_Q * np.exp(-gamma*Q**2)/aff_mean_squared) * Q**2,Q)
+    alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
+    
+    return alpha
+
+
+def calc_alphaM(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared):
+    """Function to calcultate alpha with Morard formula.
+    Morard et al. E&PSL, Vol 263, Is 1-2, p. 128-139 (eq. 15).
+    
+    Parameters
+    ----------
+    Q                : numpy array
+                       momentum transfer (nm^-1)
+    Isample_Q        : numpy array
+                       sample scattering intensity
+    Iincoh_Q         : numpy array
+                       incoherent scattering intensity
+    rho0             : float
+                       average atomic density
+    aff_squared_mean : numpy array
+                        mean of the squared form factor: <f^2>
+    aff_mean_squared : numpy array
+                       squared of the mean form factor: <f>^2
+    
+    Returns
+    -------
+    alpha            : float
+                       normalization factor
+    """
+    
+    Integral1 = simps((Iincoh_Q + aff_squared_mean)/aff_mean_squared * Q**2, Q)
     Integral2 = simps((Isample_Q/aff_mean_squared) * Q**2,Q)
     alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
     
@@ -142,31 +194,6 @@ def calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters):
     return aff_mean_squared
 
 
-def calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, minQ, QmaxIntegrate, maxQ):
-    """Function to calculate S(Q) with Faber-Ziman formalism.
-    
-    Parameters
-    ----------
-    Q                 : numpy array
-                        momentum transfer (nm)
-    Icoh_Q            : numpy array (nm)
-                        coherent scattering intensity
-    
-    
-    Returns
-    -------
-    S_Q               : numpy array
-                        structure factor in FZ formalism
-    """
-    
-    S_Q = np.zeros(Q.size)
-    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = (Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] - \
-        (aff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)] - aff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])) / (aff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])
-    S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 1
-    
-    return S_Q
-
-
 def calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, minQ, QmaxIntegrate, maxQ):
     """Function to calculate S(Q) with Ashcroft-Langreth formalism.
     
@@ -192,6 +219,33 @@ def calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, minQ, QmaxIntegrate, maxQ):
     
     S_Q = np.zeros(Q.size)
     S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] / aff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)]
-    S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 1
+    # S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 1
+    S_Q[(Q>QmaxIntegrate)] = 1
+    
+    return S_Q
+
+
+def calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, minQ, QmaxIntegrate, maxQ):
+    """Function to calculate S(Q) with Faber-Ziman formalism.
+    
+    Parameters
+    ----------
+    Q                 : numpy array
+                        momentum transfer (nm)
+    Icoh_Q            : numpy array (nm)
+                        coherent scattering intensity
+    
+    
+    Returns
+    -------
+    S_Q               : numpy array
+                        structure factor in FZ formalism
+    """
+    
+    S_Q = np.zeros(Q.size)
+    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = (Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] - \
+        (aff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)] - aff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])) / (aff_mean_squared[(Q>minQ) & (Q<=QmaxIntegrate)])
+    # S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 1
+    S_Q[(Q>QmaxIntegrate)] = 1
     
     return S_Q

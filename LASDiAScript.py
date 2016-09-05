@@ -77,58 +77,99 @@ if __name__ == '__main__':
     r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
         variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
     
-    scale_factor = variables.s_value
+    scale_factor = variables.sf_value
     density = variables.rho0_value
     percentage = 20
-    
-    # while True:
-    sf_array = UtilityAnalysis.make_array(scale_factor, percentage)
-    rho0_array = UtilityAnalysis.make_array(density, percentage)
-    chi2 = np.zeros((rho0_array.size, sf_array.size))
-    
-    chi2_min = 1000000
-    
-    for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-        chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
-            Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
-        if chi2[idx_rho0][idx_sf] < chi2_min:
-            chi2_min = chi2[idx_rho0][idx_sf]
-            best_sf = sf
-            best_rho0 = rho0
-            FOpt_r = F_r
-            Sbest_Q = S_Q
-    
-    scale_factor, density = Minimization.calc_min_chi2(sf_array, rho0_array, chi2)
-    # percentage /= 2
-    # if conditions...
-    
-    print(scale_factor, best_sf)
-    print(density, best_rho0)
-    
-    SOpt_Q = MainFunctions.calc_SQCorr(FOpt_r, r, Q, Sinf)
-    
-    Utility.plot_data(Q, Sbest_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    Utility.plot_data(Q, SOpt_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{Opt}(Q)$", "y")
-    
-    plt.show()
-    
-    
     
     
     
     
     #-----------------------------------------------------
+    # Automatic loop for rho0 and sf
     
-    # # test formalism
+    # This is good, but I still have to test several parts and I need more flexibility!
+    
+    jj = 0
+    FOpt_r = []
+    Sbest_Q = []
+    
+    sf_loop = "y"
+    rho0_loop = "y"
+    
+    while True:
+        # print(jj)
+        
+        if sf_loop == "y":
+            sf_array = UtilityAnalysis.make_array(scale_factor, percentage)
+        else:
+            sf_array = np.array([scale_factor])
+        if rho0_loop == "y":
+            rho0_array = UtilityAnalysis.make_array(density, percentage)
+        else:
+            rho0_array = np.array([25])
+        
+        chi2 = np.zeros((rho0_array.size, sf_array.size))
+        
+        chi2_min = 1000000
+        
+        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
+                Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
+            if chi2[idx_rho0][idx_sf] < chi2_min:
+                chi2_min = chi2[idx_rho0][idx_sf]
+                best_sf = sf
+                best_rho0 = rho0
+                FOpt_r.append(F_r)
+                Sbest_Q.append(S_Q)
+        
+        scale_factor, density = Minimization.calc_min_chi2(sf_array, rho0_array, chi2)
+        percentage /= 2
+        
+        # print(jj, scale_factor, best_sf)
+        # print(jj, density, best_rho0)
+        # print("----------------------")
+        
+        jj += 1
+        if jj == 1:
+            break
+            
+    # end loop
+    #-----------------------------------------------------
+    
+    
+    
+    
+    
+    
+    # chi2, S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
+        # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scale_factor, density, Fintra_r, r)
+    
+    # SOpt_Q0 = MainFunctions.calc_SQCorr(FOpt_r[0], r, Q, Sinf)
+    # SOpt_Q1 = MainFunctions.calc_SQCorr(FOpt_r[1], r, Q, Sinf)
+    
+    # Utility.plot_data(Q, Sbest_Q[0], "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)0$", "y")
+    # Utility.plot_data(Q, Sbest_Q[1], "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)1$", "y")
+    # Utility.plot_data(Q, SOpt_Q0, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{Opt}(Q)0$", "y")
+    # Utility.plot_data(Q, SOpt_Q1, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{Opt}(Q)1$", "y")
+    
+    # plt.show()
+    
+    #-----------------------------------------------------
+    # test formalism
     
     # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
-    # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
-        # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-        # fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    
+    # alphaW = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, density, aff_sq_mean, aff_mean_sq)
+    # alphaM = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, density, aff_sq_mean, aff_mean_sq)
+    
+    # print("Waseda ", alphaW)
+    # print("Morard ", alphaM)
+   
     # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
     
-    # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+   
     
     # SFZ_Q = Formalism.calc_SFZ_Q(Q, Icoh_Q, aff_sq_mean, aff_mean_sq, variables.minQ, \
         # variables.QmaxIntegrate, variables.maxQ)
@@ -138,10 +179,15 @@ if __name__ == '__main__':
     # S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
         # variables.QmaxIntegrate, variables.maxQ)
     
-    # # Utility.plot_data(Q, SAL_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
-    # # Utility.plot_data(Q, SFZ_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
-    # # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    # Utility.plot_data(Q, SAL_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    # Utility.plot_data(Q, SFZ_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
     
-    # # end formalism test
-    
+    # end formalism test
     #-----------------------------------------------------
+    
+    
+    
+    
+    
+    

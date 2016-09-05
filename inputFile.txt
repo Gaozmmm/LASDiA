@@ -54,8 +54,8 @@ iteration = 2                                                   # Number of iter
 rmin = 0.22                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
-s_value = 0.98                                                  # Scale factor initial value
-rho0_value = 29                                                 # Sample density initial value
+sf_value = 0.8379 #0.98                                                  # Scale factor initial value
+rho0_value = 25.4072222222 #29                                                 # Sample density initial value
 
 
 
