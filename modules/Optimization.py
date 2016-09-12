@@ -222,7 +222,7 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     return i_Qi
 
 
-def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin, varPlot):
+def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin, plot_iter):
     """Function to calculate the F(r) optimization (eq 47, 48, 49).
     
     Parameters
@@ -245,7 +245,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
                 atomic distance (nm)
     rmin      : float
                 r cut-off value (nm)
-    varPlot   : string
+    plot_iter : string
                 flag to plot the F(r) iterations
     
     Returns
@@ -256,7 +256,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
                 difference between the last F(r) and its theoretical value
     """
 
-    if varPlot.lower() == "y":
+    if plot_iter.lower() == "y":
         plt.ion()
         plt.figure('F_rIt')
         plt.plot(r, F_r, label='F(r)')
@@ -271,7 +271,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
         i_Q[0] = 0.0
         F_r = MainFunctions.calc_Fr(r, Q, i_Q)
         
-        if varPlot.lower() == "y":
+        if plot_iter.lower() == "y":
             j = i+1
             plt.figure('F_rIt')
             plt.plot(r, F_r, label='%s iteration F(r)' %j)
@@ -280,7 +280,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
             
             time.sleep(1.0)
     
-    if varPlot.lower() == "y":
+    if plot_iter.lower() == "y":
         plt.ioff()
     
     return (F_r, deltaF_r)

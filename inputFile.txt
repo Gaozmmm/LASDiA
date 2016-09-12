@@ -24,38 +24,42 @@
 # The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-# data_file = "../data/cea_files/CO2/WO2_007T++.chi"
-# bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
-data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
-bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
+data_file = "../data/cea_files/CO2/WO2_007T++.chi"
+bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
+# data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
+# bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
 
 # Sample composition
-molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
+molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
 element_params = "./elementParameters.txt"                      # Path element parameters file
 
 # Geometry corrections
 abs_length = 1.208                                              # @33keV 1.208cm
 dac_thickness = 0.144                                           # cm
 phi_matrix_thickness = 0.17                                     # cm
+phi_matrix_flag = "n"                                           # flag for the phi matrix calculation
 MCC_path = "./SollerSlits.txt"
 MCC_type = "A"
 
 # Analysis parameters
-minQ = 3.0 #8.005                                                    # Minimum Q value in data interpolation waves
-QmaxIntegrate = 98.0 #90.0                                              # Qmax for all integration operations
-maxQ = 109.0 #100.0                                                      # Maximum Q value in data interpolation waves
+minQ = 8.005 # 3.0                                                    # Minimum Q value in data interpolation waves
+QmaxIntegrate = 90.0 #98.0                                              # Qmax for all integration operations
+maxQ = 100.0 #109.0                                                      # Maximum Q value in data interpolation waves
 
 # NumPoints = 550                                                 # Number of points for S(Q) smoothing
 smooth_factor = 0.25                                            # Smoothing factor for cubic spline
 damping_factor = 1                                                 # Exponential damping factor == A*Qmax^2
 
 # F(r) optimization
+plot_iter = "n"                                            # flag to plot the F(r) iterations
 iteration = 2                                                   # Number of iteration for F(r) optimization
 rmin = 0.22                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
 sf_value = 0.8379 #0.98                                                  # Scale factor initial value
 rho0_value = 25.4072222222 #29                                                 # Sample density initial value
+sf_loop = "n"                                                  # flag for the loop
+rho0_loop = "n"                                                  # flag for the loop
 
 
 

@@ -383,7 +383,7 @@ def interpolation_after_smoothing(X, newX, f_X):
     return newf_X
 
 
-def make_array(var_value, percentage):
+def make_array_loop(var_value, percentage):
     """Function to create an array given its middle value and the percentage
     of the extreme.
     
@@ -406,3 +406,19 @@ def make_array(var_value, percentage):
     var_array = np.linspace(low_extreme, high_extreme, 10)
     
     return var_array
+
+
+def make_array(variables, scale_factor, density, percentage):
+    """
+    """
+    
+    if variables.sf_loop == "y":
+        sf_array = make_array_loop(scale_factor, percentage)
+    else:
+        sf_array = np.array([scale_factor])
+    if variables.rho0_loop == "y":
+        rho0_array = make_array_loop(density, percentage)
+    else:
+        rho0_array = np.array([density])
+    
+    return (sf_array, rho0_array)
