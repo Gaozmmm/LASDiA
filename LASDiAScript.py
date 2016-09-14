@@ -73,17 +73,55 @@ if __name__ == '__main__':
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+    Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
-    r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
-        variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
+    # r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
+        # variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
     
-    scale_factor = variables.sf_value
-    density = variables.rho0_value
-    percentage = 20
+    # scale_factor = variables.sf_value
+    # density = variables.rho0_value
+    # percentage = 20
     
+    #-----------------------------------------------------
+    # Test alpha
     
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, variables.sf_value, Ibkg_Q)
+    val_alphaE = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        fe_Q[Q<=variables.QmaxIntegrate], Ztot, variables.rho0_value)
     
+    val_alphaE2 = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf_Q[Q<=variables.QmaxIntegrate], \
+        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        fe_Q[Q<=variables.QmaxIntegrate], Ztot, variables.rho0_value)
+    
+    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    gamma = np.linspace(0, 0.01, 1000)
+    
+    alphaE = np.empty(gamma.size)
+    alphaE.fill(val_alphaE)
+    alphaE2 = np.empty(gamma.size)
+    alphaE2.fill(val_alphaE2)
+    
+    alphaW = np.array([])
+    for g_val in gamma:
+        # print(g_val)
+        val_alphaW = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, variables.rho0_value, aff_sq_mean, aff_mean_sq, g_val)
+        alphaW = np.append(alphaW, val_alphaW)
+    
+    alphaM = np.empty(gamma.size)
+    val_alphaM = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, variables.rho0_value, aff_sq_mean, aff_mean_sq)
+    alphaM.fill(val_alphaM)
+    
+    print("E", val_alphaE)
+    print("E2", val_alphaE2)
+    # print("W", val_alphaW)
+    print("M", val_alphaM)
+    
+    Utility.plot_data(gamma, alphaE, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^E$", "y")
+    Utility.plot_data(gamma, alphaE2, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^E$ $S_\infty(Q)$", "y")
+    # Utility.plot_data(gamma, alphaW, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^W$", "y")
+    Utility.plot_data(gamma, alphaM, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^M$", "y")
     
     #-----------------------------------------------------
     # Automatic loop for rho0 and sf
@@ -103,38 +141,38 @@ if __name__ == '__main__':
     # sf_loop = "n"
     # rho0_loop = "n"
     
-    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
     
-    while True:
-        # print(jj)
+    # while True:
+        # # print(jj)
         
-        if variables.sf_loop == "y":
-            sf_array = UtilityAnalysis.make_array_loop(scale_factor, percentage)
-        else:
-            sf_array = np.array([scale_factor])
-        if variables.rho0_loop == "y":
-            rho0_array = UtilityAnalysis.make_array_loop(density, percentage)
-        else:
-            rho0_array = np.array([density])
+        # if variables.sf_loop == "y":
+            # sf_array = UtilityAnalysis.make_array_loop(scale_factor, percentage)
+        # else:
+            # sf_array = np.array([scale_factor])
+        # if variables.rho0_loop == "y":
+            # rho0_array = UtilityAnalysis.make_array_loop(density, percentage)
+        # else:
+            # rho0_array = np.array([density])
         
-        chi2 = np.zeros((rho0_array.size, sf_array.size))
-        chi2AL = np.zeros((rho0_array.size, sf_array.size))
-        chi2FZ = np.zeros((rho0_array.size, sf_array.size))
+        # chi2 = np.zeros((rho0_array.size, sf_array.size))
+        # chi2AL = np.zeros((rho0_array.size, sf_array.size))
+        # chi2FZ = np.zeros((rho0_array.size, sf_array.size))
         
-        chi2_min = 1000000
+        # chi2_min = 1000000
         
-        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-            chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
-                Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
-            if chi2[idx_rho0][idx_sf] < chi2_min:
-                chi2_min = chi2[idx_rho0][idx_sf]
-                best_sf = sf
-                best_rho0 = rho0
-                FOpt_r = F_r
-                Sbest_Q = S_Q
-                # FOpt_r.append(F_r)
-                # Sbest_Q.append(S_Q)
+        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            # chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
+                # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
+            # if chi2[idx_rho0][idx_sf] < chi2_min:
+                # chi2_min = chi2[idx_rho0][idx_sf]
+                # best_sf = sf
+                # best_rho0 = rho0
+                # FOpt_r = F_r
+                # Sbest_Q = S_Q
+                # # FOpt_r.append(F_r)
+                # # Sbest_Q.append(S_Q)
         
         # scale_factor, density = Minimization.calc_min_chi2(sf_array, rho0_array, chi2)
         # percentage /= 2
@@ -143,22 +181,22 @@ if __name__ == '__main__':
         # print(jj, density, best_rho0)
         # print("----------------------")
         
-        chi2_min = 1000000
+        # chi2_min = 1000000
         
-        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-            chi2AL[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
-                Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
-            print(sf, rho0)
-            if chi2AL[idx_rho0][idx_sf] < chi2_min:
-                chi2_min = chi2AL[idx_rho0][idx_sf]
-                best_sfAL = sf
-                best_rho0AL = rho0
-                FOpt_rAL = F_r
-                Sbest_QAL = S_Q
+        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            # chi2AL[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
+                # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
+            # print(sf, rho0)
+            # if chi2AL[idx_rho0][idx_sf] < chi2_min:
+                # chi2_min = chi2AL[idx_rho0][idx_sf]
+                # best_sfAL = sf
+                # best_rho0AL = rho0
+                # FOpt_rAL = F_r
+                # Sbest_QAL = S_Q
         
         # Utility.plot_data(Q, Sbest_QAL, "S_QAL", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
         
-        scale_factorAL, densityAL = Minimization.calc_min_chi2(sf_array, rho0_array, chi2AL)
+        # scale_factorAL, densityAL = Minimization.calc_min_chi2(sf_array, rho0_array, chi2AL)
         
         # chi2_min = 1000000
         
@@ -175,9 +213,9 @@ if __name__ == '__main__':
         # scale_factorFZ, densityFZ = Minimization.calc_min_chi2(sf_array, rho0_array, chi2FZ)
         
         
-        jj += 1
-        if jj == 1:
-            break
+        # jj += 1
+        # if jj == 1:
+            # break
         
     # end loop
     #-----------------------------------------------------

@@ -155,7 +155,7 @@ def Kaplow_methodWAL(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
     """
     
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
-    alpha = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared)
+    alpha = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared, 0.001)
     Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
     
     S_Q = Formalism.calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, variables.minQ, variables.QmaxIntegrate, variables.maxQ)

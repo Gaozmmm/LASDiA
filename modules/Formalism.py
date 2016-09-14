@@ -50,7 +50,7 @@ import matplotlib.pyplot as plt
 from modules import MainFunctions
 
 
-def calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared):
+def calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared, gamma):
     """Function to calcultate alpha with Waseda formula (eq. 2.1.21).
     
     Parameters
@@ -64,9 +64,11 @@ def calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared
     rho0             : float
                        average atomic density
     aff_squared_mean : numpy array
-                        mean of the squared form factor: <f^2>
+                       mean of the squared form factor: <f^2>
     aff_mean_squared : numpy array
                        squared of the mean form factor: <f>^2
+    gamma            : float
+                       value of gamma parameter
     
     Returns
     -------
@@ -74,7 +76,7 @@ def calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared
                        normalization factor
     """
     
-    gamma = 0.001 # 0.01
+    # gamma = 0.001 # 0.01
     Integral1 = simps((Iincoh_Q + aff_squared_mean) * np.exp(-gamma*Q**2)/aff_mean_squared * Q**2, Q)
     Integral2 = simps((Isample_Q * np.exp(-gamma*Q**2)/aff_mean_squared) * Q**2,Q)
     alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2

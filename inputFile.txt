@@ -38,8 +38,8 @@ abs_length = 1.208                                              # @33keV 1.208cm
 dac_thickness = 0.144                                           # cm
 phi_matrix_thickness = 0.17                                     # cm
 phi_matrix_flag = "n"                                           # flag for the phi matrix calculation
-MCC_path = "./SollerSlits.txt"
-MCC_type = "A"
+MCC_path = "./SollerSlits.txt"                                  # path of Soller Slits parameters
+MCC_type = "A"                                                  # type of Soller Slits
 
 # Analysis parameters
 minQ = 8.005 # 3.0                                                    # Minimum Q value in data interpolation waves
