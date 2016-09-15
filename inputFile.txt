@@ -42,24 +42,24 @@ MCC_path = "./SollerSlits.txt"                                  # path of Soller
 MCC_type = "A"                                                  # type of Soller Slits
 
 # Analysis parameters
-minQ = 8.005 # 3.0                                                    # Minimum Q value in data interpolation waves
-QmaxIntegrate = 90.0 #98.0                                              # Qmax for all integration operations
-maxQ = 100.0 #109.0                                                      # Maximum Q value in data interpolation waves
+minQ = 8.005 # 3.0                                              # Minimum Q value in data interpolation waves
+QmaxIntegrate = 90.0 #98.0                                      # Qmax for all integration operations
+maxQ = 100.0 #109.0                                             # Maximum Q value in data interpolation waves
 
-# NumPoints = 550                                                 # Number of points for S(Q) smoothing
+# NumPoints = 550                                               # Number of points for S(Q) smoothing
 smooth_factor = 0.25                                            # Smoothing factor for cubic spline
-damping_factor = 1                                                 # Exponential damping factor == A*Qmax^2
+damping_factor = 1                                              # Exponential damping factor == A*Qmax^2
 
 # F(r) optimization
-plot_iter = "n"                                            # flag to plot the F(r) iterations
+plot_iter = "n"                                                 # flag to plot the F(r) iterations
 iteration = 2                                                   # Number of iteration for F(r) optimization
 rmin = 0.22                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
-sf_value = 0.8379 #0.98                                                  # Scale factor initial value
-rho0_value = 25.4072222222 #29                                                 # Sample density initial value
-sf_loop = "n"                                                  # flag for the loop
-rho0_loop = "n"                                                  # flag for the loop
+sf_value = 0.8379 #0.98                                         # Scale factor initial value
+rho0_value = 25.4072222222 #29                                  # Sample density initial value
+sf_loop = "y"                                                   # flag for the loop
+rho0_loop = "y"                                                 # flag for the loop
 
 
 

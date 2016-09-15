@@ -40,6 +40,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from itertools import product
 from timeit import default_timer as timer
+from scipy.integrate import simps
 
 from modules import Formalism
 from modules import Geometry
@@ -75,53 +76,14 @@ if __name__ == '__main__':
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
-    # r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
-        # variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
+    # Utility.plot_data(Q, Sinf_Q, "Sinf_Q", r"$Q(nm^{-1})$", r"$S_\infty(Q)$", r"$S_\infty(Q)$", "y")
     
-    # scale_factor = variables.sf_value
-    # density = variables.rho0_value
-    # percentage = 20
+    r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
+        variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
     
-    #-----------------------------------------------------
-    # Test alpha
-    
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, variables.sf_value, Ibkg_Q)
-    val_alphaE = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
-        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-        fe_Q[Q<=variables.QmaxIntegrate], Ztot, variables.rho0_value)
-    
-    val_alphaE2 = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf_Q[Q<=variables.QmaxIntegrate], \
-        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-        fe_Q[Q<=variables.QmaxIntegrate], Ztot, variables.rho0_value)
-    
-    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
-    gamma = np.linspace(0, 0.01, 1000)
-    
-    alphaE = np.empty(gamma.size)
-    alphaE.fill(val_alphaE)
-    alphaE2 = np.empty(gamma.size)
-    alphaE2.fill(val_alphaE2)
-    
-    alphaW = np.array([])
-    for g_val in gamma:
-        # print(g_val)
-        val_alphaW = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, variables.rho0_value, aff_sq_mean, aff_mean_sq, g_val)
-        alphaW = np.append(alphaW, val_alphaW)
-    
-    alphaM = np.empty(gamma.size)
-    val_alphaM = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, variables.rho0_value, aff_sq_mean, aff_mean_sq)
-    alphaM.fill(val_alphaM)
-    
-    print("E", val_alphaE)
-    print("E2", val_alphaE2)
-    # print("W", val_alphaW)
-    print("M", val_alphaM)
-    
-    Utility.plot_data(gamma, alphaE, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^E$", "y")
-    Utility.plot_data(gamma, alphaE2, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^E$ $S_\infty(Q)$", "y")
-    # Utility.plot_data(gamma, alphaW, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^W$", "y")
-    Utility.plot_data(gamma, alphaM, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^M$", "y")
+    scale_factor = variables.sf_value
+    density = variables.rho0_value
+    percentage = 20
     
     #-----------------------------------------------------
     # Automatic loop for rho0 and sf
@@ -141,30 +103,33 @@ if __name__ == '__main__':
     # sf_loop = "n"
     # rho0_loop = "n"
     
-    # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
     
-    # while True:
-        # # print(jj)
+    while True:
+        # print(jj)
         
-        # if variables.sf_loop == "y":
-            # sf_array = UtilityAnalysis.make_array_loop(scale_factor, percentage)
-        # else:
-            # sf_array = np.array([scale_factor])
-        # if variables.rho0_loop == "y":
-            # rho0_array = UtilityAnalysis.make_array_loop(density, percentage)
-        # else:
-            # rho0_array = np.array([density])
+        if variables.sf_loop == "y":
+            sf_array = UtilityAnalysis.make_array_loop(scale_factor, percentage)
+        else:
+            sf_array = np.array([scale_factor])
+        if variables.rho0_loop == "y":
+            rho0_array = UtilityAnalysis.make_array_loop(density, percentage)
+        else:
+            rho0_array = np.array([density])
         
-        # chi2 = np.zeros((rho0_array.size, sf_array.size))
-        # chi2AL = np.zeros((rho0_array.size, sf_array.size))
-        # chi2FZ = np.zeros((rho0_array.size, sf_array.size))
+        chi2 = np.zeros((rho0_array.size, sf_array.size))
+        chi2AL = np.zeros((rho0_array.size, sf_array.size))
+        chi2FZ = np.zeros((rho0_array.size, sf_array.size))
+        chi2ALM = np.zeros((rho0_array.size, sf_array.size))
+        chi2FZM = np.zeros((rho0_array.size, sf_array.size))
         
         # chi2_min = 1000000
         
         # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
             # chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
                 # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
+            
             # if chi2[idx_rho0][idx_sf] < chi2_min:
                 # chi2_min = chi2[idx_rho0][idx_sf]
                 # best_sf = sf
@@ -175,26 +140,18 @@ if __name__ == '__main__':
                 # # Sbest_Q.append(S_Q)
         
         # scale_factor, density = Minimization.calc_min_chi2(sf_array, rho0_array, chi2)
-        # percentage /= 2
-        
-        # print(jj, scale_factor, best_sf)
-        # print(jj, density, best_rho0)
-        # print("----------------------")
         
         # chi2_min = 1000000
         
         # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
             # chi2AL[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
                 # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
-            # print(sf, rho0)
             # if chi2AL[idx_rho0][idx_sf] < chi2_min:
                 # chi2_min = chi2AL[idx_rho0][idx_sf]
                 # best_sfAL = sf
                 # best_rho0AL = rho0
                 # FOpt_rAL = F_r
                 # Sbest_QAL = S_Q
-        
-        # Utility.plot_data(Q, Sbest_QAL, "S_QAL", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
         
         # scale_factorAL, densityAL = Minimization.calc_min_chi2(sf_array, rho0_array, chi2AL)
         
@@ -212,11 +169,66 @@ if __name__ == '__main__':
         
         # scale_factorFZ, densityFZ = Minimization.calc_min_chi2(sf_array, rho0_array, chi2FZ)
         
+        chi2_min = 1000000
         
-        # jj += 1
-        # if jj == 1:
-            # break
+        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            chi2ALM[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodMAL(numAtoms, variables, \
+                Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
+            print(chi2ALM[idx_rho0][idx_sf], chi2_min)
+            if chi2ALM[idx_rho0][idx_sf] < chi2_min:
+                chi2_min = chi2ALM[idx_rho0][idx_sf]
+                best_sfALM = sf
+                best_rho0ALM = rho0
+                FOpt_rALM = F_r
+                Sbest_QALM = S_Q
         
+        print(Sbest_QALM)
+        
+        scale_factorALM, densityALM = Minimization.calc_min_chi2(sf_array, rho0_array, chi2ALM)
+        
+        # chi2_min = 1000000
+        
+        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            # chi2FZM[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodMFZ(numAtoms, variables, \
+                # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
+            # if chi2FZM[idx_rho0][idx_sf] < chi2_min:
+                # chi2_min = chi2FZM[idx_rho0][idx_sf]
+                # best_sfFZM = sf
+                # best_rho0FZM = rho0
+                # FOpt_rFZM = F_r
+                # Sbest_QFZM = S_Q
+        
+        # scale_factorFZM, densityFZM = Minimization.calc_min_chi2(sf_array, rho0_array, chi2FZM)
+        
+        percentage /= 2
+        jj += 1
+        if jj == 2:
+            break
+    
+    # Utility.plot_data(Q, Sbest_Q, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    # Utility.plot_data(Q, Sbest_QAL, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    # Utility.plot_data(Q, Sbest_QFZ, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    Utility.plot_data(Q, Sbest_QALM, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
+    # Utility.plot_data(Q, Sbest_QFZM, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
+    # Utility.plot_data(r, FOpt_r, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    # Utility.plot_data(r, FOpt_rAL, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}(r)$", "y")
+    # Utility.plot_data(r, FOpt_rFZ, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
+    # Utility.plot_data(r, FOpt_rALM, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
+    # Utility.plot_data(r, FOpt_rFZM, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
+    
+    # Scorr_Q = MainFunctions.calc_SQCorr(FOpt_r, r, Q, Sinf)
+    # Scorr_QAL = MainFunctions.calc_SQCorr(FOpt_rAL, r, Q, 1)
+    # Scorr_QFZ = MainFunctions.calc_SQCorr(FOpt_rFZ, r, Q, 1)
+    # Scorr_QALM = MainFunctions.calc_SQCorr(FOpt_rALM, r, Q, 1)
+    # Scorr_QFZM = MainFunctions.calc_SQCorr(FOpt_rFZM, r, Q, 1)
+    
+    # Utility.plot_data(Q, Scorr_Q, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    # Utility.plot_data(Q, Scorr_QAL, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    # Utility.plot_data(Q, Scorr_QFZ, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    # Utility.plot_data(Q, Scorr_QALM, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
+    # Utility.plot_data(Q, Scorr_QFZM, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
     # end loop
     #-----------------------------------------------------
     
@@ -260,31 +272,163 @@ if __name__ == '__main__':
     
     # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
         # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-        # fe_Q[Q<=variables.QmaxIntegrate], Ztot, rho0)
+        # fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
     
-    # alphaW = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, density, aff_sq_mean, aff_mean_sq)
+    # alphaW = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, density, aff_sq_mean, aff_mean_sq, 0.001)
     # alphaM = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, density, aff_sq_mean, aff_mean_sq)
     
+    # print("Eggert ", alpha)
     # print("Waseda ", alphaW)
     # print("Morard ", alphaM)
    
     # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
     # Icoh_W_Q = MainFunctions.calc_Icoh(numAtoms, alphaW, Isample_Q, Iincoh_Q)
-    
-   
-    # SAL_Q = Formalism.calc_SAL_Q(Q, Icoh_W_Q, aff_sq_mean, variables.minQ, variables.QmaxIntegrate, \
-        # variables.maxQ)
-    # SFZ_Q = Formalism.calc_SFZ_Q(Q, Icoh_W_Q, aff_sq_mean, aff_mean_sq, variables.minQ, \
-        # variables.QmaxIntegrate, variables.maxQ)
+    # Icoh_M_Q = MainFunctions.calc_Icoh(numAtoms, alphaM, Isample_Q, Iincoh_Q)
     
     # S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
         # variables.QmaxIntegrate, variables.maxQ)
+    # S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, variables.smooth_factor, \
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    # S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, Sinf, \
+        # variables.QmaxIntegrate, variables.damping_factor)
     
+    # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
+    # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # i_Q[Q<=variables.QmaxIntegrate])
+    
+    # SAL_Q = Formalism.calc_SAL_Q(Q, Icoh_W_Q, aff_sq_mean, variables.minQ, variables.QmaxIntegrate, \
+        # variables.maxQ)
+    # SAL_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, SAL_Q, 1, variables.smooth_factor, \
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    # SAL_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(SAL_Qsmoothed, Q, 1, \
+        # variables.QmaxIntegrate, variables.damping_factor)
+    
+    # iAL_Q = MainFunctions.calc_iQ(SAL_QsmoothedDamp, 1)
+    # FAL_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # iAL_Q[Q<=variables.QmaxIntegrate])
+    
+    # SFZ_Q = Formalism.calc_SFZ_Q(Q, Icoh_W_Q, aff_sq_mean, aff_mean_sq, variables.minQ, \
+        # variables.QmaxIntegrate, variables.maxQ)
+    # SFZ_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, SFZ_Q, 1, variables.smooth_factor, \
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    # SFZ_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(SFZ_Qsmoothed, Q, 1, \
+        # variables.QmaxIntegrate, variables.damping_factor)
+    
+    # iFZ_Q = MainFunctions.calc_iQ(SFZ_QsmoothedDamp, 1)
+    # FFZ_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # iFZ_Q[Q<=variables.QmaxIntegrate])
+    
+    # SAL_M_Q = Formalism.calc_SAL_Q(Q, Icoh_M_Q, aff_sq_mean, variables.minQ, variables.QmaxIntegrate, \
+        # variables.maxQ)
+    # SAL_M_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, SAL_M_Q, 1, variables.smooth_factor, \
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    # SAL_M_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(SAL_M_Qsmoothed, Q, 1, \
+        # variables.QmaxIntegrate, variables.damping_factor)
+    
+    # iAL_M_Q = MainFunctions.calc_iQ(SAL_M_QsmoothedDamp, 1)
+    # FAL_M_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # iAL_M_Q[Q<=variables.QmaxIntegrate])
+    
+    # SFZ_M_Q = Formalism.calc_SFZ_Q(Q, Icoh_M_Q, aff_sq_mean, aff_mean_sq, variables.minQ, \
+        # variables.QmaxIntegrate, variables.maxQ)
+    # SFZ_M_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, SFZ_M_Q, 1, variables.smooth_factor, \
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    # SFZ_M_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(SFZ_M_Qsmoothed, Q, 1, \
+        # variables.QmaxIntegrate, variables.damping_factor)
+    
+    # iFZ_M_Q = MainFunctions.calc_iQ(SFZ_M_QsmoothedDamp, 1)
+    # FFZ_M_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # iFZ_M_Q[Q<=variables.QmaxIntegrate])
+    
+    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
     # Utility.plot_data(Q, SAL_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
     # Utility.plot_data(Q, SFZ_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
-    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    # Utility.plot_data(Q, SAL_M_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
+    # Utility.plot_data(Q, SFZ_M_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
+    # Utility.plot_data(Q, S_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    # Utility.plot_data(Q, SAL_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    # Utility.plot_data(Q, SFZ_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    # Utility.plot_data(Q, SAL_M_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
+    # Utility.plot_data(Q, SFZ_M_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
+    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    # Utility.plot_data(r, FAL_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}(r)$", "y")
+    # Utility.plot_data(r, FFZ_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
+    # Utility.plot_data(r, FAL_M_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
+    # Utility.plot_data(r, FFZ_M_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
     
     # end formalism test
+    #-----------------------------------------------------
+    
+    
+    #-----------------------------------------------------
+    # Test alpha
+    
+    # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, variables.sf_value, Ibkg_Q)
+    # val_alphaE = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+        # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        # fe_Q[Q<=variables.QmaxIntegrate], Ztot, variables.rho0_value)
+    
+    # val_alphaE2 = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf_Q[Q<=variables.QmaxIntegrate], \
+        # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        # fe_Q[Q<=variables.QmaxIntegrate], Ztot, variables.rho0_value)
+    
+    # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    # gamma = np.linspace(0, 0.01, 1000)
+    
+    # alphaE = np.empty(gamma.size)
+    # alphaE.fill(val_alphaE)
+    # alphaE2 = np.empty(gamma.size)
+    # alphaE2.fill(val_alphaE2)
+    
+    # alphaW = np.array([])
+    # for g_val in gamma:
+        # # print(g_val)
+        # val_alphaW = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, variables.rho0_value, aff_sq_mean, aff_mean_sq, g_val)
+        # alphaW = np.append(alphaW, val_alphaW)
+    
+    # alphaM = np.empty(gamma.size)
+    # val_alphaM = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, variables.rho0_value, aff_sq_mean, aff_mean_sq)
+    # alphaM.fill(val_alphaM)
+    
+    # print("E", val_alphaE)
+    # print("E2", val_alphaE2)
+    # # print("W", val_alphaW)
+    # print("M", val_alphaM)
+    
+    # Utility.plot_data(gamma, alphaE, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^E$", "y")
+    # Utility.plot_data(gamma, alphaE2, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^E$ $S_\infty(Q)$", "y")
+    # # Utility.plot_data(gamma, alphaW, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^W$", "y")
+    # Utility.plot_data(gamma, alphaM, "alpha", r"$\gamma$", r"$\alpha$", r"$\alpha^M$", "y")
+    
+    #-----------------------------------------------------
+    
+    #-----------------------------------------------------
+    # Kaplow method
+    # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
+    # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+        # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        # fe_Q[Q<=variables.QmaxIntegrate], Ztot, rho0)
+    # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
+    
+    # S_Q = MainFunctions.calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+        # variables.QmaxIntegrate, variables.maxQ)
+    # S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, variables.smooth_factor, \
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    # S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, Sinf, \
+        # variables.QmaxIntegrate, variables.damping_factor)
+    
+    # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
+    # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # i_Q[Q<=variables.QmaxIntegrate])
+    
+    # F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+        # Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+        # Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
+    
+    # chi2[idx_rho0][idx_sf] = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
     #-----------------------------------------------------
     
     plt.show()
