@@ -35,6 +35,7 @@ otherwise it is symbolized with just its name.
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import interpolate
+from scipy.integrate import simps
 
 from modules import Utility
 
@@ -422,3 +423,26 @@ def make_array(variables, scale_factor, density, percentage):
         rho0_array = np.array([density])
     
     return (sf_array, rho0_array)
+
+
+def normalize_to_1(var_y):
+    """Function to normalize a variable to unitary area.
+    
+    Parameters
+    ----------
+    var_y : numpy array
+            variable to normalize
+    
+    Returns
+    -------
+    var_y : numpy array
+            normalized variable
+    
+    """
+    
+    area = abs(simps(var_y))
+    # print(area)
+    var_y_norm = var_y / area
+    
+    return var_y_norm
+    

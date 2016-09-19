@@ -88,14 +88,14 @@ if __name__ == '__main__':
     #-----------------------------------------------------
     # Test Kaplow method for AL Morard
     
-    chi2_E, S_Q_E, F_r_E = KaplowMethod.Kaplow_method(numAtoms, variables, \
-                Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scale_factor, density, Fintra_r, r)
+    # chi2_E, S_Q_E, F_r_E = KaplowMethod.Kaplow_method(numAtoms, variables, \
+                # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scale_factor, density, Fintra_r, r)
     
-    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
     
-    chi2AL, S_Q_AL, F_r_AL = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
-                Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, scale_factor, density, Fintra_r, r)
+    # chi2AL, S_Q_AL, F_r_AL = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
+                # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, scale_factor, density, Fintra_r, r)
     
     # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
     # alpha = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, density, aff_sq_mean, aff_mean_sq)
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     
     # chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
     
-    print(chi2_E, chi2)
+    # print(chi2_E, chi2)
     
     #-----------------------------------------------------
     # Automatic loop for rho0 and sf
@@ -148,107 +148,120 @@ if __name__ == '__main__':
     # sf_loop = "n"
     # rho0_loop = "n"
     
-    # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
-    # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
+    aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
+    aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
     
-    # while True:
-        # # print(jj)
+    while True:
+        # print(jj)
         
-        # if variables.sf_loop == "y":
-            # sf_array = UtilityAnalysis.make_array_loop(scale_factor, percentage)
-        # else:
-            # sf_array = np.array([scale_factor])
-        # if variables.rho0_loop == "y":
-            # rho0_array = UtilityAnalysis.make_array_loop(density, percentage)
-        # else:
-            # rho0_array = np.array([density])
+        if variables.sf_loop == "y":
+            sf_array = UtilityAnalysis.make_array_loop(scale_factor, percentage)
+        else:
+            sf_array = np.array([scale_factor])
+        if variables.rho0_loop == "y":
+            rho0_array = UtilityAnalysis.make_array_loop(density, percentage)
+        else:
+            rho0_array = np.array([density])
         
-        # chi2 = np.zeros((rho0_array.size, sf_array.size))
-        # chi2AL = np.zeros((rho0_array.size, sf_array.size))
-        # chi2FZ = np.zeros((rho0_array.size, sf_array.size))
-        # chi2ALM = np.zeros((rho0_array.size, sf_array.size))
-        # chi2FZM = np.zeros((rho0_array.size, sf_array.size))
+        chi2 = np.zeros((rho0_array.size, sf_array.size))
+        chi2AL = np.zeros((rho0_array.size, sf_array.size))
+        chi2FZ = np.zeros((rho0_array.size, sf_array.size))
+        chi2ALM = np.zeros((rho0_array.size, sf_array.size))
+        chi2FZM = np.zeros((rho0_array.size, sf_array.size))
         
-        # chi2_min = 1000000
+        print(jj, "E-----------------------------------------------------")
         
-        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-            # chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
-                # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
-            
-            # if chi2[idx_rho0][idx_sf] < chi2_min:
-                # chi2_min = chi2[idx_rho0][idx_sf]
-                # best_sf = sf
-                # best_rho0 = rho0
-                # FOpt_r = F_r
-                # Sbest_Q = S_Q
-                # # FOpt_r.append(F_r)
-                # # Sbest_Q.append(S_Q)
+        chi2_min = 10000000
         
-        # scale_factor, density = Minimization.calc_min_chi2(sf_array, rho0_array, chi2)
+        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
+                Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
+            print(chi2[idx_rho0][idx_sf], chi2_min)
+            if chi2[idx_rho0][idx_sf] < chi2_min:
+                chi2_min = chi2[idx_rho0][idx_sf]
+                best_sf = sf
+                best_rho0 = rho0
+                FOpt_r = F_r
+                Sbest_Q = S_Q
+                # FOpt_r.append(F_r)
+                # Sbest_Q.append(S_Q)
         
-        # chi2_min = 1000000
+        scale_factor, density = Minimization.calc_min_chi2(sf_array, rho0_array, chi2)
         
-        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-            # chi2AL[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
-                # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
-            # if chi2AL[idx_rho0][idx_sf] < chi2_min:
-                # chi2_min = chi2AL[idx_rho0][idx_sf]
-                # best_sfAL = sf
-                # best_rho0AL = rho0
-                # FOpt_rAL = F_r
-                # Sbest_QAL = S_Q
+        print(jj, "AL-----------------------------------------------------")
         
-        # scale_factorAL, densityAL = Minimization.calc_min_chi2(sf_array, rho0_array, chi2AL)
+        chi2_min = 10000000
         
-        # chi2_min = 1000000
+        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            chi2AL[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
+                Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
+            print(chi2AL[idx_rho0][idx_sf], chi2_min)
+            if chi2AL[idx_rho0][idx_sf] < chi2_min:
+                chi2_min = chi2AL[idx_rho0][idx_sf]
+                best_sfAL = sf
+                best_rho0AL = rho0
+                FOpt_rAL = F_r
+                Sbest_QAL = S_Q
         
-        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-            # chi2FZ[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodWFZ(numAtoms, variables, \
-                # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
-            # if chi2FZ[idx_rho0][idx_sf] < chi2_min:
-                # chi2_min = chi2FZ[idx_rho0][idx_sf]
-                # best_sfFZ = sf
-                # best_rho0FZ = rho0
-                # FOpt_rFZ = F_r
-                # Sbest_QFZ = S_Q
+        scale_factorAL, densityAL = Minimization.calc_min_chi2(sf_array, rho0_array, chi2AL)
         
-        # scale_factorFZ, densityFZ = Minimization.calc_min_chi2(sf_array, rho0_array, chi2FZ)
+        print(jj, "FZ-----------------------------------------------------")
         
-        # chi2_min = 1000000
+        chi2_min = 10000000
         
-        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-            # chi2ALM[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodMAL(numAtoms, variables, \
-                # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
-            # print(chi2ALM[idx_rho0][idx_sf], chi2_min)
-            # if chi2ALM[idx_rho0][idx_sf] < chi2_min:
-                # chi2_min = chi2ALM[idx_rho0][idx_sf]
-                # best_sfALM = sf
-                # best_rho0ALM = rho0
-                # FOpt_rALM = F_r
-                # Sbest_QALM = S_Q
+        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            chi2FZ[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodWFZ(numAtoms, variables, \
+                Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
+            print(chi2FZ[idx_rho0][idx_sf], chi2_min)
+            if chi2FZ[idx_rho0][idx_sf] < chi2_min:
+                chi2_min = chi2FZ[idx_rho0][idx_sf]
+                best_sfFZ = sf
+                best_rho0FZ = rho0
+                FOpt_rFZ = F_r
+                Sbest_QFZ = S_Q
+        
+        scale_factorFZ, densityFZ = Minimization.calc_min_chi2(sf_array, rho0_array, chi2FZ)
+        
+        print(jj, "ALM-----------------------------------------------------")
+        
+        chi2_min = 10000000
+        
+        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            chi2ALM[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodMAL(numAtoms, variables, \
+                Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
+            print(chi2ALM[idx_rho0][idx_sf], chi2_min)
+            if chi2ALM[idx_rho0][idx_sf] < chi2_min:
+                chi2_min = chi2ALM[idx_rho0][idx_sf]
+                best_sfALM = sf
+                best_rho0ALM = rho0
+                FOpt_rALM = F_r
+                Sbest_QALM = S_Q
         
         # print(Sbest_QALM)
         
-        # scale_factorALM, densityALM = Minimization.calc_min_chi2(sf_array, rho0_array, chi2ALM)
+        scale_factorALM, densityALM = Minimization.calc_min_chi2(sf_array, rho0_array, chi2ALM)
         
-        # chi2_min = 1000000
+        print(jj, "FZM-----------------------------------------------------")
         
-        # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-            # chi2FZM[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodMFZ(numAtoms, variables, \
-                # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
-            # if chi2FZM[idx_rho0][idx_sf] < chi2_min:
-                # chi2_min = chi2FZM[idx_rho0][idx_sf]
-                # best_sfFZM = sf
-                # best_rho0FZM = rho0
-                # FOpt_rFZM = F_r
-                # Sbest_QFZM = S_Q
+        chi2_min = 10000000
         
-        # scale_factorFZM, densityFZM = Minimization.calc_min_chi2(sf_array, rho0_array, chi2FZM)
+        for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
+            chi2FZM[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_methodMFZ(numAtoms, variables, \
+                Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, sf, rho0, Fintra_r, r)
+            print(chi2FZM[idx_rho0][idx_sf], chi2_min)
+            if chi2FZM[idx_rho0][idx_sf] < chi2_min:
+                chi2_min = chi2FZM[idx_rho0][idx_sf]
+                best_sfFZM = sf
+                best_rho0FZM = rho0
+                FOpt_rFZM = F_r
+                Sbest_QFZM = S_Q
         
-        # percentage /= 2
-        # jj += 1
-        # if jj == 2:
-            # break
+        scale_factorFZM, densityFZM = Minimization.calc_min_chi2(sf_array, rho0_array, chi2FZM)
+        
+        percentage /= 2
+        jj += 1
+        if jj == 2:
+            break
     
     # Utility.plot_data(Q, Sbest_Q, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
     # Utility.plot_data(Q, Sbest_QAL, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
@@ -256,23 +269,66 @@ if __name__ == '__main__':
     # Utility.plot_data(Q, Sbest_QALM, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
     # Utility.plot_data(Q, Sbest_QFZM, "Sbest_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
     
-    # Utility.plot_data(r, FOpt_r, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
-    # Utility.plot_data(r, FOpt_rAL, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}(r)$", "y")
-    # Utility.plot_data(r, FOpt_rFZ, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
-    # Utility.plot_data(r, FOpt_rALM, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
-    # Utility.plot_data(r, FOpt_rFZM, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
+    Sbest_Q_norm = UtilityAnalysis.normalize_to_1(Sbest_Q)
+    Sbest_QAL_norm = UtilityAnalysis.normalize_to_1(Sbest_QAL)
+    Sbest_QFZ_norm = UtilityAnalysis.normalize_to_1(Sbest_QFZ)
+    Sbest_QALM_norm = UtilityAnalysis.normalize_to_1(Sbest_QALM)
+    Sbest_QFZM_norm = UtilityAnalysis.normalize_to_1(Sbest_QFZM)
     
-    # Scorr_Q = MainFunctions.calc_SQCorr(FOpt_r, r, Q, Sinf)
-    # Scorr_QAL = MainFunctions.calc_SQCorr(FOpt_rAL, r, Q, 1)
-    # Scorr_QFZ = MainFunctions.calc_SQCorr(FOpt_rFZ, r, Q, 1)
-    # Scorr_QALM = MainFunctions.calc_SQCorr(FOpt_rALM, r, Q, 1)
-    # Scorr_QFZM = MainFunctions.calc_SQCorr(FOpt_rFZM, r, Q, 1)
+    Utility.plot_data(Q, Sbest_Q_norm, "Sbest_QN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    Utility.plot_data(Q, Sbest_QAL_norm, "Sbest_QN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    Utility.plot_data(Q, Sbest_QFZ_norm, "Sbest_QN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    Utility.plot_data(Q, Sbest_QALM_norm, "Sbest_QN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
+    Utility.plot_data(Q, Sbest_QFZM_norm, "Sbest_QN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
+    # Utility.plot_data(r, FOpt_r, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    # Utility.plot_data(r, FOptAL_r, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}(r)$", "y")
+    # Utility.plot_data(r, FOptFZ_r, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
+    # Utility.plot_data(r, FOptALM_r, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
+    # Utility.plot_data(r, FOptFZM_r, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
+    
+    FOpt_r_norm = UtilityAnalysis.normalize_to_1(FOpt_r)
+    FOptAL_r_norm = UtilityAnalysis.normalize_to_1(FOpt_rAL)
+    FOptFZ_r_norm = UtilityAnalysis.normalize_to_1(FOpt_rFZ)
+    FOptALM_r_norm = UtilityAnalysis.normalize_to_1(FOpt_rALM)
+    FOptFZM_r_norm = UtilityAnalysis.normalize_to_1(FOpt_rFZM)
+    
+    Utility.plot_data(r, FOpt_r_norm, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    Utility.plot_data(r, FOptAL_r_norm, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}(r)$", "y")
+    Utility.plot_data(r, FOptFZ_r_norm, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
+    Utility.plot_data(r, FOptALM_r_norm, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
+    Utility.plot_data(r, FOptFZM_r_norm, "FOpt_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
+    
+    Scorr_Q = MainFunctions.calc_SQCorr(FOpt_r, r, Q, Sinf)
+    Scorr_QAL = MainFunctions.calc_SQCorr(FOpt_rAL, r, Q, 1)
+    Scorr_QFZ = MainFunctions.calc_SQCorr(FOpt_rFZ, r, Q, 1)
+    Scorr_QALM = MainFunctions.calc_SQCorr(FOpt_rALM, r, Q, 1)
+    Scorr_QFZM = MainFunctions.calc_SQCorr(FOpt_rFZM, r, Q, 1)
+    
+    Scorr_Q_norm = UtilityAnalysis.normalize_to_1(Scorr_Q)
+    Scorr_QAL_norm = UtilityAnalysis.normalize_to_1(Scorr_QAL)
+    Scorr_QFZ_norm = UtilityAnalysis.normalize_to_1(Scorr_QFZ)
+    Scorr_QALM_norm = UtilityAnalysis.normalize_to_1(Scorr_QALM)
+    Scorr_QFZM_norm = UtilityAnalysis.normalize_to_1(Scorr_QFZM)
     
     # Utility.plot_data(Q, Scorr_Q, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
     # Utility.plot_data(Q, Scorr_QAL, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
     # Utility.plot_data(Q, Scorr_QFZ, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
     # Utility.plot_data(Q, Scorr_QALM, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
     # Utility.plot_data(Q, Scorr_QFZM, "Sbest_Qc", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
+    Utility.plot_data(Q, Scorr_Q_norm, "Sbest_QcN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    Utility.plot_data(Q, Scorr_QAL_norm, "Sbest_QcN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    Utility.plot_data(Q, Scorr_QFZ_norm, "Sbest_QcN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    Utility.plot_data(Q, Scorr_QALM_norm, "Sbest_QcN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
+    Utility.plot_data(Q, Scorr_QFZM_norm, "Sbest_QcN", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
+    print("E", scale_factor, density)
+    print("AL", scale_factorAL, densityAL)
+    print("FZ", scale_factorFZ, densityFZ)
+    print("ALM", scale_factorALM, densityALM)
+    print("FZM", scale_factorFZM, densityFZM)
+    
     
     # end loop
     #-----------------------------------------------------
@@ -391,17 +447,35 @@ if __name__ == '__main__':
     # Utility.plot_data(Q, SAL_M_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
     # Utility.plot_data(Q, SFZ_M_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
     
-    # Utility.plot_data(Q, S_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
-    # Utility.plot_data(Q, SAL_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
-    # Utility.plot_data(Q, SFZ_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
-    # Utility.plot_data(Q, SAL_M_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
-    # Utility.plot_data(Q, SFZ_M_QsmoothedDamp, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    # S_QsmoothedDamp_norm = UtilityAnalysis.normalize_to_1(S_QsmoothedDamp)
+    # SAL_QsmoothedDamp_norm = UtilityAnalysis.normalize_to_1(SAL_QsmoothedDamp)
+    # SFZ_QsmoothedDamp_norm = UtilityAnalysis.normalize_to_1(SFZ_QsmoothedDamp)
+    # SAL_M_QsmoothedDamp_norm = UtilityAnalysis.normalize_to_1(SAL_M_QsmoothedDamp)
+    # SFZ_M_QsmoothedDamp_norm = UtilityAnalysis.normalize_to_1(SFZ_M_QsmoothedDamp)
+    
+    # Utility.plot_data(Q, S_QsmoothedDamp_norm, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
+    # Utility.plot_data(Q, SAL_QsmoothedDamp_norm, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}(Q)$", "y")
+    # Utility.plot_data(Q, SFZ_QsmoothedDamp_norm, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}(Q)$", "y")
+    # Utility.plot_data(Q, SAL_M_QsmoothedDamp_norm, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
+    # Utility.plot_data(Q, SFZ_M_QsmoothedDamp_norm, "S_QsmoothedDamp", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{FZ}_M(Q)$", "y")
+    
+    # F_r_norm = UtilityAnalysis.normalize_to_1(F_r)
+    # FAL_r_norm = UtilityAnalysis.normalize_to_1(FAL_r)
+    # FFZ_r_norm = UtilityAnalysis.normalize_to_1(FFZ_r)
+    # FAL_M_r_norm = UtilityAnalysis.normalize_to_1(FAL_M_r)
+    # FFZ_M_r_norm = UtilityAnalysis.normalize_to_1(FFZ_M_r)
+    
+    # Utility.plot_data(r, F_r_norm, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    # Utility.plot_data(r, FAL_r_norm, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}(r)$", "y")
+    # Utility.plot_data(r, FFZ_r_norm, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
+    # Utility.plot_data(r, FAL_M_r_norm, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
+    # Utility.plot_data(r, FFZ_M_r_norm, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
     
     # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
     # Utility.plot_data(r, FAL_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}(r)$", "y")
     # Utility.plot_data(r, FFZ_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
-    # Utility.plot_data(r, FAL_M_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
-    # Utility.plot_data(r, FFZ_M_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
+    # Utility.plot_data(r, FAL_M_r_norm, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
+    # Utility.plot_data(r, FFZ_M_r_norm, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}_M(r)$", "y")
     
     # end formalism test
     #-----------------------------------------------------

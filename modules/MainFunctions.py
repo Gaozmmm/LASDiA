@@ -531,6 +531,8 @@ def calc_SQCorr(F_r, r, Q, Sinf):
     Qr = np.outer(Q,r)
     sinQr = np.sin(Qr)
     Qi_Q =  np.sum(sinQr * F_r, axis=1) * meanDeltar
+    # print(Q)
     S_Q = Qi_Q/Q +Sinf
+    S_Q[0] = 0.0
     
     return S_Q

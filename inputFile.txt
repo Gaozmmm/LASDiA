@@ -24,12 +24,13 @@
 # The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-data_file = "../data/cea_files/CO2/WO2_007T++.chi"
-bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
 # data_file = "../data/cea_files/Ar/HT2_034T++_rem.chi"
 # bkg_file = "../data/cea_files/Ar/HT2_036T++_rem.chi"
+data_file = "../data/cea_files/CO2/WO2_007T++.chi"
+bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
 
 # Sample composition
+# molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
 molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
 element_params = "./elementParameters.txt"                      # Path element parameters file
 
@@ -42,9 +43,15 @@ MCC_path = "./SollerSlits.txt"                                  # path of Soller
 MCC_type = "A"                                                  # type of Soller Slits
 
 # Analysis parameters
-minQ = 8.005 # 3.0                                              # Minimum Q value in data interpolation waves
-QmaxIntegrate = 90.0 #98.0                                      # Qmax for all integration operations
-maxQ = 100.0 #109.0                                             # Maximum Q value in data interpolation waves
+# Ar
+# minQ = 3.0                                                      # Minimum Q value in data interpolation waves
+# QmaxIntegrate = 98.0                                            # Qmax for all integration operations
+# maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
+
+# CO2
+minQ = 8.005                                                    # Minimum Q value in data interpolation waves
+QmaxIntegrate = 90.0                                            # Qmax for all integration operations
+maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
 
 # NumPoints = 550                                               # Number of points for S(Q) smoothing
 smooth_factor = 0.25                                            # Smoothing factor for cubic spline
