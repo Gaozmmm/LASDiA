@@ -47,7 +47,7 @@ from modules import UtilityAnalysis
 
 def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, z, elementParameters):
     """Function to calculate the intramolecular contribution of i(Q) (eq. 41).
-    
+
     Parameters
     ----------
     Q                 : numpy array
@@ -77,19 +77,21 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
                         parameters : list
                                      list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
-    
+
     Returns
     -------
     iintra_Q          : numpy array
                         intramolecular contribution of i(Q)
     """
-    
+
     iintra_Q = np.zeros(Q.size)
     sinpq = np.zeros(Q.size)
 
     for ielem in range(len(element)):
         for jelem in range(len(element)):
             if ielem != jelem:
+                # print(ielem, jelem)
+                # print(element[ielem], element[jelem])
                 Kpi, Kp_Qi = MainFunctions.calc_Kp(fe_Q, element[ielem], Q, elementParameters)
                 Kpj, Kp_Qj = MainFunctions.calc_Kp(fe_Q, element[jelem], Q, elementParameters)
                 KK = Kpi * Kpj
@@ -100,6 +102,7 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
 
     iintra_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 0.0
     iintra_Q /= Ztot**2
+    iintra_Q /= 3
 
     return iintra_Q
 
@@ -107,7 +110,7 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
 def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
     x, y, z, elementParameters, damping_factor):
     """Function to calculate the intra-molecular components.
-    
+
     Parameters
     ----------
     Q                 : numpy array
@@ -138,8 +141,8 @@ def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element
                                      list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
     damping_factor    : float
-                        damp factor 
-    
+                        damp factor
+
     Returns
     -------
     r                 : numpy array
@@ -147,13 +150,13 @@ def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element
     Fintra_r          : numpy array
                         intramolecular contribution of F(r)
     """
-    
+
     iintra_Q = calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
         x, y, z, elementParameters)
     iintradamp = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor)
     r = MainFunctions.calc_r(Q)
     Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iintradamp[Q<=QmaxIntegrate])
-    
+
     return (r, Fintra_r)
 
 
@@ -170,7 +173,7 @@ def calc_deltaFr(F_r, Fintra_r, r, rho0):
                atomic distance (nm)
     rho0     : float
                atomic density
-    
+
     Returns
     -------
     deltaF_r : numpy array
@@ -182,7 +185,7 @@ def calc_deltaFr(F_r, Fintra_r, r, rho0):
     return deltaF_r
 
 
-def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
+def calc_iQiE(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     """Function to calculate the i-th iteration of i(Q) (eq. 46, 49).
 
     Parameters
@@ -201,7 +204,7 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
                atomic distance (nm)
     rmin     : float
                r cut-off value (nm)
-    
+
     Returns
     -------
     i_Qi     : numpy array
@@ -223,9 +226,51 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     return i_Qi
 
 
+def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
+    """Function to calculate the i-th iteration of i(Q) (eq. 46, 49).
+
+    Parameters
+    ----------
+    i_Q      : numpy array
+               i(Q)
+    Q        : numpy array
+               momentum transfer (nm^-1)
+    Sinf     : float
+               value of S(Q) for Q->inf
+    J_Q      : numpy array
+               J(Q)
+    deltaF_r : numpy array
+               difference between F(r) and its theoretical value
+    r        : numpy array
+               atomic distance (nm)
+    rmin     : float
+               r cut-off value (nm)
+
+    Returns
+    -------
+    i_Qi     : numpy array
+               i-th iteration of i(Q)
+    """
+
+    mask = np.where(r < rmin)
+    rInt = r[mask]
+    deltaF_rInt = deltaF_r[mask]
+
+    Deltar = np.diff(rInt)
+    meanDeltar = np.mean(Deltar)
+    Qr = np.outer(Q, rInt)
+    sinQr = np.sin(Qr)
+    integral = np.sum(deltaF_rInt * sinQr, axis=1) * meanDeltar
+
+    i_Qi = i_Q - ( 1/Q * ( i_Q + 1)) * integral
+
+    return i_Qi
+
+
+
 def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin, plot_iter):
     """Function to calculate the F(r) optimization (eq 47, 48, 49).
-    
+
     Parameters
     ----------
     iteration : int
@@ -248,7 +293,7 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
                 r cut-off value (nm)
     plot_iter : string
                 flag to plot the F(r) iterations
-    
+
     Returns
     -------
     F_r       : numpy array
@@ -265,23 +310,23 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
         plt.ylabel('F(r)')
         plt.legend()
         plt.grid(True)
-    
+
     for i in range(iteration):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         i_Q[0] = 0.0
         F_r = MainFunctions.calc_Fr(r, Q, i_Q)
-        
+
         if plot_iter.lower() == "y":
             j = i+1
             plt.figure('F_rIt')
             plt.plot(r, F_r, label='%s iteration F(r)' %j)
             plt.legend()
             plt.draw()
-            
+
             time.sleep(1.0)
-    
+
     if plot_iter.lower() == "y":
         plt.ioff()
-    
+
     return (F_r, deltaF_r)
