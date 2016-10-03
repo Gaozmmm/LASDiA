@@ -176,7 +176,7 @@ if __name__ == '__main__':
         chi2_min = 10000000
 
         # for (idx_rho0, rho0), (idx_sf, sf) in product(enumerate(rho0_array), enumerate(sf_array)):
-        #     chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(numAtoms, variables, \
+        #     chi2[idx_rho0][idx_sf], S_Q, F_r = KaplowMethod.Kaplow_method(variables, \
         #         Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, sf, rho0, Fintra_r, r)
         #     # print(chi2[idx_rho0][idx_sf], chi2_min)
         #     if chi2[idx_rho0][idx_sf] < chi2_min:

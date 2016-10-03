@@ -345,13 +345,11 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     return alpha
 
 
-def calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q):
+def calc_Icoh(alpha, Isample_Q, Iincoh_Q):
     """Function to calcultate the cohrent scattering intensity Icoh(Q) (eq. 27).
 
     Parameters
     ----------
-    numAtoms  : int
-                number of atoms in the sample (?)
     alpha     : float
                 normalization factor
     Isample_Q : numpy array
@@ -365,18 +363,16 @@ def calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q):
                 cohrent scattering intensity
     """
 
-    Icoh_Q = ((alpha * Isample_Q) - Iincoh_Q)
+    Icoh_Q = (alpha * Isample_Q) - Iincoh_Q
 
     return Icoh_Q
 
 
-def calc_SQ(numAtoms, Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
+def calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
     """Function to calculate the structure factor S(Q) (eq. 18) with Igor range.
 
     Parameters
     ----------
-    numAtoms      : int
-                    number of atoms in the molecule
     Icoh_Q        : numpy array
                     cohrent scattering intensity
     Ztot          : int
