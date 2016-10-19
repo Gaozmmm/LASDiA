@@ -55,88 +55,88 @@ from modules import UtilityAnalysis
 
 if __name__ == '__main__':
     variables = Utility.read_inputFile("./inputFile.txt")
-
+    
     elementList = Utility.molToelemList(variables.molecule)
     elementParameters = Utility.read_parameters(elementList, variables.element_params)
-
+    
     path = Utility.path_xyz_file(variables.molecule)
     numAtoms, element, x, y, z = Utility.read_xyz_file(path)
-
+    
     Q, I_Q = Utility.read_file(variables.data_file)
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
-
+    
     Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
         variables.minQ, variables.maxQ)
-
+    
     I_Q, Ibkg_Q = Geometry.geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, \
         variables.phi_matrix_flag)
-
+    
+    # Utility.plot_data(Q, Ibkg_Q, "I_Q", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I^{bkg}(Q)$", "y")
+    
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
-
-    # Utility.plot_data(Q, Sinf_Q, "Sinf_Q", r"$Q(nm^{-1})$", r"$S_\infty(Q)$", r"$S_\infty(Q)$", "y")
-
+    
     r, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, variables.QmaxIntegrate, \
         variables.maxQ, elementList, element, x, y, z, elementParameters, variables.damping_factor)
-
+    
     # Fintra_r = np.zeros(r.size)
-
+    
     scale_factor = variables.sf_value
     density = variables.rho0_value
     percentage = 20
-
+    
     #-----------------------------------------------------
     # Test Kaplow method for AL Morard
-
+    
     # chi2_E, S_Q_E, F_r_E = KaplowMethod.Kaplow_method(numAtoms, variables, \
                 # Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scale_factor, density, Fintra_r, r)
-
+    
     # aff_sq_mean = Formalism.calc_aff_squared_mean(numAtoms, elementList, Q, elementParameters)
     # aff_mean_sq = Formalism.calc_aff_mean_squared(numAtoms, elementList, Q, elementParameters)
-
+    
     # chi2AL, S_Q_AL, F_r_AL = KaplowMethod.Kaplow_methodWAL(numAtoms, variables, \
                 # Q, I_Q, Ibkg_Q, aff_sq_mean, aff_mean_sq, Iincoh_Q, scale_factor, density, Fintra_r, r)
-
+    
     # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
     # alpha = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, density, aff_sq_mean, aff_mean_sq)
     # Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-
+    
     # S_Q = Formalism.calc_SAL_Q(Q, Icoh_Q, aff_sq_mean, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-
+    
     # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)$", "y")
-
+    
     # S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, 25, \
         # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
     # S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
         # variables.QmaxIntegrate, variables.damping_factor)
-
+    
     # Utility.plot_data(Q, S_QsmoothedDamp, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{AL}_M(Q)SD$", "y")
-
+    
     # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
     # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         # i_Q[Q<=variables.QmaxIntegrate])
-
+    
     # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)$", "y")
-
+    
     # J_Q = Iincoh_Q/aff_sq_mean
-
+    
     # F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
         # Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
         # 1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
-
+    
     # Utility.plot_data(r, F_rIt, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{AL}_M(r)O$", "y")
-
+    
     # chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
-
+    
     # print(chi2_E, chi2)
-
+    
     #-----------------------------------------------------
     # Automatic loop for rho0 and sf
-
+    
     # This is good, but I still have to test several parts and I need more flexibility!
-
+    
     # jj = 0
     # FOpt_r = []
     # Sbest_Q = []
@@ -156,35 +156,35 @@ if __name__ == '__main__':
     #-----------------------------------------------------
     # test normalization error for FZ
     
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
-    Iincoh_Q = np.zeros(Q.size)
-    alpha = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, density, aff_squared_mean, aff_mean_squared)
-    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+    # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
+    # Iincoh_Q = np.zeros(Q.size)
+    # alpha = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, density, aff_squared_mean, aff_mean_squared)
+    # Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
     
-    S_Q = Formalism.calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, variables.minQ, \
-        variables.QmaxIntegrate, variables.maxQ)
-    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
-        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
-        variables.QmaxIntegrate, variables.damping_factor)
+    # S_Q = Formalism.calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, variables.minQ, \
+        # variables.QmaxIntegrate, variables.maxQ)
+    # S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    # S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
+        # variables.QmaxIntegrate, variables.damping_factor)
     
-    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        i_Q[Q<=variables.QmaxIntegrate])
+    # i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
+    # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # i_Q[Q<=variables.QmaxIntegrate])
     
-    delta_alpha = 0.01
-    delta_i_Qramp = delta_alpha * aff_squared_mean / aff_mean_squared
-    delta_F_r_ramp = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        delta_i_Qramp[Q<=variables.QmaxIntegrate])
+    # delta_alpha = 0.01
+    # delta_i_Qramp = delta_alpha * aff_squared_mean / aff_mean_squared
+    # delta_F_r_ramp = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # delta_i_Qramp[Q<=variables.QmaxIntegrate])
     
-    Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
-    Utility.plot_data(r, delta_F_r_ramp, "F_r", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{FZ}_{ramp}(r)$", "y")
+    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F^{FZ}(r)$", "y")
+    # Utility.plot_data(r, delta_F_r_ramp, "F_r", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{FZ}_{ramp}(r)$", "y")
     
     #-----------------------------------------------------
     # test normalization error for E
     
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
-    Iincoh_Q = np.zeros(Q.size)
+    # Iincoh_Q = np.zeros(Q.size)
     alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
         Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
         fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
@@ -196,6 +196,8 @@ if __name__ == '__main__':
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
     S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, Sinf, \
         variables.QmaxIntegrate, variables.damping_factor)
+    
+    # Utility.plot_data(Q, S_QsmoothedDamp, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S^{E}(Q)$", "y")
     
     i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
@@ -213,8 +215,24 @@ if __name__ == '__main__':
     Utility.plot_data(r, F_r, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
     Utility.plot_data(r, delta_F_r_ramp, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{E}_{ramp}(r)$", "y")
     
+    Utility.plot_data_2scale("Test", r, F_r, r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", \
+        r, delta_F_r_ramp, r"$\Delta F^{E}_{ramp}(r)$", r"$\Delta F^{E}_{ramp}(r)$")
+    
     # delta_F_r_ramp2 = delta_alpha * 2* Sinf /np.pi * ((np.sin(variables.QmaxIntegrate * r)/r**2) - (variables.QmaxIntegrate *np.cos(variables.QmaxIntegrate * r)/r))
     # Utility.plot_data(r, delta_F_r_ramp2, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{E}_{ramp}(r)$", "y")
+    
+    
+    # delta_s = 0.0002
+    # delta_i_Qs = delta_s * Ibkg_Q / Isample_Q
+    
+    # delta_F_r_s = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        # delta_i_Qs[Q<=variables.QmaxIntegrate])
+    
+    # Utility.plot_data(Q, Isample_Q, "I_Q", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I^{bkg}(Q)$", "y")
+    # print(Ibkg_Q[Q>variables.minQ])
+    
+    # # Utility.plot_data(r, F_r, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    # Utility.plot_data(r, delta_F_r_s, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{E}_{s}(r)$", "y")
     
     #-----------------------------------------------------
     

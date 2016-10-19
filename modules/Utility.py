@@ -399,7 +399,7 @@ def setArray(minVal, maxVal, stepVal):
     return arrayVal
 
 
-def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
+def plot_data(xVal, yVal, plotName, xName, yName, legName, overlapping):
     """Function to plot the data.
 
     Parameters
@@ -414,8 +414,8 @@ def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
                   abscissa name
     yName       : string
                   ordinate name
-    labName     : string
-                  label name
+    legName     : string
+                  legend name
     overlapping : string
                   flag for the overlapping
     """
@@ -423,11 +423,54 @@ def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     plt.figure(plotName)
     if overlapping.lower() == "n":
         plt.clf()
-    plt.plot(xVal, yVal, label=labName)
+    plt.plot(xVal, yVal, label=legName)
     plt.xlabel(xName)
     plt.ylabel(yName)
     plt.legend()
     plt.grid(True)
+    plt.draw()
+
+
+def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, legName1, \
+    xVal2, yVal2, yName2, legName2):
+    """Function to plot the data.
+
+    Parameters
+    ----------
+    xVal        : numpy array
+                  abscissa values
+    yVal        : numpy array
+                  ordinate values
+    plotName    : string
+                  canvas name
+    xName       : string
+                  abscissa name
+    yName       : string
+                  ordinate name
+    legName     : string
+                  legend name
+    overlapping : string
+                  flag for the overlapping
+    """
+    
+    fig, ax1 = plt.subplots()
+    ax1.set_title(plotName)
+    
+    ax2 = ax1.twinx()
+    # ax2.set_title(plotName)
+    
+    ax1.plot(xVal1, yVal1, 'b-', label=legName1)
+    ax2.plot(xVal2, yVal2, 'g-', label=legName2)
+
+    ax1.set_xlabel(xName1)
+    ax1.set_ylabel(yName1, color='b')
+    ax2.set_ylabel(yName2, color='g')
+    
+    ax1.legend(loc=0)
+    ax2.legend(loc=0)
+    ax1.grid(True)
+    # ax2.grid(True)
+    
     plt.draw()
 
 

@@ -441,7 +441,6 @@ def normalize_to_1(var_y):
     """
     
     area = abs(simps(var_y))
-    # print(area)
     var_y_norm = var_y / area
     
     return var_y_norm

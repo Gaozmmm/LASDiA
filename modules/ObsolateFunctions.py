@@ -1273,3 +1273,35 @@ def plot_raw_data(xVal, yVal, plotName, xName, yName, labName):
     plt.legend()
     plt.grid(True)
     plt.draw()
+
+
+def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
+    """Function to plot the data.
+
+    Parameters
+    ----------
+    xVal        : numpy array
+                  abscissa values
+    yVal        : numpy array
+                  ordinate values
+    plotName    : string
+                  canvas name
+    xName       : string
+                  abscissa name
+    yName       : string
+                  ordinate name
+    labName     : string
+                  label name
+    overlapping : string
+                  flag for the overlapping
+    """
+
+    plt.figure(plotName)
+    if overlapping.lower() == "n":
+        plt.clf()
+    plt.plot(xVal, yVal, label=labName)
+    plt.xlabel(xName)
+    plt.ylabel(yName)
+    plt.legend()
+    plt.grid(True)
+    plt.draw()
