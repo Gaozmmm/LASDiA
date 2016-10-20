@@ -65,13 +65,27 @@ if __name__ == '__main__':
     Q, I_Q = Utility.read_file(variables.data_file)
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
     
+    # Utility.plot_data(Q, I_Q, "I_Q raw", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I(Q)$", "y")
+    # Utility.plot_data(Qbkg, Ibkg_Q, "I_Q raw", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I^{bkg}(Q)$", "y")
+    
     Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
         variables.minQ, variables.maxQ)
     
-    I_Q, Ibkg_Q = Geometry.geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, \
-        variables.phi_matrix_flag)
+    # Utility.plot_data(Q, I_Q, "I_Q", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I(Q)$", "y")
+    # Utility.plot_data(Qbkg, Ibkg_Q, "I_Q", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I^{bkg}(Q)$", "y")
     
-    # Utility.plot_data(Q, Ibkg_Q, "I_Q", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I^{bkg}(Q)$", "y")
+    # I_Q, Ibkg_Q = Geometry.geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, \
+        # variables.phi_matrix_flag)
+    
+    two_theta = UtilityAnalysis.Qto2theta(Q)
+    abs_corr_factor = Geometry.calc_absorption_correction(variables.abs_length, \
+        two_theta, variables.dac_thickness, 0)
+    
+    I_Q = I_Q / abs_corr_factor
+    Ibkg_Q  = Ibkg_Q / abs_corr_factor
+    
+    # Utility.plot_data(Q, I_Q, "I_Q abs", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I(Q)$", "y")
+    # Utility.plot_data(Qbkg, Ibkg_Q, "I_Q abs", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I^{bkg}(Q)$", "y")
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
@@ -208,31 +222,42 @@ if __name__ == '__main__':
     
     delta_i_Qramp = np.empty(Q.size)
     delta_i_Qramp.fill(delta_i_Qramp_val)
+    # delta_i_Qramp.fill(delta_alpha)
     
     delta_F_r_ramp = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         delta_i_Qramp[Q<=variables.QmaxIntegrate])
     
-    Utility.plot_data(r, F_r, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    # Utility.plot_data(r, F_r, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
     Utility.plot_data(r, delta_F_r_ramp, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{E}_{ramp}(r)$", "y")
     
-    Utility.plot_data_2scale("Test", r, F_r, r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", \
-        r, delta_F_r_ramp, r"$\Delta F^{E}_{ramp}(r)$", r"$\Delta F^{E}_{ramp}(r)$")
+    # Utility.plot_data_2scale("Test", r, F_r, r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", \
+        # r, delta_F_r_ramp, r"$\Delta F^{E}_{ramp}(r)$", r"$\Delta F^{E}_{ramp}(r)$")
     
     # delta_F_r_ramp2 = delta_alpha * 2* Sinf /np.pi * ((np.sin(variables.QmaxIntegrate * r)/r**2) - (variables.QmaxIntegrate *np.cos(variables.QmaxIntegrate * r)/r))
     # Utility.plot_data(r, delta_F_r_ramp2, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{E}_{ramp}(r)$", "y")
     
+    # print(len(Ibkg_Q[Q>4.0]))
+    # print(len(Isample_Q[Q>4.0]))
     
-    # delta_s = 0.0002
-    # delta_i_Qs = delta_s * Ibkg_Q / Isample_Q
+    delta_s = 0.0002
+    Var_B = (delta_s * Ibkg_Q[Q>variables.minQ]) / (abs_corr_factor[Q>variables.minQ] * Isample_Q[Q>variables.minQ])
+    # Var_B = (delta_s * Ibkg_Q[Q>4.0]) / Isample_Q[Q>4.0]
     
-    # delta_F_r_s = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        # delta_i_Qs[Q<=variables.QmaxIntegrate])
+    Integral1 = simps((Ibkg_Q/(abs_corr_factor * fe_Q)) * Q**2, Q)
+    Integral2 = simps((Isample_Q/fe_Q**2) * Q**2,Q)
+    Var_A = Integral1 / Integral2
     
-    # Utility.plot_data(Q, Isample_Q, "I_Q", r"$Q(nm^{-1})$", r"$I(Q)$", r"$I^{bkg}(Q)$", "y")
-    # print(Ibkg_Q[Q>variables.minQ])
+    delta_i_Qs = (Var_B * i_Q[Q>variables.minQ]) - (delta_s * Var_A * Sinf) + (Var_B * Sinf)
+    # delta_i_Qs = Var_B
     
-    # # Utility.plot_data(r, F_r, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
-    # Utility.plot_data(r, delta_F_r_s, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$\Delta F^{E}_{s}(r)$", "y")
+    delta_F_r_s = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        delta_i_Qs[Q<=variables.QmaxIntegrate])
+    
+    # Utility.plot_data(r, F_r, "F_r_E", r"$r(nm)$", r"$F(r)$", r"$F^{E}(r)$", "y")
+    Utility.plot_data(r, delta_F_r_s, "F_r_E", r"$r(nm)$", r"$\Delta F(r)$", r"$\Delta F^{E}_{s}(r)$", "y")
+    
+    Utility.plot_data_2scale("", r, delta_F_r_ramp, r"$r(nm)$", r"$\Delta F(r)$", r"$\Delta F^{E}_{ramp}(r)$", \
+        r, delta_F_r_s, r"$\Delta F^{E}_s(r)$", r"$\Delta F^{E}_s(r)$")
     
     #-----------------------------------------------------
     

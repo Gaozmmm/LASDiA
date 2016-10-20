@@ -41,8 +41,8 @@ from modules import Utility
 
 
 def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
-    """Function to check if the raw data of measured and the background have the
-    same numeber of points.
+    """Function to check if the measured and the background raw data have the
+    same number of points.
     If the number is different the function rebin them.
     
     Parameters
