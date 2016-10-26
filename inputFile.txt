@@ -24,13 +24,13 @@
 # The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-# data_file = "../data/cea_files/ar/ht2_034t++_rem.chi"
-# bkg_file = "../data/cea_files/ar/ht2_036t++_rem.chi"
+#data_file = "../data/cea_files/ar/ht2_034t++_rem.chi"
+#bkg_file = "../data/cea_files/ar/ht2_036t++_rem.chi"
 data_file = "../data/cea_files/CO2/WO2_007T++.chi"
 bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
 
 # Sample composition
-# molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
+#molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
 molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
 element_params = "./elementParameters.txt"                      # Path element parameters file
 
@@ -44,9 +44,9 @@ MCC_type = "A"                                                  # type of Soller
 
 # Analysis parameters
 # Ar
-# minQ = 3.0                                                      # Minimum Q value in data interpolation waves
-# QmaxIntegrate = 98.0                                            # Qmax for all integration operations
-# maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
+#minQ = 3.0                                                      # Minimum Q value in data interpolation waves
+#QmaxIntegrate = 98.0                                            # Qmax for all integration operations
+#maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
 
 # CO2
 minQ = 8.005                                                    # Minimum Q value in data interpolation waves
@@ -63,8 +63,8 @@ iteration = 2                                                   # Number of iter
 rmin = 0.24                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
-sf_value = 1 #1.08347# 0.8379 #0.98                                         # Scale factor initial value
-rho0_value = 29.8929 # 25.4072 #29                                  # Sample density initial value
+sf_value = 1 #0.81                                          # Scale factor initial value
+rho0_value = 29.89 #27.18                                   # Sample density initial value
 sf_loop = "y"                                                   # flag for the loop
 rho0_loop = "y"                                                 # flag for the loop
 

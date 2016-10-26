@@ -52,7 +52,7 @@ def calc_aff(element, Q, aff_path):
                momentum transfer (nm^-1)
     aff_path : string
                path of atomic scattering form factor parameters
-    
+
     Returns
     -------
     f_Q      : numpy array
@@ -113,7 +113,7 @@ def calc_eeff(elementList, Q, incoh_path, aff_path):
                    path of incoherent scattered intensities parameters
     aff_path     : string
                    path of atomic scattering form factor parameters
-    
+
     Returns
     -------
     fe_Q         : numpy array
@@ -161,7 +161,7 @@ def calc_Kp(fe_Q, element, Q, aff_path):
               chemical element of the sample
     Q       : numpy array
               momentum transfer (nm^-1)
-    
+
     Returns
     -------
     Kp      : float
@@ -194,15 +194,15 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, aff_path):
                    momentum transfer (nm^-1)
     Ztot         : int
                    total Z number
-    
+
     Returns
     -------
     Sinf         : float
                    value of S(Q) for Q->inf
     """
-    
+
     sum_Kp2 = 0
-    
+
     for element, multiplicity in elementList.items():
         sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q, aff_path)**2
 
@@ -226,21 +226,21 @@ def calc_Iincoh(elementList, Q, incoh_path, aff_path):
                                   chemical element multiplicity
     Q            : numpy array
                    momentum transfer (nm^-1)
-    
+
     Returns
     -------
     Iincoh_Q     : numpy array
                    incoherent scattering intensity
     """
-    
+
     # file = open("./incohParamCEA.txt", "r")
     file = open(incoh_path, "r")
     header1 = file.readline()
     lines = file.readlines()
     file.close()
-    
+
     Iincoh_Q = 0
-    
+
     # scan the lines and when it find the right element take the Z number
     for element, multiplicity in elementList.items():
         aff = calc_aff(element, Q, aff_path)
@@ -252,7 +252,7 @@ def calc_Iincoh(elementList, Q, incoh_path, aff_path):
                 K = float(columns[3])
                 L = float(columns[4])
                 break
-        
+
         Iincoh_Q += multiplicity * ((Z - aff**2/Z ) * (1 - M * (np.exp(-K*Q/(4*10*np.pi)) - np.exp(-L*Q/(4*10*np.pi)))))
 
     return Iincoh_Q
@@ -321,7 +321,7 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, min_index, max_index, calculation_in
 def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
     """Function to calculate the structure factor S(Q) (eq. 18) with Igor range.
     This function doesn't set the value 0 for Q<minQ!!!
-    
+
     Parameters
     ----------
     N                 : int
@@ -330,29 +330,29 @@ def calc_SQ(N, Icoh_Q, Ztot, fe_Q, Sinf, Q, max_index, integration_index):
                         cohrent scattering intensity
     Ztot              : int
                         total Z number
-    fe_Q              : numpy array 
+    fe_Q              : numpy array
                         effective electric form factor
     Sinf              : float
                         value of S(Q) for Q->inf
-    Q                 : numpy array 
+    Q                 : numpy array
                         momentum transfer (nm^-1)
-    max_index         : numpy array 
+    max_index         : numpy array
                         index of element with Q>QmaxIntegrate & Q<=maxQ
-    integration_index : numpy array 
+    integration_index : numpy array
                         index of element in the integration range Q<=QmaxIntegrate
-    
+
     Returns
     -------
     S_Q               : numpy array
                         structure factor
     """
-    
+
     S_Q = Icoh_Q[integration_index] / (N * Ztot**2 * fe_Q[integration_index]**2)
-    
+
     S_Qmax = np.zeros(Q[max_index].size)
     S_Qmax.fill(Sinf)
     S_Q = np.concatenate([S_Q, S_Qmax])
-    
+
     return S_Q
 
 
@@ -400,18 +400,18 @@ def SQsmoothing(Q, S_Q, Sinf, smoothfactor, min_index, max_index, calculation_in
 def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q.
-    
+
     Parameters
     ----------
-    Q             : numpy array 
+    Q             : numpy array
                     momentum transfer (nm^-1)
-    S_Q           : numpy array 
+    S_Q           : numpy array
                     structure factor
     Sinf          : float
                     value of S(Q) for Q->inf
     smooth_factor : float
                     smoothing factor
-    min_index     : numpy array 
+    min_index     : numpy array
                     indices of elements with Q<=minQ
     minQ          : float
                     minimum Q value
@@ -421,41 +421,41 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate
                     maximum Q value for the intagrations
     NumPoints     : int
                     number of points in the smoothed S(Q)
-    
+
     Returns
     -------
-    newQ          : numpy array 
-                    new set of Q with NumPoints dimension 
+    newQ          : numpy array
+                    new set of Q with NumPoints dimension
     S_Qsmoothed   : numpy array
                     smoothed S(Q) with NumPoints dimension
     """
-    
+
     mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
     smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smooth_factor)
     newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
     S_Qsmoothed = smooth(newQ)
-    
+
     # mask_low = np.where(Q<=minQ)
     num_low = S_Qsmoothed[newQ<minQ].size
     smooth = interpolate.UnivariateSpline(Q[min_index], S_Q[min_index], k=3, s=smooth_factor)
     newQLow = np.linspace(np.amin(newQ), minQ, num_low, endpoint=True)
     S_QsmoothLow = smooth(newQLow)
-    
+
     S_Qsmoothed[newQ<minQ] = S_QsmoothLow
     S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
-    
+
     return (newQ, S_Qsmoothed)
 
 
 def calc_SQsmoothing(Q, newQ, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q.
-    
+
     Parameters
     ----------
-    Q             : numpy array 
+    Q             : numpy array
                     momentum transfer (nm^-1)
-    S_Q           : numpy array 
+    S_Q           : numpy array
                     structure factor
     Sinf          : float
                     value of S(Q) for Q->inf
@@ -469,21 +469,21 @@ def calc_SQsmoothing(Q, newQ, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, max
                     maximum Q value
     NumPoints     : int
                     number of points in the smoothed S(Q)
-    
+
     Returns
     -------
     S_Qsmoothed   : numpy array
                     smoothed S(Q) with NumPoints dimension
     """
-    
+
     smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], \
         S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
     # newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
     S_Qsmoothed = smooth(newQ)
-    
+
     S_Qsmoothed[newQ<minQ] = 0
     S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
-    
+
     return S_Qsmoothed
 
 
@@ -555,11 +555,11 @@ def calc_Fr(Q, Qi_Q, QmaxIntegrate):
     ----------
     Q             : numpy array
                     momentum transfer (nm^-1)
-    Qi_Q          : numpy array 
+    Qi_Q          : numpy array
                     Qi(Q)
     QmaxIntegrate : float
                     maximum Q value for the intagration
-    
+
     Returns
     -------
     F_r  : numpy array
@@ -687,14 +687,14 @@ def calc_iintra(Q, max_index):
 
 def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_path):
     """Function to calculate the intramolecular contribution of i(Q) (eq. 41).
-    
+
     Parameters
     ----------
     Q, max_index, elementList, element, x, y, z, incoh_path, aff_path
-    
+
     Q           : numpy array
                   momentum transfer (nm^-1)
-    max_index   : numpy array 
+    max_index   : numpy array
                   index of element with Q>QmaxIntegrate & Q<=maxQ
     elementList : dictionary("element": multiplicity)
                   chemical elements of the sample with their multiplicity
@@ -710,7 +710,7 @@ def calc_iintra(Q, max_index, elementList, element, x, y, z, incoh_path, aff_pat
                   path of incoherent scattered intensities parameters
     aff_path    : string
                   path of atomic scattering form factor parameters
-    
+
     Returns
     -------
     iintra_Q    : numpy array
@@ -744,7 +744,7 @@ def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
     """Function to calculate the intramolecular contribution of F(r) (eq. 42).
     To implemente!!! -> For now just for CO2!!!
     For now I calculate Fintra from iintra.
-    
+
     Parameters
     ----------
     r             : numpy array
@@ -755,8 +755,8 @@ def calc_Fintra(r, Q, QmaxIntegrate, aff_path):
                     maximum Q value for the intagration
     aff_path      : string
                     path of atomic scattering form factor parameters
-    
-    
+
+
     Returns
     -------
     Fintra_r      : numpy array
@@ -807,7 +807,7 @@ def calc_deltaMinim(N, r, Q, rho0, s, Sinf, I_Q, I_Qbkg, Iincoh, J_Q, fe_Q, Ztot
 
 def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
     """Function to calculate the chi2
-    
+
     Parameters
     ----------
     r        : numpy array
@@ -820,26 +820,26 @@ def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
                intramolecular contribution of F(r)
     rho0     : float
                average atomic density
-    
-    
+
+
     Returns
     -------
     chi2     : float
                chi2 value
     """
-    
+
     maskIt = np.where((r>0) & (r < rmin))
     rIt = r[maskIt]
     deltaF_r = Optimization.calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0)
-    
+
     chi2 = simps(deltaF_r**2, r[maskIt])
-    
+
     return chi2
 
 
 def calc_min_chi2(scale_factor, rho0, chi2):
     """Function to calculate the minimum of chi2 matrix
-    
+
     Parameters
     ----------
     scale_factor                : numpy array
@@ -848,8 +848,8 @@ def calc_min_chi2(scale_factor, rho0, chi2):
                                   average atomic density
     chi2                        : 2D numpy array
                                   chi2 values
-    
-    
+
+
     Returns
     -------
     minIndxS                    : int
@@ -863,16 +863,16 @@ def calc_min_chi2(scale_factor, rho0, chi2):
     chi2[minIndxRho0][minIndxS] : float
                                   chi2 minimum value
     """
-    
+
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
-    
+
     return (minIndxS, scale_factor[minIndxS], minIndxRho0, rho0[minIndxRho0], \
         chi2[minIndxRho0][minIndxS])
 
 
 def calc_min_chi2(scale_factor, rho0, sample_thickness, chi2):
     """Function to calculate the minimum of chi2 matrix
-    
+
     Parameters
     ----------
     scale_factor                : numpy array
@@ -881,8 +881,8 @@ def calc_min_chi2(scale_factor, rho0, sample_thickness, chi2):
                                   average atomic density
     chi2                        : 2D numpy array
                                   chi2 values
-    
-    
+
+
     Returns
     -------
     chi2[minIndxRho0][minIndxS] : float
@@ -896,35 +896,35 @@ def calc_min_chi2(scale_factor, rho0, sample_thickness, chi2):
     minIndxRho0                 : int
                                   atomic density minimum value index
     """
-    
+
     minIndxRho0, minIndxS, minIndxSth = np.unravel_index(chi2.argmin(), chi2.shape)
-    
+
     return (chi2[minIndxRho0][minIndxS][minIndxSth], scale_factor[minIndxS], \
         minIndxS, rho0[minIndxRho0], minIndxRho0, sample_thickness[minIndxSth], minIndxSth)
 
 
 def calc_alphaFZ(numAtoms, Q, Isample_Q, Iincoh_Q, rho0, elementParameters):
     """Function to calcultate alpha for the FZ formalism.
-    
+
     """
-    
+
     f2 = MainFunctions.calc_aff('C', Q, elementParameters)**2 + 2*MainFunctions.calc_aff('O',Q, elementParameters)**2
     f2 /= numAtoms
     f = MainFunctions.calc_aff('C', Q, elementParameters)**2 + \
         4*MainFunctions.calc_aff('C', Q, elementParameters)*MainFunctions.calc_aff('O',Q, elementParameters) + \
         4*MainFunctions.calc_aff('O',Q, elementParameters)**2
     f /= numAtoms
-    
+
     Integral1 = simps((Iincoh_Q + (f2/f)) * Q**2, Q)
     Integral2 = simps((Isample_Q/f) * Q**2,Q)
     alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
-    
+
     return alpha
 
 
 def calc_S_QFZ(numAtoms, Icoh_Q, Ztot, Q, elementParameters):
     """Function to calculate S(Q) with Faber-Ziman formalism.
-    
+
     Parameters
     ----------
     Icoh_Q            : numpy array (nm)
@@ -939,21 +939,21 @@ def calc_S_QFZ(numAtoms, Icoh_Q, Ztot, Q, elementParameters):
                         array index of element with Q>QmaxIntegrate & Q<=maxQ
     calculation_index : numpy array
                         range where S(Q) is calculated
-    
-    
+
+
     Returns
     -------
     S_Q               : numpy array
                         structure factor in FZ formalism
     """
-    
+
     f2 = MainFunctions.calc_aff('C', Q, elementParameters)**2 + 2*MainFunctions.calc_aff('O',Q, elementParameters)**2
     f2 /= numAtoms
     f = MainFunctions.calc_aff('C', Q, elementParameters)**2 + \
         4*MainFunctions.calc_aff('C', Q, elementParameters)*MainFunctions.calc_aff('O',Q, elementParameters) + \
         4*MainFunctions.calc_aff('O',Q, elementParameters)**2
     f /= numAtoms
-   
+
     S_Q = (Icoh_Q - (f2 - f)) / (f)
     # S_Q /= (numAtoms*Ztot**2)
 
@@ -971,19 +971,19 @@ def diamond(path, type, Q, I_Q, diamond_angle):
     """Function to calculate the diamond correction.
     http://physics.nist.gov/PhysRefData/XrayMassCoef/ElemTab/z06.html
     """
-    
+
     file = open(path, "r")
     header1 = file.readline()
     header2 = file.readline()
     lines = file.readlines()
     file.close()
-    
+
     for line in lines:
         columns = line.split()
         if columns[0] == type:
             dimension = float(columns[1])
             break
-            
+
     # for now...
     # mu = 0.2562 # cm2/g
     wavelenght = 0.03738 # nm
@@ -992,73 +992,73 @@ def diamond(path, type, Q, I_Q, diamond_angle):
     mu_l = 1/12.08 # mm^-1 at 33 keV
     # theta_angle = np.arcsin(wavelenght*Q/(4*np.pi))
     _2theta_angle = Qto2theta(Q) # rad
-    
-    
-    
+
+
+
     path_lenght = dimension / np.cos(_2theta_angle)
-    
+
     corr_factor = np.exp(mu_l * path_lenght)
-    
+
     I_Qeff = corr_factor * I_Q
-    
+
     return (I_Qeff, corr_factor)
-    
-    
+
+
 def calc_T_MCC_samp(phi, sth):
     """Function to calculate the MCC transmission for the sample.
     """
-    
+
     DeltaSth = np.diff(sth)
     meanDeltaSth = np.mean(DeltaSth)
     T_MCC_samp = np.sum(phi, axis=0) * meanDeltaSth
-    
+
     return T_MCC_samp
 
 
 def calc_T_MCC_sample(phi_matrix):
     """Function to calculate the MCC sample transfer function.
-    
+
     Parameters
     ----------
     phi_matrix : 2D numpy array
                  dispersion angle matrix (rad)
-    
+
     Returns
     -------
     T_MCC_sample : numpy array
                  MCC sample transfer function
     """
-    
+
     T_MCC_sample = simps(phi_matrix, axis=0, even="first")
-        
+
     return T_MCC_sample
 
 
 def calc_T_MCC_DAC(phi_matrix, T_MCC_sample):
     """Function to calculate the MCC DAC transfer function.
-    
+
     Parameters
     ----------
     phi_matrix   : 2D numpy array
                    dispersion angle matrix (rad)
     T_MCC_sample : numpy array
                    MCC sample transfer function
-    
+
     Returns
     -------
     T_MCC_DAC    : numpy array
                    MCC DAC transfer function
     """
-    
-    T_MCC_ALL = simps(phi_matrix, axis=0, even="first") 
+
+    T_MCC_ALL = simps(phi_matrix, axis=0, even="first")
     T_MCC_DAC = T_MCC_ALL - T_MCC_sample
-        
+
     return (T_MCC_ALL, T_MCC_DAC)
 
 
 def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
     """Function to calculate the bkg correction for the MCC (W. eq. 12)
-    
+
     Parameters
     ----------
     I_Qbkg         : numpy array
@@ -1067,30 +1067,30 @@ def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
                      MCC DAC transfer function
     T_DAC_MCC_s0th : numpy array
                      MCC DAC transfer function with sample thickness for the reference spectra
-    
+
     Returns
     -------
     I_Qbkg_corr    : numpy array
                      corrected scattering intensity for the bkg
     """
-    
-    
+
+
     corr_factor = np.zeros(T_DAC_MCC_sth.size)
-    
+
     for i in range(len(T_DAC_MCC_sth)):
         if (T_DAC_MCC_sth[i] == 0.0 or T_DAC_MCC_s0th[i] == 0.0):
             corr_factor[i] = 1
         else:
             corr_factor[i] = T_DAC_MCC_sth[i] / T_DAC_MCC_s0th[i]
-    
+
     I_Qbkg_corr = corr_factor * I_Qbkg
-    
+
     return (corr_factor, I_Qbkg_corr)
 
 
 def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
     """Function to calculate the bkg correction for the MCC (W. eq. 12)
-    
+
     Parameters
     ----------
     I_Qbkg         : numpy array
@@ -1099,7 +1099,7 @@ def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
                      MCC DAC transfer function
     T_DAC_MCC_s0th : numpy array
                      MCC DAC transfer function with sample thickness for the reference spectra
-    
+
     Returns
     -------
     corr_factor    : numpy array
@@ -1107,23 +1107,23 @@ def calc_T_DAC_MCC_bkg_corr(I_Qbkg, T_DAC_MCC_sth, T_DAC_MCC_s0th):
     I_Qbkg_corr    : numpy array
                      corrected scattering intensity for the bkg
     """
-    
+
     np.seterr(divide="ignore")
     corr_factor = T_DAC_MCC_sth / T_DAC_MCC_s0th
     corr_factor[T_DAC_MCC_sth == 0.0] = 1
     corr_factor[T_DAC_MCC_s0th == 0.0] = 1
-    
+
     I_Qbkg_corr = corr_factor * I_Qbkg
-    
+
     return (corr_factor, I_Qbkg_corr)
 
 
 def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
     """Function to calculate the Q ranges where S(Q) is constant.
-    
+
     Parameters
     ----------
-    Q             : numpy array 
+    Q             : numpy array
                     momentum transfer (nm^-1)
     minQ          : float
                     minimum Q value
@@ -1131,7 +1131,7 @@ def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
                     maximum Q value for the intagrations
     maxQ          : float
                     maximum Q value
-    
+
     Returns
     -------
     min_index     : numpy array
@@ -1148,10 +1148,10 @@ def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
 
 def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
     """Function to calculate the Q ranges used in the program.
-    
+
     Parameters
     ----------
-    Q                 : numpy array 
+    Q                 : numpy array
                         momentum transfer (nm^-1)
     minQ              : float
                         minimum Q value
@@ -1159,7 +1159,7 @@ def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
                         maximum Q value for the intagrations
     maxQ              : float
                         maximum Q value
-    
+
     Returns
     -------
     validation_index  : numpy array
@@ -1305,3 +1305,256 @@ def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     plt.legend()
     plt.grid(True)
     plt.draw()
+
+
+
+def Kaplow_methodWAL(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
+    aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
+    """Function to apply the Kaplow method with Waseda AL formalism.
+
+    Parameters
+    ----------
+    numAtoms  : int
+                number of atoms in the molecule
+    variables : module
+                input variables setted by the user
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                measured scattering intensity
+    Ibkg_Q    : numpy array
+                background scattering intensity
+    aff_squared_mean  : numpy array
+                        mean of the squared form factor: <f^2>
+    aff_mean_squared : numpy array
+                       squared of the mean form factor: <f>^2
+    Iincoh_Q : numpy array
+               incoherent scattering intensity
+    sf       : float
+               scale factor
+    rho0     : float
+               average atomic density
+    Fintra_r : numpy array
+               intramolecular contribution of F(r)
+    r        : numpy array
+               atomic distance (nm)
+
+    Returns
+    -------
+    chi2     : float
+               chi2 value
+    """
+
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
+    alpha = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared, 0.001)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+    S_Q = Formalism.calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
+        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
+        variables.QmaxIntegrate, variables.damping_factor)
+
+    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        i_Q[Q<=variables.QmaxIntegrate])
+
+    J_Q = Iincoh_Q/aff_mean_squared
+
+    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+        1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
+
+    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
+
+    return (chi2, S_QsmoothedDamp, F_rIt)
+
+
+def Kaplow_methodWFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
+    aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
+    """Function to apply the Kaplow method with Waseda FZ formalism.
+
+    Parameters
+    ----------
+    numAtoms  : int
+                number of atoms in the molecule
+    variables : module
+                input variables setted by the user
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                measured scattering intensity
+    Ibkg_Q    : numpy array
+                background scattering intensity
+    aff_squared_mean  : numpy array
+                        mean of the squared form factor: <f^2>
+    aff_mean_squared : numpy array
+                       squared of the mean form factor: <f>^2
+    Iincoh_Q : numpy array
+               incoherent scattering intensity
+    sf       : float
+               scale factor
+    rho0     : float
+               average atomic density
+    Fintra_r : numpy array
+               intramolecular contribution of F(r)
+    r        : numpy array
+               atomic distance (nm)
+
+    Returns
+    -------
+    chi2     : float
+               chi2 value
+    """
+
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
+    alpha = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared, 0.001)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+    S_Q = Formalism.calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, variables.minQ, \
+        variables.QmaxIntegrate, variables.maxQ)
+    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
+        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
+        variables.QmaxIntegrate, variables.damping_factor)
+
+    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        i_Q[Q<=variables.QmaxIntegrate])
+
+    J_Q = Iincoh_Q/aff_mean_squared
+
+    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+        1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
+
+    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
+
+    return (chi2, S_QsmoothedDamp, F_rIt)
+
+
+def Kaplow_methodMAL(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
+    aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
+    """Function to apply the Kaplow method with Waseda AL formalism.
+
+    Parameters
+    ----------
+    numAtoms  : int
+                number of atoms in the molecule
+    variables : module
+                input variables setted by the user
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                measured scattering intensity
+    Ibkg_Q    : numpy array
+                background scattering intensity
+    aff_squared_mean  : numpy array
+                        mean of the squared form factor: <f^2>
+    aff_mean_squared : numpy array
+                       squared of the mean form factor: <f>^2
+    Iincoh_Q : numpy array
+               incoherent scattering intensity
+    sf       : float
+               scale factor
+    rho0     : float
+               average atomic density
+    Fintra_r : numpy array
+               intramolecular contribution of F(r)
+    r        : numpy array
+               atomic distance (nm)
+
+    Returns
+    -------
+    chi2     : float
+               chi2 value
+    """
+
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
+    alpha = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+    S_Q = Formalism.calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
+        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
+        variables.QmaxIntegrate, variables.damping_factor)
+
+    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        i_Q[Q<=variables.QmaxIntegrate])
+
+    J_Q = Iincoh_Q/aff_mean_squared
+
+    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+        1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
+
+    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
+
+    return (chi2, S_QsmoothedDamp, F_rIt)
+
+
+def calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared, gamma):
+    """Function to calcultate alpha with Waseda formula (eq. 2.1.21).
+
+    Parameters
+    ----------
+    Q                : numpy array
+                       momentum transfer (nm^-1)
+    Isample_Q        : numpy array
+                       sample scattering intensity
+    Iincoh_Q         : numpy array
+                       incoherent scattering intensity
+    rho0             : float
+                       average atomic density
+    aff_squared_mean : numpy array
+                       mean of the squared form factor: <f^2>
+    aff_mean_squared : numpy array
+                       squared of the mean form factor: <f>^2
+    gamma            : float
+                       value of gamma parameter
+
+    Returns
+    -------
+    alpha            : float
+                       normalization factor
+    """
+
+    # gamma = 0.001 # 0.01
+    Integral1 = simps((Iincoh_Q + aff_squared_mean) * np.exp(-gamma*Q**2)/aff_mean_squared * Q**2, Q)
+    Integral2 = simps((Isample_Q * np.exp(-gamma*Q**2)/aff_mean_squared) * Q**2,Q)
+    alpha = ((-2*np.pi**2*rho0) + Integral1) / Integral2
+
+    return alpha
+
+
+def calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, minQ, QmaxIntegrate, maxQ):
+    """Function to calculate S(Q) with Ashcroft-Langreth formalism.
+
+    Parameters
+    ----------
+    Icoh_Q            : numpy array (nm)
+                        coherent scattering intensity
+    Q                 : numpy array
+                        momentum transfer (nm)
+    min_index         : numpy array
+                        array index of element with Q<=minQ
+    max_index         : numpy array
+                        array index of element with Q>QmaxIntegrate & Q<=maxQ
+    calculation_index : numpy array
+                        range where S(Q) is calculated
+
+
+    Returns
+    -------
+    S_Q               : numpy array
+                        structure factor in FZ formalism
+    """
+
+    S_Q = np.zeros(Q.size)
+    S_Q[(Q>minQ) & (Q<=QmaxIntegrate)] = Icoh_Q[(Q>minQ) & (Q<=QmaxIntegrate)] / aff_squared_mean[(Q>minQ) & (Q<=QmaxIntegrate)]
+    # S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = 1
+    S_Q[(Q>QmaxIntegrate)] = 1
+
+    return S_Q

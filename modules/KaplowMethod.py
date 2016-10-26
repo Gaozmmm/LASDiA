@@ -46,7 +46,7 @@ from modules import UtilityAnalysis
 def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     Sinf, Ztot, sf, rho0, Fintra_r, r):
     """Function to apply the Kaplow method.
-    
+
     Parameters
     ----------
     variables : module
@@ -75,105 +75,43 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
                intramolecular contribution of F(r)
     r        : numpy array
                atomic distance (nm)
-    
+
     Returns
     -------
     chi2     : float
                chi2 value
     """
-    
+
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
     alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
         Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
         fe_Q[Q<=variables.QmaxIntegrate], Ztot, rho0)
     Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
-    
+
     S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
         variables.QmaxIntegrate, variables.maxQ)
     S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, variables.smooth_factor, \
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
     S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, Sinf, \
         variables.QmaxIntegrate, variables.damping_factor)
-    
+
     i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         i_Q[Q<=variables.QmaxIntegrate])
-    
+
     F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
         Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
         Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
-    
+
     chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
-    
+
     return (chi2, S_QsmoothedDamp, F_rIt)
 
 
-def Kaplow_methodWAL(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
-    aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
-    """Function to apply the Kaplow method with Waseda AL formalism.
-    
-    Parameters
-    ----------
-    numAtoms  : int
-                number of atoms in the molecule
-    variables : module
-                input variables setted by the user
-    Q         : numpy array
-                momentum transfer (nm^-1)
-    I_Q       : numpy array
-                measured scattering intensity
-    Ibkg_Q    : numpy array
-                background scattering intensity
-    aff_squared_mean  : numpy array
-                        mean of the squared form factor: <f^2>
-    aff_mean_squared : numpy array
-                       squared of the mean form factor: <f>^2
-    Iincoh_Q : numpy array
-               incoherent scattering intensity
-    sf       : float
-               scale factor
-    rho0     : float
-               average atomic density
-    Fintra_r : numpy array
-               intramolecular contribution of F(r)
-    r        : numpy array
-               atomic distance (nm)
-    
-    Returns
-    -------
-    chi2     : float
-               chi2 value
-    """
-    
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
-    alpha = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared, 0.001)
-    Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-    
-    S_Q = Formalism.calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
-        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
-        variables.QmaxIntegrate, variables.damping_factor)
-    
-    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        i_Q[Q<=variables.QmaxIntegrate])
-    
-    J_Q = Iincoh_Q/aff_mean_squared
-    
-    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
-        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
-        1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
-    
-    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
-    
-    return (chi2, S_QsmoothedDamp, F_rIt)
-
-
-def Kaplow_methodWFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
+def Kaplow_methodFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
     aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
     """Function to apply the Kaplow method with Waseda FZ formalism.
-    
+
     Parameters
     ----------
     numAtoms  : int
@@ -200,159 +138,34 @@ def Kaplow_methodWFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
                intramolecular contribution of F(r)
     r        : numpy array
                atomic distance (nm)
-    
+
     Returns
     -------
     chi2     : float
                chi2 value
     """
-    
+
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
-    alpha = Formalism.calc_alphaW(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared, 0.001)
-    Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-    
+    alpha = Formalism.calc_alphaFZ(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
     S_Q = Formalism.calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, variables.minQ, \
         variables.QmaxIntegrate, variables.maxQ)
     S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
     S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
         variables.QmaxIntegrate, variables.damping_factor)
-    
+
     i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         i_Q[Q<=variables.QmaxIntegrate])
-    
-    J_Q = Iincoh_Q/aff_mean_squared
-    
-    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+
+    # J_Q = Iincoh_Q/aff_mean_squared
+
+    F_rIt, deltaF_rIt = Formalism.calc_optimize_FrFZ(variables.iteration, F_r, \
         Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
-        1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
-    
+        Iincoh_Q[Q<=variables.QmaxIntegrate], r, variables.rmin)
+
     chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
-    
-    return (chi2, S_QsmoothedDamp, F_rIt)
 
-
-def Kaplow_methodMAL(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
-    aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
-    """Function to apply the Kaplow method with Waseda AL formalism.
-    
-    Parameters
-    ----------
-    numAtoms  : int
-                number of atoms in the molecule
-    variables : module
-                input variables setted by the user
-    Q         : numpy array
-                momentum transfer (nm^-1)
-    I_Q       : numpy array
-                measured scattering intensity
-    Ibkg_Q    : numpy array
-                background scattering intensity
-    aff_squared_mean  : numpy array
-                        mean of the squared form factor: <f^2>
-    aff_mean_squared : numpy array
-                       squared of the mean form factor: <f>^2
-    Iincoh_Q : numpy array
-               incoherent scattering intensity
-    sf       : float
-               scale factor
-    rho0     : float
-               average atomic density
-    Fintra_r : numpy array
-               intramolecular contribution of F(r)
-    r        : numpy array
-               atomic distance (nm)
-    
-    Returns
-    -------
-    chi2     : float
-               chi2 value
-    """
-    
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
-    alpha = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared)
-    Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-    
-    S_Q = Formalism.calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
-        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
-        variables.QmaxIntegrate, variables.damping_factor)
-    
-    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        i_Q[Q<=variables.QmaxIntegrate])
-    
-    J_Q = Iincoh_Q/aff_mean_squared
-    
-    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
-        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
-        1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
-    
-    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
-    
-    return (chi2, S_QsmoothedDamp, F_rIt)
-
-
-def Kaplow_methodMFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
-    aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
-    """Function to apply the Kaplow method with Waseda FZ formalism.
-    
-    Parameters
-    ----------
-    numAtoms  : int
-                number of atoms in the molecule
-    variables : module
-                input variables setted by the user
-    Q         : numpy array
-                momentum transfer (nm^-1)
-    I_Q       : numpy array
-                measured scattering intensity
-    Ibkg_Q    : numpy array
-                background scattering intensity
-    aff_squared_mean  : numpy array
-                        mean of the squared form factor: <f^2>
-    aff_mean_squared : numpy array
-                       squared of the mean form factor: <f>^2
-    Iincoh_Q : numpy array
-               incoherent scattering intensity
-    sf       : float
-               scale factor
-    rho0     : float
-               average atomic density
-    Fintra_r : numpy array
-               intramolecular contribution of F(r)
-    r        : numpy array
-               atomic distance (nm)
-    
-    Returns
-    -------
-    chi2     : float
-               chi2 value
-    """
-    
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
-    alpha = Formalism.calc_alphaM(Q, Isample_Q, Iincoh_Q, rho0, aff_squared_mean, aff_mean_squared)
-    Icoh_Q = MainFunctions.calc_Icoh(numAtoms, alpha, Isample_Q, Iincoh_Q)
-    
-    S_Q = Formalism.calc_SFZ_Q(Q, Icoh_Q, aff_squared_mean, aff_mean_squared, variables.minQ, \
-        variables.QmaxIntegrate, variables.maxQ)
-    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, 1, variables.smooth_factor, \
-        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, 1, \
-        variables.QmaxIntegrate, variables.damping_factor)
-    
-    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, 1)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        i_Q[Q<=variables.QmaxIntegrate])
-    
-    J_Q = Iincoh_Q/aff_mean_squared
-    
-    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
-        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
-        1, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
-    
-    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
-    
     return (chi2, S_QsmoothedDamp, F_rIt)
