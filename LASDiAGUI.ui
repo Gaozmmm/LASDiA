@@ -6,370 +6,34 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>751</height>
+    <width>1291</width>
+    <height>771</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>LASDiA</string>
   </property>
-  <widget class="QTabWidget" name="tabWidget">
+  <widget class="QTabWidget" name="expPanel">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>710</x>
      <y>0</y>
-     <width>1261</width>
-     <height>741</height>
+     <width>571</width>
+     <height>261</height>
     </rect>
    </property>
    <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="exp">
+   <widget class="QWidget" name="fileTab">
     <attribute name="title">
-     <string>Experiment</string>
+     <string>File</string>
     </attribute>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QLabel" name="num_interpolation_2">
      <property name="geometry">
       <rect>
-       <x>960</x>
-       <y>40</y>
-       <width>115</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Import Data</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="geometry">
-      <rect>
-       <x>960</x>
-       <y>110</y>
-       <width>115</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Import Bkg</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_3">
-     <property name="geometry">
-      <rect>
-       <x>960</x>
+       <x>160</x>
        <y>180</y>
-       <width>115</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Remove Peaks</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_4">
-     <property name="geometry">
-      <rect>
-       <x>960</x>
-       <y>220</y>
-       <width>115</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Interpolation</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox">
-     <property name="geometry">
-      <rect>
-       <x>1190</x>
-       <y>70</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>1120</x>
-       <y>50</y>
-       <width>59</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Q range</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
-     <property name="geometry">
-      <rect>
-       <x>1120</x>
-       <y>140</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>270</y>
-       <width>141</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Sample Composition</string>
-     </property>
-    </widget>
-    <widget class="QGraphicsView" name="graphicsView">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>921</width>
-       <height>351</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QGraphicsView" name="graphicsView_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>360</y>
-       <width>921</width>
-       <height>351</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>510</y>
-       <width>91</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Corrections</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>630</y>
-       <width>89</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Soller Slits</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_7">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>660</y>
-       <width>231</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Import Soller Slits Parameter File</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_7">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>540</y>
-       <width>121</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>X-Ray Energy (keV)</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>540</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_8">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>590</y>
-       <width>121</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Anvil thickness (cm)</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>590</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QListView" name="listView_2">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>380</y>
-       <width>251</width>
-       <height>121</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_2">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>300</y>
-       <width>89</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Molecule</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_3">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>350</y>
-       <width>151</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Atomic Composition</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_22">
-     <property name="geometry">
-      <rect>
-       <x>1120</x>
-       <y>120</y>
-       <width>59</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Scale</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_23">
-     <property name="geometry">
-      <rect>
-       <x>980</x>
-       <y>10</y>
-       <width>141</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Data...</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
-     <property name="geometry">
-      <rect>
-       <x>1120</x>
-       <y>70</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_5">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>300</y>
-       <width>115</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Import XYZ file</string>
-     </property>
-    </widget>
-    <widget class="QTextBrowser" name="textBrowser">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>70</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QTextBrowser" name="textBrowser_2">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>140</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_15">
-     <property name="geometry">
-      <rect>
-       <x>1180</x>
-       <y>220</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_24">
-     <property name="geometry">
-      <rect>
-       <x>1080</x>
-       <y>220</y>
        <width>91</width>
        <height>16</height>
       </rect>
@@ -378,85 +42,587 @@
       <string>Num of Points</string>
      </property>
     </widget>
-    <zorder>pushButton</zorder>
-    <zorder>pushButton_2</zorder>
-    <zorder>pushButton_3</zorder>
-    <zorder>pushButton_4</zorder>
-    <zorder>doubleSpinBox</zorder>
-    <zorder>label</zorder>
-    <zorder>doubleSpinBox_3</zorder>
-    <zorder>label_3</zorder>
-    <zorder>graphicsView</zorder>
-    <zorder>graphicsView</zorder>
-    <zorder>graphicsView_2</zorder>
-    <zorder>label_6</zorder>
-    <zorder>checkBox</zorder>
-    <zorder>pushButton_7</zorder>
-    <zorder>label_7</zorder>
-    <zorder>doubleSpinBox_4</zorder>
-    <zorder>label_8</zorder>
-    <zorder>doubleSpinBox_5</zorder>
-    <zorder>listView_2</zorder>
-    <zorder>checkBox_2</zorder>
-    <zorder>checkBox_3</zorder>
-    <zorder>label_22</zorder>
-    <zorder>label_23</zorder>
-    <zorder>doubleSpinBox_2</zorder>
-    <zorder>pushButton_5</zorder>
-    <zorder>textBrowser</zorder>
-    <zorder>textBrowser_2</zorder>
-    <zorder>doubleSpinBox_15</zorder>
-    <zorder>label_24</zorder>
-   </widget>
-   <widget class="QWidget" name="tab_2">
-    <attribute name="title">
-     <string>Analysis</string>
-    </attribute>
-    <widget class="QGraphicsView" name="graphicsView_3">
+    <widget class="QPushButton" name="importData">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>240</y>
-       <width>921</width>
-       <height>231</height>
+       <y>20</y>
+       <width>115</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Import Data</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="interpolation">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>170</y>
+       <width>115</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Interpolation</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="removePeaks">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>115</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Remove Peaks</string>
+     </property>
+    </widget>
+    <widget class="QTextBrowser" name="fileSampleName">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>20</y>
+       <width>381</width>
+       <height>31</height>
       </rect>
      </property>
     </widget>
-    <widget class="QGraphicsView" name="graphicsView_4">
+    <widget class="QSpinBox" name="num_interpolation">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>180</y>
+       <width>42</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="bkgTab">
+    <attribute name="title">
+     <string>Bkg</string>
+    </attribute>
+    <widget class="QTextBrowser" name="fileBkgName">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>20</y>
+       <width>381</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="scaleValue_2">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>110</y>
+       <width>59</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Scale</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="num_interpolation_4">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>180</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Num of Points</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="importBkg">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>115</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Import Bkg</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="scaleValue">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>110</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="interpolation_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>170</y>
+       <width>115</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Interpolation</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="removePeaks_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>115</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Remove Peaks</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="num_interpolation_3">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>180</y>
+       <width>42</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="geometryTab">
+    <attribute name="title">
+     <string>Geometry</string>
+    </attribute>
+    <widget class="QLabel" name="xray_energy_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>121</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>X-Ray Energy (keV)</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="xray_energy">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>10</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="dacCorrection">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>361</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>DAC Correction</string>
+     </property>
+     <widget class="QDoubleSpinBox" name="dac_thickness">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>20</y>
+        <width>66</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="maximum">
+       <double>99.999899999999997</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="dac_thickness_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Anvil thickness (cm)</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="dac_angle">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>20</y>
+        <width>66</width>
+        <height>24</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="dac_angle_2">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>20</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>DAC Angle (deg)</string>
+      </property>
+     </widget>
+     <zorder>dac_thickness</zorder>
+     <zorder>dac_thickness_2</zorder>
+     <zorder>dac_angle</zorder>
+     <zorder>dac_angle_2</zorder>
+     <zorder>MCCCorrection</zorder>
+    </widget>
+    <widget class="QGroupBox" name="MCCCorrection">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>281</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>MCC Correction</string>
+     </property>
+     <widget class="QLabel" name="ws1_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>WS1 (cm)</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="ws1">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>20</y>
+        <width>66</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="maximum">
+       <double>99.999899999999997</double>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="r1">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>50</y>
+        <width>66</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="maximum">
+       <double>99.999899999999997</double>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="r2">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>50</y>
+        <width>66</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="maximum">
+       <double>99.999899999999997</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="d_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>D (cm)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="ws2_2">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>20</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>WS2 (cm)</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="ws2">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>20</y>
+        <width>66</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="maximum">
+       <double>99.999899999999997</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="r1_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>R1 (cm)</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="d">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>80</y>
+        <width>66</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="maximum">
+       <double>99.999899999999997</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="r2_2">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>50</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>R2 (cm)</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="sampleTab">
+    <attribute name="title">
+     <string>Sample</string>
+    </attribute>
+    <widget class="QPushButton" name="pushButton_5">
+     <property name="geometry">
+      <rect>
+       <x>430</x>
+       <y>190</y>
+       <width>115</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Import XYZ file</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>69</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>Ar</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>O</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Add</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Edit</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Claer</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_4">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Delete</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="overlayTab">
+    <attribute name="title">
+     <string>Overlay</string>
+    </attribute>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="analysisPanel">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>270</y>
+     <width>571</width>
+     <height>491</height>
+    </rect>
+   </property>
+   <widget class="QGroupBox" name="NonOptimizeParam">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>571</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QDoubleSpinBox" name="smooth_factor">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>10</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="smooth_factor_2">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>921</width>
-       <height>231</height>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Smoothing Factor</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="maxQ">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>50</y>
+       <width>66</width>
+       <height>24</height>
       </rect>
      </property>
     </widget>
-    <widget class="QGraphicsView" name="graphicsView_5">
+    <widget class="QLabel" name="damping_factor_2">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>470</y>
-       <width>461</width>
-       <height>231</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QGraphicsView" name="graphicsView_6">
-     <property name="geometry">
-      <rect>
-       <x>470</x>
-       <y>470</y>
-       <width>461</width>
-       <height>231</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_9">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>110</y>
+       <y>50</y>
        <width>91</width>
        <height>16</height>
       </rect>
@@ -465,90 +631,11 @@
       <string>Damp Factor</string>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+    <widget class="QLabel" name="iteration_2">
      <property name="geometry">
       <rect>
-       <x>1100</x>
-       <y>110</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_10">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>150</y>
-       <width>59</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Rcutoff</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>150</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_11">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>230</y>
-       <width>59</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Density</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>230</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_12">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>270</y>
-       <width>59</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Scale</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>270</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_13">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>190</y>
+       <x>180</x>
+       <y>10</y>
        <width>101</width>
        <height>16</height>
       </rect>
@@ -557,93 +644,100 @@
       <string>Num Iterations</string>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
+    <widget class="QDoubleSpinBox" name="iteration">
      <property name="geometry">
       <rect>
-       <x>1100</x>
-       <y>190</y>
+       <x>260</x>
+       <y>10</y>
        <width>66</width>
        <height>24</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label_14">
+    <widget class="QDoubleSpinBox" name="damping_factor">
      <property name="geometry">
       <rect>
-       <x>970</x>
-       <y>70</y>
-       <width>121</width>
+       <x>100</x>
+       <y>50</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="minQ">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>10</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="maxQ_2">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>50</y>
+       <width>59</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Smoothing Factor</string>
+      <string>max Q</string>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_11">
+    <widget class="QLabel" name="minQ_2">
      <property name="geometry">
       <rect>
-       <x>1100</x>
-       <y>70</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_15">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>30</y>
-       <width>101</width>
+       <x>350</x>
+       <y>10</y>
+       <width>59</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>QmaxIntegral</string>
+      <string>min Q</string>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_12">
+   </widget>
+   <widget class="QGroupBox" name="OptimizeParam">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>100</y>
+      <width>571</width>
+      <height>391</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QDoubleSpinBox" name="sf_value">
      <property name="geometry">
       <rect>
-       <x>1100</x>
-       <y>30</y>
+       <x>100</x>
+       <y>90</y>
        <width>66</width>
        <height>24</height>
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_8">
+    <widget class="QDoubleSpinBox" name="rmin">
      <property name="geometry">
       <rect>
-       <x>960</x>
-       <y>350</y>
-       <width>115</width>
-       <height>32</height>
+       <x>100</x>
+       <y>130</y>
+       <width>66</width>
+       <height>24</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Optimize</string>
-     </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_9">
+    <widget class="QLabel" name="rho0_value_2">
      <property name="geometry">
       <rect>
-       <x>960</x>
-       <y>410</y>
-       <width>151</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Revert to Initial State</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_19">
-     <property name="geometry">
-      <rect>
-       <x>980</x>
-       <y>550</y>
+       <x>10</x>
+       <y>50</y>
        <width>59</width>
        <height>16</height>
       </rect>
@@ -652,11 +746,21 @@
       <string>Density</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_20">
+    <widget class="QDoubleSpinBox" name="rho0_value">
      <property name="geometry">
       <rect>
-       <x>980</x>
-       <y>590</y>
+       <x>100</x>
+       <y>50</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="sf_value_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
        <width>59</width>
        <height>16</height>
       </rect>
@@ -665,201 +769,130 @@
       <string>Scale</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_21">
+    <widget class="QLabel" name="rmin_2">
      <property name="geometry">
       <rect>
-       <x>980</x>
-       <y>510</y>
-       <width>61</width>
+       <x>10</x>
+       <y>130</y>
+       <width>59</width>
        <height>16</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
      <property name="text">
-      <string>Results</string>
+      <string>r cutoff</string>
      </property>
     </widget>
-    <widget class="QLCDNumber" name="lcdNumber">
+    <widget class="MatplotlibWidget" name="chi2_plot">
      <property name="geometry">
       <rect>
-       <x>1070</x>
-       <y>550</y>
-       <width>64</width>
-       <height>23</height>
+       <x>180</x>
+       <y>50</y>
+       <width>391</width>
+       <height>361</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLCDNumber" name="lcdNumber_2">
+    <widget class="QLabel" name="ref_thickness_2">
      <property name="geometry">
       <rect>
-       <x>1070</x>
-       <y>590</y>
-       <width>64</width>
-       <height>23</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_4">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>350</y>
-       <width>111</width>
-       <height>20</height>
+       <x>10</x>
+       <y>210</y>
+       <width>71</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Update plots</string>
+      <string>Ref Thickness</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="ref_thickness">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>210</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="samp_thickness_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>260</y>
+       <width>81</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Samp Thinckness</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="samp_thickness">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>260</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab">
-    <attribute name="title">
-     <string>Results</string>
-    </attribute>
-    <widget class="QGraphicsView" name="graphicsView_7">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>360</y>
-       <width>921</width>
-       <height>351</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QGraphicsView" name="graphicsView_8">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>921</width>
-       <height>351</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QListView" name="listView">
-     <property name="geometry">
-      <rect>
-       <x>960</x>
-       <y>50</y>
-       <width>256</width>
-       <height>192</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_16">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>20</y>
-       <width>121</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-       <kerning>true</kerning>
-      </font>
-     </property>
-     <property name="text">
-      <string>Results Data Sets</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_17">
-     <property name="geometry">
-      <rect>
-       <x>960</x>
-       <y>290</y>
-       <width>71</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>S(Q) Offset</string>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_13">
-     <property name="geometry">
-      <rect>
-       <x>1090</x>
-       <y>290</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_14">
-     <property name="geometry">
-      <rect>
-       <x>1090</x>
-       <y>340</y>
-       <width>66</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_18">
-     <property name="geometry">
-      <rect>
-       <x>960</x>
-       <y>340</y>
-       <width>71</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>F(r) Offset</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_5">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>60</y>
-       <width>111</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Experiment 1</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_6">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>90</y>
-       <width>111</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Experiment 2</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_7">
-     <property name="geometry">
-      <rect>
-       <x>970</x>
-       <y>120</y>
-       <width>101</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Experiment 3</string>
-     </property>
-    </widget>
+   <zorder>OptimizeParam</zorder>
+   <zorder>NonOptimizeParam</zorder>
+  </widget>
+  <widget class="QGroupBox" name="graphicPanel">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>711</width>
+     <height>761</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="MatplotlibWidget" name="matplotlibwidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>691</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="MatplotlibWidget" name="matplotlibwidget_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>260</y>
+      <width>691</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="MatplotlibWidget" name="matplotlibwidget_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>510</y>
+      <width>691</width>
+      <height>241</height>
+     </rect>
+    </property>
    </widget>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MatplotlibWidget</class>
+   <extends>QWidget</extends>
+   <header>matplotlibwidget</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
