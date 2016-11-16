@@ -20,28 +20,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""LASDiA main script file.
+"""Set of modules used in LASDiA to calculate the diamond absorption and Soller
+Slits correction.
+
+The nomenclature and the procedure follow the articles:
+Weck et al. Rev. Sci. Instrum. 84, 063901 (2013)
+Yaoita et al. Rev. Sci. Instrum. 68, 2106 (1997)
+Eggert et al. 2002 PRB, 65, 174105.
+
+For the functions arguments and the returns I followed this convetion for the notes:
+argument: description - type
+return: description - type.
+
+For the variables name I used this convention:
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
+otherwise it is symbolized with just its name.
 """
 
-# __authors__ = "Francesco Devoto"
-# __license__ = "MIT"
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-import six
-
-import sys
-import os
 from PyQt4 import QtCore, QtGui
 
-from modules import LASDiAGUI
-
-if __name__ == "__main__":
-    
-    app = QtGui.QApplication(sys.argv)
-    
-    # Call the GUI
-    LASDiA = LASDiAGUI.QtGui.QMainWindow()
-    ui = LASDiAGUI.Ui_LASDiAGUI()
-    ui.setupUi(LASDiA)
-    LASDiA.show()
-    sys.exit(app.exec_())
+def load_data(self):
+        '''load and plot the file'''
+        
+        # Open data file
+        path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
