@@ -24,24 +24,25 @@
 """
 
 # __authors__ = "Francesco Devoto"
-# __license__ = "MIT"
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
 
 import sys
 import os
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
+# from PyQt5 import QtWidgets
 
 from modules import LASDiAGUI
+from modules import controller
 
 if __name__ == "__main__":
     
-    app = QtGui.QApplication(sys.argv)
-    
     # Call the GUI
-    LASDiA = LASDiAGUI.QtGui.QMainWindow()
-    ui = LASDiAGUI.Ui_LASDiAGUI()
-    ui.setupUi(LASDiA)
-    LASDiA.show()
-    sys.exit(app.exec_())
+    # app = QtWidgets.QApplication(sys.argv)
+    # LASDiA = LASDiAGUI.QtWidgets.QMainWindow()
+    # ui = LASDiAGUI.Ui_LASDiAGUI()
+    # ui.setupUi(LASDiA)
+    # LASDiA.show()
+    # sys.exit(app.exec_())
+    controller.main()
