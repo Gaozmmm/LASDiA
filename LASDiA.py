@@ -30,10 +30,10 @@ import six
 
 import sys
 import os
-from PyQt5 import QtCore, QtGui, QtWidgets
+# from PyQt5 import QtCore, QtGui, QtWidgets
 # from PyQt5 import QtWidgets
 
-from modules import LASDiAGUI
+# from modules import LASDiAGUI
 from modules import controller
 
 if __name__ == "__main__":

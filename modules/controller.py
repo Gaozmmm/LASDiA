@@ -23,6 +23,7 @@
 """LASDiA Controller
 """
 
+
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
 
@@ -32,16 +33,12 @@ import sys
 import os
 
 import matplotlib
-matplotlib.use("Qt4Agg")
+matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
-# from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-# from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-# import numpy as np
 
 from modules import Formalism
 from modules import Geometry
@@ -54,6 +51,7 @@ from modules import Utility
 from modules import UtilityAnalysis
 
 from modules import LASDiAGUI
+
 
 class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def __init__(self):
@@ -70,7 +68,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.Q = None
         self.I_Q = None
         self.Qbkg = None
-        self.I_Qbkg = None
+        self.Ibkg_Q = None
         self.S_Q = None
         self.elementList = None
         self.Ztot = None
@@ -85,8 +83,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         # Set the buttons
         self.ui.importData.clicked.connect(self.import_data)
-        # self.ui.LoadBkg.clicked.connect(self.load_bkg)
-        # self.ui.CalcSQ.clicked.connect(self.calcSQ)
+        self.ui.importBkg.clicked.connect(self.import_bkg)
+        self.ui.calcSQ.clicked.connect(self.SQ)
         # self.ui.Calcgr.clicked.connect(self.calcgr)
         # self.ui.Optimization.clicked.connect(self.calcOptimization)
         #self.ui.Minimization.clicked.connect(self.calcMinimization)
@@ -94,74 +92,61 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     #---------------------------------------------------------  
 
     def import_data(self):
-        '''load and plot the file'''
-        # Open data file
-        path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '.')
+        '''load and plot the data file'''
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File", r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
         
         self.Q, self.I_Q = Utility.read_file(path)
 
-        self.ui.matplotlibwidget.canvas.ax.clear()
-        self.ui.matplotlibwidget.canvas.ax.plot(self.Q, self.I_Q, label='Data')
-        self.ui.matplotlibwidget.canvas.draw()
+        self.ui.rawDataPlot.canvas.ax.clear()
+        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, label='Data')
+        self.ui.rawDataPlot.canvas.draw()
 
     #---------------------------------------------------------
         
-    # def load_bkg(self):
-        # '''load and plot the file'''
-        # # Open bkg file
-        # path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '.')
+    def import_bkg(self):
+        '''load and plot the bkg file'''
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File", r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
         
-        # # Modify the variables as numpy array
-        # self.Qbkg, self.I_Qbkg = read_file(path)
+        self.Qbkg, self.Ibkg_Q = Utility.read_file(path)
 
-        # self.ui.RawData.canvas.ax.plot(self.Qbkg, self.I_Qbkg, 'g--', label='Bkg')
-        # self.ui.RawData.canvas.draw()
+        self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, 'g--', label='Bkg')
+        self.ui.rawDataPlot.canvas.draw()
 
     # #---------------------------------------------------------
 
-    # def calcSQ(self):
-        # element = str(self.ui.Elements.currentText())
-        # multiplicity = self.ui.Multiplicity.value()
-        # self.elementList = {element:multiplicity}
-    
-        # self.fe_Q, self.Ztot = calc_eeff(self.elementList, self.Q)
-    
-        # #numAtoms =  sc.N_A
-        # N = 1
-        # if self.ui.sValue.value() == 0.00:
-            # s = 1
-        # else:
-            # s = self.ui.sValue.value()
+    def SQ(self):
+        elementList = Utility.molToelemList("Ar")
+        elementParameters = Utility.read_parameters(elementList, "./elementParameters.txt")
         
-        # if self.ui.rho0Value.value() == 0.00:
-            # self.rho0 = 25.0584
-        # else:
-            # self.rho0 = self.ui.rho0Value.value()
-
-        # self.Iincoh_Q = calc_Iincoh(self.elementList, self.Q)            
-        # self.J_Q = calc_JQ(self.Iincoh_Q, self.Ztot, self.fe_Q)
-        # self.Sinf = calc_Sinf(self.elementList, self.fe_Q, self.Q, self.Ztot)
-
-        # Isample_Q = self.I_Q - s * self.I_Qbkg
+        self.Q, self.I_Q, self.Qbkg, self.Ibkg_Q = UtilityAnalysis.check_data_length(self.Q, \
+            self.I_Q, self.Qbkg, self.Ibkg_Q, self.ui.minQ.value(), self.ui.maxQ.value())
         
-        # alpha = calc_alpha(self.J_Q, self.Sinf, self.Q, Isample_Q, self.fe_Q, self.Ztot, self.rho0)
-
-        # Icoh_Q = calc_Icoh(N, alpha, Isample_Q, self.Iincoh_Q)
-    
-        # self.S_Q = calc_SQ(N, Icoh_Q, self.Ztot, self.fe_Q, self.Q)
-
-        # qmax = np.amax(self.Q)
-        # Qa = np.arange(qmax,100,self.Q[1]-self.Q[0])
-        # newQ = np.concatenate([self.Q, Qa])
-        # SQa = np.zeros(Qa.size)
-        # SQa.fill(1)
-        # newSQ = np.concatenate([self.S_Q, SQa])
+        self.fe_Q, self.Ztot = MainFunctions.calc_eeff(elementList, self.Q, elementParameters)
+        self.Iincoh_Q = MainFunctions.calc_Iincoh(elementList, self.Q, elementParameters)
+        self.J_Q = MainFunctions.calc_JQ(self.Iincoh_Q, self.Ztot, self.fe_Q)
+        self.Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, self.fe_Q, \
+            self.Q, self.Ztot, elementParameters)
         
-        # self.ui.SQ.canvas.ax.clear()
-        # self.ui.SQ.canvas.ax.plot(newQ, self.S_Q)
-        # self.ui.SQ.canvas.draw()
+        QmaxIntegrate = 90.0
 
-    # #---------------------------------------------------------
+        Isample_Q = MainFunctions.calc_IsampleQ(self.I_Q, self.ui.sf_value.value(), self.Ibkg_Q)
+        alpha = MainFunctions.calc_alpha(self.J_Q[self.Q<=QmaxIntegrate], self.Sinf, \
+            self.Q[self.Q<=QmaxIntegrate], Isample_Q[self.Q<=QmaxIntegrate], \
+        self.fe_Q[self.Q<=QmaxIntegrate], self.Ztot, self.ui.rho0_value.value())
+        Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, self.Iincoh_Q)
+
+        self.S_Q = MainFunctions.calc_SQ(Icoh_Q, self.Ztot, self.fe_Q, self.Sinf, self.Q, self.ui.minQ.value(), \
+            QmaxIntegrate, self.ui.maxQ.value())
+        S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(self.Q, self.S_Q, self.Sinf, self.ui.smooth_factor.value(), \
+            self.ui.minQ.value(), QmaxIntegrate, self.ui.maxQ.value())
+        S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, self.Q, self.Sinf, \
+            QmaxIntegrate, self.ui.damping_factor.value())
+        
+        self.ui.factorPlot.canvas.ax.clear()
+        self.ui.factorPlot.canvas.ax.plot(self.Q, S_QsmoothedDamp)
+        self.ui.factorPlot.canvas.draw()
+
+    #---------------------------------------------------------
 
     # def calcgr(self):
         # self.i_Q = calc_iQ(self.S_Q, self.Sinf)

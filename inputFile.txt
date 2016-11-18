@@ -32,7 +32,7 @@ bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
 # Sample composition
 #molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
 molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
-element_params = "./elementParameters.txt"                      # Path element parameters file
+element_params_path = "./elementParameters.txt"                      # Path element parameters file
 
 # Geometry corrections
 abs_length = 1.208                                              # @33keV 1.208cm

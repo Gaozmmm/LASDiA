@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1291</width>
-    <height>771</height>
+    <width>1385</width>
+    <height>910</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,6 +21,12 @@
      <width>571</width>
      <height>261</height>
     </rect>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
    </property>
    <property name="currentIndex">
     <number>0</number>
@@ -50,6 +56,9 @@
        <width>115</width>
        <height>32</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>Import Data</string>
@@ -90,6 +99,9 @@
        <height>31</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
     <widget class="QSpinBox" name="num_interpolation">
      <property name="geometry">
@@ -99,6 +111,9 @@
        <width>42</width>
        <height>22</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
     </widget>
    </widget>
@@ -114,6 +129,9 @@
        <width>381</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
     </widget>
     <widget class="QLabel" name="scaleValue_2">
@@ -164,6 +182,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
     <widget class="QPushButton" name="interpolation_2">
      <property name="geometry">
@@ -200,6 +221,9 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="geometryTab">
@@ -215,6 +239,9 @@
        <height>16</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="text">
       <string>X-Ray Energy (keV)</string>
      </property>
@@ -227,6 +254,9 @@
        <width>66</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="dacCorrection">
@@ -249,6 +279,9 @@
         <width>66</width>
         <height>24</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -279,6 +312,9 @@
         <height>24</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255)</string>
+      </property>
      </widget>
      <widget class="QLabel" name="dac_angle_2">
       <property name="geometry">
@@ -293,11 +329,6 @@
        <string>DAC Angle (deg)</string>
       </property>
      </widget>
-     <zorder>dac_thickness</zorder>
-     <zorder>dac_thickness_2</zorder>
-     <zorder>dac_angle</zorder>
-     <zorder>dac_angle_2</zorder>
-     <zorder>MCCCorrection</zorder>
     </widget>
     <widget class="QGroupBox" name="MCCCorrection">
      <property name="geometry">
@@ -333,6 +364,9 @@
         <height>24</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255)</string>
+      </property>
       <property name="decimals">
        <number>4</number>
       </property>
@@ -349,6 +383,9 @@
         <height>24</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255)</string>
+      </property>
       <property name="decimals">
        <number>4</number>
       </property>
@@ -364,6 +401,9 @@
         <width>66</width>
         <height>24</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -407,6 +447,9 @@
         <height>24</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255)</string>
+      </property>
       <property name="decimals">
        <number>4</number>
       </property>
@@ -435,6 +478,9 @@
         <width>66</width>
         <height>24</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -483,6 +529,9 @@
        <width>69</width>
        <height>22</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
      <item>
       <property name="text">
@@ -557,6 +606,32 @@
       <string>Delete</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="calcSQ">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>S(Q)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="calcFr">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>210</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>F(r)</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="overlayTab">
     <attribute name="title">
@@ -594,6 +669,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
     <widget class="QLabel" name="smooth_factor_2">
      <property name="geometry">
@@ -616,6 +694,9 @@
        <width>66</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
     </widget>
     <widget class="QLabel" name="damping_factor_2">
@@ -653,6 +734,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="damping_factor">
      <property name="geometry">
@@ -663,6 +747,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="minQ">
      <property name="geometry">
@@ -672,6 +759,9 @@
        <width>66</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
     </widget>
     <widget class="QLabel" name="maxQ_2">
@@ -722,6 +812,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="rmin">
      <property name="geometry">
@@ -731,6 +824,9 @@
        <width>66</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
     </widget>
     <widget class="QLabel" name="rho0_value_2">
@@ -754,6 +850,9 @@
        <width>66</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
     </widget>
     <widget class="QLabel" name="sf_value_2">
@@ -814,6 +913,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
     <widget class="QLabel" name="samp_thickness_2">
      <property name="geometry">
@@ -837,6 +939,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
     </widget>
    </widget>
    <zorder>OptimizeParam</zorder>
@@ -854,7 +959,7 @@
    <property name="title">
     <string/>
    </property>
-   <widget class="MatplotlibWidget" name="matplotlibwidget">
+   <widget class="MatplotlibWidget" name="rawDataPlot">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -864,7 +969,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="MatplotlibWidget" name="matplotlibwidget_2">
+   <widget class="MatplotlibWidget" name="factorPlot">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -874,7 +979,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="MatplotlibWidget" name="matplotlibwidget_3">
+   <widget class="MatplotlibWidget" name="distfuncPlot">
     <property name="geometry">
      <rect>
       <x>10</x>

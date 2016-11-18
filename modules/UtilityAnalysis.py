@@ -36,6 +36,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import interpolate
 from scipy.integrate import simps
+from scipy.constants import *
 
 from modules import Utility
 
@@ -430,13 +431,13 @@ def normalize_to_1(var_y):
     
     Parameters
     ----------
-    var_y : numpy array
-            variable to normalize
+    var_y      : numpy array
+                 variable to normalize
     
     Returns
     -------
-    var_y : numpy array
-            normalized variable
+    var_y_norm : numpy array
+                 normalized variable
     
     """
     
@@ -444,4 +445,47 @@ def normalize_to_1(var_y):
     var_y_norm = var_y / area
     
     return var_y_norm
+
+
+def conv_gcm3_to_atnm3(val, a_weight):
+    """Function to convert the sample density from g/cm3 to atoms/nm3.
     
+    Parameters
+    ----------
+    val      : float
+               density value in g/cm3
+    a_weight : float
+               atomic weight in g/mol
+    
+    Returns
+    -------
+    val_conv : float
+               density value in atoms/nm3
+    
+    """
+    
+    val_conv = val/a_weight*N_A/10**21
+    
+    return val_conv
+
+
+def conv_atnm3_to_gcm3(val, a_weight):
+    """Function to convert the sample density from atoms/nm3 to g/cm3.
+    
+    Parameters
+    ----------
+    val      : float
+               density value in g/cm3
+    a_weight : float
+               atomic weight in g/mol
+    
+    Returns
+    -------
+    val_conv : float
+               density value in atoms/nm3
+    
+    """
+    
+    val_conv = val*a_weight/N_A*10**21
+    
+    return val_conv
