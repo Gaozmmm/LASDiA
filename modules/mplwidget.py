@@ -13,8 +13,11 @@ class MplCanvas(FigureCanvas):
     def __init__(self):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
+        self.ax.grid(True)
         
         FigureCanvas.__init__(self, self.fig)
+        # FigureCanvas.legend()
+        # FigureCanvas.grid(True)
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding,QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 

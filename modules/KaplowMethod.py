@@ -49,37 +49,41 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
 
     Parameters
     ----------
-    variables : module
-                input variables setted by the user
-    Q         : numpy array
-                momentum transfer (nm^-1)
-    I_Q       : numpy array
-                measured scattering intensity
-    Ibkg_Q    : numpy array
-                background scattering intensity
-    J_Q      : numpy array
-               J(Q)
-    fe_Q     : numpy array
-               effective electric form factor
-    Iincoh_Q : numpy array
-               incoherent scattering intensity
-    Sinf     : float
-               value of S(Q) for Q->inf
-    Ztot     : int
-               total Z number
-    sf       : float
-               scale factor
-    rho0     : float
-               average atomic density
-    Fintra_r : numpy array
-               intramolecular contribution of F(r)
-    r        : numpy array
-               atomic distance (nm)
+    variables     : module
+                    input variables setted by the user
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    I_Q           : numpy array
+                    measured scattering intensity
+    Ibkg_Q        : numpy array
+                    background scattering intensity
+    J_Q           : numpy array
+                    J(Q)
+    fe_Q          : numpy array
+                    effective electric form factor
+    Iincoh_Q      : numpy array
+                    incoherent scattering intensity
+    Sinf          : float
+                    value of S(Q) for Q->inf
+    Ztot          : int
+                    total Z number
+    sf            : float
+                    scale factor
+    rho0          : float
+                    average atomic density
+    Fintra_r      : numpy array
+                    intramolecular contribution of F(r)
+    r             : numpy array
+                    atomic distance (nm)
 
     Returns
     -------
-    chi2     : float
-               chi2 value
+    chi2          : float
+                    chi2 value
+    SsmoothDamp_Q : numpy array
+                    smoothed and damped structure factor
+    Fopt_r        : numpy array
+                    optimized F(r)
     """
 
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
@@ -90,22 +94,22 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
 
     S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
         variables.QmaxIntegrate, variables.maxQ)
-    S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, variables.smooth_factor, \
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, variables.smoothFactor, \
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, Q, Sinf, \
-        variables.QmaxIntegrate, variables.damping_factor)
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf, \
+        variables.QmaxIntegrate, variables.dampFactor)
 
-    i_Q = MainFunctions.calc_iQ(S_QsmoothedDamp, Sinf)
+    i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
         i_Q[Q<=variables.QmaxIntegrate])
 
-    F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+    Fopt_r, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
         Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
         Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
 
     chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
 
-    return (chi2, S_QsmoothedDamp, F_rIt)
+    return (chi2, SsmoothDamp_Q, Fopt_r)
 
 
 def Kaplow_methodFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \

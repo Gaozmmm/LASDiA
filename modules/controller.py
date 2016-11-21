@@ -32,11 +32,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import os
 
+import numpy as np
+
 import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -69,7 +71,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.I_Q = None
         self.Qbkg = None
         self.Ibkg_Q = None
-        self.S_Q = None
+        self.SsmoothDamp_Q = None
         self.elementList = None
         self.Ztot = None
         self.fe_Q = None
@@ -85,36 +87,47 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.importData.clicked.connect(self.import_data)
         self.ui.importBkg.clicked.connect(self.import_bkg)
         self.ui.calcSQ.clicked.connect(self.SQ)
-        # self.ui.Calcgr.clicked.connect(self.calcgr)
-        # self.ui.Optimization.clicked.connect(self.calcOptimization)
+        self.ui.calcFr.clicked.connect(self.Fr)
+        self.ui.optimize.clicked.connect(self.Optimization)
         #self.ui.Minimization.clicked.connect(self.calcMinimization)
         
     #---------------------------------------------------------  
 
     def import_data(self):
-        '''load and plot the data file'''
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File", r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
+        """Function to load and plot the data file"""
+        
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File", \
+            r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
         
         self.Q, self.I_Q = Utility.read_file(path)
-
-        self.ui.rawDataPlot.canvas.ax.clear()
-        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, label='Data')
+        
+        self.ui.fileSampleName.setPlainText(path)
+        
+        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, label="Data")
+        self.ui.rawDataPlot.canvas.ax.legend()
         self.ui.rawDataPlot.canvas.draw()
 
     #---------------------------------------------------------
         
     def import_bkg(self):
-        '''load and plot the bkg file'''
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File", r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
+        """Function to load and plot the bkg file"""
+        
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File", \
+            r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
         
         self.Qbkg, self.Ibkg_Q = Utility.read_file(path)
-
-        self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, 'g--', label='Bkg')
+        
+        self.ui.fileBkgName.setPlainText(path)
+        
+        self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, "g--", label="Bkg")
+        self.ui.rawDataPlot.canvas.ax.legend()
         self.ui.rawDataPlot.canvas.draw()
 
-    # #---------------------------------------------------------
+    #---------------------------------------------------------
 
     def SQ(self):
+        """Function to calculate and plot the structure factor S(Q)"""
+        
         elementList = Utility.molToelemList("Ar")
         elementParameters = Utility.read_parameters(elementList, "./elementParameters.txt")
         
@@ -127,66 +140,68 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, self.fe_Q, \
             self.Q, self.Ztot, elementParameters)
         
-        QmaxIntegrate = 90.0
-
-        Isample_Q = MainFunctions.calc_IsampleQ(self.I_Q, self.ui.sf_value.value(), self.Ibkg_Q)
-        alpha = MainFunctions.calc_alpha(self.J_Q[self.Q<=QmaxIntegrate], self.Sinf, \
-            self.Q[self.Q<=QmaxIntegrate], Isample_Q[self.Q<=QmaxIntegrate], \
-        self.fe_Q[self.Q<=QmaxIntegrate], self.Ztot, self.ui.rho0_value.value())
+        Isample_Q = MainFunctions.calc_IsampleQ(self.I_Q, self.ui.sfValue.value(), self.Ibkg_Q)
+        alpha = MainFunctions.calc_alpha(self.J_Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
+            self.Q[self.Q<=self.ui.QmaxInt.value()], Isample_Q[self.Q<=self.ui.QmaxInt.value()], \
+        self.fe_Q[self.Q<=self.ui.QmaxInt.value()], self.Ztot, self.ui.rho0Value.value())
         Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, self.Iincoh_Q)
-
-        self.S_Q = MainFunctions.calc_SQ(Icoh_Q, self.Ztot, self.fe_Q, self.Sinf, self.Q, self.ui.minQ.value(), \
-            QmaxIntegrate, self.ui.maxQ.value())
-        S_Qsmoothed = UtilityAnalysis.calc_SQsmoothing(self.Q, self.S_Q, self.Sinf, self.ui.smooth_factor.value(), \
-            self.ui.minQ.value(), QmaxIntegrate, self.ui.maxQ.value())
-        S_QsmoothedDamp = UtilityAnalysis.calc_SQdamp(S_Qsmoothed, self.Q, self.Sinf, \
-            QmaxIntegrate, self.ui.damping_factor.value())
         
-        self.ui.factorPlot.canvas.ax.clear()
-        self.ui.factorPlot.canvas.ax.plot(self.Q, S_QsmoothedDamp)
+        S_Q = MainFunctions.calc_SQ(Icoh_Q, self.Ztot, self.fe_Q, self.Sinf, self.Q, \
+            self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value())
+        Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(self.Q, S_Q, self.Sinf, \
+            self.ui.smoothFactor.value(), self.ui.minQ.value(), self.ui.QmaxInt.value(), \
+            self.ui.maxQ.value())
+        self.SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, self.Q, self.Sinf, \
+            self.ui.QmaxInt.value(), self.ui.dampFactor.value())
+        
+        self.ui.factorPlot.canvas.ax.plot(self.Q, self.SsmoothDamp_Q, label="S(Q)")
         self.ui.factorPlot.canvas.draw()
 
     #---------------------------------------------------------
 
-    # def calcgr(self):
-        # self.i_Q = calc_iQ(self.S_Q, self.Sinf)
-        # self.r = calc_spectrum(self.i_Q)
-        # self.F_r = calc_Fr(self.r, self.Q, self.i_Q)
-        # #self.rho0 = calc_rho0(self.Q, self.i_Q)
-        # #g_r = calc_gr(r, F_r, rho0)
-
-        # # self.ui.gr.canvas.ax.clear()
-        # # self.ui.gr.canvas.ax.plot(r, g_r)
-        # # self.ui.gr.canvas.draw()
-
-        # self.ui.Fr.canvas.ax.clear()
-        # self.ui.Fr.canvas.ax.plot(self.r, self.F_r)
-        # self.ui.Fr.canvas.draw()
-    
-    # #---------------------------------------------------------
-
-    # def calcOptimization(self):
-        # iteration = self.ui.Iteration.value()
-        # r_cutoff = self.ui.rcutoff.value()
-
-        # Fintra_r = calc_Fintra()
-        # optF_r = calc_optimize_Fr(iteration, self.F_r, Fintra_r, self.rho0, self.i_Q, self.Q, self.Sinf, self.J_Q, self.r, r_cutoff)
-
-        # #self.ui.Fr.canvas.ax.clear()
-        # self.ui.Fr.canvas.ax.plot(self.r, optF_r)
-        # self.ui.Fr.canvas.draw()
-
-        # # SQ_F = calc_SQ_F(optF_r, self.r, self.Q, self.Sinf)
-
-        # # self.ui.SQ.canvas.ax.plot(self.Q, SQ_F)
-        # # self.ui.SQ.canvas.draw()
-            
-    # #---------------------------------------------------------
-
-# #    def calcMinimization(self):
+    def Fr(self):
+        """Function to calculte and plot F(r)"""
         
+        self.i_Q = MainFunctions.calc_iQ(self.SsmoothDamp_Q, self.Sinf)
+        self.r = MainFunctions.calc_r(self.Q)
+        self.F_r = MainFunctions.calc_Fr(self.r, self.Q[self.Q<=self.ui.QmaxInt.value()], \
+            self.i_Q[self.Q<=self.ui.QmaxInt.value()])
+        
+        self.ui.distfuncPlot.canvas.ax.plot(self.r, self.F_r, label="F(r)")
+        self.ui.distfuncPlot.canvas.draw()
     
-    # #---------------------------------------------------------
+    #---------------------------------------------------------
+
+    def Optimization(self):
+        """Function to optimize and plot F(r)"""
+        
+        Fintra_r = np.zeros(self.r.size)
+        
+        
+        F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
+            Fintra_r, self.ui.rho0Value.value(), self.i_Q[self.Q<=self.ui.QmaxInt.value()], \
+            self.Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
+            self.J_Q[self.Q<=self.ui.QmaxInt.value()], self.r, self.ui.rmin.value(), "n")
+        
+        self.ui.distfuncPlot.canvas.ax.plot(self.r, F_rIt, label=r"F_{opt}(r)")
+        self.ui.distfuncPlot.canvas.draw()
+    
+    #---------------------------------------------------------
+    
+    # def importXYZFile(self):
+        # """Function to import the XYZ file and calculate the intramolecular
+           # component"""
+        
+        # path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load XYZ File", \
+            # r".\xyzFiles", "XYZ File(*xyz)")
+        
+        # numAtoms, element, x, y, z = Utility.read_xyz_file(path)
+        
+        # r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(self.Q, fe_Q, Ztot, \
+            # variables.QmaxIntegrate, variables.maxQ, elementList, element, \
+        # x, y, z, elementParameters, variables.damping_factor)
+    
+    #---------------------------------------------------------
     
 def main():
     # app = QtWidgets.QApplication(sys.argv)
