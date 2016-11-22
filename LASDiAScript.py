@@ -36,11 +36,13 @@ otherwise it is symbolized with just its name.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
 
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
-from itertools import product
-from timeit import default_timer as timer
-from scipy.integrate import simps
+import time
+# from itertools import product
+# from timeit import default_timer as timer
+# from scipy.integrate import simps
 
 from modules import Formalism
 from modules import Geometry
@@ -51,6 +53,9 @@ from modules import Minimization
 from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
+
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
+
 
 
 if __name__ == '__main__':
@@ -78,13 +83,30 @@ if __name__ == '__main__':
     
     r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, \
         variables.QmaxIntegrate, variables.maxQ, elementList, element, \
-        x, y, z, elementParameters, variables.damping_factor)
+        x, y, z, elementParameters, variables.dampFactor)
     
-    chi2, SsmoothDamp_Q, Fopt_r2 = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
+    density_array = UtilityAnalysis.make_array_loop(density, 20, 10)
+    chi2_array = np.zeros(density_array.size)
+    
+    # plt.ion()
+    # plt.figure("chi2")
+    
+    # for i in range(len(density_array)):
+    chi2, SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
         Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scale_factor, density, Fintra_r, r)
+        
+        # plt.scatter(density_array[i], chi2_array[i])
+        # # plt.draw()
+        # plt.pause(0.05)
+        
+    # plt.ioff()
+    # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    Utility.plot_data2(Q, SsmoothDamp_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    Utility.plot_data2(Q, SsmoothDamp_Q-1, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
+    # Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
     
-    Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
-    Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
+    app = QApplication(sys.argv)
+    sys.exit(app.exec_())
     
-    plt.show()
+    # plt.show()

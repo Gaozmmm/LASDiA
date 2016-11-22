@@ -27,8 +27,6 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import six
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
 import sys
 import os
 
@@ -36,8 +34,7 @@ import numpy as np
 
 import matplotlib
 matplotlib.use("Qt5Agg")
-import matplotlib.pyplot as plt
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -59,13 +56,10 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.setupUi(self)
-
-        self.figure = plt.figure()
-        self.canvas = FigureCanvas(self.figure)
-        #self.toolbar = NavigationToolbar(self.canvas, self)
+        
         self.ui = LASDiAGUI.Ui_LASDiAGUI()
         self.ui.setupUi(self)
-
+        
         # Set the variable
         self.Q = None
         self.I_Q = None
@@ -105,7 +99,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, label="Data")
         self.ui.rawDataPlot.canvas.ax.legend()
-        self.ui.rawDataPlot.canvas.draw()
+        # self.ui.rawDataPlot.canvas.draw()
 
     #---------------------------------------------------------
         

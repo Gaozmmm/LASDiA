@@ -29,14 +29,23 @@ otherwise it is symbolized with just its name.
 """
 
 
+import sys
 import os
+
 import numpy as np
 import re
 import imp
 import time
 import datetime
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d.axes3d import Axes3D
+# from mpl_toolkits.mplot3d.axes3d import Axes3D
+
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
 
 
 def align_yaxis(ax1, v1, ax2, v2):
@@ -148,7 +157,7 @@ def plot_chi2(chi2, scale_factor, scale_factor_idx, rho0, rho0_idx):
     plt.draw()
 
 
-def plot_data(xVal, yVal, plotName, xName, yName, legName, overlapping):
+def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     """Function to plot the data.
 
     Parameters
@@ -163,8 +172,8 @@ def plot_data(xVal, yVal, plotName, xName, yName, legName, overlapping):
                   abscissa name
     yName       : string
                   ordinate name
-    legName     : string
-                  legend name
+    labName     : string
+                  label name
     overlapping : string
                   flag for the overlapping
     """
@@ -172,7 +181,7 @@ def plot_data(xVal, yVal, plotName, xName, yName, legName, overlapping):
     plt.figure(plotName)
     if overlapping.lower() == "n":
         plt.clf()
-    plt.plot(xVal, yVal, label=legName)
+    plt.plot(xVal, yVal, label=labName)
     plt.xlabel(xName)
     plt.ylabel(yName)
     plt.legend()
@@ -180,8 +189,7 @@ def plot_data(xVal, yVal, plotName, xName, yName, legName, overlapping):
     plt.draw()
 
 
-def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, legName1, \
-    xVal2, yVal2, yName2, legName2):
+def plot_data2(xVal, yVal, plotName, xName, yName, labName, overlapping):
     """Function to plot the data.
 
     Parameters
@@ -196,8 +204,54 @@ def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, legName1, \
                   abscissa name
     yName       : string
                   ordinate name
-    legName     : string
-                  legend name
+    labName     : string
+                  label name
+    overlapping : string
+                  flag for the overlapping
+    """
+
+    fig = Figure()
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(111)
+    ax.set_xlabel(xName)
+    ax.set_ylabel(yName)
+    ax.grid(True)
+    
+    ax.hold(True)
+    ax.plot(xVal, yVal, label=labName)
+    ax.legend()
+    
+    ui = QWidget()
+    
+    toolbar = NavigationToolbar(canvas, ui, coordinates=True)
+    
+    vbox = QVBoxLayout()
+    vbox.addWidget(canvas)
+    vbox.addWidget(toolbar)
+    ui.setLayout(vbox)
+    ui.show()
+
+
+
+
+def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, labName1, \
+    xVal2, yVal2, yName2, labName2):
+    """Function to plot the data.
+
+    Parameters
+    ----------
+    xVal        : numpy array
+                  abscissa values
+    yVal        : numpy array
+                  ordinate values
+    plotName    : string
+                  canvas name
+    xName       : string
+                  abscissa name
+    yName       : string
+                  ordinate name
+    labName     : string
+                  label name
     overlapping : string
                   flag for the overlapping
     """
@@ -208,8 +262,8 @@ def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, legName1, \
     ax2 = ax1.twinx()
     # ax2.set_title(plotName)
     
-    ax1.plot(xVal1, yVal1, 'b-', label=legName1)
-    ax2.plot(xVal2, yVal2, 'g-', label=legName2)
+    ax1.plot(xVal1, yVal1, 'b-', label=labName1)
+    ax2.plot(xVal2, yVal2, 'g-', label=labName2)
 
     ax1.set_xlabel(xName1)
     ax1.set_ylabel(yName1, color='b')

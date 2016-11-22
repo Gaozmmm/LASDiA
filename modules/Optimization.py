@@ -260,10 +260,10 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
 
     if plot_iter.lower() == "y":
         plt.ion()
-        plt.figure('F_rIt')
-        plt.plot(r, F_r, label='F(r)')
-        plt.xlabel('r (nm)')
-        plt.ylabel('F(r)')
+        plt.figure("F_rIt")
+        plt.plot(r, F_r, label="F(r)")
+        plt.xlabel("r (nm)")
+        plt.ylabel("F(r)")
         plt.legend()
         plt.grid(True)
 
@@ -275,8 +275,8 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
 
         if plot_iter.lower() == "y":
             j = i+1
-            plt.figure('F_rIt')
-            plt.plot(r, F_r, label='%s iteration F(r)' %j)
+            plt.figure("F_rIt")
+            plt.plot(r, F_r, label="%s iteration F(r)" %j)
             plt.legend()
             plt.draw()
 

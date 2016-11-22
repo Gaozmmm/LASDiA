@@ -109,7 +109,7 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
 
     chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
 
-    return (chi2, SsmoothDamp_Q, Fopt_r)
+    return (chi2, SsmoothDamp_Q, F_r, Fopt_r)
 
 
 def Kaplow_methodFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \

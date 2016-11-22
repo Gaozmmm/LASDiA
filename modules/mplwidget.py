@@ -16,8 +16,6 @@ class MplCanvas(FigureCanvas):
         self.ax.grid(True)
         
         FigureCanvas.__init__(self, self.fig)
-        # FigureCanvas.legend()
-        # FigureCanvas.grid(True)
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding,QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
