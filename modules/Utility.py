@@ -232,8 +232,6 @@ def plot_data2(xVal, yVal, plotName, xName, yName, labName, overlapping):
     ui.show()
 
 
-
-
 def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, labName1, \
     xVal2, yVal2, yName2, labName2):
     """Function to plot the data.

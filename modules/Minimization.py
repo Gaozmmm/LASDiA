@@ -62,3 +62,33 @@ def calc_min_chi2(scale_factor, rho0, chi2):
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
     
     return (scale_factor[minIndxS], rho0[minIndxRho0])
+
+
+def chi2_fit(density_array, chi2_array):
+    """Function to fit the chi2 function to find the minimal value.
+    
+    Parameters
+    ----------
+    density_array : numpy array
+                    array with density values
+    chi2_array    : numpy array
+                    array with chi2 values
+    
+    Returns
+    -------
+    x_fit          : numpy array
+                     array with the x values to plot the fit results
+    y_fit          : numpy array
+                     array with the fit y values
+    min_density    : float
+                     minimum value of the fit curve
+    """
+    
+    pol_fit = np.poly1d(np.polyfit(density_array, chi2_array, 2))
+    x_fit = np.linspace(density_array[0], density_array[-1], 1000)
+    y_fit = pol_fit(x_fit)
+    min_density = x_fit[np.argmin(y_fit)]
+    
+    return (x_fit, y_fit, min_density)
+    
+    

@@ -78,15 +78,15 @@ if __name__ == '__main__':
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
-    scale_factor = variables.sfValue
-    density = variables.rho0Value
-    
     r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, \
         variables.QmaxIntegrate, variables.maxQ, elementList, element, \
         x, y, z, elementParameters, variables.dampFactor)
     
+    scale_factor = variables.sfValue
+    density = variables.rho0Value
+    
     percentage = 20
-    step = 0.025
+    step = 1 #0.025
     
     # while True:
     density_array = UtilityAnalysis.make_array_loop(density, percentage, step)
@@ -106,11 +106,11 @@ if __name__ == '__main__':
         
     plt.ioff()
     
-    test = np.poly1d(np.polyfit(density_array, chi2_array, 2))
-    xp = np.linspace(density_array[0], density_array[-1], 1000)
-    plt.plot(xp, test(xp))
-    density1 = xp[np.argmin(test(xp))]
-        
+    xfit, yfit, density = Minimization.chi2_fit(density_array, chi2_array)
+    
+    print(density)
+    
+    plt.plot(xfit, yfit)
         # if np.abs(density-density1) <
         
         

@@ -1558,3 +1558,31 @@ def calc_SAL_Q(Q, Icoh_Q, aff_squared_mean, minQ, QmaxIntegrate, maxQ):
     S_Q[(Q>QmaxIntegrate)] = 1
 
     return S_Q
+
+
+def make_array_loop(var_value, percentage, step):
+    """Function to create an array given its middle value and the percentage
+    of the extreme.
+    
+    Parameters
+    ----------
+    var_value  : float
+                 variable's value to generate the array
+    percentage : float
+                 percentage to calculate the extreme of the interval
+    step       : float
+                 array step
+    
+    Returns
+    -------
+    var_array  : numpy array
+                 variable final array
+    """
+    
+    low_extreme = var_value - var_value*percentage/100
+    high_extreme = var_value + var_value*percentage/100
+    
+    # var_array = np.linspace(low_extreme, high_extreme, num_sample)
+    var_array = np.arange(low_extreme, high_extreme, step)
+    
+    return var_array
