@@ -487,15 +487,15 @@ def normalize_to_1(var_y):
     return var_y_norm
 
 
-def conv_gcm3_to_atnm3(val, a_weight):
+def conv_gcm3_to_atnm3(val, atomMass):
     """Function to convert the sample density from g/cm3 to atoms/nm3.
     
     Parameters
     ----------
     val      : float
                density value in g/cm3
-    a_weight : float
-               atomic weight in g/mol
+    atomMass : float
+               atomic mass in g/mol
     
     Returns
     -------
@@ -504,20 +504,20 @@ def conv_gcm3_to_atnm3(val, a_weight):
     
     """
     
-    val_conv = val/a_weight*N_A/10**21
+    val_conv = val/atomMass*N_A/10**21
     
     return val_conv
 
 
-def conv_atnm3_to_gcm3(val, a_weight):
+def conv_atnm3_to_gcm3(val, atomMass):
     """Function to convert the sample density from atoms/nm3 to g/cm3.
     
     Parameters
     ----------
     val      : float
                density value in g/cm3
-    a_weight : float
-               atomic weight in g/mol
+    atomMass : float
+               atomic mass in g/mol
     
     Returns
     -------
@@ -526,7 +526,7 @@ def conv_atnm3_to_gcm3(val, a_weight):
     
     """
     
-    val_conv = val*a_weight/N_A*10**21
+    val_conv = val*atomMass/N_A*10**21
     
     return val_conv
     

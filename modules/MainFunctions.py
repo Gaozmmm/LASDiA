@@ -197,7 +197,7 @@ def calc_Iincoh(elementList, Q, elementParameters):
 
 def calc_JQ(Iincoh_Q, Ztot, fe_Q):
     """Function to calculate J(Q) (eq. 35).
-
+    
     Parameters
     ----------
     Iincoh_Q : numpy array
@@ -206,21 +206,21 @@ def calc_JQ(Iincoh_Q, Ztot, fe_Q):
                total Z number
     fe_Q     : numpy array
                effective electric form factor
-
+    
     Returns
     -------
     J_Q      : numpy array
                J(Q)
     """
-
+    
     J_Q = Iincoh_Q/(Ztot**2 * fe_Q**2)
-
+    
     return J_Q
 
 
 def calc_Kp(fe_Q, element, Q, elementParameters):
     """Function to calculate the average of effective atomic number Kp (eq. 11, 14).
-
+    
     Parameters
     ----------
     fe_Q              : numpy array
@@ -236,25 +236,25 @@ def calc_Kp(fe_Q, element, Q, elementParameters):
                         parameters : list
                                      list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
-
+    
     Returns
     -------
     Kp                : float
                         average of effective atomic number
     """
-
+    
     # effective atomic number
     Kp_Q = calc_aff(element, Q, elementParameters)/fe_Q
-
+    
     # average effective atomic number
     Kp = np.mean(Kp_Q)
-
+    
     return (Kp, Kp_Q)
 
 
 def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     """Function to calculate Sinf (eq. 19).
-
+    
     Parameters
     ----------
     elementList       : dictionary("element": multiplicity)
@@ -276,53 +276,53 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
                         parameters : list
                                      list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
-
+    
     Returns
     -------
     Sinf              : float
                         value of S(Q) for Q->inf
     """
-
+    
     sum_Kp2 = 0
     sum_Kp2_Q = np.zeros(Q.size)
-
+    
     for element, multiplicity in elementList.items():
         Kp, Kp_Q = calc_Kp(fe_Q, element, Q, elementParameters)
         sum_Kp2 += multiplicity * Kp**2
         sum_Kp2_Q += multiplicity * Kp_Q**2
-
+    
     Sinf = sum_Kp2 / Ztot**2
     Sinf_Q = sum_Kp2_Q / Ztot**2
-
+    
     return (Sinf, Sinf_Q)
 
 
-def calc_IsampleQ(I_Q, sf, Ibkg_Q):
+def calc_IsampleQ(I_Q, scale_factor, Ibkg_Q):
     """Function to calculate the sample scattering intensity Isample(Q) (eq. 28).
-
+    
     Parameters
     ----------
-    I_Q       : numpy array
-                measured scattering intensity
-    sf        : float
-                scale factor
-    Ibkg_Q    : numpy array
-                background scattering intensity
-
+    I_Q          : numpy array
+                   measured scattering intensity
+    scale_factor : float
+                   scale factor
+    Ibkg_Q       : numpy array
+                   background scattering intensity
+    
     Returns
     -------
-    Isample_Q : numpy array
-                sample scattering intensity
+    Isample_Q    : numpy array
+                   sample scattering intensity
     """
-
-    Isample_Q = I_Q - sf * Ibkg_Q
-
+    
+    Isample_Q = I_Q - scale_factor * Ibkg_Q
+    
     return Isample_Q
 
 
 def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     """Function to calculate the normalization factor alpha (eq. 34).
-
+    
     Parameters
     ----------
     J_Q       : numpy array
@@ -339,23 +339,23 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
                 total Z number
     rho0      : float
                 average atomic density
-
+    
     Returns
     -------
     alpha     : float
                 normalization factor
     """
-
+    
     Integral1 = simps((J_Q + Sinf) * Q**2, Q)
     Integral2 = simps((Isample_Q/fe_Q**2) * Q**2, Q)
     alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
-
+    
     return alpha
 
 
 def calc_Icoh(alpha, Isample_Q, Iincoh_Q):
     """Function to calcultate the cohrent scattering intensity Icoh(Q) (eq. 27).
-
+    
     Parameters
     ----------
     alpha     : float
@@ -364,21 +364,21 @@ def calc_Icoh(alpha, Isample_Q, Iincoh_Q):
                 sample scattering intensity
     Iincoh_Q  : numpy array
                 incoherent scattering intensity
-
+    
     Returns
     -------
     Icoh_Q    : numpy array
                 cohrent scattering intensity
     """
-
+    
     Icoh_Q = (alpha * Isample_Q) - Iincoh_Q
-
+    
     return Icoh_Q
 
 
 def calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
     """Function to calculate the structure factor S(Q) (eq. 18) with Igor range.
-
+    
     Parameters
     ----------
     Icoh_Q        : numpy array
@@ -397,43 +397,39 @@ def calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, QmaxIntegrate, maxQ):
                     maximum Q value for the intagrations
     maxQ          : float
                     maximum Q value
-
+    
     Returns
     -------
     S_Q           : numpy array
                     structure factor
     """
-
+    
     S_Q = np.zeros(Q.size)
-    # S_Q = np.empty(Q.size)
-    # S_Q.fill(Sinf)
-    # S_Q[Q<=minQ] = 0.0
     S_Q[(Q > minQ) & (Q <= QmaxIntegrate)] = Icoh_Q[(Q > minQ) & (Q <= QmaxIntegrate)] \
         / (Ztot**2 * fe_Q[(Q > minQ) & (Q <= QmaxIntegrate)]**2)
     S_Q[Q > QmaxIntegrate] = Sinf
-    # S_Q[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
-
+    
     return S_Q
 
 
 def calc_iQ(S_Q, Sinf):
     """Function to calculate i(Q) (eq. 21).
-
+    
     Parameters
     ----------
     S_Q  : numpy array
            structure factor
     Sinf : float
            value of S(Q) for Q->inf
-
+    
     Returns
     -------
     i_Q  : numpy array
            i(Q)
     """
-
+    
     i_Q = S_Q - Sinf
-
+    
     return i_Q
 
 

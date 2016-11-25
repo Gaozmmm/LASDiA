@@ -44,7 +44,7 @@ from modules import UtilityAnalysis
 
 
 def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
-    Sinf, Ztot, sf, rho0, Fintra_r, r):
+    Sinf, Ztot, sf, density, Fintra_r, r):
     """Function to apply the Kaplow method.
 
     Parameters
@@ -67,9 +67,9 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
                     value of S(Q) for Q->inf
     Ztot          : int
                     total Z number
-    sf            : float
+    scale_factor  : float
                     scale factor
-    rho0          : float
+    density       : float
                     average atomic density
     Fintra_r      : numpy array
                     intramolecular contribution of F(r)
@@ -86,10 +86,10 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
                     optimized F(r)
     """
 
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, sf, Ibkg_Q)
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
     alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
         Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-        fe_Q[Q<=variables.QmaxIntegrate], Ztot, rho0)
+        fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
     Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
 
     S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
@@ -104,7 +104,7 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
         i_Q[Q<=variables.QmaxIntegrate])
 
     Fopt_r, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
-        Fintra_r, rho0, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+        Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
         Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
 
     chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
