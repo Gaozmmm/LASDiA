@@ -41,50 +41,70 @@ from scipy.constants import *
 from modules import Utility
 
 
-def data_interpolation(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
-    """Function to check if the measured and the background raw data have the
-    same number of points.
-    If the number is different the function rebin them.
+def data_interpolation(Q, I_Q, minQ, maxQ, numPoints):
+    """Function to interpolate the data between.
     
     Parameters
     ----------
-    Q      : numpy array
-             momentum transfer (nm^-1)
-    I_Q    : numpy array
-             measured scattering intensity
-    Qbkg   : numpy array
-             background momentum transfer (nm^-1)
-    I_Qbkg : numpy array
-             background scattering intensity
-    minQ   : float
-             minimum Q value
-    maxQ   : float
-             maximum Q value
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                scattering intensity
+    minQ      : float
+                minimum Q value
+    maxQ      : float
+                maximum Q value
+    numPoints : int
+                number of point for the interpolation
     
     Returns
     -------
-    Q      : numpy array
-             rebinned momentum transfer (nm^-1)
-    I_Q    : numpy array
-             rebinned measured scattering intensity
-    Qbkg   : numpy array
-             rebinned background momentum transfer (nm^-1)
-    I_Qbkg : numpy array
-             rebinned background scattering intensity
+    Q         : numpy array
+                interpolated momentum transfer (nm^-1)
+    I_Q       : numpy array
+                interpolated scattering intensity
     """
     
-    if len(Q) != len(Qbkg):
-        min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
-        Q, I_Q = rebinning2(Q, I_Q, min_len, minQ, maxQ)
-        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, minQ, maxQ)
+    Q, I_Q = rebinning(Q, I_Q, minQ, maxQ, numPoints)
     
-    return (Q, I_Q, Qbkg, I_Qbkg)
+    I_Q[Q<=minQ] = 0.0
+    
+    return (Q, I_Q)
+    
+    
+def rebinning(Q, I_Q, minQ, maxQ, numPoints):
+    """Function to rebin the data.
+    
+    Parameters
+    ----------
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                scattering intensity
+    minQ      : float
+                minimum Q value
+    maxQ      : float
+                maximum Q value
+    numPoints : int
+                number of point for the interpolation
+    
+    Returns
+    -------
+    Q         : numpy array
+                rebinned momentum transfer (nm^-1)
+    I_Q       : numpy array
+                rebinned scattering intensity
+    """
+    
+    if numPoints == 0:
+        numPoints = Q.size
+    
+    interI_Q = interpolate.interp1d(Q, I_Q)
+    Q = np.linspace(np.amin(Q), maxQ, numPoints, endpoint=True)
+    I_Q = interI_Q(Q)
+    
+    return (Q, I_Q)
 
-    
-    
-    
-    
-    
 
 def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
     """Function to check if the measured and the background raw data have the
@@ -120,93 +140,10 @@ def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
     
     if len(Q) != len(Qbkg):
         min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
-        Q, I_Q = rebinning(Q, I_Q, 1, min_len, minQ, maxQ)
-        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, 1, min_len, minQ, maxQ)
+        Q, I_Q = rebinning(Q, I_Q, minQ, maxQ, min_len)
+        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, minQ, maxQ, min_len)
     
     return (Q, I_Q, Qbkg, I_Qbkg)
-
-
-
-
-
-
-
-def rebinning(X, f_X, BinNum, Num, maxQ, minQ):
-    """Function for the rebinning
-    """
-
-    newf_X = interpolate.interp1d(X, f_X)
-    ShitX = np.linspace(np.amin(X), maxQ, BinNum*Num, endpoint=True)
-    ShitY = newf_X(ShitX)
-
-    min = (BinNum - 1)/2 * maxQ /(BinNum * Num - 1)
-    max = maxQ - (BinNum - 1)/2 * maxQ / (BinNum*Num - 1)
-    BinX = np.linspace(min, max, Num, endpoint=True)
-    BinY = np.zeros(Num)
-
-    for i in range(BinNum):
-        for j in range(0, Num):
-            BinY[j] += ShitY[j*BinNum+i]
-
-    BinY /= BinNum
-
-    mask = np.where(X<=minQ)
-    BinY[mask] = 0.0
-
-    # lenX = len(X)
-    # numX = 2**int(math.log(lenX,2))
-    # rebinnedX = np.linspace(np.amin(X), maxQ, numX, endpoint=True)
-    # if min < np.amin(X):
-        # min = np.amin(X)
-
-    return (BinX, BinY)
-
-
-
-
-
-
-
-
-
-def rebinning2(X, f_X, Num, minQ, maxQ):
-    """Function for the rebinning.
-    
-    Parameters
-    ----------
-    X      : numpy array
-             abscissa to rebin
-    f_X    : numpy array
-             ordinate to interpolate
-    Num    : int
-             number of points in data interpolation
-    minQ   : float
-             minimum Q value
-    maxQ   : float
-             maximum Q value
-    
-    Returns
-    -------
-    BinX   : numpy array
-             rebinned abscissa
-    BinY   : numpy array
-             rebinned ordinate
-    """
-
-    newf_X = interpolate.interp1d(X, f_X)
-    ShiftX = np.linspace(np.amin(X), maxQ, Num, endpoint=True)
-    ShiftY = newf_X(ShiftX)
-    
-    BinX = np.linspace(np.amin(X), maxQ, Num, endpoint=True)
-    BinY = np.zeros(Num)
-    
-    for j in range(0, Num):
-        BinY[j] += ShiftY[j+1]
-    
-    mask = np.where(BinX<=minQ)
-    BinY[mask] = 0.0
-    
-    return (BinX, BinY)
 
 
 def fitline(Q, I_Q, index1, element1, index2, element2):
