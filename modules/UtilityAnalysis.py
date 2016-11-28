@@ -397,73 +397,31 @@ def interpolation_after_smoothing(X, newX, f_X):
     return newf_X
 
 
-def make_array_loop(var_value, percentage, step):
+def make_array_loop(varValue, step, numSample):
     """Function to create an array given its middle value and the percentage
     of the extreme.
     
     Parameters
     ----------
-    var_value  : float
+    varValue  : float
                  variable's value to generate the array
-    percentage : float
-                 percentage to calculate the extreme of the interval
     step       : float
                  array step
+    numSample : int
+                number of sample
     
     Returns
     -------
-    var_array  : numpy array
+    varArray  : numpy array
                  variable final array
     """
     
-    low_extreme = var_value - var_value*percentage/100
-    high_extreme = var_value + var_value*percentage/100
+    lowExtreme = varValue-step*11
+    highExtreme = varValue+step*11
     
-    # var_array = np.linspace(low_extreme, high_extreme, num_sample)
-    var_array = np.arange(low_extreme, high_extreme, step)
-    # np.linspace(27.18-0.025*11, 27.18+0.025*11, 23)
+    varArray = np.linspace(lowExtreme, highExtreme, numSample)
     
-    return var_array
-
-
-def make_array(variables, scale_factor, density, percentage, num_sample):
-    """Function to generate array used to generate the array for the scale factor
-    and the density for the chi2 minimization.
-    If the loop variable is set-on it generates an array using the function
-    make_array_loop, otherwise it generates an array with one value.
-    
-    Parameters
-    ----------
-    variables    : module
-                   input variables setted by the user
-    scale_factor : float
-                   scale factor initial value
-    density      : float
-                   density inizial value
-    percentage   : float
-                   percentage to calculate the extreme of the interval
-    num_sample   : int
-                   number of sample to generate
-    
-    Returns
-    -------
-    sf_array     : numpy array
-                   scale factor array
-    rho0_array   : numpy array
-                   density array
-    """
-    
-    if variables.sf_loop == "y":
-        sf_array = make_array_loop(scale_factor, percentage, num_sample)
-    else:
-        sf_array = np.array([scale_factor])
-    
-    if variables.rho0_loop == "y":
-        rho0_array = make_array_loop(density, percentage, num_sample)
-    else:
-        rho0_array = np.array([density])
-    
-    return (sf_array, rho0_array)
+    return varArray
 
 
 def normalize_to_1(var_y):

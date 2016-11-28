@@ -44,7 +44,7 @@ from modules import UtilityAnalysis
 
 
 def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
-    Sinf, Ztot, sf, density, Fintra_r, r):
+    Sinf, Ztot, scaleFactor, density, Fintra_r, r):
     """Function to apply the Kaplow method.
 
     Parameters
@@ -67,7 +67,7 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
                     value of S(Q) for Q->inf
     Ztot          : int
                     total Z number
-    scale_factor  : float
+    scaleFactor   : float
                     scale factor
     density       : float
                     average atomic density
@@ -86,7 +86,7 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
                     optimized F(r)
     """
 
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scale_factor, Ibkg_Q)
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
     alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
         Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
         fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)

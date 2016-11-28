@@ -82,40 +82,84 @@ if __name__ == '__main__':
         variables.QmaxIntegrate, variables.maxQ, elementList, element, \
         x, y, z, elementParameters, variables.dampFactor)
     
-    scale_factor = variables.sfValue
+    scaleFactor = variables.sfValue
     density = variables.rho0Value
     
-    percentage = 20
-    step = 1 #0.025
-    
-    # while True:
-    density_array = UtilityAnalysis.make_array_loop(density, percentage, step)
-    # print(density_array)
-    chi2_array = np.zeros(density_array.size)
+    scaleStep = 0.00006
+    densityStep = 0.025
+    numSample = 23
+    numLoopIteration = 0
+
     
     plt.ion()
     figure, ax = plt.subplots()
-    ax.grid()
-    
-    for i in range(len(density_array)):
-        chi2_array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
-            Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scale_factor, density_array[i], Fintra_r, r)
+
+    while True:
+        plt.cla()
+        ax.grid()
+        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+
+        chi2Array = np.zeros(numSample)
+
+        for i in range(len(scaleArray)):
+            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
+                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleArray[i], density, Fintra_r, r)
+            
+            # plt.figure("chi2")
+            plt.scatter(scaleArray[i], chi2Array[i])
+            figure.canvas.draw()
         
-        plt.scatter(density_array[i], chi2_array[i])
+        xfit, yfit, scaleFactor = Minimization.chi2_fit(scaleArray, chi2Array)
+        plt.plot(xfit, yfit)
         figure.canvas.draw()
+        print(scaleFactor)
         
+        # time.sleep(1.0)
+        plt.cla()
+        ax.grid()
+
+        density0 = density
+        densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+        chi2Array = np.zeros(numSample)
+        
+        for i in range(len(densityArray)):
+            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
+                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleFactor, densityArray[i], Fintra_r, r)
+            
+            plt.scatter(densityArray[i], chi2Array[i])
+            figure.canvas.draw()
+            
+        
+        xfit, yfit, density = Minimization.chi2_fit(densityArray, chi2Array)
+        plt.plot(xfit, yfit)
+        figure.canvas.draw()
+        print(density0, density)
+        # time.sleep(1.0)
+
+        if np.abs(density-density0) > density0/25:
+            scaleStep = 0.006
+            densityStep = density0/10
+            print(1, np.abs(density-density0), density0/25)
+        elif np.abs(density-density0) > density0/75:
+            scaleStep = 0.0006
+            densityStep = density0/100
+            print(2, np.abs(density-density0), density0/75)
+        else:
+            scaleStep = 0.00006
+            densityStep = density0/1000
+            print(3, np.abs(density-density0))
+
+        numLoopIteration += 1
+        print(numLoopIteration)
+        # if (numLoopIteration == 2):
+        if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
+            print(4, np.abs(density-density0), density0/2500)
+            break
+
     plt.ioff()
-    
-    xfit, yfit, density = Minimization.chi2_fit(density_array, chi2_array)
-    
-    print(density)
-    
-    plt.plot(xfit, yfit)
-        # if np.abs(density-density1) <
         
-        
-    # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
-    # Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
+    # # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    # # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
+    # # Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
     
     plt.show()
