@@ -85,7 +85,7 @@ if __name__ == '__main__':
     scaleFactor = variables.sfValue
     density = variables.rho0Value
     
-    scaleStep = 0.00006
+    scaleStep = 0.05
     densityStep = 0.025
     numSample = 23
     numLoopIteration = 0
@@ -101,6 +101,7 @@ if __name__ == '__main__':
 
         chi2Array = np.zeros(numSample)
 
+        plt.xlabel("Scale")
         for i in range(len(scaleArray)):
             chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
                 Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleArray[i], density, Fintra_r, r)
@@ -122,6 +123,7 @@ if __name__ == '__main__':
         densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
         chi2Array = np.zeros(numSample)
         
+        plt.xlabel("Density")
         for i in range(len(densityArray)):
             chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
                 Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleFactor, densityArray[i], Fintra_r, r)
