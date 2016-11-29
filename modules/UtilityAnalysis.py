@@ -38,7 +38,9 @@ from scipy import interpolate
 from scipy.integrate import simps
 from scipy.constants import *
 
+from modules import MainFunctions
 from modules import Utility
+from modules import UtilityAnalysis
 
 
 def data_interpolation(Q, I_Q, minQ, maxQ, numPoints):
@@ -373,6 +375,27 @@ def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
     return S_Qdamp
 
 
+def S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
+    minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor):
+    """
+    """
+    
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf,
+        Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate],
+        fe_Q[Q<=QmaxIntegrate], Ztot, density)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+    
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q,
+        minQ, QmaxIntegrate, maxQ)
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf,
+        smoothFactor, minQ, QmaxIntegrate, maxQ)
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf,
+        QmaxIntegrate, dampFactor)
+    
+    return SsmoothDamp_Q
+
+
 def interpolation_after_smoothing(X, newX, f_X):
     """Function to interpolate the data.
     
@@ -404,16 +427,16 @@ def make_array_loop(varValue, step, numSample):
     Parameters
     ----------
     varValue  : float
-                 variable's value to generate the array
-    step       : float
-                 array step
+                variable's value to generate the array
+    step      : float
+                array step
     numSample : int
                 number of sample
     
     Returns
     -------
     varArray  : numpy array
-                 variable final array
+                variable final array
     """
     
     lowExtreme = varValue-step*11
@@ -425,17 +448,17 @@ def make_array_loop(varValue, step, numSample):
 
 
 def normalize_to_1(var_y):
-    """Function to normalize a variable to unitary area.
+    """Function to normalize a distribution to unitary area.
     
     Parameters
     ----------
     var_y      : numpy array
-                 variable to normalize
+                 distribution to normalize
     
     Returns
     -------
     var_y_norm : numpy array
-                 normalized variable
+                 normalized distribution
     
     """
     

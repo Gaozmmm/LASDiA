@@ -57,7 +57,6 @@ from modules import UtilityAnalysis
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
 
 
-
 if __name__ == '__main__':
     variables = Utility.read_inputFile("./inputFile.txt")
     
@@ -85,83 +84,29 @@ if __name__ == '__main__':
     scaleFactor = variables.sfValue
     density = variables.rho0Value
     
-    scaleStep = 0.05
-    densityStep = 0.025
-    numSample = 23
-    numLoopIteration = 0
-
+    # density, scaleFactor = Minimization.chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, 
+        # J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
+        # density, Fintra_r, r, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 
+        # variables.smoothFactor, variables.dampFactor, variables.iteration, variables.rmin)
     
-    plt.ion()
-    figure, ax = plt.subplots()
-
-    while True:
-        plt.cla()
-        ax.grid()
-        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
-
-        chi2Array = np.zeros(numSample)
-
-        plt.xlabel("Scale")
-        for i in range(len(scaleArray)):
-            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
-                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleArray[i], density, Fintra_r, r)
-            
-            # plt.figure("chi2")
-            plt.scatter(scaleArray[i], chi2Array[i])
-            figure.canvas.draw()
+    # print("Final values ", density, scaleFactor)
+    
+    S_Q = UtilityAnalysis.S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
+        variables.minQ, variables.QmaxIntegrate, variables.maxQ, variables.smoothFactor, variables.dampFactor)
+    
+    i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], i_Q[Q<=variables.QmaxIntegrate])
+    
+    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iteration, F_r, 
+            Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate],
+            Q[Q<=variables.QmaxIntegrate], Sinf,
+            J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
         
-        xfit, yfit, scaleFactor = Minimization.chi2_fit(scaleArray, chi2Array)
-        plt.plot(xfit, yfit)
-        figure.canvas.draw()
-        print(scaleFactor)
-        
-        # time.sleep(1.0)
-        plt.cla()
-        ax.grid()
-
-        density0 = density
-        densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
-        chi2Array = np.zeros(numSample)
-        
-        plt.xlabel("Density")
-        for i in range(len(densityArray)):
-            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(variables, Q, I_Q, \
-                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleFactor, densityArray[i], Fintra_r, r)
-            
-            plt.scatter(densityArray[i], chi2Array[i])
-            figure.canvas.draw()
-            
-        
-        xfit, yfit, density = Minimization.chi2_fit(densityArray, chi2Array)
-        plt.plot(xfit, yfit)
-        figure.canvas.draw()
-        print(density0, density)
-        # time.sleep(1.0)
-
-        if np.abs(density-density0) > density0/25:
-            scaleStep = 0.006
-            densityStep = density0/10
-            print(1, np.abs(density-density0), density0/25)
-        elif np.abs(density-density0) > density0/75:
-            scaleStep = 0.0006
-            densityStep = density0/100
-            print(2, np.abs(density-density0), density0/75)
-        else:
-            scaleStep = 0.00006
-            densityStep = density0/1000
-            print(3, np.abs(density-density0))
-
-        numLoopIteration += 1
-        print(numLoopIteration)
-        # if (numLoopIteration == 2):
-        if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
-            print(4, np.abs(density-density0), density0/2500)
-            break
-
-    plt.ioff()
-        
-    # # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    # # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
-    # # Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
+    Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
+    
+    Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
+    Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
+    Utility.plot_data(Q, Sopt_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{opt}(Q)$", "y")
     
     plt.show()

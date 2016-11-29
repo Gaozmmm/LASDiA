@@ -99,7 +99,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, label="Data")
         self.ui.rawDataPlot.canvas.ax.legend()
-        # self.ui.rawDataPlot.canvas.draw()
+        self.ui.rawDataPlot.canvas.draw()
 
     #---------------------------------------------------------
         

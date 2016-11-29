@@ -1307,6 +1307,74 @@ def plot_data(xVal, yVal, plotName, xName, yName, labName, overlapping):
     plt.draw()
 
 
+def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
+    Sinf, Ztot, scaleFactor, density, Fintra_r, r):
+    """Function to apply the Kaplow method.
+
+    Parameters
+    ----------
+    variables     : module
+                    input variables setted by the user
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    I_Q           : numpy array
+                    measured scattering intensity
+    Ibkg_Q        : numpy array
+                    background scattering intensity
+    J_Q           : numpy array
+                    J(Q)
+    fe_Q          : numpy array
+                    effective electric form factor
+    Iincoh_Q      : numpy array
+                    incoherent scattering intensity
+    Sinf          : float
+                    value of S(Q) for Q->inf
+    Ztot          : int
+                    total Z number
+    scaleFactor   : float
+                    scale factor
+    density       : float
+                    average atomic density
+    Fintra_r      : numpy array
+                    intramolecular contribution of F(r)
+    r             : numpy array
+                    atomic distance (nm)
+
+    Returns
+    -------
+    chi2          : float
+                    chi2 value
+    SsmoothDamp_Q : numpy array
+                    smoothed and damped structure factor
+    Fopt_r        : numpy array
+                    optimized F(r)
+    """
+
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+        fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+        variables.QmaxIntegrate, variables.maxQ)
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, variables.smoothFactor, \
+        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf, \
+        variables.QmaxIntegrate, variables.dampFactor)
+
+    i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+        i_Q[Q<=variables.QmaxIntegrate])
+
+    Fopt_r, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
+        Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+        Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
+
+    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
+
+    return (chi2, SsmoothDamp_Q, F_r, Fopt_r)
+
 
 def Kaplow_methodWAL(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
     aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
@@ -1626,3 +1694,29 @@ def make_array(variables, scale_factor, density, percentage, num_sample):
         rho0_array = np.array([density])
     
     return (sf_array, rho0_array)
+
+
+def calc_min_chi2(scale_factor, rho0, chi2):
+    """Function to calculate the minimum of chi2 matrix
+    
+    Parameters
+    ----------
+    scale_factor                : numpy array
+                                  scale factor
+    rho0                        : numpy array
+                                  average atomic density
+    chi2                        : 2D numpy array
+                                  chi2 values
+    
+    
+    Returns
+    -------
+    scale_factor[minIndxS]      : float
+                                  scale factor minimum value
+    rho0[minIndxRho0]           : float
+                                  atomic density minimum value
+    """
+    
+    minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
+    
+    return (scale_factor[minIndxS], rho0[minIndxRho0])

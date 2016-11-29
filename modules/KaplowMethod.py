@@ -43,8 +43,10 @@ from modules import Utility
 from modules import UtilityAnalysis
 
 
-def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
-    Sinf, Ztot, scaleFactor, density, Fintra_r, r):
+def Kaplow_method(Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q,
+    Sinf, Ztot, scaleFactor, density, Fintra_r, r,
+    minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration,
+    rmin):
     """Function to apply the Kaplow method.
 
     Parameters
@@ -87,27 +89,27 @@ def Kaplow_method(variables, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, \
     """
 
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
-    alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
-        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-        fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, \
+        Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate], \
+        fe_Q[Q<=QmaxIntegrate], Ztot, density)
     Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
 
-    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
-        variables.QmaxIntegrate, variables.maxQ)
-    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, variables.smoothFactor, \
-        variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, \
+        QmaxIntegrate, maxQ)
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, smoothFactor, \
+        minQ, QmaxIntegrate, maxQ)
     SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf, \
-        variables.QmaxIntegrate, variables.dampFactor)
+        QmaxIntegrate, dampFactor)
 
     i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-        i_Q[Q<=variables.QmaxIntegrate])
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], \
+        i_Q[Q<=QmaxIntegrate])
 
-    Fopt_r, deltaF_rIt = Optimization.calc_optimize_Fr(variables.iteration, F_r, \
-        Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
-        Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, variables.plot_iter)
+    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(iteration, F_r, \
+        Fintra_r, density, i_Q[Q<=QmaxIntegrate], Q[Q<=QmaxIntegrate], \
+        Sinf, J_Q[Q<=QmaxIntegrate], r, rmin, "n")
 
-    chi2 = simps(deltaF_rIt[r < variables.rmin]**2, r[r < variables.rmin])
+    chi2 = simps(deltaFopt_r[r < rmin]**2, r[r < rmin])
 
     return (chi2, SsmoothDamp_Q, F_r, Fopt_r)
 
