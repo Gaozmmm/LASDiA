@@ -171,7 +171,26 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         Fintra_r = np.zeros(self.r.size)
         
+        # density, scaleFactor = Minimization.chi2_minimization(self.ui.sfValue.value(), 
+            # self.Q, self.I_Q, self.Ibkg_Q, 
+            # self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot,
+            # self.ui.rho0Value.value(), Fintra_r, self.r, self.ui.minQ.value(), self.ui.QmaxInt.value(), variables.maxQ, 
+            # variables.smoothFactor, variables.dampFactor, variables.iteration, variables.rmin)
+            
+        # S_Q = UtilityAnalysis.S_QCalculation(self.Q, self.I_Q, self.Ibkg_Q, scaleFactor, 
+            # self.J_Q, self.Sinf, self.fe_Q, self.Ztot, density, self.Iincoh_Q, 
+            # self.ui.minQ.value(), self.ui.QmaxInt.value(), variables.maxQ, variables.smoothFactor, variables.dampFactor)
         
+        # i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
+        # F_r = MainFunctions.calc_Fr(r, Q[Q<=self.ui.QmaxInt.value()], i_Q[Q<=self.ui.QmaxInt.value()])
+        
+        # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iteration, F_r, 
+                # Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate],
+                # Q[Q<=variables.QmaxIntegrate], Sinf,
+                # J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+            
+        # Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
+            
         F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
             Fintra_r, self.ui.rho0Value.value(), self.i_Q[self.Q<=self.ui.QmaxInt.value()], \
             self.Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
