@@ -84,12 +84,12 @@ if __name__ == '__main__':
     scaleFactor = variables.sfValue
     density = variables.rho0Value
     
-    # density, scaleFactor = Minimization.chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, 
-        # J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
-        # density, Fintra_r, r, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 
-        # variables.smoothFactor, variables.dampFactor, variables.iteration, variables.rmin)
+    density, scaleFactor = Minimization.chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, 
+        J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
+        density, Fintra_r, r, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 
+        variables.smoothFactor, variables.dampFactor, variables.iterations, variables.rmin)
     
-    # print("Final values ", density, scaleFactor)
+    print("Final values ", density, scaleFactor)
     
     S_Q = UtilityAnalysis.S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
         variables.minQ, variables.QmaxIntegrate, variables.maxQ, variables.smoothFactor, variables.dampFactor)
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], i_Q[Q<=variables.QmaxIntegrate])
     
-    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iteration, F_r, 
+    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, 
             Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate],
             Q[Q<=variables.QmaxIntegrate], Sinf,
             J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")

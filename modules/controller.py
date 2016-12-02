@@ -176,28 +176,103 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
             # self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot,
             # self.ui.rho0Value.value(), Fintra_r, self.r, self.ui.minQ.value(), self.ui.QmaxInt.value(), variables.maxQ, 
             # variables.smoothFactor, variables.dampFactor, variables.iteration, variables.rmin)
-            
-        # S_Q = UtilityAnalysis.S_QCalculation(self.Q, self.I_Q, self.Ibkg_Q, scaleFactor, 
-            # self.J_Q, self.Sinf, self.fe_Q, self.Ztot, density, self.Iincoh_Q, 
-            # self.ui.minQ.value(), self.ui.QmaxInt.value(), variables.maxQ, variables.smoothFactor, variables.dampFactor)
         
-        # i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
-        # F_r = MainFunctions.calc_Fr(r, Q[Q<=self.ui.QmaxInt.value()], i_Q[Q<=self.ui.QmaxInt.value()])
+        scaleStep = 0.05
+        densityStep = 0.025
+        numSample = 23
+        numLoopIteration = 0
         
-        # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iteration, F_r, 
-                # Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate],
-                # Q[Q<=variables.QmaxIntegrate], Sinf,
-                # J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+        # plt.ion()
+        # figure, ax = plt.subplots()
+        
+        scaleFactor = self.ui.sfValue.value()
+        density = self.ui.rho0Value.value()
+        
+        while True:
+            self.ui.chi2_plot.canvas.ax.cla()
+            self.ui.chi2_plot.canvas.ax.grid(True)
+            scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
             
-        # Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
+            chi2Array = np.zeros(numSample)
             
-        F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
-            Fintra_r, self.ui.rho0Value.value(), self.i_Q[self.Q<=self.ui.QmaxInt.value()], \
+            self.ui.chi2_plot.canvas.ax.set_xlabel("Scale")
+            self.ui.chi2_plot.canvas.ax.relim()
+            self.ui.chi2_plot.canvas.ax.autoscale_view()
+            for i in range(len(scaleArray)):
+                chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(self.Q, self.I_Q,
+                    self.Ibkg_Q, self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot, scaleArray[i], density, Fintra_r, self.r,
+                    self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value(), self.ui.smoothFactor.value(),
+                    self.ui.dampFactor.value(), self.ui.iterations.value(), self.ui.rmin.value())
+                
+                self.ui.chi2_plot.canvas.ax.scatter(scaleArray[i], chi2Array[i])
+                self.ui.chi2_plot.canvas.draw()
+            
+            xfit, yfit, scaleFactor = Minimization.chi2_fit(scaleArray, chi2Array)
+            self.ui.chi2_plot.canvas.ax.plot(xfit, yfit)
+            self.ui.chi2_plot.canvas.draw()
+            
+            self.ui.chi2_plot.canvas.ax.cla()
+            self.ui.chi2_plot.canvas.ax.grid(True)
+
+            density0 = density
+            densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+            chi2Array = np.zeros(numSample)
+            
+            self.ui.chi2_plot.canvas.ax.set_xlabel("Density")
+            self.ui.chi2_plot.canvas.ax.relim()
+            self.ui.chi2_plot.canvas.ax.autoscale_view()
+            for i in range(len(densityArray)):
+                chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(self.Q, self.I_Q,
+                    self.Ibkg_Q, self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot, scaleFactor, densityArray[i], Fintra_r, self.r,
+                    self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value(), self.ui.smoothFactor.value(),
+                    self.ui.dampFactor.value(), self.ui.iterations.value(), self.ui.rmin.value())
+                
+                self.ui.chi2_plot.canvas.ax.scatter(densityArray[i], chi2Array[i])
+                self.ui.chi2_plot.canvas.draw()
+                
+            
+            xfit, yfit, density = Minimization.chi2_fit(densityArray, chi2Array)
+            self.ui.chi2_plot.canvas.ax.plot(xfit, yfit)
+            self.ui.chi2_plot.canvas.draw()
+            
+            if np.abs(density-density0) > density0/25:
+                scaleStep = 0.006
+                densityStep = density0/10
+            elif np.abs(density-density0) > density0/75:
+                scaleStep = 0.0006
+                densityStep = density0/100
+            else:
+                scaleStep = 0.00006
+                densityStep = density0/1000
+
+            numLoopIteration += 1
+            if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
+                break
+        
+        S_Q = UtilityAnalysis.S_QCalculation(self.Q, self.I_Q, self.Ibkg_Q, scaleFactor, 
+            self.J_Q, self.Sinf, self.fe_Q, self.Ztot, density, self.Iincoh_Q, 
+            self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value(), self.ui.smoothFactor.value(), self.ui.dampFactor.value())
+        
+        i_Q = MainFunctions.calc_iQ(S_Q, self.Sinf)
+        F_r = MainFunctions.calc_Fr(self.r, self.Q[self.Q<=self.ui.QmaxInt.value()], i_Q[self.Q<=self.ui.QmaxInt.value()])
+        
+        Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
+            Fintra_r, density, i_Q[self.Q<=self.ui.QmaxInt.value()], \
             self.Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
             self.J_Q[self.Q<=self.ui.QmaxInt.value()], self.r, self.ui.rmin.value(), "n")
+            
+        Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, self.r, self.Q, self.Sinf)
+            
+        # # F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
+            # # Fintra_r, self.ui.rho0Value.value(), self.i_Q[self.Q<=self.ui.QmaxInt.value()], \
+            # # self.Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
+            # # self.J_Q[self.Q<=self.ui.QmaxInt.value()], self.r, self.ui.rmin.value(), "n")
         
-        self.ui.distfuncPlot.canvas.ax.plot(self.r, F_rIt, label=r"F_{opt}(r)")
+        self.ui.distfuncPlot.canvas.ax.plot(self.r, Fopt_r, label=r"F_{opt}(r)")
         self.ui.distfuncPlot.canvas.draw()
+        
+        self.ui.factorPlot.canvas.ax.plot(self.Q, Sopt_Q, label=r"S_{opt}(Q)")
+        self.ui.factorPlot.canvas.draw()
     
     #---------------------------------------------------------
     
