@@ -70,8 +70,6 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File", \
             r"../data/cea_files/Ar", "Data File(*chi *xy)")
-            # r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
-
         
         self.Q, self.I_Q = Utility.read_file(path)
         
@@ -88,7 +86,6 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File", \
             r"../data/cea_files/Ar", "Data File(*chi *xy)")
-        	# r"C:\Users\devoto\work\ID27\data\cea_files\Ar", "Data File(*chi *xy)")
         
         self.Qbkg, self.Ibkg_Q = Utility.read_file(path)
         
@@ -169,6 +166,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         scaleFactor = self.ui.sfValue.value()
         density = self.ui.rho0Value.value()
         
+        print("density ", density, " Scale Factor ", scaleFactor)
+        
         while True:
             self.ui.chi2_plot.canvas.ax.cla()
             self.ui.chi2_plot.canvas.ax.grid(True)
@@ -229,6 +228,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
             numLoopIteration += 1
             if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
                 break
+        
+        print("density ", density, " Scale Factor ", scaleFactor)
         
         S_Q = UtilityAnalysis.S_QCalculation(self.Q, self.I_Q, self.Ibkg_Q, scaleFactor, 
             self.J_Q, self.Sinf, self.fe_Q, self.Ztot, density, self.Iincoh_Q, 
