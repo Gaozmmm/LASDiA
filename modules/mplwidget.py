@@ -29,7 +29,7 @@ class MplWidget(QWidget):
         self.vbl = QVBoxLayout()
         
         self.toolbar = NavigationToolbar(self.canvas, self, coordinates=True)
-        
+
+        self.vbl.addWidget(self.canvas)        
         self.vbl.addWidget(self.toolbar)
-        self.vbl.addWidget(self.canvas)
         self.setLayout(self.vbl)
