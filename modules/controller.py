@@ -29,6 +29,10 @@ from modules import UtilityAnalysis
 
 from modules import LASDiAGUI
 
+# class MyPopup(QWidget):
+    # def __init__(self):
+        # QWidget.__init__(self)
+
 
 class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def __init__(self):
@@ -55,6 +59,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.Iincoh_Q = None
         self.J_Q = None
         
+        self.XYZFilePath = None
+        
         # Set the buttons
         self.ui.importData.clicked.connect(self.import_data)
         self.ui.importBkg.clicked.connect(self.import_bkg)
@@ -62,6 +68,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.calcFr.clicked.connect(self.Fr)
         self.ui.optimize.clicked.connect(self.Optimization)
         #self.ui.Minimization.clicked.connect(self.calcMinimization)
+        self.ui.importXYZFile.clicked.connect(self.import_XYZFile)
         
     #---------------------------------------------------------  
 
@@ -80,7 +87,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.rawDataPlot.canvas.draw()
 
     #---------------------------------------------------------
-        
+
     def import_bkg(self):
         """Function to load and plot the bkg file"""
         
@@ -94,6 +101,14 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, "g--", label="Bkg")
         self.ui.rawDataPlot.canvas.ax.legend()
         self.ui.rawDataPlot.canvas.draw()
+
+    #---------------------------------------------------------
+
+    def import_XYZFile(self):
+        """Function to load and plot the bkg file"""
+        
+        self.XYZFilePath, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load XYZ File", \
+            r"./", "Data File(*xyz)")
 
     #---------------------------------------------------------
 
@@ -147,7 +162,15 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def Optimization(self):
         """Function to optimize and plot F(r)"""
         
-        Fintra_r = np.zeros(self.r.size)
+        # Fintra_r = np.zeros(self.r.size)
+        
+        elementList = Utility.molToelemList("Ar")
+        elementParameters = Utility.read_parameters(elementList, "./elementParameters.txt")
+        numAtoms, element, x, y, z = Utility.read_xyz_file(self.XYZFilePath)
+        
+        r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(self.Q, self.fe_Q, self.Ztot, \
+            self.ui.QmaxInt.value(), self.ui.maxQ.value(), elementList, element, \
+            x, y, z, elementParameters, self.ui.dampFactor.value())
         
         # density, scaleFactor = Minimization.chi2_minimization(self.ui.sfValue.value(), 
             # self.Q, self.I_Q, self.Ibkg_Q, 
@@ -166,7 +189,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         scaleFactor = self.ui.sfValue.value()
         density = self.ui.rho0Value.value()
         
-        print("density ", density, " Scale Factor ", scaleFactor)
+        # print("density ", density, " Scale Factor ", scaleFactor)
         
         while True:
             self.ui.chi2_plot.canvas.ax.cla()

@@ -101,7 +101,6 @@ def molToelemList(molecule):
 
     elemlist = re.findall('[A-Z][a-z]*|\d+', re.sub('[A-Z][a-z]*(?![\da-z])', '\g<0>1', molecule))
     elementList = dict(zip(elemlist[0::2], elemlist[1::2]))
-
     elementList = dict((k,int(v)) for k,v in elementList.items())
 
     return elementList

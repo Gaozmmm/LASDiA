@@ -58,6 +58,7 @@ from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
 
 
 if __name__ == '__main__':
+    
     variables = Utility.read_inputFile("./inputFile.txt")
     
     elementList = Utility.molToelemList(variables.molecule)
