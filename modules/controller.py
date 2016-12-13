@@ -69,6 +69,10 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.optimize.clicked.connect(self.Optimization)
         #self.ui.Minimization.clicked.connect(self.calcMinimization)
         self.ui.importXYZFile.clicked.connect(self.import_XYZFile)
+        # self.ui.removePeaksData.clicked.connect(self.remove_PeaksData)
+        # self.ui.removePeaksBkg.clicked.connect(self.remove_PeaksBkg)
+        self.ui.interpolationData.clicked.connect(self.interpolation_Data)
+        self.ui.interpolationBkg.clicked.connect(self.interpolation_Bkg)
         
     #---------------------------------------------------------  
 
@@ -82,10 +86,25 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         self.ui.fileSampleName.setPlainText(path)
         
-        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, label="Data")
+        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, "b", label="Data")
         self.ui.rawDataPlot.canvas.ax.legend()
         self.ui.rawDataPlot.canvas.draw()
+        
+    #---------------------------------------------------------
 
+    def interpolation_Data(self):
+        """Function to interpolate data"""
+        
+        self.Q, self.I_Q = UtilityAnalysis.data_interpolation(self.Q, self.I_Q, 
+                            self.ui.minQ.value(), self.ui.maxQ.value(),
+                            self.ui.numInterpData.value())
+        
+        
+        self.ui.rawDataPlot.canvas.ax.lines.pop(0)
+        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, "b", label="Data")
+        self.ui.rawDataPlot.canvas.ax.legend()
+        self.ui.rawDataPlot.canvas.draw()
+        
     #---------------------------------------------------------
 
     def import_bkg(self):
@@ -98,6 +117,20 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         self.ui.fileBkgName.setPlainText(path)
         
+        self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, "g--", label="Bkg")
+        self.ui.rawDataPlot.canvas.ax.legend()
+        self.ui.rawDataPlot.canvas.draw()
+
+    #---------------------------------------------------------
+
+    def interpolation_Bkg(self):
+        """Function to interpolate data"""
+        
+        self.Qbkg, self.Ibkg_Q = UtilityAnalysis.data_interpolation(self.Qbkg, self.Ibkg_Q, 
+                            self.ui.minQ.value(), self.ui.maxQ.value(),
+                            self.ui.numInterpBkg.value())
+        
+        self.ui.rawDataPlot.canvas.ax.lines.pop(1)
         self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, "g--", label="Bkg")
         self.ui.rawDataPlot.canvas.ax.legend()
         self.ui.rawDataPlot.canvas.draw()
@@ -280,22 +313,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.factorPlot.canvas.draw()
     
     #---------------------------------------------------------
-    
-    # def importXYZFile(self):
-        # """Function to import the XYZ file and calculate the intramolecular
-           # component"""
-        
-        # path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load XYZ File", \
-            # r".\xyzFiles", "XYZ File(*xyz)")
-        
-        # numAtoms, element, x, y, z = Utility.read_xyz_file(path)
-        
-        # r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(self.Q, fe_Q, Ztot, \
-            # variables.QmaxIntegrate, variables.maxQ, elementList, element, \
-        # x, y, z, elementParameters, variables.damping_factor)
-    
-    #---------------------------------------------------------
-    
+
+
 def main():
     # app = QtWidgets.QApplication(sys.argv)
     # LASDiA = LASDiAGUI.QtWidgets.QMainWindow()

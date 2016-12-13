@@ -232,8 +232,11 @@ def remove_peaks(Q, I_Q):
     points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, \
         mouse_pop=3, mouse_stop=2))
 
-    plt.close()
+    # plt.close()
 
+    print(type(points))
+    print(points)
+    
     idx_elem = np.zeros(shape=(len(points),2))
 
     for i in range(0, len(points)):

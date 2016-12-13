@@ -70,44 +70,46 @@ if __name__ == '__main__':
     Q, I_Q = Utility.read_file(variables.data_file)
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
     
-    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
-        variables.minQ, variables.maxQ)
+    I_Q = UtilityAnalysis.remove_peaks(Q, I_Q)
     
-    fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
-    Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
-    J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+    # Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
+        # variables.minQ, variables.maxQ)
     
-    r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, \
-        variables.QmaxIntegrate, variables.maxQ, elementList, element, \
-        x, y, z, elementParameters, variables.dampFactor)
+    # fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
+    # Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
+    # J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    # Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
-    scaleFactor = variables.sfValue
-    density = variables.rho0Value
+    # r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, \
+        # variables.QmaxIntegrate, variables.maxQ, elementList, element, \
+        # x, y, z, elementParameters, variables.dampFactor)
     
-    density, scaleFactor = Minimization.chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, 
-        J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
-        density, Fintra_r, r, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 
-        variables.smoothFactor, variables.dampFactor, variables.iterations, variables.rmin)
+    # scaleFactor = variables.sfValue
+    # density = variables.rho0Value
     
-    print("Final values ", density, scaleFactor)
+    # density, scaleFactor = Minimization.chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, 
+        # J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
+        # density, Fintra_r, r, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 
+        # variables.smoothFactor, variables.dampFactor, variables.iterations, variables.rmin)
     
-    S_Q = UtilityAnalysis.S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
-        variables.minQ, variables.QmaxIntegrate, variables.maxQ, variables.smoothFactor, variables.dampFactor)
+    # print("Final values ", density, scaleFactor)
     
-    i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], i_Q[Q<=variables.QmaxIntegrate])
+    # S_Q = UtilityAnalysis.S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
+        # variables.minQ, variables.QmaxIntegrate, variables.maxQ, variables.smoothFactor, variables.dampFactor)
     
-    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, 
-            Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate],
-            Q[Q<=variables.QmaxIntegrate], Sinf,
-            J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+    # i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
+    # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], i_Q[Q<=variables.QmaxIntegrate])
+    
+    # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, 
+            # Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate],
+            # Q[Q<=variables.QmaxIntegrate], Sinf,
+            # J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
         
-    Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
+    # Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
     
-    Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
-    Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
-    Utility.plot_data(Q, Sopt_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{opt}(Q)$", "y")
+    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
+    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
+    # Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
+    # Utility.plot_data(Q, Sopt_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{opt}(Q)$", "y")
     
     plt.show()

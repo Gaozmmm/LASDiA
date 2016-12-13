@@ -115,6 +115,9 @@
      <property name="styleSheet">
       <string notr="true">background-color:rgb(255, 255, 255)</string>
      </property>
+     <property name="maximum">
+      <number>999</number>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="bkgTab">
@@ -223,6 +226,9 @@
      </property>
      <property name="styleSheet">
       <string notr="true">background-color:rgb(255, 255, 255)</string>
+     </property>
+     <property name="maximum">
+      <number>999</number>
      </property>
     </widget>
    </widget>
@@ -521,7 +527,7 @@
       <string>Import XYZ file</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="element">
      <property name="geometry">
       <rect>
        <x>10</x>

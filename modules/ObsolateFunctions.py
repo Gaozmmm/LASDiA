@@ -1720,3 +1720,47 @@ def calc_min_chi2(scale_factor, rho0, chi2):
     minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
     
     return (scale_factor[minIndxS], rho0[minIndxRho0])
+
+
+def remove_peaks(Q, I_Q):
+    """Function to remove Bragg's peaks.
+    
+    Parameters
+    ----------
+    Q   : numpy array
+          momentum transfer (nm^-1)
+    I_Q : numpy array
+          measured scattering intensity
+    
+    Returns
+    -------
+    I_Q : numpy array 
+          measured scattering intensity without peaks
+    """
+
+    plt.figure('Remove Peaks')
+    plt.plot(Q, I_Q)
+    plt.grid()
+    plt.xlabel('Q')
+    plt.ylabel('I(Q)')
+
+    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, \
+        mouse_pop=3, mouse_stop=2))
+
+    plt.close()
+
+    idx_elem = np.zeros(shape=(len(points),2))
+
+    for i in range(0, len(points)):
+        idx_elem[i] = find_nearest(Q, points[i,0])
+
+    zipped_idx = np.array(list(zip(*[iter(idx_elem[:,0])]*2)))
+    zipped_elem = np.array(list(zip(*[iter(idx_elem[:,1])]*2)))
+
+    for i in range(0, len(zipped_elem)):
+        mask = np.where((Q>=zipped_elem[i,0]) & (Q<=zipped_elem[i,1]))
+        I_Q1 = fitline(Q[mask], I_Q, zipped_idx[i,0], zipped_elem[i,0], zipped_idx[i,1], \
+            zipped_elem[i,1])
+        I_Q[mask] = I_Q1
+
+    return I_Q
