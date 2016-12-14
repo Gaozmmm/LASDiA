@@ -60,7 +60,7 @@ dampFactor = 1                                              # Exponential dampin
 # F(r) optimization
 plot_iter = "n"                                                 # flag to plot the F(r) iterations
 iterations = 2                                                   # Number of iteration for F(r) optimization
-rmin = 0.24                                                     # The distance below which no peaks in F(r) may occur
+rmin = 0.21                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
 sfValue = 0.81 #0.585368#0.8                                          # Scale factor initial value

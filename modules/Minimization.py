@@ -40,6 +40,7 @@ import matplotlib.pyplot as plt
 
 from modules import KaplowMethod
 from modules import UtilityAnalysis
+import time
 
 
 def chi2_fit(density_array, chi2_array):
@@ -72,10 +73,10 @@ def chi2_fit(density_array, chi2_array):
 
 def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
     density, Fintra_r, r, minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin):
-    """
+    """Function to calculate the whole loop for the chi2 minimization.
     """
     
-    scaleStep = 0.05
+    scaleStep = 0.025
     densityStep = 0.025
     numSample = 23
     numLoopIteration = 0
@@ -104,6 +105,8 @@ def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Zt
         xfit, yfit, scaleFactor = chi2_fit(scaleArray, chi2Array)
         plt.plot(xfit, yfit)
         figure.canvas.draw()
+
+        time.sleep(10)
         
         ax.cla()
         ax.grid(True)

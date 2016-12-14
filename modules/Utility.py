@@ -654,3 +654,6 @@ def write_results(path, molecule, scale_factor, rho0):
 
     file.write(timeStamp + " \t " + molecule + " \t " + str(scale_factor) + " \t " + str(rho0) + "\n")
     file.close()
+
+
+    
