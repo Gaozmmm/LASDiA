@@ -106,7 +106,7 @@ def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Zt
         plt.plot(xfit, yfit)
         figure.canvas.draw()
 
-        time.sleep(10)
+        time.sleep(100)
         
         ax.cla()
         ax.grid(True)
