@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1472</width>
-    <height>932</height>
+    <width>1471</width>
+    <height>931</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,7 +38,7 @@
     <attribute name="title">
      <string>File</string>
     </attribute>
-    <widget class="QTextEdit" name="fileSampleName">
+    <widget class="QTextEdit" name="dataPathName">
      <property name="geometry">
       <rect>
        <x>140</x>
@@ -51,7 +51,7 @@
       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="importData_2">
+    <widget class="QPushButton" name="dataPath">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -72,7 +72,7 @@
       <rect>
        <x>10</x>
        <y>70</y>
-       <width>321</width>
+       <width>331</width>
        <height>101</height>
       </rect>
      </property>
@@ -104,10 +104,10 @@
        <string>Load</string>
       </property>
      </widget>
-     <widget class="QTextEdit" name="fileSampleName_2">
+     <widget class="QTextEdit" name="dataFileName">
       <property name="geometry">
        <rect>
-        <x>120</x>
+        <x>111</x>
         <y>20</y>
         <width>111</width>
         <height>31</height>
@@ -133,12 +133,12 @@
        <string>Remove Peaks</string>
       </property>
      </widget>
-     <widget class="QLabel" name="num_interpolation_3">
+     <widget class="QLabel" name="dataFileName_2">
       <property name="geometry">
        <rect>
         <x>20</x>
         <y>30</y>
-        <width>61</width>
+        <width>46</width>
         <height>16</height>
        </rect>
       </property>
@@ -150,9 +150,9 @@
     <widget class="QGroupBox" name="bkgBox">
      <property name="geometry">
       <rect>
-       <x>370</x>
+       <x>350</x>
        <y>70</y>
-       <width>321</width>
+       <width>331</width>
        <height>101</height>
       </rect>
      </property>
@@ -168,7 +168,7 @@
      <widget class="QPushButton" name="importBkg">
       <property name="geometry">
        <rect>
-        <x>230</x>
+        <x>240</x>
         <y>20</y>
         <width>71</width>
         <height>31</height>
@@ -181,20 +181,7 @@
        <string>Load</string>
       </property>
      </widget>
-     <widget class="QTextEdit" name="fileSampleName_3">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>20</y>
-        <width>111</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="removePeaksData_2">
+     <widget class="QPushButton" name="removePeaksBkg">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -210,7 +197,7 @@
        <string>Remove Peaks</string>
       </property>
      </widget>
-     <widget class="QLabel" name="num_interpolation_4">
+     <widget class="QLabel" name="bkgFileName_2">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -223,14 +210,33 @@
        <string>File Name</string>
       </property>
      </widget>
+     <widget class="QTextEdit" name="bkgFileName">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>20</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="interpolationBox">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>210</y>
+       <y>200</y>
        <width>671</width>
-       <height>131</height>
+       <height>141</height>
       </rect>
      </property>
      <property name="autoFillBackground">
@@ -242,7 +248,7 @@
      <property name="title">
       <string>Interpolation</string>
      </property>
-     <widget class="QSpinBox" name="numInterpData">
+     <widget class="QSpinBox" name="interpolationPoints">
       <property name="geometry">
        <rect>
         <x>100</x>
@@ -261,7 +267,7 @@
        <number>2048</number>
       </property>
      </widget>
-     <widget class="QLabel" name="num_interpolation_2">
+     <widget class="QLabel" name="interpolationPoints_2">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -278,7 +284,7 @@
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>10</y>
+        <y>20</y>
         <width>171</width>
         <height>111</height>
        </rect>
@@ -289,72 +295,54 @@
       <property name="title">
        <string>Q Range (nm-1)</string>
       </property>
-      <widget class="QLabel" name="minQ_2">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>30</y>
-         <width>51</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="maxQ_2">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>70</y>
-         <width>71</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximim&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-      <widget class="QDoubleSpinBox" name="minQ">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>30</y>
-         <width>66</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-       </property>
-       <property name="maximum">
-        <double>1000.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>3.000000000000000</double>
-       </property>
-      </widget>
-      <widget class="QDoubleSpinBox" name="maxQ">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>70</y>
-         <width>66</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-       </property>
-       <property name="maximum">
-        <double>1000.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>109.000000000000000</double>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="minQ_2">
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="minQ">
+           <property name="styleSheet">
+            <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+           </property>
+           <property name="maximum">
+            <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>3.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="maxQ_2">
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximim&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="maxQ">
+           <property name="styleSheet">
+            <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+           </property>
+           <property name="maximum">
+            <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>109.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
-     <widget class="QPushButton" name="interpolationData">
+     <widget class="QPushButton" name="dataInterpolation">
       <property name="geometry">
        <rect>
         <x>500</x>
@@ -376,7 +364,7 @@
     <attribute name="title">
      <string>Geometry</string>
     </attribute>
-    <widget class="QLabel" name="xray_energy_2">
+    <widget class="QLabel" name="xrayEnergy_2">
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -386,13 +374,13 @@
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">color:rgb(255, 255, 255)</string>
      </property>
      <property name="text">
       <string>X-Ray Energy (keV)</string>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="xray_energy">
+    <widget class="QDoubleSpinBox" name="xrayEnergy">
      <property name="geometry">
       <rect>
        <x>140</x>
@@ -410,14 +398,17 @@
       <rect>
        <x>20</x>
        <y>90</y>
-       <width>361</width>
+       <width>371</width>
        <height>51</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(97, 126, 255);color:rgb(255, 255, 255)</string>
      </property>
      <property name="title">
       <string>DAC Correction</string>
      </property>
-     <widget class="QDoubleSpinBox" name="dac_thickness">
+     <widget class="QDoubleSpinBox" name="dacThickness">
       <property name="geometry">
        <rect>
         <x>110</x>
@@ -427,7 +418,7 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255)</string>
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -436,7 +427,7 @@
        <double>99.999899999999997</double>
       </property>
      </widget>
-     <widget class="QLabel" name="dac_thickness_2">
+     <widget class="QLabel" name="dacThickness_2">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -449,7 +440,7 @@
        <string>Anvil thickness (cm)</string>
       </property>
      </widget>
-     <widget class="QDoubleSpinBox" name="dac_angle">
+     <widget class="QDoubleSpinBox" name="dacAngle">
       <property name="geometry">
        <rect>
         <x>290</x>
@@ -459,15 +450,15 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255)</string>
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
       </property>
      </widget>
-     <widget class="QLabel" name="dac_angle_2">
+     <widget class="QLabel" name="dacAngle_2">
       <property name="geometry">
        <rect>
-        <x>190</x>
+        <x>200</x>
         <y>20</y>
-        <width>101</width>
+        <width>81</width>
         <height>16</height>
        </rect>
       </property>
@@ -484,6 +475,9 @@
        <width>461</width>
        <height>91</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(97, 126, 255);color:rgb(255, 255, 255)</string>
      </property>
      <property name="title">
       <string>MCC Correction</string>
@@ -511,7 +505,7 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255)</string>
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -530,7 +524,7 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255)</string>
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -542,14 +536,14 @@
      <widget class="QDoubleSpinBox" name="r2">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>220</x>
         <y>50</y>
         <width>66</width>
         <height>24</height>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255)</string>
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -561,9 +555,9 @@
      <widget class="QLabel" name="d_2">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>320</x>
         <y>20</y>
-        <width>51</width>
+        <width>41</width>
         <height>16</height>
        </rect>
       </property>
@@ -574,7 +568,7 @@
      <widget class="QLabel" name="ws2_2">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>160</x>
         <y>20</y>
         <width>51</width>
         <height>16</height>
@@ -587,14 +581,14 @@
      <widget class="QDoubleSpinBox" name="ws2">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>220</x>
         <y>20</y>
         <width>66</width>
         <height>24</height>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255)</string>
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -626,7 +620,7 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color:rgb(255, 255, 255)</string>
+       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
       </property>
       <property name="decimals">
        <number>4</number>
@@ -638,7 +632,7 @@
      <widget class="QLabel" name="r2_2">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>160</x>
         <y>50</y>
         <width>51</width>
         <height>16</height>
@@ -662,6 +656,9 @@
        <width>115</width>
        <height>32</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color:rgb(255, 255, 255);border: 2px solid rgb(28, 31, 255)</string>
      </property>
      <property name="text">
       <string>Import XYZ file</string>
@@ -752,114 +749,220 @@
       <string>Delete</string>
      </property>
     </widget>
+    <widget class="QTextEdit" name="xyzFileName">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>260</y>
+       <width>331</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="displayTab">
     <attribute name="title">
      <string>Display</string>
     </attribute>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="middlePlotBox">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>10</y>
+       <y>30</y>
        <width>291</width>
        <height>111</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(97, 126, 255);color:rgb(255, 255, 255)</string>
+     </property>
      <property name="title">
       <string>Middle Plot</string>
      </property>
-     <widget class="QPushButton" name="calcSQ">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>70</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>S(Q)</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="calcSQ_2">
-      <property name="geometry">
-       <rect>
-        <x>130</x>
-        <y>70</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Qi(Q)</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="calcSQ_3">
+     <widget class="QCheckBox" name="formFactorCheck">
       <property name="geometry">
        <rect>
         <x>20</x>
         <y>30</y>
-        <width>75</width>
-        <height>23</height>
+        <width>81</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
        <string>Form Factor</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="calcSQ_4">
+     <widget class="QCheckBox" name="SQCheck">
       <property name="geometry">
        <rect>
-        <x>130</x>
+        <x>20</x>
+        <y>70</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>S(Q)</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="incohCheck">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
         <y>30</y>
-        <width>111</width>
-        <height>23</height>
+        <width>121</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
        <string>Incoherent Intensity</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="QiQCheck">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>70</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Qi(Q)</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="bottomPlotBox">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>180</y>
-       <width>291</width>
+       <y>200</y>
+       <width>111</width>
        <height>111</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(97, 126, 255);color:rgb(255, 255, 255)</string>
      </property>
      <property name="title">
       <string>Bottom Plot</string>
      </property>
-     <widget class="QPushButton" name="calcFr">
+     <widget class="QCheckBox" name="FrCheck">
       <property name="geometry">
        <rect>
-        <x>130</x>
-        <y>40</y>
-        <width>75</width>
-        <height>23</height>
+        <x>30</x>
+        <y>30</y>
+        <width>41</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
        <string>F(r)</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="calcFr_2">
+     <widget class="QCheckBox" name="grCheck">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>40</y>
-        <width>75</width>
-        <height>23</height>
+        <x>30</x>
+        <y>70</y>
+        <width>41</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
        <string>g(r)</string>
       </property>
      </widget>
+    </widget>
+    <widget class="QPushButton" name="calcSQ_4">
+     <property name="geometry">
+      <rect>
+       <x>550</x>
+       <y>100</y>
+       <width>111</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(97, 126, 255);border: 2px solid rgb(28, 31, 255)</string>
+     </property>
+     <property name="text">
+      <string>Incoherent Intensity</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="calcSQ">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>140</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(97, 126, 255);border: 2px solid rgb(28, 31, 255)</string>
+     </property>
+     <property name="text">
+      <string>S(Q)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="calcSQ_2">
+     <property name="geometry">
+      <rect>
+       <x>550</x>
+       <y>140</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Qi(Q)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="calcSQ_3">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>100</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(97, 126, 255);border: 2px solid rgb(28, 31, 255)</string>
+     </property>
+     <property name="text">
+      <string>Form Factor</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="calcFr">
+     <property name="geometry">
+      <rect>
+       <x>540</x>
+       <y>230</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>F(r)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="calcFr_2">
+     <property name="geometry">
+      <rect>
+       <x>430</x>
+       <y>230</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>g(r)</string>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="overlayTab">
@@ -883,126 +986,21 @@
    <property name="title">
     <string>Analysis Panel</string>
    </property>
-   <widget class="QDoubleSpinBox" name="sfValue">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>170</y>
-      <width>91</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-    </property>
-    <property name="decimals">
-     <number>5</number>
-    </property>
-    <property name="maximum">
-     <double>1000.000000000000000</double>
-    </property>
-    <property name="value">
-     <double>1.000000000000000</double>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="rmin">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>210</y>
-      <width>91</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-    </property>
-    <property name="decimals">
-     <number>3</number>
-    </property>
-    <property name="maximum">
-     <double>1000.000000000000000</double>
-    </property>
-    <property name="value">
-     <double>0.240000000000000</double>
-    </property>
-   </widget>
-   <widget class="QLabel" name="rho0Value_2">
-    <property name="geometry">
-     <rect>
-      <x>15</x>
-      <y>130</y>
-      <width>101</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Density (atm/nm&lt;sup&gt;3&lt;/sup&gt;)</string>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="rho0Value">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>130</y>
-      <width>91</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-    </property>
-    <property name="decimals">
-     <number>5</number>
-    </property>
-    <property name="maximum">
-     <double>1000.000000000000000</double>
-    </property>
-    <property name="value">
-     <double>30.000000000000000</double>
-    </property>
-   </widget>
-   <widget class="QLabel" name="sfValue_2">
-    <property name="geometry">
-     <rect>
-      <x>15</x>
-      <y>170</y>
-      <width>59</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Scale Factor</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="rmin_2">
-    <property name="geometry">
-     <rect>
-      <x>15</x>
-      <y>210</y>
-      <width>71</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>r cutoff (nm)</string>
-    </property>
-   </widget>
    <widget class="MatplotlibWidget" name="chi2_plot">
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>110</y>
+      <y>130</y>
       <width>391</width>
       <height>361</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="ref_thickness_2">
+   <widget class="QLabel" name="refThickness_2">
     <property name="geometry">
      <rect>
       <x>15</x>
-      <y>290</y>
+      <y>400</y>
       <width>101</width>
       <height>16</height>
      </rect>
@@ -1011,11 +1009,11 @@
      <string>Ref Thickness (cm)</string>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="ref_thickness">
+   <widget class="QDoubleSpinBox" name="refThickness">
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>290</y>
+      <y>400</y>
       <width>91</width>
       <height>24</height>
      </rect>
@@ -1030,11 +1028,11 @@
      <double>1000.000000000000000</double>
     </property>
    </widget>
-   <widget class="QLabel" name="samp_thickness_2">
+   <widget class="QLabel" name="sampThickness_2">
     <property name="geometry">
      <rect>
       <x>15</x>
-      <y>340</y>
+      <y>450</y>
       <width>121</width>
       <height>16</height>
      </rect>
@@ -1043,11 +1041,11 @@
      <string>Samp Thinckness (cm)</string>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="samp_thickness">
+   <widget class="QDoubleSpinBox" name="sampThickness">
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>340</y>
+      <y>450</y>
       <width>91</width>
       <height>24</height>
      </rect>
@@ -1065,8 +1063,8 @@
    <widget class="QPushButton" name="optimize">
     <property name="geometry">
      <rect>
-      <x>15</x>
-      <y>420</y>
+      <x>300</x>
+      <y>80</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -1078,10 +1076,10 @@
      <string>Optimize</string>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="QmaxInt">
+   <widget class="QDoubleSpinBox" name="QmaxIntegrate">
     <property name="geometry">
      <rect>
-      <x>570</x>
+      <x>610</x>
       <y>30</y>
       <width>81</width>
       <height>24</height>
@@ -1097,10 +1095,10 @@
      <double>98.000000000000000</double>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="smoothFactor">
+   <widget class="QDoubleSpinBox" name="smoothingFactor">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>380</x>
       <y>30</y>
       <width>91</width>
       <height>24</height>
@@ -1116,23 +1114,10 @@
      <double>0.250000000000000</double>
     </property>
    </widget>
-   <widget class="QLabel" name="iterations_2">
+   <widget class="QLabel" name="QmaxIntegrate_2">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>30</y>
-      <width>81</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;F(r) Optimization&lt;br&gt;Iterations&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="QmaxInt_2">
-    <property name="geometry">
-     <rect>
-      <x>460</x>
+      <x>500</x>
       <y>30</y>
       <width>101</width>
       <height>31</height>
@@ -1143,29 +1128,10 @@
 </string>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="dampFactor">
+   <widget class="QLabel" name="smoothingFactor_2">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>70</y>
-      <width>91</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-    </property>
-    <property name="maximum">
-     <double>1000.000000000000000</double>
-    </property>
-    <property name="value">
-     <double>1.000000000000000</double>
-    </property>
-   </widget>
-   <widget class="QLabel" name="smooth_factor_2">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
+      <x>280</x>
       <y>30</y>
       <width>91</width>
       <height>16</height>
@@ -1175,43 +1141,11 @@
      <string>Smoothing Factor</string>
     </property>
    </widget>
-   <widget class="QLabel" name="damping_factor_2">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>70</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Damping Factor</string>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="iterations">
-    <property name="geometry">
-     <rect>
-      <x>370</x>
-      <y>30</y>
-      <width>66</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
-    </property>
-    <property name="maximum">
-     <number>99</number>
-    </property>
-    <property name="value">
-     <number>2</number>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox">
+   <widget class="QCheckBox" name="refThicknessCheck">
     <property name="geometry">
      <rect>
       <x>250</x>
-      <y>290</y>
+      <y>400</y>
       <width>41</width>
       <height>17</height>
      </rect>
@@ -1223,11 +1157,11 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_2">
+   <widget class="QCheckBox" name="sampThicknessCheck">
     <property name="geometry">
      <rect>
       <x>250</x>
-      <y>340</y>
+      <y>450</y>
       <width>31</width>
       <height>17</height>
      </rect>
@@ -1235,6 +1169,243 @@
     <property name="text">
      <string/>
     </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="dampingFunctBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>241</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Damping Function</string>
+    </property>
+    <widget class="QDoubleSpinBox" name="dampingFactor">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>20</y>
+       <width>91</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+     </property>
+     <property name="maximum">
+      <double>1000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="dampingFactor_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>81</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Damping Factor</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="dampingFunction">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>60</y>
+       <width>91</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>Exponential</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Lorch Function</string>
+      </property>
+     </item>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="FrOptBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>250</y>
+      <width>241</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>F(r) Optimization</string>
+    </property>
+    <widget class="QDoubleSpinBox" name="rmin">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>70</y>
+       <width>91</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>1000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.240000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="rmin_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>r cutoff (nm)</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="iterations">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>20</y>
+       <width>66</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+     </property>
+     <property name="maximum">
+      <number>99</number>
+     </property>
+     <property name="value">
+      <number>2</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="iterations_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>61</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Iterations</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="initialValueBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>130</y>
+      <width>241</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Initial values</string>
+    </property>
+    <widget class="QLabel" name="sfValue_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>59</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Scale Factor</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="rho0Value">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>20</y>
+       <width>91</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+     </property>
+     <property name="decimals">
+      <number>5</number>
+     </property>
+     <property name="maximum">
+      <double>1000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>30.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="sfValue">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>60</y>
+       <width>91</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
+     </property>
+     <property name="decimals">
+      <number>5</number>
+     </property>
+     <property name="maximum">
+      <double>1000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="rho0Value_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Density (atm/nm&lt;sup&gt;3&lt;/sup&gt;)</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QGroupBox" name="graphicPanel">
@@ -1289,23 +1460,6 @@
     </property>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="fakeBox">
-   <property name="geometry">
-    <rect>
-     <x>760</x>
-     <y>10</y>
-     <width>701</width>
-     <height>381</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color:rgb(97, 126, 255)</string>
-   </property>
-   <property name="title">
-    <string/>
-   </property>
-  </widget>
-  <zorder>fakeBox</zorder>
   <zorder>analysisPanel</zorder>
   <zorder>graphicPanel</zorder>
   <zorder>experimentPanel</zorder>
