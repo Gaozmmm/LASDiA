@@ -145,8 +145,8 @@ def calc_Iincoh(elementList, Q, elementParameters):
     For some atoms (as Bi) the incoherent scattering intensity is calculated with the
     formula from the article:
     Palinkas Acta Cryst. (1973). A29, 10.
-    To be consistent with the other formula, the parameters a, b, and c in Palinkas are
-    renamed M, K, and L respectly.
+    To be consistent with the other formula, the Palinkas' parameters a, b, and c are
+    renamed M, K, and L, respectly.
     
     Parameters
     ----------

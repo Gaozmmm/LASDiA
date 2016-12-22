@@ -43,32 +43,32 @@ from modules import UtilityAnalysis
 import time
 
 
-def chi2_fit(density_array, chi2_array):
+def chi2_fit(variableArray, chi2Array):
     """Function to fit the chi2 function to find the minimal value.
     
     Parameters
     ----------
-    density_array : numpy array
-                    array with density values
-    chi2_array    : numpy array
+    variableArray : numpy array
+                    array with variable values
+    chi2Array     : numpy array
                     array with chi2 values
     
     Returns
     -------
-    x_fit          : numpy array
-                     array with the x values to plot the fit results
-    y_fit          : numpy array
-                     array with the fit y values
-    min_density    : float
-                     minimum value of the fit curve
+    x_fit         : numpy array
+                    array with the x values to plot the fit results
+    y_fit         : numpy array
+                    array with the fit y values
+    minValue      : float
+                    minimum value of the fit curve
     """
     
-    pol_fit = np.poly1d(np.polyfit(density_array, chi2_array, 2))
-    x_fit = np.linspace(density_array[0], density_array[-1], 1000)
+    pol_fit = np.poly1d(np.polyfit(variableArray, chi2Array, 2))
+    x_fit = np.linspace(variableArray[0], variableArray[-1], 1000)
     y_fit = pol_fit(x_fit)
-    min_density = x_fit[np.argmin(y_fit)]
+    minValue = x_fit[np.argmin(y_fit)]
     
-    return (x_fit, y_fit, min_density)
+    return (x_fit, y_fit, minValue)
 
 
 def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
@@ -76,7 +76,7 @@ def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Zt
     """Function to calculate the whole loop for the chi2 minimization.
     """
     
-    scaleStep = 0.025
+    scaleStep = 0.05
     densityStep = 0.025
     numSample = 23
     numLoopIteration = 0
@@ -85,26 +85,38 @@ def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Zt
     figure, ax = plt.subplots()
 
     while True:
-        ax.cla()
-        ax.grid(True)
-        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+        NoPeak = 0
+        while True:
+            ax.cla()
+            ax.grid(True)
+            scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
 
-        chi2Array = np.zeros(numSample)
+            chi2Array = np.zeros(numSample)
 
-        plt.xlabel("Scale")
-        ax.relim()
-        ax.autoscale_view()
-        for i in range(len(scaleArray)):
-            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(Q, I_Q,
-                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleArray[i], density, Fintra_r, r,
-                minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin)
+            plt.xlabel("Scale")
+            ax.relim()
+            ax.autoscale_view()
+            for i in range(len(scaleArray)):
+                chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(Q, I_Q,
+                    Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleArray[i], density, Fintra_r, r,
+                    minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin)
+                
+                plt.scatter(scaleArray[i], chi2Array[i])
+                figure.canvas.draw()
             
-            plt.scatter(scaleArray[i], chi2Array[i])
+            if np.amax(chi2Array) > 10**8:
+                chi2Array = chi2Array[0:np.amax(chi2Array)]
+            
+            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+            
+            if XXX
+            
+            xfit, yfit, scaleFactor = chi2_fit(scaleArray, chi2Array)
+            plt.plot(xfit, yfit)
             figure.canvas.draw()
-        
-        xfit, yfit, scaleFactor = chi2_fit(scaleArray, chi2Array)
-        plt.plot(xfit, yfit)
-        figure.canvas.draw()
+            
+            if ():
+            break
 
         # time.sleep(100)
         

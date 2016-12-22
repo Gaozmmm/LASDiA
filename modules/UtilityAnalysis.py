@@ -184,7 +184,7 @@ def fitline(Q, I_Q, index1, element1, index2, element2):
 
 
 def find_nearest(array, value):
-    """Function to find the nearest array element of a given value.
+    """Function to find the nearest value to a given number in array.
     
     Parameters
     ----------
