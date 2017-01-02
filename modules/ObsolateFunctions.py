@@ -1764,3 +1764,55 @@ def remove_peaks(Q, I_Q):
         I_Q[mask] = I_Q1
 
     return I_Q
+
+
+def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
+    """Function to apply the damping factor to iintra(Q) function.
+    
+    Parameters
+    ----------
+    iintra_Q       : numpy array
+                     intramolecular contribution of i(Q)
+    Q              : numpy array
+                     momentum transfer (nm^-1)
+    QmaxIntegrate  : float
+                     maximum Q value for the intagrations
+    damping_factor : float
+                     damping factor
+    
+    Returns
+    -------
+    Qiintra_Q      : numpy array
+                     intramolecular contribution of i(Q) multiplied by Q and the
+                     damping function
+    """
+
+    # damping_factor = 0.5 # np.log(10)
+    exponent_factor = damping_factor / QmaxIntegrate**2
+    damp_Q = np.exp(-exponent_factor * Q**2)
+
+    # Qiintra_Q = Q*iintra_Q
+    iintra_Q = damp_Q*iintra_Q
+
+    return iintra_Q
+
+
+def S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
+    minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor):
+    """Function for the S(Q) calculation.
+    """
+    
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf,
+        Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate],
+        fe_Q[Q<=QmaxIntegrate], Ztot, density)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+    
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q,
+        minQ, QmaxIntegrate, maxQ)
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf,
+        smoothFactor, minQ, QmaxIntegrate, maxQ)
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf,
+        QmaxIntegrate, dampFactor)
+    
+    return SsmoothDamp_Q
