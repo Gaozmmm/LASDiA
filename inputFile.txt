@@ -1,52 +1,87 @@
-# Input file format for LASDiA software
-# The lines with the hash tag (#) are comments
-#
-# If the min and max of scale factor and rho0 are the same,
-# the software recognizes it as the only possible value and
-# calculates all the physical quantities just for those ones.
+# The MIT License (MIT)
+
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# Input file format for LASDiA software.
+# The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-data_file = "C:/Users/devoto/work/ID27/data/cea_files/CO2/WO2_007BBin.chi"
-bkg_file = "C:/Users/devoto/work/ID27/data/cea_files/CO2/WO2_013BBin.chi"
+data_file = "../data/cea_files/ar/ht2_034t++_rem.chi"
+bkg_file = "../data/cea_files/ar/ht2_036t++_rem.chi"
+# data_file = "../data/cea_files/CO2/WO2_007T++.chi"
+# bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
 
 # Sample composition
-xyz_file = "C:/Users/devoto/work/ID27/LASDiA/xyzFiles/co2.xyz"                               # Path for the XYZ file
-molecule = "CO2"                                                                                 # Molecular composition: Ar, CO2, N2
-aff_params = "C:/Users/devoto/work/ID27/LASDiA/affParamCEA.txt"                                # Path atomic form factor parameters file
-incoh_params = "C:/Users/devoto/work/ID27/LASDiA/incohParamCEA.txt"                            # Path incoherent parameters file
+molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
+# molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
+element_params_path = "./elementParameters.txt"                      # Path element parameters file
+
+# Geometry corrections
+abs_length = 1.208                                              # @33keV 1.208cm
+dac_thickness = 0.144                                           # cm
+phi_matrix_thickness = 0.17                                     # cm
+phi_matrix_flag = "n"                                           # flag for the phi matrix calculation
+MCC_path = "./SollerSlits.txt"                                  # path of Soller Slits parameters
+MCC_type = "A"                                                  # type of Soller Slits
 
 # Analysis parameters
-minQ = 8.005                                                   # Minimum Q value in data interpolation waves
-QmaxIntegrate = 90                                              # Qmax for all integration operations
-maxQ = 100                                                     # Maximum Q value in data interpolation waves
+# Ar
+minQ = 3.0                                                      # Minimum Q value in data interpolation waves
+QmaxIntegrate = 98.0                                            # Qmax for all integration operations
+maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
 
-smooth_factor = 0.25                                            # Smoothing factor for cubic spline
-damp_factor = 1                                                 # Exponential damping factor == A*Qmax^2
+# CO2
+# minQ = 8.005                                                    # Minimum Q value in data interpolation waves
+# QmaxIntegrate = 90.0                                            # Qmax for all integration operations
+# maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
+
+# NumPoints = 550                                               # Number of points for S(Q) smoothing
+smoothFactor = 0.25                                            # Smoothing factor for cubic spline
+dampFactor = 1                                              # Exponential damping factor == A*Qmax^2
 
 # F(r) optimization
-iteration = 2                                                   # Number of iteration for F(r) optimization
-rmin = 0.22                                                     # The distance below which no peaks in F(r) may occur
+plot_iter = "n"                                                 # flag to plot the F(r) iterations
+iterations = 2                                                   # Number of iteration for F(r) optimization
+rmin = 0.21                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
-s_min = 0.2                                                     # Scale factor minimum value for the minimization
-s_max = 1.0                                                     # Scale factor maximum  value for the minimization
-s_step = 0.1                                                    # Scale factor step value for the minimization
+sfValue = 0.81 #0.585368#0.8                                          # Scale factor initial value
+rho0Value = 27.18 #25.05841#27.1793 #29.89                                    # Sample density initial value
+sfLoop = "n"                                                   # flag for the loop
+rho0Loop = "n"                                                 # flag for the loop
 
-rho0_min = 20                                                   # Density minimum value for the minimization
-rho0_max = 31                                                   # Density maximum  value for the minimization
-rho0_step = 1                                                   # Density step value for the minimization
 
-# Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path] 
-pw_raw_data = ["n"]                                             # Plot the Raw Data
 
-pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)    
-pw_F_r = ["n", "N", "./test/Fr.txt"]                            # Plot and save F(r)
 
-pw_F_r_iter = ["n"]                                             # Plot the iterations for the F(r) optimization
+# Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path]
+# pw_raw_data = ["n"]                                             # Plot the Raw Data
 
-pw_chi2 = ["y"]                                                 # Plot Chi2 graphs
+# pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)
+# pw_F_r = ["n", "N", "./test/Fr.txt"]                            # Plot and save F(r)
 
-pw_F_rOpt = ["n", "N", "./test/FrOpt.txt"]                      # Plot and save the optimal F(r) with the best scale factor and rho0 density
-pw_S_QCorr = ["n", "N", "./test/SQCorr.txt"]                    # Plot and save the S(Q) corrected
+# pw_F_r_iter = ["n"]                                             # Plot the iterations for the F(r) optimization
 
-pw_results = ["n", "./results.txt"]                             # Save the scale factor and rho0 density on file otherwise print them
+# pw_chi2 = ["y"]                                                 # Plot Chi2 graphs
+
+# pw_F_rOpt = ["n", "N", "./test/FrOpt.txt"]                      # Plot and save the optimal F(r) with the best scale factor and rho0 density
+# pw_S_QCorr = ["n", "N", "./test/SQCorr.txt"]                    # Plot and save the S(Q) corrected
+
+# pw_results = ["n", "./results.txt"]                             # Save the scale factor and rho0 density on file otherwise print them

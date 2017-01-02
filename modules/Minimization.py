@@ -34,43 +34,206 @@ if the variable symbolizes a function, its argument is preceded by an underscore
 otherwise it is just the name.
 """
 
-import matplotlib.pyplot as plt
-
-import sys
-import os
 
 import numpy as np
-import scipy.constants as sc
-from scipy import fftpack
-from scipy.integrate import simps
-from scipy.stats import chisquare
+import matplotlib.pyplot as plt
 
-from modules.Optimization import *
+from modules import KaplowMethod
+from modules import UtilityAnalysis
+import time
 
 
-def calc_chi2(r, rmin, F_rIt, Fintra_r, rho0):
+def chi2_fit(variableArray, chi2Array):
+    """Function to fit the chi2 function to find the minimal value.
+    
+    Parameters
+    ----------
+    variableArray : numpy array
+                    array with variable values
+    chi2Array     : numpy array
+                    array with chi2 values
+    
+    Returns
+    -------
+    x_fit         : numpy array
+                    array with the x values to plot the fit results
+    y_fit         : numpy array
+                    array with the fit y values
+    minValue      : float
+                    minimum value of the fit curve
+    """
+    
+    pol_fit = np.poly1d(np.polyfit(variableArray, chi2Array, 2))
+    x_fit = np.linspace(variableArray[0], variableArray[-1], 1000)
+    y_fit = pol_fit(x_fit)
+    minValue = x_fit[np.argmin(y_fit)]
+    
+    return (x_fit, y_fit, minValue)
+
+
+def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
+    density, Fintra_r, r, minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin):
+    """Function to calculate the whole loop for the chi2 minimization.
+    """
+    
+    scaleStep = 0.05
+    densityStep = 0.025
+    numSample = 23
+    numLoopIteration = 0
+    
+    plt.ion()
+    figure, ax = plt.subplots()
+
+    while True:
+        NoPeak = 0
+        while True:
+            ax.cla()
+            ax.grid(True)
+            scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+
+            chi2Array = np.zeros(numSample)
+
+            plt.xlabel("Scale")
+            ax.relim()
+            ax.autoscale_view()
+            for i in range(len(scaleArray)):
+                chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(Q, I_Q,
+                    Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleArray[i], density, Fintra_r, r,
+                    minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin)
+                
+                plt.scatter(scaleArray[i], chi2Array[i])
+                figure.canvas.draw()
+            
+            if np.amax(chi2Array) > 10**8:
+                chi2Array = chi2Array[0:np.amax(chi2Array)]
+            
+            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+            
+            # if XXX
+            
+            # xfit, yfit, scaleFactor = chi2_fit(scaleArray, chi2Array)
+            # plt.plot(xfit, yfit)
+            # figure.canvas.draw()
+            
+            # if ():
+            # break
+
+        # time.sleep(100)
+        
+        ax.cla()
+        ax.grid(True)
+
+        density0 = density
+        densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+        chi2Array = np.zeros(numSample)
+        
+        plt.xlabel("Density")
+        ax.relim()
+        ax.autoscale_view()
+        for i in range(len(densityArray)):
+            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(Q, I_Q,
+                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleFactor, densityArray[i], Fintra_r, r,
+                minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin)
+            
+            plt.scatter(densityArray[i], chi2Array[i])
+            figure.canvas.draw()
+            
+        
+        xfit, yfit, density = chi2_fit(densityArray, chi2Array)
+        plt.plot(xfit, yfit)
+        figure.canvas.draw()
+        
+        if np.abs(density-density0) > density0/25:
+            scaleStep = 0.006
+            densityStep = density0/10
+        elif np.abs(density-density0) > density0/75:
+            scaleStep = 0.0006
+            densityStep = density0/100
+        else:
+            scaleStep = 0.00006
+            densityStep = density0/1000
+
+        numLoopIteration += 1
+        if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
+            break
+    
+    plt.ioff()
+    
+    return (density, scaleFactor)
+
+
+def chi2_minimization2(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
+    density, Fintra_r, r, minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin):
     """
     """
     
-    maskIt = np.where((r>0) & (r < rmin))
-    rIt = r[maskIt]
-    deltaF_r = calc_deltaFr(F_rIt[maskIt], Fintra_r[maskIt], rIt, rho0)
+    scaleStep = 0.05
+    densityStep = 0.025
+    numSample = 23
+    numLoopIteration = 0
     
-    chi2 = simps(deltaF_r**2, r[maskIt])
+    plt.ion()
+    figure, ax = plt.subplots()
+
+    while True:
+        ax.cla()
+        ax.grid(True)
+        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+
+        chi2Array = np.zeros(numSample)
+
+        plt.xlabel("Scale")
+        ax.relim()
+        ax.autoscale_view()
+        for i in range(len(scaleArray)):
+            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(Q, I_Q,
+                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleArray[i], density, Fintra_r, r,
+                minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin)
+            
+            plt.scatter(scaleArray[i], chi2Array[i])
+            figure.canvas.draw()
+        
+        xfit, yfit, scaleFactor = chi2_fit(scaleArray, chi2Array)
+        plt.plot(xfit, yfit)
+        figure.canvas.draw()
+        
+        ax.cla()
+        ax.grid(True)
+
+        density0 = density
+        densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+        chi2Array = np.zeros(numSample)
+        
+        plt.xlabel("Density")
+        ax.relim()
+        ax.autoscale_view()
+        for i in range(len(densityArray)):
+            chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(Q, I_Q,
+                Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot, scaleFactor, densityArray[i], Fintra_r, r,
+                minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor, iteration, rmin)
+            
+            plt.scatter(densityArray[i], chi2Array[i])
+            figure.canvas.draw()
+            
+        
+        xfit, yfit, density = chi2_fit(densityArray, chi2Array)
+        plt.plot(xfit, yfit)
+        figure.canvas.draw()
+        
+        if np.abs(density-density0) > density0/25:
+            scaleStep = 0.006
+            densityStep = density0/10
+        elif np.abs(density-density0) > density0/75:
+            scaleStep = 0.0006
+            densityStep = density0/100
+        else:
+            scaleStep = 0.00006
+            densityStep = density0/1000
+
+        numLoopIteration += 1
+        if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
+            break
     
-    return chi2
+    plt.ioff()
     
-    
-def calc_min_chi2(s, rho0, chi2):
-    """
-    """
-    
-    # take min of chi2
-    minIndxRho0, minIndxS = np.unravel_index(chi2.argmin(), chi2.shape)
-    # maxIndxRho0, maxIndxS = np.unravel_index(chi2.argmax(), chi2.shape)
-    # print(chi2[minIndxRho0][minIndxS])
-    # print(chi2[maxIndxRho0][maxIndxS])
-    # print("chi2 min ", chi2[minIndxRho0][minIndxS])
-    # print("rho0 ", rho0[minIndxRho0], "s ", s[minIndxS])
-    
-    return (chi2[minIndxRho0][minIndxS], s[minIndxS], minIndxS, rho0[minIndxRho0], minIndxRho0)
+    return (density, scaleFactor)

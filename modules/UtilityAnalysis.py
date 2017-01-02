@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2015 Francesco Devoto
+# Copyright (c) 2015-2016 European Synchrotron Radiation Facility
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,115 +20,157 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module containing useful functions used in LASDiA.
+"""Module containing useful functions for the analysis used in LASDiA.
 
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
 
-For the functions arguments and the returns I followed this convetion for the notes:
-arguments: description - type
-returns: description - type.
-
 For the variables name I used this convention:
-if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 
+
 import matplotlib.pyplot as plt
-
-import sys
-import os
-
 import numpy as np
-import scipy.constants as sc
-from scipy import fftpack
-from scipy.integrate import simps
 from scipy import interpolate
-from scipy import signal
-import math
-import random
+from scipy.integrate import simps
+from scipy.constants import *
 
-def calc_indices(Q, minQ, QmaxIntegrate, maxQ):
-    """Function to calculate the ranges where S(Q) is constant
+from modules import MainFunctions
+from modules import Utility
+from modules import UtilityAnalysis
+
+
+def data_interpolation(Q, I_Q, minQ, maxQ, numPoints):
+    """Function to interpolate the data between.
     
-    arguments:
-    Q: momentum transfer - array
-    minQ: minimum Q value - number
-    maxQ: maximum Q value - number
-    QmaxIntegrate: maximum Q value for the intagrations - number
+    Parameters
+    ----------
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                scattering intensity
+    minQ      : float
+                minimum Q value
+    maxQ      : float
+                maximum Q value
+    numPoints : int
+                number of point for the interpolation
     
-    returns:
-    min_index: array index of element with Q<=minQ - array
-    max_index: array index of element with Q>QmaxIntegrate & Q<=maxQ - array
+    Returns
+    -------
+    Q         : numpy array
+                interpolated momentum transfer (nm^-1)
+    I_Q       : numpy array
+                interpolated scattering intensity
     """
     
-    min_index = np.where(Q<=minQ)
-    max_index = np.where((Q>QmaxIntegrate) & (Q<=maxQ))
+    Q, I_Q = rebinning(Q, I_Q, minQ, maxQ, numPoints)
     
-    return (min_index, max_index)
+    I_Q[Q<=minQ] = 0.0
+    
+    return (Q, I_Q)
     
     
-def calc_ranges(Q, minQ, QmaxIntegrate, maxQ):
-    """Function to calculate the ranges used in the program
+def rebinning(Q, I_Q, minQ, maxQ, numPoints):
+    """Function to rebin the data.
     
-    arguments:
-    Q: momentum transfer - array
-    minQ: minimum Q value - number
-    maxQ: maximum Q value - number
-    QmaxIntegrate: maximum Q value for the intagrations - number
+    Parameters
+    ----------
+    Q         : numpy array
+                momentum transfer (nm^-1)
+    I_Q       : numpy array
+                scattering intensity
+    minQ      : float
+                minimum Q value
+    maxQ      : float
+                maximum Q value
+    numPoints : int
+                number of point for the interpolation
     
-    returns:
-    validation_index: range of valide Q
-    integration_index: range of integration
-    calculation_index: range where S(Q) is calculated
+    Returns
+    -------
+    Q         : numpy array
+                rebinned momentum transfer (nm^-1)
+    I_Q       : numpy array
+                rebinned scattering intensity
     """
     
-    validation_index = np.where(Q<=maxQ)
-    integration_index = np.where(Q<=QmaxIntegrate)
-    calculation_index = np.where((Q>minQ) & (Q<=QmaxIntegrate))
+    if numPoints == 0:
+        numPoints = Q.size
     
-    return(validation_index, integration_index, calculation_index)
+    interI_Q = interpolate.interp1d(Q, I_Q)
+    Q = np.linspace(np.amin(Q), maxQ, numPoints, endpoint=True)
+    I_Q = interI_Q(Q)
     
+    return (Q, I_Q)
+
+
+def check_data_length(Q, I_Q, Qbkg, I_Qbkg, minQ, maxQ):
+    """Function to check if the measured and the background raw data have the
+    same number of points.
+    If the number is different the function rebin them.
     
-def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, min_index, minQ, QmaxIntegrate, maxQ, NumPoints):
-    """Function for smoothing S(Q).
-    This function smooths S(Q) and resets the number of points for the variable Q
+    Parameters
+    ----------
+    Q      : numpy array
+             momentum transfer (nm^-1)
+    I_Q    : numpy array
+             measured scattering intensity
+    Qbkg   : numpy array
+             background momentum transfer (nm^-1)
+    I_Qbkg : numpy array
+             background scattering intensity
+    minQ   : float
+             minimum Q value
+    maxQ   : float
+             maximum Q value
     
-    arguments:
-    Q: momentum transfer - array
-    S_Q: structure factor - array
-    Sinf: Sinf - number
-    smooth_factor: smoothing factor - number
-    min_index: array index of element with Q<=minQ - array
-    minQ: minimum Q value - number
-    maxQ: maximum Q value - number
-    QmaxIntegrate: maximum Q value for the intagrations - number
-    NumPoints: number of points in the smoothed S(Q) - number
-    
-    returns:
-    newQ: new set of Q with NumPoints dimension - array
-    S_Qsmoothed: smoothed S(Q) with NumPoints dimension - array
+    Returns
+    -------
+    Q      : numpy array
+             rebinned momentum transfer (nm^-1)
+    I_Q    : numpy array
+             rebinned measured scattering intensity
+    Qbkg   : numpy array
+             rebinned background momentum transfer (nm^-1)
+    I_Qbkg : numpy array
+             rebinned background scattering intensity
     """
     
-    mask_smooth = np.where((Q>minQ) & (Q<=maxQ))
-    smooth = interpolate.UnivariateSpline(Q[mask_smooth], S_Q[mask_smooth], k=3, s=smooth_factor)
-    newQ = np.linspace(np.amin(Q), maxQ, NumPoints, endpoint=True)
-    S_Qsmoothed = smooth(newQ)
+    if len(Q) != len(Qbkg):
+        min_len = len(Q) if len(Q)<len(Qbkg) else len(Qbkg)
+        Q, I_Q = rebinning(Q, I_Q, minQ, maxQ, min_len)
+        Qbkg, I_Qbkg = rebinning(Qbkg, I_Qbkg, minQ, maxQ, min_len)
     
-    # mask_low = np.where(Q<=minQ)
-    num_low = S_Qsmoothed[newQ<minQ].size
-    smooth = interpolate.UnivariateSpline(Q[min_index], S_Q[min_index], k=3, s=smooth_factor)
-    newQLow = np.linspace(np.amin(newQ), minQ, num_low, endpoint=True)
-    S_QsmoothLow = smooth(newQLow)
-    
-    S_Qsmoothed[newQ<minQ] = S_QsmoothLow
-    S_Qsmoothed[(newQ>QmaxIntegrate) & (newQ<=maxQ)] = Sinf
-    
-    return (newQ, S_Qsmoothed)
-    
-    
+    return (Q, I_Q, Qbkg, I_Qbkg)
+
+
 def fitline(Q, I_Q, index1, element1, index2, element2):
-    """Function to flat the peak
+    """Function to calculate the fit line between two points.
+    This function is used to flat the peaks in the raw data with a first order polynomial.
+    
+    Parameters
+    ----------
+    Q        : numpy array 
+               momentum transfer (nm^-1)
+    I_Q      : numpy array
+               measured scattering intensity
+    index1   : int
+               first point index
+    element1 : float
+               first point value
+    index2   : int
+               second point index
+    element2 : float
+               second point value
+    
+    Returns
+    -------
+    y_axis   : numpy array
+               ordinate values of fitted curve
     """
     
     xpoints = [element1, element2]
@@ -139,85 +181,390 @@ def fitline(Q, I_Q, index1, element1, index2, element2):
     y_axis = polynomial(Q)
 
     return y_axis
-    
-    
+
+
 def find_nearest(array, value):
-    """Function to find the nearest array element of a given value
+    """Function to find the nearest value to a given number in array.
     
-    arguments:
-    array: array of which it wants to find the nearest element - array
-    value: comparing element - number
+    Parameters
+    ----------
+    array   : numpy array
+              array of which it wants to find the nearest element
+    value   : float
+              comparing element
     
-    returns:
-    index: index of the nearest element - number
-    element: nearest element - number
+    Returns
+    -------
+    index   : int
+              index of the nearest element
+    element : float
+              nearest element
     """
-    
+
     index = (np.abs(array-value)).argmin()
     element = array[index]
-    
+
     return (index, element)
-    
-    
+
+
 def remove_peaks(Q, I_Q):
-    """Function to remove Bragg's peaks
+    """Function to remove Bragg's peaks.
     
-    arguments:
-    Q: momentum transfer - array
-    I_Q: measured scattering intensity - array
+    Parameters
+    ----------
+    Q   : numpy array
+          momentum transfer (nm^-1)
+    I_Q : numpy array
+          measured scattering intensity
     
-    returns:
-    I_Q: measured scattering intensity without peaks - array
+    Returns
+    -------
+    I_Q : numpy array 
+          measured scattering intensity without peaks
     """
-    
+
     plt.figure('Remove Peaks')
     plt.plot(Q, I_Q)
     plt.grid()
     plt.xlabel('Q')
     plt.ylabel('I(Q)')
-    
-    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, mouse_stop=2))
-    
-    plt.close()
+
+    points = np.array(plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, \
+        mouse_pop=3, mouse_stop=2))
+
+    # plt.close()
+
+    print(type(points))
+    print(points)
     
     idx_elem = np.zeros(shape=(len(points),2))
-    
+
     for i in range(0, len(points)):
         idx_elem[i] = find_nearest(Q, points[i,0])
-    
+
     zipped_idx = np.array(list(zip(*[iter(idx_elem[:,0])]*2)))
     zipped_elem = np.array(list(zip(*[iter(idx_elem[:,1])]*2)))
-    
+
     for i in range(0, len(zipped_elem)):
         mask = np.where((Q>=zipped_elem[i,0]) & (Q<=zipped_elem[i,1]))
-        I_Q1 = fitline(Q[mask], I_Q, zipped_idx[i,0], zipped_elem[i,0], zipped_idx[i,1], zipped_elem[i,1])
+        I_Q1 = fitline(Q[mask], I_Q, zipped_idx[i,0], zipped_elem[i,0], zipped_idx[i,1], \
+            zipped_elem[i,1])
         I_Q[mask] = I_Q1
-    
+
     return I_Q
+
+
+def Qto2theta(Q):
+    """Function to convert Q into 2theta.
+    
+    Parameters
+    ----------
+    Q         : numpy array
+                momentum transfer (nm^-1)
     
     
-def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor):
-    """Function to calculate the damping function
-    
+    Returns
+    -------
+    two_theta : numpy array
+                2theta angle (rad)
     """
+
+    wavelenght = 0.03738
+    theta = np.arcsin((wavelenght*Q) / (4*np.pi))
+    two_theta = 2*theta
+
+    # return np.degrees(theta2)
+    return two_theta
+
+
+def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_function):
+    """Function to apply the damping factor to iintra(Q) function.
     
+    Parameters
+    ----------
+    iintra_Q       : numpy array
+                     intramolecular contribution of i(Q)
+    Q              : numpy array
+                     momentum transfer (nm^-1)
+    QmaxIntegrate  : float
+                     
+
+    damping_factor : float
+                     damping factor
+    
+    Returns
+    -------
+    Qiintra_Q      : numpy array
+                     intramolecular contribution of i(Q) multiplied by Q and the
+                     damping function
+    """
+
     # damping_factor = 0.5 # np.log(10)
     exponent_factor = damping_factor / QmaxIntegrate**2
     damp_Q = np.exp(-exponent_factor * Q**2)
+
+    # Qiintra_Q = Q*iintra_Q
+    iintra_Q = damp_Q*iintra_Q
+
+    return iintra_Q
+
+
+def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
+    """Function for smoothing S(Q).
+    This function smooths S(Q) and resets the number of points for the variable Q.
     
-    Qiintra_Q = Q*iintra_Q
-    Qiintra_Q = damp_Q*Qiintra_Q
+    Parameters
+    ----------
+    Q             : numpy array 
+                    momentum transfer (nm^-1)
+    S_Q           : numpy array 
+                    structure factor
+    Sinf          : float
+                    value of S(Q) for Q->inf
+    smooth_factor : float
+                    smoothing factor
+    minQ          : float
+                    minimum Q value
+    QmaxIntegrate : float
+                    maximum Q value for the intagrations
+    maxQ          : float
+                    maximum Q value
+    NumPoints     : int
+                    number of points in the smoothed S(Q)
     
-    return Qiintra_Q
-    
-    
-def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
+    Returns
+    -------
+    S_Qsmoothed   : numpy array
+                    smoothed S(Q) with NumPoints dimension
     """
-    """
     
+    smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], \
+        S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
+    S_Qsmoothed = smooth(Q)
+    
+    S_Qsmoothed[Q<minQ] = 0
+    S_Qsmoothed[(Q>QmaxIntegrate)] = Sinf
+    # S_Qsmoothed[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
+    
+    return S_Qsmoothed
+
+
+def calc_SQdamp(S_Q, Sinf, dampingFunction):
+    """Function to apply the damping factor to the structure factor.
+    
+    Parameters
+    ----------
+    S_Q             : numpy array 
+                      structure factor
+    Sinf            : float
+                      value of S(Q) for Q->inf
+    dampingFunction : float
+                      damp factor
+    
+    Returns
+    -------
+    S_Qdamp         : numpy array
+                      damped structure factor
+    """
+
+    S_Qdamp = (dampingFunction * (S_Q - Sinf)) + Sinf
+
+    return S_Qdamp
+
+
+def calc_SQdamp2(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
+    """Function to apply the damping factor to the structure factor.
+    
+    Parameters
+    ----------
+    S_Q            : numpy array 
+                     structure factor
+    Q              : numpy array
+                     momentum transfer (nm^-1)
+    Sinf           : float
+                     value of S(Q) for Q->inf
+    QmaxIntegrate  : float
+                     maximum Q value for the intagrations
+    damping_factor : float
+                     damp factor
+    
+    Returns
+    -------
+    S_Qdamp        : numpy array
+                     damped structure factor
+    """
+
     exponent_factor = damping_factor / QmaxIntegrate**2
     damp_Q = np.exp(-exponent_factor * Q**2)
-    
+
     S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
-    
+
     return S_Qdamp
+
+
+def calc_dampingFunction(Q, dampingFactor, QmaxIntegrate, typeFunction):
+    """Function to calculate the damping function.
+
+    Parameters
+    ----------
+    Q               : numpy array 
+                      momentum transfer (nm^-1)
+    dampingFactor   : float
+                      damping factor
+    QmaxIntegrate   : float
+                      maximum Q value for the intagrations
+    typeFunction    : string
+                      type of function to use for the damping
+
+    Returns
+    -------
+    dampingFunction : numpy array
+                      damping function
+    """
+    
+    if typeFunction == "Exponential":
+        exponentFactor = dampingFactor / QmaxIntegrate**2
+        dampingFunction = np.exp(-exponentFactor * Q**2)
+    elif typeFunction == "Lorch Function":
+        delta = np.pi/QmaxIntegrate
+        dampingFunction = np.sin(Q*delta)/Q*delta
+
+    return dampingFunction
+
+
+def S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
+    minQ, QmaxIntegrate, maxQ, smoothFactor, dampFactor):
+    """Function for the S(Q) calculation.
+    """
+    
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf,
+        Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate],
+        fe_Q[Q<=QmaxIntegrate], Ztot, density)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+    
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q,
+        minQ, QmaxIntegrate, maxQ)
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf,
+        smoothFactor, minQ, QmaxIntegrate, maxQ)
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf,
+        QmaxIntegrate, dampFactor)
+    
+    return SsmoothDamp_Q
+
+
+def interpolation_after_smoothing(X, newX, f_X):
+    """Function to interpolate the data.
+    
+    Parameters
+    ----------
+    X         : numpy array
+                old abscissa
+    interpf_X : numpy array
+                new abscissa
+    f_X       : numpy array
+                old ordinate
+    
+    Returns
+    -------
+    newf_X    : numpy array
+                new ordinate
+    """
+    
+    interpf_X = interpolate.interp1d(X, f_X)
+    newf_X = interpf_X(newX)
+    
+    return newf_X
+
+
+def make_array_loop(varValue, step, numSample):
+    """Function to create an array given its middle value and the percentage
+    of the extreme.
+    
+    Parameters
+    ----------
+    varValue  : float
+                variable's value to generate the array
+    step      : float
+                array step
+    numSample : int
+                number of sample
+    
+    Returns
+    -------
+    varArray  : numpy array
+                variable final array
+    """
+    
+    lowExtreme = varValue-step*11
+    highExtreme = varValue+step*11
+    
+    varArray = np.linspace(lowExtreme, highExtreme, numSample)
+    
+    return varArray
+
+
+def normalize_to_1(var_y):
+    """Function to normalize a distribution to unitary area.
+    
+    Parameters
+    ----------
+    var_y      : numpy array
+                 distribution to normalize
+    
+    Returns
+    -------
+    var_y_norm : numpy array
+                 normalized distribution
+    
+    """
+    
+    area = abs(simps(var_y))
+    var_y_norm = var_y / area
+    
+    return var_y_norm
+
+
+def conv_gcm3_to_atnm3(val, atomMass):
+    """Function to convert the sample density from g/cm3 to atoms/nm3.
+    
+    Parameters
+    ----------
+    val      : float
+               density value in g/cm3
+    atomMass : float
+               atomic mass in g/mol
+    
+    Returns
+    -------
+    val_conv : float
+               density value in atoms/nm3
+    
+    """
+    
+    val_conv = val/atomMass*N_A/10**21
+    
+    return val_conv
+
+
+def conv_atnm3_to_gcm3(val, atomMass):
+    """Function to convert the sample density from atoms/nm3 to g/cm3.
+    
+    Parameters
+    ----------
+    val      : float
+               density value in g/cm3
+    atomMass : float
+               atomic mass in g/mol
+    
+    Returns
+    -------
+    val_conv : float
+               density value in atoms/nm3
+    
+    """
+    
+    val_conv = val*atomMass/N_A*10**21
+    
+    return val_conv
+    
