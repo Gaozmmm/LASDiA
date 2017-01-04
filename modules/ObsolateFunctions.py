@@ -488,7 +488,25 @@ def calc_SQsmoothing(Q, newQ, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, max
 
 
 def calc_SQdamp(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
-    """
+    """Function to apply the damping factor to the structure factor.
+    
+    Parameters
+    ----------
+    S_Q            : numpy array 
+                     structure factor
+    Q              : numpy array
+                     momentum transfer (nm^-1)
+    Sinf           : float
+                     value of S(Q) for Q->inf
+    QmaxIntegrate  : float
+                     maximum Q value for the intagrations
+    damping_factor : float
+                     damp factor
+    
+    Returns
+    -------
+    S_Qdamp        : numpy array
+                     damped structure factor
     """
 
     # damping_factor = 0.5

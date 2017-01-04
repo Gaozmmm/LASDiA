@@ -106,7 +106,7 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
 
 
 def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
-    x, y, z, elementParameters, damping_factor):
+    x, y, z, elementParameters, dampingFunction):
     """Function to calculate the intra-molecular components.
 
     Parameters
@@ -138,8 +138,8 @@ def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element
                         parameters : list
                                      list of the parameters
                                      (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
-    damping_factor    : float
-                        damp factor
+    dampingFunction   : numpy array
+                        damping function
 
     Returns
     -------
@@ -151,7 +151,7 @@ def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element
 
     iintra_Q = calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, \
         x, y, z, elementParameters)
-    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_factor)
+    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, QmaxIntegrate, dampingFunction)
     r = MainFunctions.calc_r(Q)
     Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], iintradamp_Q[Q<=QmaxIntegrate])
 

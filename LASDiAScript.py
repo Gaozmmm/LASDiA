@@ -42,7 +42,7 @@ import numpy as np
 import time
 # from itertools import product
 # from timeit import default_timer as timer
-# from scipy.integrate import simps
+from scipy.integrate import simps
 
 from modules import Formalism
 from modules import Geometry
@@ -57,7 +57,9 @@ from modules import UtilityAnalysis
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    
+    #---------------------------Files reading----------------------------------
     
     variables = Utility.read_inputFile("./inputFile.txt")
     
@@ -69,66 +71,127 @@ if __name__ == '__main__':
     
     Q, I_Q = Utility.read_file(variables.data_file)
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
-    
-    # I_Q = UtilityAnalysis.remove_peaks(Q, I_Q)
-    
-    lorch = UtilityAnalysis.calc_dampingFunction(Q, variables.dampFactor, variables.QmaxIntegrate, "Lorch Function")
-    lorch2 = UtilityAnalysis.calc_dampingFunction(Q, variables.dampFactor, variables.maxQ, "Lorch Function")
 
-    expon = UtilityAnalysis.calc_dampingFunction(Q, variables.dampFactor, variables.QmaxIntegrate, "Exponential")
-    
-    # S_Qdamp = UtilityAnalysis.calc_SQdamp(I_Q, 1, dampFunc)
+    #--------------------Preliminary calculation-------------------------------
 
-    # S_Qdamp2 = UtilityAnalysis.calc_SQdamp2(I_Q, Q, 1, variables.QmaxIntegrate, variables.dampFactor)
+    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
+        variables.minQ, variables.maxQ)
+    
+    fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
+    Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
+    J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
+    Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+    
+    dampingFunction = UtilityAnalysis.calc_dampingFunction(Q, variables.dampingFactor,
+        variables.QmaxIntegrate, variables.typeFunction)
 
+    #-------------------Intra-molecular components-----------------------------
 
-    # Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
-    #     variables.minQ, variables.maxQ)
-    
-    # fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
-    # Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
-    # J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    # Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
-    
-    # r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(Q, fe_Q, Ztot, \
-    #     variables.QmaxIntegrate, variables.maxQ, elementList, element, \
-    #     x, y, z, elementParameters, variables.dampFactor)
-    
-    # scaleFactor = variables.sfValue
-    # density = variables.rho0Value
-    
-    # density, scaleFactor = Minimization.chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, 
-    #     J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,
-    #     density, Fintra_r, r, variables.minQ, variables.QmaxIntegrate, variables.maxQ, 
-    #     variables.smoothFactor, variables.dampFactor, variables.iterations, variables.rmin)
-    
-    # print("Final values ", density, scaleFactor)
-    
-    # S_Q = UtilityAnalysis.S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 
-    #     variables.minQ, variables.QmaxIntegrate, variables.maxQ, variables.smoothFactor, variables.dampFactor)
-    
-    # i_Q = MainFunctions.calc_iQ(S_Q, Sinf)
-    # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], i_Q[Q<=variables.QmaxIntegrate])
-    
-    # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, 
-    #         Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate],
-    #         Q[Q<=variables.QmaxIntegrate], Sinf,
-    #         J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
-        
-    # Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
-    
-    # Utility.plot_data(Q, S_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S(Q)$", "y")
-    # Utility.plot_data(r, F_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F(r)$", "y")
-    # Utility.plot_data(r, Fopt_r, "F_r", r"$r(nm)$", r"$F(r)$", r"$F_{opt}(r)$", "y")
-    # Utility.plot_data(Q, Sopt_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$S_{opt}(Q)$", "y")
-    # Utility.plot_data(Q, I_Q, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)$", "y")
-    # Utility.plot_data(Q, S_Qdamp, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)damp$", "y")
-    # Utility.plot_data(Q, S_Qdamp2, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)damp2$", "y")
+    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, 
+        variables.maxQ, elementList, element, x, y, z, elementParameters)
+    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
+        dampingFunction)
+    r = MainFunctions.calc_r(Q)
+    Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
+        iintradamp_Q[Q<=variables.QmaxIntegrate])
 
-    Utility.plot_data(Q, lorch, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$lorch$", "y")
-    Utility.plot_data(Q, lorch2, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$lorch2$", "y")
+    # ------------------------Starting minimization----------------------------
 
-    # Utility.plot_data(Q, expon, "S_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$exp$", "y")
-   
+    scaleFactor = variables.scaleFactor
+    density = variables.density
+    
+    scaleStep = 0.05
+    scaleStepEnd = 0.00006
+    densityStep = 0.025
+    numSample = 23
+    loopIteration = 0
+    StopLoop = 1
+    
+    # plt.ion()
+    # figure, ax = plt.subplots()
 
-    plt.show()
+    while True: # Loop for the step changing
+        NoPeak = 0
+
+        # --------------------Scale minimization---------------------------
+        Flag = 0
+        while True: # Loop for the range shifting
+            # ax.cla()
+            # ax.grid(True)
+            scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+
+            chi2Array = np.zeros(numSample)
+
+            # plt.xlabel("Scale")
+            # ax.relim()
+            # ax.autoscale_view()
+            for i in range(len(scaleArray)):
+                
+                # ------------------Kaplow method for scale--------------------
+
+                Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
+                alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+                    Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+                    fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+                Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+                S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+                    variables.QmaxIntegrate, variables.maxQ)
+                Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                    variables.smoothingFactor, \
+                    variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+                SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
+                    dampingFunction)
+
+                # Utility.plot_data(Q, SsmoothDamp_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)$", "y")
+
+                i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+                F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+                    i_Q[Q<=variables.QmaxIntegrate])
+
+                Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \
+                    Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+                    Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+
+                chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
+            
+                # plt.scatter(scaleArray[i], chi2Array[i])
+                # figure.canvas.draw()
+
+                # ------------------End Kaplow method for scale----------------
+            
+            if np.amax(chi2Array) > 10**8:
+                chi2Array = chi2Array[0:np.argmax(chi2Array)]
+
+            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+            
+            nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+            
+            # print("---------")
+            # print("chi2Array ", chi2Array)
+            # print("scaleArray ", scaleArray)
+            # print("chi2 min ", np.amin(chi2Array))
+            # print("scale min ", scaleArray[np.argmin(chi2Array)])
+            # print("scaleFactor ", scaleFactor)
+
+            if nearIdx == 0:
+                scaleFactor-=scaleStep*10
+                scaleStep*=10
+                NoPeak+=1
+            if nearIdx >= numSample-2:
+                scaleFactor+=scaleStep*10
+                scaleStep*=10
+                NoPeak+=1
+
+            scaleStep /= 10
+            Flag += 1
+            loopIteration += 1
+            print(loopIteration, scaleFactor)
+            if (10*scaleStep<=scaleStepEnd)*(NoPeak>=5)*((Flag!=1)+(scaleFactor+scaleStep*1.1<0)):
+                break
+        if (StopLoop == 1): 
+            break
+    
+    
+    # plt.ioff()
+    # plt.show()

@@ -277,34 +277,28 @@ def Qto2theta(Q):
     return two_theta
 
 
-def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, damping_function):
+def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, dampingFunction):
     """Function to apply the damping factor to iintra(Q) function.
     
     Parameters
     ----------
-    iintra_Q       : numpy array
-                     intramolecular contribution of i(Q)
-    Q              : numpy array
-                     momentum transfer (nm^-1)
-    QmaxIntegrate  : float
-                     
-
-    damping_factor : float
-                     damping factor
+    iintra_Q        : numpy array
+                      intramolecular contribution of i(Q)
+    Q               : numpy array
+                      momentum transfer (nm^-1)
+    QmaxIntegrate   : float
+                     maximum Q value for the integrations
+    dampingFunction : numpy array
+                      damping function
     
     Returns
     -------
     Qiintra_Q      : numpy array
-                     intramolecular contribution of i(Q) multiplied by Q and the
+                     intramolecular contribution of i(Q) multiplied by the
                      damping function
     """
 
-    # damping_factor = 0.5 # np.log(10)
-    exponent_factor = damping_factor / QmaxIntegrate**2
-    damp_Q = np.exp(-exponent_factor * Q**2)
-
-    # Qiintra_Q = Q*iintra_Q
-    iintra_Q = damp_Q*iintra_Q
+    iintra_Q = dampingFunction*iintra_Q
 
     return iintra_Q
 
@@ -326,7 +320,7 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
     minQ          : float
                     minimum Q value
     QmaxIntegrate : float
-                    maximum Q value for the intagrations
+                    maximum Q value for the integrations
     maxQ          : float
                     maximum Q value
     NumPoints     : int
@@ -347,6 +341,36 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
     # S_Qsmoothed[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
     
     return S_Qsmoothed
+
+
+def calc_dampingFunction(Q, dampingFactor, QmaxIntegrate, typeFunction):
+    """Function to calculate the damping function.
+
+    Parameters
+    ----------
+    Q               : numpy array 
+                      momentum transfer (nm^-1)
+    dampingFactor   : float
+                      damping factor
+    QmaxIntegrate   : float
+                      maximum Q value for the integrations
+    typeFunction    : string
+                      type of function to use for the damping
+
+    Returns
+    -------
+    dampingFunction : numpy array
+                      damping function
+    """
+    
+    if typeFunction == "Exponential":
+        exponentFactor = dampingFactor / QmaxIntegrate**2
+        dampingFunction = np.exp(-exponentFactor * Q**2)
+    elif typeFunction == "Lorch Function":
+        delta = np.pi/QmaxIntegrate
+        dampingFunction = np.sin(Q*delta)/Q*delta
+
+    return dampingFunction
 
 
 def calc_SQdamp(S_Q, Sinf, dampingFunction):
@@ -370,66 +394,6 @@ def calc_SQdamp(S_Q, Sinf, dampingFunction):
     S_Qdamp = (dampingFunction * (S_Q - Sinf)) + Sinf
 
     return S_Qdamp
-
-
-def calc_SQdamp2(S_Q, Q, Sinf, QmaxIntegrate, damping_factor):
-    """Function to apply the damping factor to the structure factor.
-    
-    Parameters
-    ----------
-    S_Q            : numpy array 
-                     structure factor
-    Q              : numpy array
-                     momentum transfer (nm^-1)
-    Sinf           : float
-                     value of S(Q) for Q->inf
-    QmaxIntegrate  : float
-                     maximum Q value for the intagrations
-    damping_factor : float
-                     damp factor
-    
-    Returns
-    -------
-    S_Qdamp        : numpy array
-                     damped structure factor
-    """
-
-    exponent_factor = damping_factor / QmaxIntegrate**2
-    damp_Q = np.exp(-exponent_factor * Q**2)
-
-    S_Qdamp = (damp_Q * (S_Q - Sinf)) + Sinf
-
-    return S_Qdamp
-
-
-def calc_dampingFunction(Q, dampingFactor, QmaxIntegrate, typeFunction):
-    """Function to calculate the damping function.
-
-    Parameters
-    ----------
-    Q               : numpy array 
-                      momentum transfer (nm^-1)
-    dampingFactor   : float
-                      damping factor
-    QmaxIntegrate   : float
-                      maximum Q value for the intagrations
-    typeFunction    : string
-                      type of function to use for the damping
-
-    Returns
-    -------
-    dampingFunction : numpy array
-                      damping function
-    """
-    
-    if typeFunction == "Exponential":
-        exponentFactor = dampingFactor / QmaxIntegrate**2
-        dampingFunction = np.exp(-exponentFactor * Q**2)
-    elif typeFunction == "Lorch Function":
-        delta = np.pi/QmaxIntegrate
-        dampingFunction = np.sin(Q*delta)/Q*delta
-
-    return dampingFunction
 
 
 def S_QCalculation(Q, I_Q, Ibkg_Q, scaleFactor, J_Q, Sinf, fe_Q, Ztot, density, Iincoh_Q, 

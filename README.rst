@@ -10,8 +10,8 @@ or GUI (LASDiA.py) script you can find in its folder.
 Dependencies
 ------------
 
-LASDiA is developed in Python 3.5 in Windows and MacOs environment.
-The following modules are necessary:
+LASDiA is developed in Python 3.5, tested in Windows and MacOs environment.
+To use it the following modules are necessary:
 
 	* numpy == 1.11.2
 	* scipy == 0.17.1
