@@ -102,96 +102,354 @@ if __name__ == "__main__":
     
     scaleStep = 0.05
     scaleStepEnd = 0.00006
-    densityStep = 0.025
+    densityStep = density/50
+    densityStepEnd = density/250
     numSample = 23
     loopIteration = 0
-    StopLoop = 1
+    NoPeak = 0
     
-    # plt.ion()
-    # figure, ax = plt.subplots()
+    # ----------------------First scale minimization---------------------------
+    Flag = 0
+    while True: # Loop for the range shifting
+        
+        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+        chi2Array = np.zeros(numSample)
 
-    while True: # Loop for the step changing
-        NoPeak = 0
-
-        # --------------------Scale minimization---------------------------
-        Flag = 0
-        while True: # Loop for the range shifting
-            # ax.cla()
-            # ax.grid(True)
-            scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
-
-            chi2Array = np.zeros(numSample)
-
-            # plt.xlabel("Scale")
-            # ax.relim()
-            # ax.autoscale_view()
-            for i in range(len(scaleArray)):
-                
-                # ------------------Kaplow method for scale--------------------
-
-                Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
-                alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
-                    Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
-                    fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
-                Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
-
-                S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
-                    variables.QmaxIntegrate, variables.maxQ)
-                Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
-                    variables.smoothingFactor, \
-                    variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-                SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
-                    dampingFunction)
-
-                # Utility.plot_data(Q, SsmoothDamp_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)$", "y")
-
-                i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-                F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
-                    i_Q[Q<=variables.QmaxIntegrate])
-
-                Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \
-                    Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
-                    Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
-
-                chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
+        for i in range(len(scaleArray)):
             
-                # plt.scatter(scaleArray[i], chi2Array[i])
-                # figure.canvas.draw()
+            # ------------------Kaplow method for scale--------------------
 
-                # ------------------End Kaplow method for scale----------------
-            
-            if np.amax(chi2Array) > 10**8:
-                chi2Array = chi2Array[0:np.argmax(chi2Array)]
+            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
+            alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+                Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+                fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+            Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
 
+            S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+                variables.QmaxIntegrate, variables.maxQ)
+            Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                variables.smoothingFactor, \
+                variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
+                dampingFunction)
+
+            i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+            F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+                i_Q[Q<=variables.QmaxIntegrate])
+
+            Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \
+                Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+                Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+
+            chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
+        
+        # --------------------Range shifting selection --------------------
+        
+        print("---------")
+        
+        print("chi2Array ", chi2Array)
+        
+        if np.amax(chi2Array) > 10**8:
+            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
+        else:
             scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
-            
-            nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
-            
-            # print("---------")
-            # print("chi2Array ", chi2Array)
-            # print("scaleArray ", scaleArray)
-            # print("chi2 min ", np.amin(chi2Array))
-            # print("scale min ", scaleArray[np.argmin(chi2Array)])
-            # print("scaleFactor ", scaleFactor)
+        
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+        
+        if nearIdx == 0:
+            scaleFactor -= scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
+        if nearIdx >= numSample-2:
+            scaleFactor += scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
 
-            if nearIdx == 0:
-                scaleFactor-=scaleStep*10
-                scaleStep*=10
-                NoPeak+=1
-            if nearIdx >= numSample-2:
-                scaleFactor+=scaleStep*10
-                scaleStep*=10
-                NoPeak+=1
+        scaleStep /= 10
+        Flag += 1
+        
+        loopIteration += 1
 
-            scaleStep /= 10
-            Flag += 1
-            loopIteration += 1
-            print(loopIteration, scaleFactor)
-            if (10*scaleStep<=scaleStepEnd)*(NoPeak>=5)*((Flag!=1)+(scaleFactor+scaleStep*1.1<0)):
-                break
-        if (StopLoop == 1): 
+        print("cond ", 10*scaleStep, scaleStepEnd, NoPeak, Flag, scaleFactor+scaleStep*1.1)
+        
+        if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
             break
+        
+    # ------------------------chi2 curve fit for scale-------------------------
+    
+    print("finale scale array ", scaleArray)
+    
+    if scaleFactor < 0:
+        print("Scale factor < 0")
+        # break
+    else:
+        left = scaleArray[0]
+        right = scaleArray[-1]
+        coeffs = np.polyfit(scaleArray, chi2Array, 3)
+        if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
+            scaleFactor = (left+right)/2
+        else:
+            x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
+                scaleFactor = left + np.diff(scaleArray)[0]*x1
+            else:
+                scaleFactor = left + np.diff(scaleArray)[0]*x2
+    
+    print("finale scale factor", scaleFactor)
+    
+    # # ----------------------First density minimization-------------------------
+    
+    # NoPeak = 0
+    # while True: # Loop for the range shifting
+        
+        # density0 = density
+        # densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+        # chi2Array = np.zeros(numSample)
+        
+        # for i in range(len(densityArray)):
+            
+            # # ----------------Kaplow method for density--------------------
+
+            # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+            # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+                # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+                # fe_Q[Q<=variables.QmaxIntegrate], Ztot, densityArray[i])
+            # Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+            # S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+                # variables.QmaxIntegrate, variables.maxQ)
+            # Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                # variables.smoothingFactor, \
+                # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+            # SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
+                # dampingFunction)
+
+            # # Utility.plot_data(Q, SsmoothDamp_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)$", "y")
+
+            # i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+            # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+                # i_Q[Q<=variables.QmaxIntegrate])
+
+            # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \
+                # Fintra_r, densityArray[i], i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+                # Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+
+            # chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
+        
+        # # --------------------Range shifting selection---------------------
+        
+        # density = densityArray[np.argmin(chi2Array)] - scaleStep*1.1
+        
+        # nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
+        
+        # if nearIdx == 0:
+            # density-=scaleStep*10
+            # scaleStep*=10
+            # NoPeak+=1
+        # if nearIdx >= numSample-2:
+            # density+=scaleStep*10
+            # scaleStep*=10
+            # NoPeak+=1
+
+        # scaleStep /= 10
+
+        # if (10*densityStep<=densityStepEnd)*(NoPeak>=5):
+            # break
+        
+    # # -------------------chi2 curve fit for density--------------------
+    
+    # left = densityArray[0]
+    # right = densityArray[-1]
+    # coeffs = np.polyfit(densityArray, chi2Array, 3)
+    # if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
+            # density = (left+right)/2
+    # else:
+        # x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+        # x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+        # if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
+            # density = left + np.diff(densityArray)[0]*x1
+        # else:
+            # density = left + np.diff(densityArray)[0]*x2
+
     
     
-    # plt.ioff()
+    
+    
+    # while True: # Loop for the step changing
+        # NoPeak = 0
+
+        # # --------------------Scale minimization---------------------------
+        # Flag = 0
+        # while True: # Loop for the range shifting
+            
+            # scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+            # chi2Array = np.zeros(numSample)
+
+            
+            # for i in range(len(scaleArray)):
+                
+                # # ------------------Kaplow method for scale--------------------
+
+                # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
+                # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+                    # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+                    # fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+                # Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+                # S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+                    # variables.QmaxIntegrate, variables.maxQ)
+                # Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                    # variables.smoothingFactor, \
+                    # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+                # SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
+                    # dampingFunction)
+
+                # # Utility.plot_data(Q, SsmoothDamp_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)$", "y")
+
+                # i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+                # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+                    # i_Q[Q<=variables.QmaxIntegrate])
+
+                # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \
+                    # Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+                    # Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+
+                # chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
+            
+            # # --------------------Range shifting selection --------------------
+            
+            # if np.amax(chi2Array) > 10**8:
+                # scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
+            # else:
+                # scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+            
+            # nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+            
+            # if nearIdx == 0:
+                # scaleFactor-=scaleStep*10
+                # scaleStep*=10
+                # NoPeak+=1
+            # if nearIdx >= numSample-2:
+                # scaleFactor+=scaleStep*10
+                # scaleStep*=10
+                # NoPeak+=1
+
+            # scaleStep /= 10
+            # Flag += 1
+
+            # if (10*scaleStep<=scaleStepEnd)*(NoPeak>=5)*((Flag!=1)+(scaleFactor+scaleStep*1.1<0)):
+                # break
+            
+            # # ---------------------chi2 curve fit for scale--------------------
+            
+            # if scaleFactor < 0:
+                # print("Scale factor < 0")
+                # break
+            # else:
+                # left = scaleArray[0]
+                # right = scaleArray[-1]
+                # coeffs = np.polyfit(scaleArray, chi2Array, 3)
+                # if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
+                    # scaleFactor = (left+right)/2
+                # else:
+                    # x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+                    # x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+                    # if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
+                        # scaleFactor = left + np.diff(scaleArray)[0]*x1
+                    # else:
+                        # scaleFactor = left + np.diff(scaleArray)[0]*x2
+            
+        # # ----------------------Density minimization---------------------------
+        
+        # NoPeak = 0
+        # while True: # Loop for the range shifting
+            
+            # density0 = density
+            # densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+            # chi2Array = np.zeros(numSample)
+            
+            # for i in range(len(densityArray)):
+                
+                # # ----------------Kaplow method for density--------------------
+
+                # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+                # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
+                    # Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+                    # fe_Q[Q<=variables.QmaxIntegrate], Ztot, densityArray[i])
+                # Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+                # S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+                    # variables.QmaxIntegrate, variables.maxQ)
+                # Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                    # variables.smoothingFactor, \
+                    # variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+                # SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
+                    # dampingFunction)
+
+                # # Utility.plot_data(Q, SsmoothDamp_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"$I(Q)$", "y")
+
+                # i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+                # F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+                    # i_Q[Q<=variables.QmaxIntegrate])
+
+                # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \
+                    # Fintra_r, densityArray[i], i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
+                    # Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+
+                # chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
+            
+            # # --------------------Range shifting selection---------------------
+            
+            # density = densityArray[np.argmin(chi2Array)] - scaleStep*1.1
+            
+            # nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
+            
+            # if nearIdx == 0:
+                # density-=scaleStep*10
+                # scaleStep*=10
+                # NoPeak+=1
+            # if nearIdx >= numSample-2:
+                # density+=scaleStep*10
+                # scaleStep*=10
+                # NoPeak+=1
+
+            # scaleStep /= 10
+
+            # if (10*densityStep<=densityStepEnd)*(NoPeak>=5):
+                # break
+            
+            # # -------------------chi2 curve fit for density--------------------
+            
+            # left = densityArray[0]
+            # right = densityArray[-1]
+            # coeffs = np.polyfit(densityArray, chi2Array, 3)
+            # if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
+                    # density = (left+right)/2
+            # else:
+                # x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+                # x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+                # if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
+                    # density = left + np.diff(densityArray)[0]*x1
+                # else:
+                    # density = left + np.diff(densityArray)[0]*x2
+
+        # # -----------------------Step changing selection-----------------------
+        
+        # if np.abs(density-density0) > density0/25:
+            # scaleStep = 0.006
+            # densityStep = density0/10
+        # elif np.abs(density-density0) > density0/75:
+            # scaleStep = 0.0006
+            # densityStep = density0/100
+        # else:
+            # scaleStep = 0.00006
+            # densityStep = density0/1000
+
+        # numLoopIteration += 1
+        # if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
+            # break
+    
+    # print("scaleFactor final ", scaleFactor)
+    # print("density final ", density)
     # plt.show()

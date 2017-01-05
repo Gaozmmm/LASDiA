@@ -63,7 +63,7 @@ def chi2_fit(variableArray, chi2Array):
                     minimum value of the fit curve
     """
     
-    pol_fit = np.poly1d(np.polyfit(variableArray, chi2Array, 2))
+    pol_fit = np.poly1d(np.polyfit(variableArray, chi2Array, 3))
     x_fit = np.linspace(variableArray[0], variableArray[-1], 1000)
     y_fit = pol_fit(x_fit)
     minValue = x_fit[np.argmin(y_fit)]
