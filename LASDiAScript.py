@@ -108,13 +108,16 @@ if __name__ == "__main__":
     loopIteration = 0
     NoPeak = 0
     
+    plt.ion()
+    figure, ax = plt.subplots()
+    
     # ----------------------First scale minimization---------------------------
     Flag = 0
     while True: # Loop for the range shifting
         
         scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
         chi2Array = np.zeros(numSample)
-
+        
         for i in range(len(scaleArray)):
             
             # ------------------Kaplow method for scale--------------------
@@ -145,10 +148,6 @@ if __name__ == "__main__":
         
         # --------------------Range shifting selection --------------------
         
-        print("---------")
-        
-        print("chi2Array ", chi2Array)
-        
         if np.amax(chi2Array) > 10**8:
             scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
         else:
@@ -170,9 +169,9 @@ if __name__ == "__main__":
         
         loopIteration += 1
 
-        print("cond ", 10*scaleStep, scaleStepEnd, NoPeak, Flag, scaleFactor+scaleStep*1.1)
-        
-        if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
+        # print(loopIteration, "cond ", 10*scaleStep, scaleStepEnd, NoPeak, Flag, scaleFactor+scaleStep*1.1)
+        # if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
+        if (1==1):
             break
         
     # ------------------------chi2 curve fit for scale-------------------------
@@ -196,6 +195,16 @@ if __name__ == "__main__":
             else:
                 scaleFactor = left + np.diff(scaleArray)[0]*x2
     
+    ax.cla()
+    ax.grid(True)
+    plt.xlabel("Scale")
+    plt.plot(scaleArray, chi2Array, "o")
+    pol_fit = np.poly1d(np.polyfit(scaleArray, chi2Array, 3))
+    x_fit = np.linspace(scaleArray[0], scaleArray[-1], 1000)
+    y_fit = pol_fit(x_fit)
+    plt.plot(x_fit, y_fit)
+    figure.canvas.draw()
+
     print("finale scale factor", scaleFactor)
     
     # # ----------------------First density minimization-------------------------
@@ -254,7 +263,8 @@ if __name__ == "__main__":
 
         # scaleStep /= 10
 
-        # if (10*densityStep<=densityStepEnd)*(NoPeak>=5):
+        # # if (10*densityStep<=densityStepEnd)*(NoPeak>=5):
+        # if (1==1):
             # break
         
     # # -------------------chi2 curve fit for density--------------------
@@ -272,7 +282,18 @@ if __name__ == "__main__":
         # else:
             # density = left + np.diff(densityArray)[0]*x2
 
-    
+    # ax.cla()
+    # ax.grid(True)
+    # plt.xlabel("Density")
+    # # ax.relim()
+    # # ax.autoscale_view()
+    # plt.plot(densityArray, chi2Array, "o")
+    # pol_fit = np.poly1d(np.polyfit(densityArray, chi2Array, 3))
+    # x_fit = np.linspace(densityArray[0], densityArray[-1], 1000)
+    # y_fit = pol_fit(x_fit)
+    # plt.plot(x_fit, y_fit)
+    # figure.canvas.draw()
+
     
     
     
@@ -452,4 +473,6 @@ if __name__ == "__main__":
     
     # print("scaleFactor final ", scaleFactor)
     # print("density final ", density)
-    # plt.show()
+    
+    plt.ioff()
+    plt.show()

@@ -109,17 +109,6 @@ def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Zt
             
             scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
             
-            # if XXX
-            
-            # xfit, yfit, scaleFactor = chi2_fit(scaleArray, chi2Array)
-            # plt.plot(xfit, yfit)
-            # figure.canvas.draw()
-            
-            # if ():
-            # break
-
-        # time.sleep(100)
-        
         ax.cla()
         ax.grid(True)
 
