@@ -20,17 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module containing the functions used in Igor Pro code to compare their results with those of LASDiA.
+"""Module containing the functions used in Igor Pro code to compare their results 
+with those of LASDiA.
 
 The nomenclature and the procedure follow the article:
 Eggert et al. 2002 PRB, 65, 174105.
 
-For the functions arguments and the returns I followed this convetion for the notes:
+For the functions arguments and the returns I followed this convetion for the
+notes:
 arguments: description - type
 returns: description - type.
 
 For the variables name I used this convention:
-if the variable symbolizes a mathematical function, its argument is preceded by an underscore: f(x) -> f_x
+if the variable symbolizes a mathematical function, its argument is preceded by
+an underscore: f(x) -> f_x
 otherwise it is symbolized with just its name.
 """
 

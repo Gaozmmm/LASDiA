@@ -108,9 +108,6 @@ if __name__ == "__main__":
     loopIteration = 0
     NoPeak = 0
     
-    plt.ion()
-    figure, ax = plt.subplots()
-    
     # ----------------------First scale minimization---------------------------
     Flag = 0
     while True: # Loop for the range shifting
@@ -159,19 +156,21 @@ if __name__ == "__main__":
             scaleFactor -= scaleStep*10
             scaleStep *= 10
             NoPeak += 1
+            print("bug 1")
         if nearIdx >= numSample-2:
             scaleFactor += scaleStep*10
             scaleStep *= 10
             NoPeak += 1
+            print("bug 2")
 
         scaleStep /= 10
         Flag += 1
         
         loopIteration += 1
 
-        # print(loopIteration, "cond ", 10*scaleStep, scaleStepEnd, NoPeak, Flag, scaleFactor+scaleStep*1.1)
-        # if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
-        if (1==1):
+        print(loopIteration, "cond ", 10*scaleStep, scaleStepEnd, NoPeak, Flag, scaleFactor+scaleStep*1.1)
+        if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
+        # if (1==1):
             break
         
     # ------------------------chi2 curve fit for scale-------------------------
@@ -195,6 +194,8 @@ if __name__ == "__main__":
             else:
                 scaleFactor = left + np.diff(scaleArray)[0]*x2
     
+    plt.ion()
+    figure, ax = plt.subplots()
     ax.cla()
     ax.grid(True)
     plt.xlabel("Scale")
