@@ -119,13 +119,13 @@ if __name__ == "__main__":
     
     # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
     
-    Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
-        variables.maxQ, 550)
-    
     i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
         i_Q[Q<=variables.QmaxIntegrate])
 
+    Q, i_Q = UtilityAnalysis.rebinning(Q, i_Q, 0.0, 
+        variables.maxQ, 550)
+    
     # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
     # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r)", "n")
     
@@ -136,21 +136,33 @@ if __name__ == "__main__":
     Q = np.linspace(np.amin(Q), np.amax(Q), len(Qi_Q), endpoint=True)
     Qi_Q[pMax+1:] = 0.0
     
-    # Utility.plot_data(Q, Qi_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
+    # r2 = MainFunctions.calc_r(Q)
     
-    r2 = MainFunctions.calc_r(Q)
+    DeltaQ = np.diff(Q)
+    meanDeltaQ = np.mean(DeltaQ)
+    r2 = fftpack.fftfreq(Q.size, meanDeltaQ)
+    r2 = r2[np.where(r2>=0)]
     F_r2 = fftpack.fft(Qi_Q)
-    
-    print(len(r))
-    print(len(F_r))
+    F_r2 = F_r2[np.where(r2>=0)]
+
+    print(len(Qi_Q))
     print(len(r2))
     print(len(F_r2))
+
+    # print(len(r))
+    # print(len(F_r))
+    # print(len(r2))
+    # print(len(F_r2))
     
-    # F_r2 = F_r2.imag*meanDeltaQ*2/np.pi
+    # DeltaQ = np.diff(Q)
+    # meanDeltaQ = np.mean(DeltaQ)
+    # print(meanDeltaQ)
+    F_r2 = np.imag(F_r2)*meanDeltaQ*2/np.pi
+    print(len(F_r2))
     
     # plt.plot(F_r2)
     
     # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r)", "y")
-    # Utility.plot_data(r2, F_r2, "F_r", "r", "F(r)", "F2(r)", "y")
+    Utility.plot_data(r2, -F_r2, "F_r", "r", "F(r)", "F2(r)", "y")
     
     plt.show()
