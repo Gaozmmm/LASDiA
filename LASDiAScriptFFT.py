@@ -77,8 +77,9 @@ if __name__ == "__main__":
     
     #--------------------Preliminary calculation-------------------------------
 
-    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
+    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q,
         variables.minQ, variables.maxQ)
+        
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
@@ -122,12 +123,16 @@ if __name__ == "__main__":
     i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
         i_Q[Q<=variables.QmaxIntegrate])
-
+    
+    Num_SS =550
+    
     Q, i_Q = UtilityAnalysis.rebinning(Q, i_Q, 0.0, 
-        variables.maxQ, 550)
+        variables.maxQ, Num_SS)
     
     # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
     # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r)", "n")
+    
+    # ----------------------------FFT calculation------------------------------
     
     pMax, elem = UtilityAnalysis.find_nearest(Q, variables.QmaxIntegrate)
     NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
@@ -135,34 +140,40 @@ if __name__ == "__main__":
     Qi_Q = np.resize(Q*i_Q, NumPoints)
     Q = np.linspace(np.amin(Q), np.amax(Q), len(Qi_Q), endpoint=True)
     Qi_Q[pMax+1:] = 0.0
-    
-    # r2 = MainFunctions.calc_r(Q)
-    
     DeltaQ = np.diff(Q)
     meanDeltaQ = np.mean(DeltaQ)
     r2 = fftpack.fftfreq(Q.size, meanDeltaQ)
     r2 = r2[np.where(r2>=0)]
     F_r2 = fftpack.fft(Qi_Q)
     F_r2 = F_r2[np.where(r2>=0)]
-
-    print(len(Qi_Q))
-    print(len(r2))
-    print(len(F_r2))
-
-    # print(len(r))
-    # print(len(F_r))
-    # print(len(r2))
-    # print(len(F_r2))
-    
-    # DeltaQ = np.diff(Q)
-    # meanDeltaQ = np.mean(DeltaQ)
-    # print(meanDeltaQ)
-    F_r2 = np.imag(F_r2)*meanDeltaQ*2/np.pi
-    print(len(F_r2))
-    
-    # plt.plot(F_r2)
+    F_r2 = -np.imag(F_r2)*meanDeltaQ*2/np.pi
     
     # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r)", "y")
-    Utility.plot_data(r2, -F_r2, "F_r", "r", "F(r)", "F2(r)", "y")
+    # Utility.plot_data(r2, F_r2, "F_r2", "r", "F(r)", "F2(r)", "y")
+    
+    # ----------------------------IFFT calculation-----------------------------
+    
+    print(len(F_r2))
+    
+    NumPoints = 2**math.ceil(math.log(len(F_r2)-1)/math.log(2))
+    for n in range(len(F_r2), NumPoints):
+        F_r2.append(0)
+    
+    print(len(F_r2))
+    
+    # Utility.plot_data(r2, F_r2, "F_r2", "r", "F(r)", "F2(r)", "y")
+    
+    # Q2 = np.linspace(0.0, variables.maxQ, Num_SS, endpoint=True)
+    DelQ = 2*np.pi/(np.mean(np.diff(r2))*NumPoints)
+    Deltar = np.diff(r2)
+    meanDeltar = np.mean(Deltar)
+    Q2 = fftpack.fftfreq(r2.size, meanDeltar)
+    Q2 = Q2[np.where(Q2>=0)]
+    QiQ = fftpack.fft(F_r2)
+    QiQ = QiQ[np.where(Q2>=0)]
+    print(len(QiQ))
+    QiQ = -np.imag(QiQ)*meanDeltar
+    
+    plt.plot(QiQ)
     
     plt.show()
