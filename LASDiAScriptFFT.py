@@ -143,37 +143,49 @@ if __name__ == "__main__":
     DeltaQ = np.diff(Q)
     meanDeltaQ = np.mean(DeltaQ)
     r2 = fftpack.fftfreq(Q.size, meanDeltaQ)
-    r2 = r2[np.where(r2>=0)]
     F_r2 = fftpack.fft(Qi_Q)
     F_r2 = F_r2[np.where(r2>=0)]
     F_r2 = -np.imag(F_r2)*meanDeltaQ*2/np.pi
+    r2 = np.arange(0, 0+DelR*len(F_r2), DelR)
     
     # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r)", "y")
     # Utility.plot_data(r2, F_r2, "F_r2", "r", "F(r)", "F2(r)", "y")
     
     # ----------------------------IFFT calculation-----------------------------
     
-    print(len(F_r2))
+    # print(len(F_r2))
     
     NumPoints = 2**math.ceil(math.log(len(F_r2)-1)/math.log(2))
     for n in range(len(F_r2), NumPoints):
         F_r2.append(0)
     
-    print(len(F_r2))
+    # print(len(F_r2))
     
     # Utility.plot_data(r2, F_r2, "F_r2", "r", "F(r)", "F2(r)", "y")
     
-    # Q2 = np.linspace(0.0, variables.maxQ, Num_SS, endpoint=True)
+    DelG = np.zeros(len(F_r2))
+    print(len(DelG))
+    # Utility.plot_data(r2, DelG, "F_r2", "r", "F(r)", "F2(r)", "y")
+    DelG[r2<variables.rmin] = F_r2[r2<variables.rmin]-4*np.pi*r2[r2<variables.rmin]*density
+    # plt.plot(DelG)
+    # Utility.plot_data(r2, DelG, "F_r2", "r", "F(r)", "F2(r)", "y")
+    # print(len(DelG))
+    
+    F_r2 = DelG
+    
+    Q2 = np.linspace(0.0, variables.maxQ, Num_SS, endpoint=True)
     DelQ = 2*np.pi/(np.mean(np.diff(r2))*NumPoints)
+    print(DelQ)
+    
     Deltar = np.diff(r2)
     meanDeltar = np.mean(Deltar)
     Q2 = fftpack.fftfreq(r2.size, meanDeltar)
-    Q2 = Q2[np.where(Q2>=0)]
     QiQ = fftpack.fft(F_r2)
     QiQ = QiQ[np.where(Q2>=0)]
     print(len(QiQ))
     QiQ = -np.imag(QiQ)*meanDeltar
+    # Q2 = np.arange(0, 0+DelQ*Num_SS, DelQ)
     
-    plt.plot(QiQ)
+    # Utility.plot_data(Q2, QiQ, "QiQ", "r", "F(r)", "F2(r)", "y")
     
     plt.show()
