@@ -34,6 +34,8 @@ otherwise it is symbolized with just its name.
 
 import matplotlib.pyplot as plt
 import numpy as np
+import math
+from scipy import fftpack
 from scipy import interpolate
 from scipy.integrate import simps
 from scipy.constants import *
@@ -531,4 +533,80 @@ def conv_atnm3_to_gcm3(val, atomMass):
     val_conv = val*atomMass/N_A*10**21
     
     return val_conv
+
+
+def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
+    """Function to calculate the FFT following the IGOR procedure.
     
+    Parameters
+    ----------
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    i_Q           : numpy array
+                    i(Q)
+    
+    QmaxIntegrate : float
+                    maximum Q value for the integrations
+    
+    Returns
+    -------
+    r             : numpy array
+                    atomic distance (nm)
+    F_r           : numpy array
+                    F(r)
+    """
+    
+    pMax, elem = UtilityAnalysis.find_nearest(Q, QmaxIntegrate)
+    NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
+    DelR = 2*np.pi/(np.mean(np.diff(Q))*NumPoints)
+    Qi_Q = Utility.resize_zero(Qi_Q, NumPoints) 
+    # np.resize(Qi_Q, NumPoints)
+    Q = np.linspace(np.amin(Q), np.amax(Q), len(Qi_Q), endpoint=True)
+    Qi_Q[pMax+1:] = 0.0
+    meanDeltaQ = np.mean(np.diff(Q))
+    r = fftpack.fftfreq(Q.size, meanDeltaQ)
+    F_r = fftpack.fft(Qi_Q)
+    F_r = F_r[np.where(r>=0)]
+    F_r = -np.imag(F_r)*meanDeltaQ*2/np.pi
+    r = np.arange(0.0, 0.0+DelR*len(F_r), DelR)
+    
+    return (r, F_r)
+
+
+def calc_IFFT_Fr(r, F_r, maxQ, newDim):
+    """Function to calculate the FFT following the IGOR procedure.
+    
+    Parameters
+    ----------
+    r      : numpy array
+             atomic distance (nm)
+    F_r    : numpy array
+             F(r)
+    maxQ   : float
+             maximum Q value
+    newDim : int
+             S(Q)_SS dimension
+    
+    Returns
+    -------
+    Q      : numpy array
+             momentum transfer (nm^-1)
+    i_Q    : numpy array
+             i(Q)
+    """
+    
+    NumPoints = 2**math.ceil(math.log(len(F_r)-1)/math.log(2))
+    F_r = Utility.resize_zero(F_r, NumPoints)
+    DelQ = 2*np.pi/(np.mean(np.diff(r))*NumPoints)
+    meanDeltar = np.mean(np.diff(r))
+    Q = fftpack.fftfreq(r.size, meanDeltar)
+    QiQ = fftpack.fft(F_r)
+    QiQ = QiQ[np.where(Q>=0)]
+    QiQ = -np.imag(QiQ)*meanDeltar
+    QiQ = QiQ[:newDim]
+    # print(len(QiQ))
+    # Q = np.arange(0.0, 0.0+DelQ*len(QiQ), DelQ)
+    Q = np.linspace(0.0, maxQ, newDim, endpoint=True)
+    # print(len(Q))
+    
+    return (Q, QiQ)

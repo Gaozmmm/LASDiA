@@ -33,6 +33,7 @@ import sys
 import os
 
 import numpy as np
+import math
 import re
 import imp
 import time
@@ -231,7 +232,7 @@ def plot_data2(xVal, yVal, plotName, xName, yName, labName, overlapping):
     ui.show()
 
 
-def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, labName1, \
+def plot_data_2scale(plotName, xVal1, yVal1, xName1, yName1, labName1,
     xVal2, yVal2, yName2, labName2):
     """Function to plot the data.
 
@@ -656,4 +657,24 @@ def write_results(path, molecule, scale_factor, rho0):
     file.close()
 
 
+def resize_zero(f_x, newDim):
+    """Function to resize the function with zeros.
     
+    Parameters
+    ----------
+    f_x    : numpy array
+             function to resize
+    
+    newDim : int
+             function final dimension
+    
+    Returns
+    -------
+    f_x    : numpy array
+             resized function
+    """
+
+    for n in range(len(f_x), newDim):
+        f_x = np.append(f_x, 0)
+    
+    return f_x
