@@ -604,9 +604,7 @@ def calc_IFFT_Fr(r, F_r, maxQ, newDim):
     QiQ = QiQ[np.where(Q>=0)]
     QiQ = -np.imag(QiQ)*meanDeltar
     QiQ = QiQ[:newDim]
-    # print(len(QiQ))
     # Q = np.arange(0.0, 0.0+DelQ*len(QiQ), DelQ)
     Q = np.linspace(0.0, maxQ, newDim, endpoint=True)
-    # print(len(Q))
     
     return (Q, QiQ)
