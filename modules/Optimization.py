@@ -224,38 +224,38 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     return i_Qi
 
 
-def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin, plot_iter):
+def calc_optimize_Fr(iterations, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin, plot_iter):
     """Function to calculate the F(r) optimization (eq 47, 48, 49).
 
     Parameters
     ----------
-    iteration : int
-                number of iterations
-    F_r       : numpy array
-                F(r)
-    rho0      : float
-                atomic density
-    i_Q       : numpy array
-                i(Q)
-    Q         : numpy array
-                momentum transfer (nm^-1)
-    Sinf      : float
-                value of S(Q) for Q->inf
-    J_Q       : numpy array
-                J(Q)
-    r         : numpy array
-                atomic distance (nm)
-    rmin      : float
-                r cut-off value (nm)
-    plot_iter : string
-                flag to plot the F(r) iterations
+    iterations : int
+                 number of iterations
+    F_r        : numpy array
+                 F(r)
+    rho0       : float
+                 atomic density
+    i_Q        : numpy array
+                 i(Q)
+    Q          : numpy array
+                 momentum transfer (nm^-1)
+    Sinf       : float
+                 value of S(Q) for Q->inf
+    J_Q        : numpy array
+                 J(Q)
+    r          : numpy array
+                 atomic distance (nm)
+    rmin       : float
+                 r cut-off value (nm)
+    plot_iter  : string
+                 flag to plot the F(r) iterations
 
     Returns
     -------
-    F_r       : numpy array
-                optimazed F(r)
-    deltaF_r  : numpy array
-                difference between the last F(r) and its theoretical value
+    F_r        : numpy array
+                 optimazed F(r)
+    deltaF_r   : numpy array
+                 difference between the last F(r) and its theoretical value
     """
 
     if plot_iter.lower() == "y":
@@ -267,11 +267,11 @@ def calc_optimize_Fr(iteration, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin,
         plt.legend()
         plt.grid(True)
 
-    for i in range(iteration):
+    for i in range(iterations):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
         i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         i_Q[0] = 0.0
-        F_r = MainFunctions.calc_Fr(r, Q, i_Q)
+        F_r = MainFunctions.calc_Fr2(r, Q, i_Q)
 
         if plot_iter.lower() == "y":
             j = i+1

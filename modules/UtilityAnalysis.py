@@ -536,7 +536,9 @@ def conv_atnm3_to_gcm3(val, atomMass):
 
 
 def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
-    """Function to calculate the FFT following the IGOR procedure.
+    """Function to calculate the FFT following the Igor Pro procedure.
+    I do not agree with this procedure, but I follow it to comparemy results
+    with Igor Pro's ones.
     
     Parameters
     ----------
@@ -575,6 +577,8 @@ def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
 
 def calc_IFFT_Fr(r, F_r, maxQ, newDim):
     """Function to calculate the FFT following the IGOR procedure.
+    I do not agree with this procedure, but I follow it to comparemy results
+    with Igor Pro's ones.
     
     Parameters
     ----------

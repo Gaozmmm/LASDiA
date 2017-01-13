@@ -79,7 +79,6 @@ if __name__ == "__main__":
 
     Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q,
         variables.minQ, variables.maxQ)
-        
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
@@ -91,13 +90,13 @@ if __name__ == "__main__":
 
     #-------------------Intra-molecular components-----------------------------
 
-    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, 
-        variables.maxQ, elementList, element, x, y, z, elementParameters)
-    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
-        dampingFunction)
-    r = MainFunctions.calc_r(Q)
-    Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
-        iintradamp_Q[Q<=variables.QmaxIntegrate])
+    # iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, 
+        # variables.maxQ, elementList, element, x, y, z, elementParameters)
+    # iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
+        # dampingFunction)
+    # r = MainFunctions.calc_r(Q)
+    # Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
+        # iintradamp_Q[Q<=variables.QmaxIntegrate])
 
     # ------------------------Starting minimization----------------------------
 
@@ -117,36 +116,72 @@ if __name__ == "__main__":
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
     SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
         dampingFunction)
-    
-    # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
-    
-    i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
-        i_Q[Q<=variables.QmaxIntegrate])
-    
-    Q, i_Q = UtilityAnalysis.rebinning(Q, i_Q, 0.0, 
+
+    Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
         variables.maxQ, variables.NumPoints)
     
-    QiQ = Q*i_Q
+    i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+    Qi_Q = MainFunctions.calc_QiQ(Q, i_Q)
     
-    # ----------------------------FFT calculation------------------------------
-        
-    r1, F_r1 = UtilityAnalysis.calc_FFT_QiQ(Q, QiQ, variables.QmaxIntegrate)
-    # Utility.plot_data(r2, F_r2, "F_r1", "r", "F(r)", "F2(r)", "y")
+    r, F_r = MainFunctions.calc_Fr(Q, Qi_Q, variables.QmaxIntegrate)
+    # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r)", "y")
     
-    # ----------------------------IFFT calculation-----------------------------
+    # ----------------------------F(r) optimization----------------------------
+    Qi_Q1 = np.zeros(len(SsmoothDamp_Q))
+    Qi_Q1[Q<=variables.QmaxIntegrate] = Qi_Q[Q<=variables.QmaxIntegrate]
     
-    Q, QiQ = UtilityAnalysis.calc_IFFT_Fr(r1, F_r1, variables.maxQ,
-        variables.NumPoints)
-    Utility.plot_data(Q, QiQ, "F_r1", "r", "F(r)", "F2(r)", "y")
-    
+    Rnn = variables.rmin
+    F_r1 = F_r
     DelG = np.zeros(len(F_r1))
-    DelG[r1<variables.rmin] = F_r1[r1<variables.rmin]-4*np.pi*r1[r1<variables.rmin]*density
-
-    Q, QiQ = UtilityAnalysis.calc_IFFT_Fr(r1, DelG, variables.maxQ,
-        variables.NumPoints)
+    DelG[r<Rnn] = F_r1[r<Rnn]-4*np.pi*r[r<Rnn]*density
     
-    Utility.plot_data(Q, QiQ, "test", "Q", "Qi(Q)", "F2(r)", "y")
+    
+    # plt.ion()
+    # plt.figure("F_rIt")
+    # plt.plot(r, F_r1, label="F(r)")
+    # plt.xlabel("r (nm)")
+    # plt.ylabel("F(r)")
+    # plt.legend()
+    # plt.grid(True)
+    QLimit ,_ = UtilityAnalysis.find_nearest(Q, variables.QmaxIntegrate)
+    
+    for i in range(variables.iterations):
+        Q, QiQcorr = UtilityAnalysis.calc_IFFT_Fr(r, DelG, variables.maxQ,
+            variables.NumPoints)
+        
+        Qi_Q1[1:QLimit-1] = Qi_Q1[1:QLimit-1] - (Qi_Q1[1:QLimit-1] / 
+            (Q[1:QLimit-1]*(Sinf + J_Q[1:QLimit-1])) + 1 ) * QiQcorr[1:QLimit-1]
+        
+        r, F_r1 = UtilityAnalysis.calc_FFT_QiQ(Q, Qi_Q1, variables.QmaxIntegrate)
+        DelG = np.zeros(len(F_r1))
+        DelG[r<Rnn] = F_r1[r<Rnn]-4*np.pi*r[r<Rnn]*density 
+        Rnn = 0.99*r[np.argmin(F_r1[r<0.95*Rnn])]
+        
+        # j = i+1
+        # plt.figure("F_rIt")
+        # plt.plot(r, F_r1, label="%s iteration F(r)" %j)
+        # plt.legend()
+        # plt.draw()
+
+        # time.sleep(1.0)
+        
+    # plt.ioff() 
+    # Utility.plot_data(r, F_r1, "F_r", "r", "F(r)", "F(r)", "y")
+    
+    SQcorr = Qi_Q1/Q + Sinf
+    QiQ = Q*(SsmoothDamp_Q-Sinf)/dampingFunction
+    
+    
+    Fintra_r = np.zeros(len(r))
+    # print(len(Q))
+    # print(len(i_Q))
+    # print(len(J_Q))
+    
+    # F_r2, _ = Optimization.calc_optimize_Fr(variables.iterations, 
+        # F_r, Fintra_r, density, i_Q, Q, Sinf, J_Q[:550], r, variables.rmin, "n")
+    
+    # Utility.plot_data(r, F_r2, "F_r", "r", "F(r)", "F(r)", "y")
+    # Utility.plot_data(Q, QiQ, "test", "Q", "Qi(Q)", "F2(r)", "y")
     
     plt.show()
     

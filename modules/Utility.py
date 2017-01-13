@@ -675,9 +675,10 @@ def resize_zero(f_x, newDim):
     """
 
     if newDim >=len(f_x): 
-        for n in range(len(f_x), newDim):
+        for i in range(len(f_x), newDim):
             f_x = np.append(f_x, 0)
     else:
-        f_x = f_x[:-1]
+        for i in range(newDim, len(f_x)):
+            f_x = f_x[:-1]
     
     return f_x

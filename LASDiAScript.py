@@ -92,7 +92,7 @@ if __name__ == "__main__":
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
         dampingFunction)
     r = MainFunctions.calc_r(Q)
-    Fintra_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
+    Fintra_r = MainFunctions.calc_Fr2(r, Q[Q<=variables.QmaxIntegrate], 
         iintradamp_Q[Q<=variables.QmaxIntegrate])
 
     # ------------------------Starting minimization----------------------------
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 dampingFunction)
 
             i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-            F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], \
+            F_r = MainFunctions.calc_Fr2(r, Q[Q<=variables.QmaxIntegrate], \
                 i_Q[Q<=variables.QmaxIntegrate])
 
             Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \

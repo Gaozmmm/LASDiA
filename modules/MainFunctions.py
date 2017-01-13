@@ -433,17 +433,15 @@ def calc_iQ(S_Q, Sinf):
     return i_Q
 
 
-def calc_QiQ(Q, S_Q, Sinf):
+def calc_QiQ(Q, i_Q):
     """Function to calculate Qi(Q) (eq. 7, 20).
     
     Parameters
     ----------
     Q    : numpy array
            momentum transfer (nm^-1)
-    S_Q  : numpy array
-           structure factor
-    Sinf : float
-           value of S(Q) for Q->inf
+    i_Q  : numpy array
+           i(Q)
     
     Returns
     -------
@@ -451,7 +449,7 @@ def calc_QiQ(Q, S_Q, Sinf):
            Qi(Q)
     """
     
-    Qi_Q = Q*(S_Q - Sinf)
+    Qi_Q = Q*i_Q
     
     return Qi_Q
 
@@ -478,7 +476,33 @@ def calc_r(Q):
     return r[mask]
 
 
-def calc_Fr(r, Q, i_Q):
+def calc_Fr(Q, Qi_Q, QmaxIntegrate):
+    """Function to calculate F(r) (eq. 20).
+    
+    Parameters
+    ----------
+
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    Qi_Q          : numpy array
+                    Qi(Q)
+    QmaxIntegrate : float
+                    maximum Q value for the integrations
+    
+    Returns
+    -------
+    r             : numpy array
+                    atomic distance (nm)
+    F_r           : numpy array
+                    F(r)
+    """
+    
+    r, F_r = UtilityAnalysis.calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate)
+    
+    return (r, F_r)
+
+
+def calc_Fr2(r, Q, i_Q):
     """Function to calculate F(r) (eq. 20).
     
     Parameters
@@ -494,6 +518,9 @@ def calc_Fr(r, Q, i_Q):
     -------
     F_r : numpy array
           F(r)
+    
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
+        i_Q[Q<=variables.QmaxIntegrate])
     """
     
     DeltaQ = np.diff(Q)
