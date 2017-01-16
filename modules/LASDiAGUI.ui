@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1494</width>
-    <height>751</height>
+    <width>1487</width>
+    <height>931</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -664,7 +664,7 @@
       <string>Import XYZ file</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="sampleButton">
+    <widget class="QPushButton" name="sampleComposition">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -693,7 +693,7 @@
       <string notr="true">background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)</string>
      </property>
     </widget>
-    <widget class="QTextEdit" name="molecule">
+    <widget class="QTextEdit" name="composition">
      <property name="geometry">
       <rect>
        <x>160</x>
@@ -930,7 +930,7 @@
    <property name="title">
     <string>Analysis Panel</string>
    </property>
-   <widget class="MatplotlibWidget" name="chi2_plot" native="true">
+   <widget class="MatplotlibWidget" name="chi2_plot">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -1365,12 +1365,12 @@
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color:rgb(97, 126, 255)</string>
+    <string notr="true">background-color:rgb(97, 126, 255);color:rgb(255, 255, 255)</string>
    </property>
    <property name="title">
     <string>Graphic Panel</string>
    </property>
-   <widget class="MatplotlibWidget" name="factorPlot" native="true">
+   <widget class="MatplotlibWidget" name="factorPlot">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -1380,7 +1380,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="MatplotlibWidget" name="rawDataPlot" native="true">
+   <widget class="MatplotlibWidget" name="rawDataPlot">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -1393,7 +1393,7 @@
      <string notr="true"/>
     </property>
    </widget>
-   <widget class="MatplotlibWidget" name="distfuncPlot" native="true">
+   <widget class="MatplotlibWidget" name="distfuncPlot">
     <property name="geometry">
      <rect>
       <x>10</x>

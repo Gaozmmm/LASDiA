@@ -7,6 +7,8 @@ import six
 
 import sys
 import os
+from os import path
+import subprocess
 
 import numpy as np
 
@@ -43,6 +45,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.setupUi(self)
         
         # Set the variable
+        self.dirpath = None
         self.Q = None
         self.I_Q = None
         self.Qbkg = None
@@ -62,8 +65,14 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.XYZFilePath = None
         
         # Set the buttons
+        self.ui.dataPath.clicked.connect(self.importPath)
         self.ui.importData.clicked.connect(self.import_data)
         self.ui.importBkg.clicked.connect(self.import_bkg)
+        
+        self.ui.dataInterpolation.clicked.connect(self.interpolation)
+        
+        self.ui.sampleComposition.clicked.connect(self.setComposition)
+        
         self.ui.calcSQ.clicked.connect(self.SQ)
         self.ui.calcFr.clicked.connect(self.Fr)
         self.ui.optimize.clicked.connect(self.Optimization)
@@ -71,51 +80,68 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.importXYZFile.clicked.connect(self.import_XYZFile)
         # self.ui.removePeaksData.clicked.connect(self.remove_PeaksData)
         # self.ui.removePeaksBkg.clicked.connect(self.remove_PeaksBkg)
-        self.ui.interpolationData.clicked.connect(self.interpolation_Data)
-        self.ui.interpolationBkg.clicked.connect(self.interpolation_Bkg)
+        # self.ui.interpolationData.clicked.connect(self.interpolation_Data)
+        # self.ui.interpolationBkg.clicked.connect(self.interpolation_Bkg)
+        
         
     #---------------------------------------------------------  
 
+    def importPath(self):
+        """Function to load and plot the data file"""
+        
+        self.dirpath = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open directory",
+            r"..\data\cea_files\Ar", QtWidgets.QFileDialog.ShowDirsOnly))
+            # expanduser("~"), QtWidgets.QFileDialog.ShowDirsOnly))
+        
+        self.ui.dataPathName.setPlainText(self.dirpath)
+        
+    #---------------------------------------------------------
+    
     def import_data(self):
         """Function to load and plot the data file"""
         
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File", \
-            r"../data/cea_files/Ar", "Data File(*chi *xy)")
+        if self.ui.dataFileName.toPlainText() == "":
+            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File",
+                r"../data/cea_files/Ar", "Data File(*chi *xy)")
+        else:
+            path = self.dirpath + "/" + self.ui.dataFileName.toPlainText()
+            # if self.ui.dataPathName.toPlainText() == "":
+                # self.dirpath = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open directory",
+                    # r"..\data\cea_files\Ar", QtWidgets.QFileDialog.ShowDirsOnly))
+            # else:
+                # self.dirpath = self.ui.dataPathName.toPlainText()
+                # path = self.dirpath + "/" + self.ui.dataFileName.toPlainText()
+        
+        
+        
+        pathDir, fileName = os.path.split(path)
+        self.ui.dataPathName.setPlainText(pathDir)
+        self.ui.dataFileName.setPlainText(fileName)
         
         self.Q, self.I_Q = Utility.read_file(path)
         
-        self.ui.fileSampleName.setPlainText(path)
-        
         self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, "b", label="Data")
         self.ui.rawDataPlot.canvas.ax.legend()
         self.ui.rawDataPlot.canvas.draw()
         
-    #---------------------------------------------------------
-
-    def interpolation_Data(self):
-        """Function to interpolate data"""
-        
-        self.Q, self.I_Q = UtilityAnalysis.data_interpolation(self.Q, self.I_Q, 
-                            self.ui.minQ.value(), self.ui.maxQ.value(),
-                            self.ui.numInterpData.value())
-        
-        
-        self.ui.rawDataPlot.canvas.ax.lines.pop(0)
-        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, "b", label="Data")
-        self.ui.rawDataPlot.canvas.ax.legend()
-        self.ui.rawDataPlot.canvas.draw()
         
     #---------------------------------------------------------
 
     def import_bkg(self):
         """Function to load and plot the bkg file"""
         
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File", \
-            r"../data/cea_files/Ar", "Data File(*chi *xy)")
+        if self.ui.bkgFileName.toPlainText() == "":
+            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File",
+                r"../data/cea_files/Ar", "Data File(*chi *xy)")
+        else:
+            path = self.dirpath + "/" + self.ui.bkgFileName.toPlainText()
+        
+        pathDir, fileName = os.path.split(path)
+        self.ui.dataPathName.setPlainText(pathDir)
+        self.ui.bkgFileName.setPlainText(fileName)
         
         self.Qbkg, self.Ibkg_Q = Utility.read_file(path)
-        
-        self.ui.fileBkgName.setPlainText(path)
+        path = ""
         
         self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, "g--", label="Bkg")
         self.ui.rawDataPlot.canvas.ax.legend()
@@ -123,20 +149,38 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
 
     #---------------------------------------------------------
 
-    def interpolation_Bkg(self):
+    def interpolation(self):
         """Function to interpolate data"""
         
+        self.Q, self.I_Q = UtilityAnalysis.data_interpolation(self.Q, self.I_Q, 
+            self.ui.minQ.value(), self.ui.maxQ.value(),
+            self.ui.interpolationPoints.value())
+
         self.Qbkg, self.Ibkg_Q = UtilityAnalysis.data_interpolation(self.Qbkg, self.Ibkg_Q, 
-                            self.ui.minQ.value(), self.ui.maxQ.value(),
-                            self.ui.numInterpBkg.value())
+            self.ui.minQ.value(), self.ui.maxQ.value(),
+            self.ui.interpolationPoints.value())
         
-        self.ui.rawDataPlot.canvas.ax.lines.pop(1)
+        self.ui.rawDataPlot.canvas.ax.lines.pop(0)
+        self.ui.rawDataPlot.canvas.ax.lines.pop(0)
+        
+        self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, "b", label="Data")
+        self.ui.rawDataPlot.canvas.ax.legend()
+        self.ui.rawDataPlot.canvas.draw()
+        
         self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, "g--", label="Bkg")
         self.ui.rawDataPlot.canvas.ax.legend()
         self.ui.rawDataPlot.canvas.draw()
 
     #---------------------------------------------------------
+    
+    def setComposition(self):
+        """Function to set the sample composition"""
+        
+        os.system("python.exe ./modules/myMassEl_v16_code.py")
+    
 
+    #---------------------------------------------------------
+    
     def import_XYZFile(self):
         """Function to load and plot the bkg file"""
         

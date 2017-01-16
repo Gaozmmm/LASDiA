@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'LASDiAGUI.ui'
+# Form implementation generated from reading ui file '.\LASDiAGUI.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_LASDiAGUI(object):
     def setupUi(self, LASDiAGUI):
         LASDiAGUI.setObjectName("LASDiAGUI")
-        LASDiAGUI.resize(1471, 751)
+        LASDiAGUI.resize(1487, 931)
         LASDiAGUI.setStyleSheet("background-color:rgb(255, 255, 255)")
         self.experimentPanel = QtWidgets.QTabWidget(LASDiAGUI)
         self.experimentPanel.setGeometry(QtCore.QRect(760, 10, 701, 381))
@@ -206,18 +206,18 @@ class Ui_LASDiAGUI(object):
         self.importXYZFile.setGeometry(QtCore.QRect(10, 260, 115, 32))
         self.importXYZFile.setStyleSheet("color:rgb(255, 255, 255);border: 2px solid rgb(28, 31, 255)")
         self.importXYZFile.setObjectName("importXYZFile")
-        self.sampleButton = QtWidgets.QPushButton(self.sampleTab)
-        self.sampleButton.setGeometry(QtCore.QRect(10, 20, 75, 23))
-        self.sampleButton.setStyleSheet("color:rgb(255, 255, 255);border: 2px solid rgb(28, 31, 255)")
-        self.sampleButton.setObjectName("sampleButton")
+        self.sampleComposition = QtWidgets.QPushButton(self.sampleTab)
+        self.sampleComposition.setGeometry(QtCore.QRect(10, 20, 75, 23))
+        self.sampleComposition.setStyleSheet("color:rgb(255, 255, 255);border: 2px solid rgb(28, 31, 255)")
+        self.sampleComposition.setObjectName("sampleComposition")
         self.xyzFileName = QtWidgets.QTextEdit(self.sampleTab)
         self.xyzFileName.setGeometry(QtCore.QRect(160, 260, 331, 31))
         self.xyzFileName.setStyleSheet("background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)")
         self.xyzFileName.setObjectName("xyzFileName")
-        self.molecule = QtWidgets.QTextEdit(self.sampleTab)
-        self.molecule.setGeometry(QtCore.QRect(160, 20, 331, 31))
-        self.molecule.setStyleSheet("background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)")
-        self.molecule.setObjectName("molecule")
+        self.composition = QtWidgets.QTextEdit(self.sampleTab)
+        self.composition.setGeometry(QtCore.QRect(160, 20, 331, 31))
+        self.composition.setStyleSheet("background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)")
+        self.composition.setObjectName("composition")
         self.experimentPanel.addTab(self.sampleTab, "")
         self.displayTab = QtWidgets.QWidget()
         self.displayTab.setObjectName("displayTab")
@@ -395,7 +395,7 @@ class Ui_LASDiAGUI(object):
         self.graphicPanel = QtWidgets.QGroupBox(LASDiAGUI)
         self.graphicPanel.setGeometry(QtCore.QRect(0, 0, 751, 921))
         self.graphicPanel.setAutoFillBackground(False)
-        self.graphicPanel.setStyleSheet("background-color:rgb(97, 126, 255)")
+        self.graphicPanel.setStyleSheet("background-color:rgb(97, 126, 255);color:rgb(255, 255, 255)")
         self.graphicPanel.setObjectName("graphicPanel")
         self.factorPlot = mplwidget.MplWidget(self.graphicPanel)
         self.factorPlot.setGeometry(QtCore.QRect(10, 320, 731, 291))
@@ -412,7 +412,7 @@ class Ui_LASDiAGUI(object):
         self.experimentPanel.raise_()
 
         self.retranslateUi(LASDiAGUI)
-        self.experimentPanel.setCurrentIndex(2)
+        self.experimentPanel.setCurrentIndex(0)
         self.dampingFunction.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(LASDiAGUI)
 
@@ -447,7 +447,7 @@ class Ui_LASDiAGUI(object):
         self.r2_2.setText(_translate("LASDiAGUI", "R2 (cm)"))
         self.experimentPanel.setTabText(self.experimentPanel.indexOf(self.geometryTab), _translate("LASDiAGUI", "Geometry"))
         self.importXYZFile.setText(_translate("LASDiAGUI", "Import XYZ file"))
-        self.sampleButton.setText(_translate("LASDiAGUI", "Sample"))
+        self.sampleComposition.setText(_translate("LASDiAGUI", "Sample"))
         self.experimentPanel.setTabText(self.experimentPanel.indexOf(self.sampleTab), _translate("LASDiAGUI", "Sample"))
         self.middlePlotBox.setTitle(_translate("LASDiAGUI", "Middle Plot"))
         self.formFactorCheck.setText(_translate("LASDiAGUI", "Form Factor"))
@@ -486,4 +486,3 @@ class Ui_LASDiAGUI(object):
 
 # from matplotlibwidget import MatplotlibWidget
 from modules import mplwidget
-
