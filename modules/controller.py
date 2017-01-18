@@ -176,7 +176,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def setComposition(self):
         """Function to set the sample composition"""
         
-        os.system("python.exe ./modules/myMassEl_v16_code.py")
+        os.system("python3.5 ./modules/myMassEl_v16_code.py")
     
 
     #---------------------------------------------------------

@@ -98,7 +98,9 @@ if __name__ == "__main__":
     # ------------------------Starting minimization----------------------------
 
     scaleFactor = variables.scaleFactor
+    print(scaleFactor)
     density = variables.density
+    print(density)
     
     scaleStep = 0.05
     scaleStepEnd = 0.00006
@@ -133,6 +135,12 @@ if __name__ == "__main__":
             SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
                 dampingFunction)
 
+            print(scaleArray[i])
+
+            Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
+            plt.show()
+            time.sleep(1000)
+
             i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
             F_r = MainFunctions.calc_Fr2(r, Q[Q<=variables.QmaxIntegrate], \
                 i_Q[Q<=variables.QmaxIntegrate])
@@ -142,35 +150,36 @@ if __name__ == "__main__":
                 Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
 
             chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
+
         
         # --------------------Range shifting selection --------------------
         
-        if np.amax(chi2Array) > 10**8:
-            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
-        else:
-            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+        # if np.amax(chi2Array) > 10**8:
+        #     scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
+        # else:
+        #     scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
         
-        nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+        # nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
-        if nearIdx == 0:
-            scaleFactor -= scaleStep*10
-            scaleStep *= 10
-            NoPeak += 1
-            print("bug 1")
-        if nearIdx >= numSample-2:
-            scaleFactor += scaleStep*10
-            scaleStep *= 10
-            NoPeak += 1
-            print("bug 2")
+        # if nearIdx == 0:
+        #     scaleFactor -= scaleStep*10
+        #     scaleStep *= 10
+        #     NoPeak += 1
+        #     print("bug 1")
+        # if nearIdx >= numSample-2:
+        #     scaleFactor += scaleStep*10
+        #     scaleStep *= 10
+        #     NoPeak += 1
+        #     print("bug 2")
 
-        scaleStep /= 10
-        Flag += 1
+        # scaleStep /= 10
+        # Flag += 1
         
-        loopIteration += 1
+        # loopIteration += 1
 
         print(loopIteration, "cond ", 10*scaleStep, scaleStepEnd, NoPeak, Flag, scaleFactor+scaleStep*1.1)
-        if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
-        # if (1==1):
+        # if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
+        if (1==1):
             break
         
     # ------------------------chi2 curve fit for scale-------------------------
