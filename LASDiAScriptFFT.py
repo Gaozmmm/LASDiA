@@ -117,7 +117,7 @@ if __name__ == "__main__":
     SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
         dampingFunction)
 
-    Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
+    # Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
 
 
     Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
@@ -126,8 +126,51 @@ if __name__ == "__main__":
     i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     Qi_Q = MainFunctions.calc_QiQ(Q, i_Q)
     
-    r, F_r = MainFunctions.calc_Fr(Q, Qi_Q, variables.QmaxIntegrate)
-    # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r)", "y")
+    
+    # ----------------------------F(r) with int sum----------------------------
+    
+    r = MainFunctions.calc_r(Q)
+    meanDeltaQ = np.mean(np.diff(Q[Q<=variables.QmaxIntegrate]))
+    rQ = np.outer(r, Q[Q<=variables.QmaxIntegrate])
+    sinrQ = np.sin(rQ)
+    F_r = (2.0 / np.pi) * np.sum(Q[Q<=variables.QmaxIntegrate]*
+        i_Q[Q<=variables.QmaxIntegrate] * sinrQ, axis=1) * meanDeltaQ
+    
+    Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r) sum", "y")
+    
+    # ----------------------------F(r) with int simps--------------------------
+    
+    F_r2 = (2.0 / np.pi) * simps(Q[Q<=variables.QmaxIntegrate]*
+        i_Q[Q<=variables.QmaxIntegrate] * sinrQ, Q[Q<=variables.QmaxIntegrate])
+    
+    Utility.plot_data(r, F_r2, "F_r", "r", "F(r)", "F(r) simps", "y")
+    
+    # -------------------------------F(r) with FFT-----------------------------
+    
+    pMax, elem = UtilityAnalysis.find_nearest(Q, variables.QmaxIntegrate)
+    NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
+    DelR = 2*np.pi/(np.mean(np.diff(Q))*NumPoints)
+    Qi_Q = Utility.resize_zero(Q[Q<=variables.QmaxIntegrate]*i_Q[Q<=variables.QmaxIntegrate], NumPoints) 
+    # np.resize(Qi_Q, NumPoints)
+    Qi_Q[pMax+1:] = 0.0
+    F_r3 = fftpack.fft(Qi_Q)
+    F_r3 = F_r3[np.where(r>=0)]
+    F_r3 = -np.imag(F_r3)*meanDeltaQ*2/np.pi
+    r = np.arange(0.0, 0.0+DelR*len(F_r3), DelR)
+    
+    # F_r3 = fftpack.fft(Q[Q<=variables.QmaxIntegrate]*i_Q[Q<=variables.QmaxIntegrate])
+    # F_r3 = F_r3[np.where(r>=0)]
+    # F_r3 = -np.imag(F_r3)*meanDeltaQ*2/np.pi
+    
+    Utility.plot_data(r, F_r3, "F_r", "r", "F(r)", "F(r) fft", "y")
+    
+    print(len(F_r))
+    print(len(F_r2))
+    print(len(F_r3))
+    
+    # Utility.plot_data(r, F_r-F_r2, "F_r", "r", "F(r)", "F(r) simps", "y")
+    # r, F_r = MainFunctions.calc_Fr(Q, Qi_Q, variables.QmaxIntegrate)
+    
     
     # ----------------------------F(r) optimization----------------------------
     # Qi_Q1 = np.zeros(len(SsmoothDamp_Q))
