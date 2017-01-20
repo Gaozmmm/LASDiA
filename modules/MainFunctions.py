@@ -471,7 +471,7 @@ def calc_r(Q):
     DeltaQ = np.diff(Q)
     meanDeltaQ = np.mean(DeltaQ)
     r = fftpack.fftfreq(Q.size, meanDeltaQ)
-    mask = np.where(r >= 0)
+    mask = np.where(r>=0)
     
     return r[mask]
 
