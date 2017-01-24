@@ -119,7 +119,6 @@ if __name__ == "__main__":
 
     # Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
 
-
     Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
         variables.maxQ, variables.NumPoints)
     
@@ -136,40 +135,81 @@ if __name__ == "__main__":
     F_r = (2.0 / np.pi) * np.sum(Q[Q<=variables.QmaxIntegrate]*
         i_Q[Q<=variables.QmaxIntegrate] * sinrQ, axis=1) * meanDeltaQ
     
-    Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r) sum", "y")
+    # Utility.plot_data(r, F_r, "F_r", "r", "F(r)", "F(r) sum", "y")
     
     # ----------------------------F(r) with int simps--------------------------
     
     F_r2 = (2.0 / np.pi) * simps(Q[Q<=variables.QmaxIntegrate]*
         i_Q[Q<=variables.QmaxIntegrate] * sinrQ, Q[Q<=variables.QmaxIntegrate])
     
-    Utility.plot_data(r, F_r2, "F_r", "r", "F(r)", "F(r) simps", "y")
+    # Utility.plot_data(r, F_r2, "F_r", "r", "F(r)", "F(r) simps", "y")
     
     # -------------------------------F(r) with FFT-----------------------------
     
     pMax, elem = UtilityAnalysis.find_nearest(Q, variables.QmaxIntegrate)
     NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
     DelR = 2*np.pi/(np.mean(np.diff(Q))*NumPoints)
-    Qi_Q = Utility.resize_zero(Q[Q<=variables.QmaxIntegrate]*i_Q[Q<=variables.QmaxIntegrate], NumPoints) 
-    # np.resize(Qi_Q, NumPoints)
+    Qi_Q = Utility.resize_zero(Q[Q<=variables.QmaxIntegrate]*i_Q[Q<=variables.QmaxIntegrate], NumPoints)
     Qi_Q[pMax+1:] = 0.0
+    Q = np.arange(np.amin(Q), np.amin(Q)+np.mean(np.diff(Q))*NumPoints, np.mean(np.diff(Q)))
+    r = MainFunctions.calc_r(Q)
     F_r3 = fftpack.fft(Qi_Q)
-    F_r3 = F_r3[np.where(r>=0)]
+    F_r3 = F_r3[np.where(r>=0.0)]
     F_r3 = -np.imag(F_r3)*meanDeltaQ*2/np.pi
     r = np.arange(0.0, 0.0+DelR*len(F_r3), DelR)
     
-    # F_r3 = fftpack.fft(Q[Q<=variables.QmaxIntegrate]*i_Q[Q<=variables.QmaxIntegrate])
-    # F_r3 = F_r3[np.where(r>=0)]
-    # F_r3 = -np.imag(F_r3)*meanDeltaQ*2/np.pi
+    # Utility.plot_data(r, F_r3, "F_r", "r", "F(r)", "F(r) fft", "y")
     
-    Utility.plot_data(r, F_r3, "F_r", "r", "F(r)", "F(r) fft", "y")
+    # ------------------------------Qi(Q) with IFFT----------------------------
     
-    print(len(F_r))
-    print(len(F_r2))
-    print(len(F_r3))
+    DelG = np.zeros(len(F_r3))
+    Rnn = variables.rmin
+    DelG[r<Rnn] = F_r3[r<Rnn]-(-4*np.pi*r[r<Rnn]*density)
+    NumPoints = 2**math.ceil(math.log(len(DelG)-1)/math.log(2))
+    DelG = Utility.resize_zero(DelG, NumPoints)
     
-    # Utility.plot_data(r, F_r-F_r2, "F_r", "r", "F(r)", "F(r) simps", "y")
-    # r, F_r = MainFunctions.calc_Fr(Q, Qi_Q, variables.QmaxIntegrate)
+    DelQ = 2*np.pi/(np.mean(np.diff(r))*NumPoints)
+    
+    
+    
+    
+    
+    meanDeltar = np.mean(np.diff(r))
+    Q = fftpack.fftfreq(r.size, meanDeltar)
+    QiQ = fftpack.fft(DelG)
+    QiQ = QiQ[np.where(Q>=0.0)]
+    QiQ = -np.imag(QiQ)*meanDeltar
+    
+    QiQ = QiQ[:550]
+    Q = np.arange(0.0, 0.0+DelQ*len(QiQ), DelQ)
+    
+    Utility.plot_data(Q, QiQ, "QiQ", "Q", "Qi(Q)", "Qi(Q) ifft", "y")
+    
+    # QiQ = QiQ[np.where((Q>=0.0) & (Q<=variables.maxQ))]
+    # print(len(QiQ))
+    # Q = np.arange(0.0, 0.0+DelQ*len(QiQ), DelQ)
+    
+    # Utility.plot_data(Q, QiQ, "F_r", "r", "F(r)", "F(r) fft", "y")
+    
+    # 
+    # # Q = np.arange(0.0, 0.0+DelQ*len(QiQ), DelQ)
+    # Q = np.linspace(0.0, maxQ, newDim, endpoint=True)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     # ----------------------------F(r) optimization----------------------------
