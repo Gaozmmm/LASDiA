@@ -162,28 +162,27 @@ if __name__ == "__main__":
     
     # ------------------------------Qi(Q) with IFFT----------------------------
     
-    DelG = np.zeros(len(F_r3))
+    GR = np.zeros(len(F_r3))
     Rnn = variables.rmin
-    DelG[r<Rnn] = F_r3[r<Rnn]-(-4*np.pi*r[r<Rnn]*density)
-    NumPoints = 2**math.ceil(math.log(len(DelG)-1)/math.log(2))
-    DelG = Utility.resize_zero(DelG, NumPoints)
+    GR[r<Rnn] = F_r3[r<Rnn]-(-4*np.pi*r[r<Rnn]*density)
     
+    
+    NumPoints = 2**math.ceil(math.log(len(GR)-1)/math.log(2))
+    GR = Utility.resize_zero(GR, NumPoints)
+    Q1 = np.linspace(0.0, 109, 550)
     DelQ = 2*np.pi/(np.mean(np.diff(r))*NumPoints)
-    
-    
-    
-    
-    
     meanDeltar = np.mean(np.diff(r))
     Q = fftpack.fftfreq(r.size, meanDeltar)
-    QiQ = fftpack.fft(DelG)
+    QiQ = fftpack.fft(GR)
     QiQ = QiQ[np.where(Q>=0.0)]
     QiQ = -np.imag(QiQ)*meanDeltar
-    
-    QiQ = QiQ[:550]
     Q = np.arange(0.0, 0.0+DelQ*len(QiQ), DelQ)
+    idxArray = np.zeros(550, dtype=np.int)
+    for i in range(len(Q1)):
+        idxArray[i], _ = UtilityAnalysis.find_nearest(Q, Q1[i])
+    QiQ = QiQ[idxArray]
     
-    Utility.plot_data(Q, QiQ, "QiQ", "Q", "Qi(Q)", "Qi(Q) ifft", "y")
+    Utility.plot_data(Q1, QiQ, "QiQ", "Q", "Qi(Q)", "Qi(Q) ifft", "y")
     
     # QiQ = QiQ[np.where((Q>=0.0) & (Q<=variables.maxQ))]
     # print(len(QiQ))
