@@ -61,6 +61,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.rho0 = None
         self.Iincoh_Q = None
         self.J_Q = None
+        self.dampingFunct = None
         
         self.XYZFilePath = None
         
@@ -100,20 +101,21 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def import_data(self):
         """Function to load and plot the data file"""
         
-        if self.ui.dataFileName.toPlainText() == "":
-            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File",
-                r"../data/cea_files/Ar", "Data File(*chi *xy)")
-        else:
-            path = self.dirpath + "/" + self.ui.dataFileName.toPlainText()
-            # if self.ui.dataPathName.toPlainText() == "":
-                # self.dirpath = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open directory",
-                    # r"..\data\cea_files\Ar", QtWidgets.QFileDialog.ShowDirsOnly))
-            # else:
-                # self.dirpath = self.ui.dataPathName.toPlainText()
-                # path = self.dirpath + "/" + self.ui.dataFileName.toPlainText()
+        # commented just for testing
+        # if self.ui.dataFileName.toPlainText() == "":
+            # path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Data File",
+                # r"../data/cea_files/Ar", "Data File(*chi *xy)")
+        # else:
+            # path = self.dirpath + "/" + self.ui.dataFileName.toPlainText()
+            # # if self.ui.dataPathName.toPlainText() == "":
+                # # self.dirpath = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open directory",
+                    # # r"..\data\cea_files\Ar", QtWidgets.QFileDialog.ShowDirsOnly))
+            # # else:
+                # # self.dirpath = self.ui.dataPathName.toPlainText()
+                # # path = self.dirpath + "/" + self.ui.dataFileName.toPlainText()
         
         
-        
+        path = r"../data/cea_files/Ar/HT2_034T++_rem.chi"
         pathDir, fileName = os.path.split(path)
         self.ui.dataPathName.setPlainText(pathDir)
         self.ui.dataFileName.setPlainText(fileName)
@@ -130,12 +132,14 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def import_bkg(self):
         """Function to load and plot the bkg file"""
         
-        if self.ui.bkgFileName.toPlainText() == "":
-            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File",
-                r"../data/cea_files/Ar", "Data File(*chi *xy)")
-        else:
-            path = self.dirpath + "/" + self.ui.bkgFileName.toPlainText()
+        # commented just for testing
+        # if self.ui.bkgFileName.toPlainText() == "":
+            # path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Bkg File",
+                # r"../data/cea_files/Ar", "Data File(*chi *xy)")
+        # else:
+            # path = self.dirpath + "/" + self.ui.bkgFileName.toPlainText()
         
+        path = r"../data/cea_files/Ar/HT2_036T++_rem.chi"
         pathDir, fileName = os.path.split(path)
         self.ui.dataPathName.setPlainText(pathDir)
         self.ui.bkgFileName.setPlainText(fileName)
@@ -176,7 +180,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def setComposition(self):
         """Function to set the sample composition"""
         
-        os.system("python3.5 ./modules/myMassEl_v16_code.py")
+        os.system("python.exe ./modules/myMassEl_v16_code.py")
     
 
     #---------------------------------------------------------
@@ -186,6 +190,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         self.XYZFilePath, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load XYZ File", \
             r"./", "Data File(*xyz)")
+        
+        self.ui.xyzFileName.setPlainText(self.XYZFilePath)
 
     #---------------------------------------------------------
 
@@ -204,19 +210,22 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, self.fe_Q, \
             self.Q, self.Ztot, elementParameters)
         
+        self.dampingFunct = UtilityAnalysis.calc_dampingFunction(self.Q, self.ui.dampingFactor.value(),
+            self.ui.QmaxIntegrate.value(), self.ui.dampingFunction.currentText())
+        
         Isample_Q = MainFunctions.calc_IsampleQ(self.I_Q, self.ui.sfValue.value(), self.Ibkg_Q)
-        alpha = MainFunctions.calc_alpha(self.J_Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
-            self.Q[self.Q<=self.ui.QmaxInt.value()], Isample_Q[self.Q<=self.ui.QmaxInt.value()], \
-        self.fe_Q[self.Q<=self.ui.QmaxInt.value()], self.Ztot, self.ui.rho0Value.value())
+        alpha = MainFunctions.calc_alpha(self.J_Q[self.Q<=self.ui.QmaxIntegrate.value()], self.Sinf, \
+            self.Q[self.Q<=self.ui.QmaxIntegrate.value()], Isample_Q[self.Q<=self.ui.QmaxIntegrate.value()], \
+        self.fe_Q[self.Q<=self.ui.QmaxIntegrate.value()], self.Ztot, self.ui.rho0Value.value())
         Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, self.Iincoh_Q)
         
         S_Q = MainFunctions.calc_SQ(Icoh_Q, self.Ztot, self.fe_Q, self.Sinf, self.Q, \
-            self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value())
+            self.ui.minQ.value(), self.ui.QmaxIntegrate.value(), self.ui.maxQ.value())
         Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(self.Q, S_Q, self.Sinf, \
-            self.ui.smoothFactor.value(), self.ui.minQ.value(), self.ui.QmaxInt.value(), \
+            self.ui.smoothingFactor.value(), self.ui.minQ.value(), self.ui.QmaxIntegrate.value(), \
             self.ui.maxQ.value())
-        self.SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, self.Q, self.Sinf, \
-            self.ui.QmaxInt.value(), self.ui.dampFactor.value())
+        self.SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, self.Sinf,
+            self.dampingFunct)
         
         self.ui.factorPlot.canvas.ax.plot(self.Q, self.SsmoothDamp_Q, label="S(Q)")
         self.ui.factorPlot.canvas.draw()
@@ -228,8 +237,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         self.i_Q = MainFunctions.calc_iQ(self.SsmoothDamp_Q, self.Sinf)
         self.r = MainFunctions.calc_r(self.Q)
-        self.F_r = MainFunctions.calc_Fr(self.r, self.Q[self.Q<=self.ui.QmaxInt.value()], \
-            self.i_Q[self.Q<=self.ui.QmaxInt.value()])
+        self.F_r = MainFunctions.calc_Fr2(self.r, self.Q[self.Q<=self.ui.QmaxIntegrate.value()], \
+            self.i_Q[self.Q<=self.ui.QmaxIntegrate.value()])
         
         self.ui.distfuncPlot.canvas.ax.plot(self.r, self.F_r, label="F(r)")
         self.ui.distfuncPlot.canvas.draw()
@@ -245,112 +254,128 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         elementParameters = Utility.read_parameters(elementList, "./elementParameters.txt")
         numAtoms, element, x, y, z = Utility.read_xyz_file(self.XYZFilePath)
         
-        r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(self.Q, self.fe_Q, self.Ztot, \
-            self.ui.QmaxInt.value(), self.ui.maxQ.value(), elementList, element, \
-            x, y, z, elementParameters, self.ui.dampFactor.value())
+        
+        iintra_Q = Optimization.calc_iintra(self.Q, self.fe_Q, self.Ztot, self.ui.QmaxIntegrate.value(), 
+            self.ui.maxQ.value(), elementList, element, x, y, z, elementParameters)
+        iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, self.Q, self.ui.QmaxIntegrate.value(), 
+            self.dampingFunct)
+        # r = MainFunctions.calc_r(self.Q)
+        Fintra_r = MainFunctions.calc_Fr2(self.r, self.Q[self.Q<=self.ui.QmaxIntegrate.value()], 
+            iintradamp_Q[self.Q<=self.ui.QmaxIntegrate.value()])
+        
+        F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
+            Fintra_r, self.ui.rho0Value.value(), self.i_Q[self.Q<=self.ui.QmaxIntegrate.value()], \
+            self.Q[self.Q<=self.ui.QmaxIntegrate.value()], self.Sinf, \
+            self.J_Q[self.Q<=self.ui.QmaxIntegrate.value()], self.r, self.ui.rmin.value(), "n")
+        
+        # r, iintradamp_Q, Fintra_r = Optimization.calc_intraComponent(self.Q, self.fe_Q, self.Ztot, \
+            # self.ui.QmaxIntegrate.value(), self.ui.maxQ.value(), elementList, element, \
+            # x, y, z, elementParameters, self.ui.dampingFactor.value())
         
         # density, scaleFactor = Minimization.chi2_minimization(self.ui.sfValue.value(), 
             # self.Q, self.I_Q, self.Ibkg_Q, 
             # self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot,
-            # self.ui.rho0Value.value(), Fintra_r, self.r, self.ui.minQ.value(), self.ui.QmaxInt.value(), variables.maxQ, 
-            # variables.smoothFactor, variables.dampFactor, variables.iteration, variables.rmin)
+            # self.ui.rho0Value.value(), Fintra_r, self.r, self.ui.minQ.value(), self.ui.QmaxIntegrate.value(), variables.maxQ, 
+            # variables.smoothingFactor, variables.dampingFactor, variables.iteration, variables.rmin)
         
-        scaleStep = 0.05
-        densityStep = 0.025
-        numSample = 23
-        numLoopIteration = 0
+        # scaleStep = 0.05
+        # densityStep = 0.025
+        # numSample = 23
+        # numLoopIteration = 0
         
-        # plt.ion()
-        # figure, ax = plt.subplots()
+        # # plt.ion()
+        # # figure, ax = plt.subplots()
         
-        scaleFactor = self.ui.sfValue.value()
-        density = self.ui.rho0Value.value()
+        # scaleFactor = self.ui.sfValue.value()
+        # density = self.ui.rho0Value.value()
+        
+        # # print("density ", density, " Scale Factor ", scaleFactor)
+        
+        # while True:
+            # self.ui.chi2_plot.canvas.ax.cla()
+            # self.ui.chi2_plot.canvas.ax.grid(True)
+            # scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+            
+            # chi2Array = np.zeros(numSample)
+            
+            # self.ui.chi2_plot.canvas.ax.set_xlabel("Scale")
+            # self.ui.chi2_plot.canvas.ax.relim()
+            # self.ui.chi2_plot.canvas.ax.autoscale_view()
+            # for i in range(len(scaleArray)):
+                # chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(self.Q, self.I_Q,
+                    # self.Ibkg_Q, self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot, scaleArray[i], density, Fintra_r, self.r,
+                    # self.ui.minQ.value(), self.ui.QmaxIntegrate.value(), self.ui.maxQ.value(), self.ui.smoothingFactor.value(),
+                    # self.ui.dampingFactor.value(), self.ui.iterations.value(), self.ui.rmin.value())
+                
+                # self.ui.chi2_plot.canvas.ax.scatter(scaleArray[i], chi2Array[i])
+                # self.ui.chi2_plot.canvas.draw()
+            
+            # xfit, yfit, scaleFactor = Minimization.chi2_fit(scaleArray, chi2Array)
+            # self.ui.chi2_plot.canvas.ax.plot(xfit, yfit)
+            # self.ui.chi2_plot.canvas.draw()
+            
+            # self.ui.chi2_plot.canvas.ax.cla()
+            # self.ui.chi2_plot.canvas.ax.grid(True)
+
+            # density0 = density
+            # densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+            # chi2Array = np.zeros(numSample)
+            
+            # self.ui.chi2_plot.canvas.ax.set_xlabel("Density")
+            # self.ui.chi2_plot.canvas.ax.relim()
+            # self.ui.chi2_plot.canvas.ax.autoscale_view()
+            # for i in range(len(densityArray)):
+                # chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(self.Q, self.I_Q,
+                    # self.Ibkg_Q, self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot, scaleFactor, densityArray[i], Fintra_r, self.r,
+                    # self.ui.minQ.value(), self.ui.QmaxIntegrate.value(), self.ui.maxQ.value(), self.ui.smoothingFactor.value(),
+                    # self.ui.dampingFactor.value(), self.ui.iterations.value(), self.ui.rmin.value())
+                
+                # self.ui.chi2_plot.canvas.ax.scatter(densityArray[i], chi2Array[i])
+                # self.ui.chi2_plot.canvas.draw()
+                
+            
+            # xfit, yfit, density = Minimization.chi2_fit(densityArray, chi2Array)
+            # self.ui.chi2_plot.canvas.ax.plot(xfit, yfit)
+            # self.ui.chi2_plot.canvas.draw()
+            
+            # if np.abs(density-density0) > density0/25:
+                # scaleStep = 0.006
+                # densityStep = density0/10
+            # elif np.abs(density-density0) > density0/75:
+                # scaleStep = 0.0006
+                # densityStep = density0/100
+            # else:
+                # scaleStep = 0.00006
+                # densityStep = density0/1000
+
+            # numLoopIteration += 1
+            # if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
+                # break
         
         # print("density ", density, " Scale Factor ", scaleFactor)
         
-        while True:
-            self.ui.chi2_plot.canvas.ax.cla()
-            self.ui.chi2_plot.canvas.ax.grid(True)
-            scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
-            
-            chi2Array = np.zeros(numSample)
-            
-            self.ui.chi2_plot.canvas.ax.set_xlabel("Scale")
-            self.ui.chi2_plot.canvas.ax.relim()
-            self.ui.chi2_plot.canvas.ax.autoscale_view()
-            for i in range(len(scaleArray)):
-                chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(self.Q, self.I_Q,
-                    self.Ibkg_Q, self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot, scaleArray[i], density, Fintra_r, self.r,
-                    self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value(), self.ui.smoothFactor.value(),
-                    self.ui.dampFactor.value(), self.ui.iterations.value(), self.ui.rmin.value())
-                
-                self.ui.chi2_plot.canvas.ax.scatter(scaleArray[i], chi2Array[i])
-                self.ui.chi2_plot.canvas.draw()
-            
-            xfit, yfit, scaleFactor = Minimization.chi2_fit(scaleArray, chi2Array)
-            self.ui.chi2_plot.canvas.ax.plot(xfit, yfit)
-            self.ui.chi2_plot.canvas.draw()
-            
-            self.ui.chi2_plot.canvas.ax.cla()
-            self.ui.chi2_plot.canvas.ax.grid(True)
-
-            density0 = density
-            densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
-            chi2Array = np.zeros(numSample)
-            
-            self.ui.chi2_plot.canvas.ax.set_xlabel("Density")
-            self.ui.chi2_plot.canvas.ax.relim()
-            self.ui.chi2_plot.canvas.ax.autoscale_view()
-            for i in range(len(densityArray)):
-                chi2Array[i], SsmoothDamp_Q, F_r, Fopt_r = KaplowMethod.Kaplow_method(self.Q, self.I_Q,
-                    self.Ibkg_Q, self.J_Q, self.fe_Q, self.Iincoh_Q, self.Sinf, self.Ztot, scaleFactor, densityArray[i], Fintra_r, self.r,
-                    self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value(), self.ui.smoothFactor.value(),
-                    self.ui.dampFactor.value(), self.ui.iterations.value(), self.ui.rmin.value())
-                
-                self.ui.chi2_plot.canvas.ax.scatter(densityArray[i], chi2Array[i])
-                self.ui.chi2_plot.canvas.draw()
-                
-            
-            xfit, yfit, density = Minimization.chi2_fit(densityArray, chi2Array)
-            self.ui.chi2_plot.canvas.ax.plot(xfit, yfit)
-            self.ui.chi2_plot.canvas.draw()
-            
-            if np.abs(density-density0) > density0/25:
-                scaleStep = 0.006
-                densityStep = density0/10
-            elif np.abs(density-density0) > density0/75:
-                scaleStep = 0.0006
-                densityStep = density0/100
-            else:
-                scaleStep = 0.00006
-                densityStep = density0/1000
-
-            numLoopIteration += 1
-            if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
-                break
+        # S_Q = UtilityAnalysis.S_QCalculation(self.Q, self.I_Q, self.Ibkg_Q, scaleFactor, 
+            # self.J_Q, self.Sinf, self.fe_Q, self.Ztot, density, self.Iincoh_Q, 
+            # self.ui.minQ.value(), self.ui.QmaxIntegrate.value(), self.ui.maxQ.value(), self.ui.smoothingFactor.value(), self.ui.dampingFactor.value())
         
-        print("density ", density, " Scale Factor ", scaleFactor)
+        # i_Q = MainFunctions.calc_iQ(S_Q, self.Sinf)
+        # F_r = MainFunctions.calc_Fr(self.r, self.Q[self.Q<=self.ui.QmaxIntegrate.value()], i_Q[self.Q<=self.ui.QmaxIntegrate.value()])
         
-        S_Q = UtilityAnalysis.S_QCalculation(self.Q, self.I_Q, self.Ibkg_Q, scaleFactor, 
-            self.J_Q, self.Sinf, self.fe_Q, self.Ztot, density, self.Iincoh_Q, 
-            self.ui.minQ.value(), self.ui.QmaxInt.value(), self.ui.maxQ.value(), self.ui.smoothFactor.value(), self.ui.dampFactor.value())
-        
-        i_Q = MainFunctions.calc_iQ(S_Q, self.Sinf)
-        F_r = MainFunctions.calc_Fr(self.r, self.Q[self.Q<=self.ui.QmaxInt.value()], i_Q[self.Q<=self.ui.QmaxInt.value()])
-        
-        Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
-            Fintra_r, density, i_Q[self.Q<=self.ui.QmaxInt.value()], \
-            self.Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
-            self.J_Q[self.Q<=self.ui.QmaxInt.value()], self.r, self.ui.rmin.value(), "n")
+        # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
+            # Fintra_r, density, i_Q[self.Q<=self.ui.QmaxIntegrate.value()], \
+            # self.Q[self.Q<=self.ui.QmaxIntegrate.value()], self.Sinf, \
+            # self.J_Q[self.Q<=self.ui.QmaxIntegrate.value()], self.r, self.ui.rmin.value(), "n")
             
-        Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, self.r, self.Q, self.Sinf)
+        # Sopt_Q = MainFunctions.calc_SQCorr(Fopt_r, self.r, self.Q, self.Sinf)
             
         # # F_rIt, deltaF_rIt = Optimization.calc_optimize_Fr(self.ui.iterations.value(), self.F_r, \
-            # # Fintra_r, self.ui.rho0Value.value(), self.i_Q[self.Q<=self.ui.QmaxInt.value()], \
-            # # self.Q[self.Q<=self.ui.QmaxInt.value()], self.Sinf, \
-            # # self.J_Q[self.Q<=self.ui.QmaxInt.value()], self.r, self.ui.rmin.value(), "n")
+            # # Fintra_r, self.ui.rho0Value.value(), self.i_Q[self.Q<=self.ui.QmaxIntegrate.value()], \
+            # # self.Q[self.Q<=self.ui.QmaxIntegrate.value()], self.Sinf, \
+            # # self.J_Q[self.Q<=self.ui.QmaxIntegrate.value()], self.r, self.ui.rmin.value(), "n")
         
-        self.ui.distfuncPlot.canvas.ax.plot(self.r, Fopt_r, label=r"F_{opt}(r)")
+        Sopt_Q = MainFunctions.calc_SQCorr(F_rIt, self.r, self.Q, self.Sinf)
+        
+        self.ui.distfuncPlot.canvas.ax.plot(self.r, F_rIt, label=r"F_{opt}(r)")
         self.ui.distfuncPlot.canvas.draw()
         
         self.ui.factorPlot.canvas.ax.plot(self.Q, Sopt_Q, label=r"S_{opt}(Q)")

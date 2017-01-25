@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\LASDiAGUI.ui'
+# Form implementation generated from reading ui file '.\modules\LASDiAGUI.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -380,14 +380,14 @@ class Ui_LASDiAGUI(object):
         self.rho0Value.setStyleSheet("background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)")
         self.rho0Value.setDecimals(5)
         self.rho0Value.setMaximum(1000.0)
-        self.rho0Value.setProperty("value", 30.0)
+        self.rho0Value.setProperty("value", 25.0584)
         self.rho0Value.setObjectName("rho0Value")
         self.sfValue = QtWidgets.QDoubleSpinBox(self.initialValueBox)
         self.sfValue.setGeometry(QtCore.QRect(140, 60, 91, 24))
         self.sfValue.setStyleSheet("background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)")
         self.sfValue.setDecimals(5)
         self.sfValue.setMaximum(1000.0)
-        self.sfValue.setProperty("value", 1.0)
+        self.sfValue.setProperty("value", 0.58536)
         self.sfValue.setObjectName("sfValue")
         self.rho0Value_2 = QtWidgets.QLabel(self.initialValueBox)
         self.rho0Value_2.setGeometry(QtCore.QRect(10, 20, 111, 16))
@@ -484,5 +484,4 @@ class Ui_LASDiAGUI(object):
         self.rho0Value_2.setText(_translate("LASDiAGUI", "Density (atm/nm<sup>3</sup>)"))
         self.graphicPanel.setTitle(_translate("LASDiAGUI", "Graphic Panel"))
 
-# from matplotlibwidget import MatplotlibWidget
 from modules import mplwidget
