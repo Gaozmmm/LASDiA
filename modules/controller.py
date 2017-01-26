@@ -227,7 +227,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, self.Sinf,
             self.dampingFunct)
         
-        self.ui.factorPlot.canvas.ax.plot(self.Q, self.SsmoothDamp_Q, label="S(Q)")
+        self.ui.factorPlot.canvas.ax.plot(self.Q, self.SsmoothDamp_Q, "b", label="S(Q)")
+        self.ui.factorPlot.canvas.ax.legend()
         self.ui.factorPlot.canvas.draw()
 
     #---------------------------------------------------------
@@ -240,7 +241,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.F_r = MainFunctions.calc_Fr2(self.r, self.Q[self.Q<=self.ui.QmaxIntegrate.value()], \
             self.i_Q[self.Q<=self.ui.QmaxIntegrate.value()])
         
-        self.ui.distfuncPlot.canvas.ax.plot(self.r, self.F_r, label="F(r)")
+        self.ui.distfuncPlot.canvas.ax.plot(self.r, self.F_r, "b", label="F(r)")
+        self.ui.distfuncPlot.canvas.ax.legend()
         self.ui.distfuncPlot.canvas.draw()
     
     #---------------------------------------------------------
@@ -375,10 +377,12 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         
         Sopt_Q = MainFunctions.calc_SQCorr(F_rIt, self.r, self.Q, self.Sinf)
         
-        self.ui.distfuncPlot.canvas.ax.plot(self.r, F_rIt, label=r"F_{opt}(r)")
+        self.ui.distfuncPlot.canvas.ax.plot(self.r, F_rIt, "g", label=r"F_{opt}(r)")
+        self.ui.distfuncPlot.canvas.ax.legend()
         self.ui.distfuncPlot.canvas.draw()
         
-        self.ui.factorPlot.canvas.ax.plot(self.Q, Sopt_Q, label=r"S_{opt}(Q)")
+        self.ui.factorPlot.canvas.ax.plot(self.Q, Sopt_Q, "g", label=r"S_{opt}(Q)")
+        self.ui.factorPlot.canvas.ax.legend()
         self.ui.factorPlot.canvas.draw()
     
     #---------------------------------------------------------
