@@ -476,62 +476,6 @@ def calc_r(Q):
     return r[mask]
 
 
-def calc_Fr(Q, Qi_Q, QmaxIntegrate):
-    """Function to calculate F(r) (eq. 20).
-    
-    Parameters
-    ----------
-
-    Q             : numpy array
-                    momentum transfer (nm^-1)
-    Qi_Q          : numpy array
-                    Qi(Q)
-    QmaxIntegrate : float
-                    maximum Q value for the integrations
-    
-    Returns
-    -------
-    r             : numpy array
-                    atomic distance (nm)
-    F_r           : numpy array
-                    F(r)
-    """
-    
-    r, F_r = UtilityAnalysis.calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate)
-    
-    return (r, F_r)
-
-
-def calc_Fr2(r, Q, i_Q):
-    """Function to calculate F(r) (eq. 20).
-    
-    Parameters
-    ----------
-    r   : numpy array
-          atomic distance (nm)
-    Q   : numpy array
-          momentum transfer (nm^-1)
-    i_Q : numpy array
-          i(Q)
-    
-    Returns
-    -------
-    F_r : numpy array
-          F(r)
-    
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=variables.QmaxIntegrate], 
-        i_Q[Q<=variables.QmaxIntegrate])
-    """
-    
-    DeltaQ = np.diff(Q)
-    meanDeltaQ = np.mean(DeltaQ)
-    rQ = np.outer(r, Q)
-    sinrQ = np.sin(rQ)
-    F_r = (2.0 / np.pi) * np.sum(Q*i_Q * sinrQ, axis=1) * meanDeltaQ
-    
-    return F_r
-
-
 def calc_SQCorr(F_r, r, Q, Sinf):
     """Function to calculate S(Q) Corr from F(r) optimal.
 

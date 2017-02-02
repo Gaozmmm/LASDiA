@@ -91,16 +91,12 @@ if __name__ == "__main__":
         variables.maxQ, elementList, element, x, y, z, elementParameters)
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
         dampingFunction)
-    r = MainFunctions.calc_r(Q)
-    Fintra_r = MainFunctions.calc_Fr2(r, Q[Q<=variables.QmaxIntegrate], 
-        iintradamp_Q[Q<=variables.QmaxIntegrate])
+    r, Fintra_r = UtilityAnalysis.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
 
     # ------------------------Starting minimization----------------------------
 
     scaleFactor = variables.scaleFactor
-    print(scaleFactor)
     density = variables.density
-    print(density)
     
     scaleStep = 0.05
     scaleStepEnd = 0.00006
@@ -135,20 +131,15 @@ if __name__ == "__main__":
             SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
                 dampingFunction)
 
-            print(scaleArray[i])
-
-            Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
-            plt.show()
-            time.sleep(1000)
-
             i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-            F_r = MainFunctions.calc_Fr2(r, Q[Q<=variables.QmaxIntegrate], \
-                i_Q[Q<=variables.QmaxIntegrate])
-
-            Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r, \
-                Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate], \
-                Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
-
+            r, F_r = UtilityAnalysis.calc_FFT_QiQ(Q, i_Q, variables.QmaxIntegrate)
+            
+            GR = np.zeros(len(F_r))
+            Rnn = variables.rmin
+            GR[r<Rnn] = F_r[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
+            
+            Utility.plot_data(r, GR, "S_Q", "Q", "S(Q)", "S(Q)", "y")
+            
             chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
 
         
@@ -184,38 +175,38 @@ if __name__ == "__main__":
         
     # ------------------------chi2 curve fit for scale-------------------------
     
-    print("finale scale array ", scaleArray)
+    # print("finale scale array ", scaleArray)
     
-    if scaleFactor < 0:
-        print("Scale factor < 0")
-        # break
-    else:
-        left = scaleArray[0]
-        right = scaleArray[-1]
-        coeffs = np.polyfit(scaleArray, chi2Array, 3)
-        if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
-            scaleFactor = (left+right)/2
-        else:
-            x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
-            x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
-            if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
-                scaleFactor = left + np.diff(scaleArray)[0]*x1
-            else:
-                scaleFactor = left + np.diff(scaleArray)[0]*x2
+    # if scaleFactor < 0:
+        # print("Scale factor < 0")
+        # # break
+    # else:
+        # left = scaleArray[0]
+        # right = scaleArray[-1]
+        # coeffs = np.polyfit(scaleArray, chi2Array, 3)
+        # if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
+            # scaleFactor = (left+right)/2
+        # else:
+            # x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            # x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            # if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
+                # scaleFactor = left + np.diff(scaleArray)[0]*x1
+            # else:
+                # scaleFactor = left + np.diff(scaleArray)[0]*x2
     
-    plt.ion()
-    figure, ax = plt.subplots()
-    ax.cla()
-    ax.grid(True)
-    plt.xlabel("Scale")
-    plt.plot(scaleArray, chi2Array, "o")
-    pol_fit = np.poly1d(np.polyfit(scaleArray, chi2Array, 3))
-    x_fit = np.linspace(scaleArray[0], scaleArray[-1], 1000)
-    y_fit = pol_fit(x_fit)
-    plt.plot(x_fit, y_fit)
-    figure.canvas.draw()
+    # plt.ion()
+    # figure, ax = plt.subplots()
+    # ax.cla()
+    # ax.grid(True)
+    # plt.xlabel("Scale")
+    # plt.plot(scaleArray, chi2Array, "o")
+    # pol_fit = np.poly1d(np.polyfit(scaleArray, chi2Array, 3))
+    # x_fit = np.linspace(scaleArray[0], scaleArray[-1], 1000)
+    # y_fit = pol_fit(x_fit)
+    # plt.plot(x_fit, y_fit)
+    # figure.canvas.draw()
 
-    print("finale scale factor", scaleFactor)
+    # print("finale scale factor", scaleFactor)
     
     # # ----------------------First density minimization-------------------------
     
@@ -484,5 +475,5 @@ if __name__ == "__main__":
     # print("scaleFactor final ", scaleFactor)
     # print("density final ", density)
     
-    plt.ioff()
+    # plt.ioff()
     plt.show()

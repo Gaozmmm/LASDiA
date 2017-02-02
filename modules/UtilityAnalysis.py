@@ -537,7 +537,7 @@ def conv_atnm3_to_gcm3(val, atomMass):
 
 def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
     """Function to calculate the FFT following the Igor Pro procedure.
-    I do not agree with this procedure, but I follow it to comparemy results
+    I do not agree with this procedure, but I follow it to compare my results
     with Igor Pro's ones.
     
     Parameters
@@ -557,27 +557,26 @@ def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
     F_r           : numpy array
                     F(r)
     """
-    
+
     pMax, elem = UtilityAnalysis.find_nearest(Q, QmaxIntegrate)
     NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
     DelR = 2*np.pi/(np.mean(np.diff(Q))*NumPoints)
-    Qi_Q = Utility.resize_zero(Qi_Q, NumPoints) 
-    # np.resize(Qi_Q, NumPoints)
-    Q = np.linspace(np.amin(Q), np.amax(Q), len(Qi_Q), endpoint=True)
+    # Qi_Q = Utility.resize_zero(Q[Q<=QmaxIntegrate]*i_Q[Q<=QmaxIntegrate], NumPoints)
+    Qi_Q = Utility.resize_zero(Qi_Q[Q<=QmaxIntegrate], NumPoints)
     Qi_Q[pMax+1:] = 0.0
-    meanDeltaQ = np.mean(np.diff(Q))
-    r = fftpack.fftfreq(Q.size, meanDeltaQ)
+    Q = np.arange(np.amin(Q), np.amin(Q)+np.mean(np.diff(Q))*NumPoints, np.mean(np.diff(Q)))
+    r = MainFunctions.calc_r(Q)
     F_r = fftpack.fft(Qi_Q)
-    F_r = F_r[np.where(r>=0)]
-    F_r = -np.imag(F_r)*meanDeltaQ*2/np.pi
+    F_r = F_r[np.where(r>=0.0)]
+    F_r = -np.imag(F_r)*np.mean(np.diff(Q))*2/np.pi
     r = np.arange(0.0, 0.0+DelR*len(F_r), DelR)
     
     return (r, F_r)
 
 
-def calc_IFFT_Fr(r, F_r, maxQ, newDim):
+def calc_IFFT_Fr(r, F_r):
     """Function to calculate the FFT following the IGOR procedure.
-    I do not agree with this procedure, but I follow it to comparemy results
+    I do not agree with this procedure, but I follow it to compare my results
     with Igor Pro's ones.
     
     Parameters
@@ -586,29 +585,28 @@ def calc_IFFT_Fr(r, F_r, maxQ, newDim):
              atomic distance (nm)
     F_r    : numpy array
              F(r)
-    maxQ   : float
-             maximum Q value
-    newDim : int
-             S(Q)_SS dimension
     
     Returns
     -------
     Q      : numpy array
              momentum transfer (nm^-1)
-    i_Q    : numpy array
-             i(Q)
+    Qi_Q   : numpy array
+             Qi(Q)
     """
     
     NumPoints = 2**math.ceil(math.log(len(F_r)-1)/math.log(2))
     F_r = Utility.resize_zero(F_r, NumPoints)
+    Q = np.linspace(0.0, 109, 550)
     DelQ = 2*np.pi/(np.mean(np.diff(r))*NumPoints)
     meanDeltar = np.mean(np.diff(r))
-    Q = fftpack.fftfreq(r.size, meanDeltar)
-    QiQ = fftpack.fft(F_r)
-    QiQ = QiQ[np.where(Q>=0)]
-    QiQ = -np.imag(QiQ)*meanDeltar
-    QiQ = QiQ[:newDim]
-    # Q = np.arange(0.0, 0.0+DelQ*len(QiQ), DelQ)
-    Q = np.linspace(0.0, maxQ, newDim, endpoint=True)
+    Q1 = fftpack.fftfreq(r.size, meanDeltar)
+    Qi_Q = fftpack.fft(F_r)
+    Qi_Q = Qi_Q[np.where(Q1>=0.0)]
+    Qi_Q = -np.imag(Qi_Q)*meanDeltar
+    Q1 = np.arange(0.0, 0.0+DelQ*len(Qi_Q), DelQ)
+    idxArray = np.zeros(550, dtype=np.int)
+    for i in range(len(Q)):
+        idxArray[i], _ = UtilityAnalysis.find_nearest(Q1, Q[i])
+    Qi_Q = Qi_Q[idxArray]
     
-    return (Q, QiQ)
+    return (Q, Qi_Q)

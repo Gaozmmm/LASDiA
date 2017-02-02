@@ -587,13 +587,7 @@ def calc_Fr(r, Q, i_Q):
 
     F_r = (2.0 / np.pi) * simps(Q * i_Q * np.array(np.sin(np.mat(Q).T * np.mat(r))).T, Q)
 
-    DeltaQ = np.diff(Q)
-    meanDeltaQ = np.mean(DeltaQ)
-    rQ = np.outer(r,Q)
-    sinrQ = np.sin(rQ)
-    F_r2 = (2.0 / np.pi) * np.sum(Q * i_Q * sinrQ, axis=1) * meanDeltaQ
-
-    return (F_r, F_r2)
+    return F_r
 
 
 def calc_Fr(Q, Qi_Q, QmaxIntegrate):
