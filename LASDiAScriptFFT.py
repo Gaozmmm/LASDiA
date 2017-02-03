@@ -44,6 +44,8 @@ import time
 # from timeit import default_timer as timer
 from scipy.integrate import simps
 from scipy import fftpack
+from scipy import interpolate
+from scipy import signal
 import math
 
 from modules import Formalism
@@ -109,58 +111,32 @@ if __name__ == "__main__":
 
     S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, 
         variables.QmaxIntegrate, variables.maxQ)
+    
+    Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
+    
     Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
         variables.smoothingFactor, 
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
-        dampingFunction)
-
-    Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
-        variables.maxQ, variables.NumPoints)
     
-    i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-    Qi_Q = Q*i_Q
-    r, GR = UtilityAnalysis.calc_FFT_QiQ(Q, Qi_Q, variables.QmaxIntegrate)
-    _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
-        np.amax(Fintra_r), len(GR))
+    Utility.plot_data(Q, Ssmooth_Q, "S_Q", "Q", "S(Q)", "S_smooth(Q)", "y")
     
-    # ------------------------------Qi(Q) with IFFT----------------------------
+    StdDevWave=variables.smoothingFactor * 10**(-6) * Q**3
+    smooth2 = interpolate.InterpolatedUnivariateSpline(Q, S_Q, w=StdDevWave, k=3)
+    Ssmooth_Q2 = smooth2(Q)
+    # Utility.plot_data(Q, Ssmooth_Q2, "S_Q", "Q", "S(Q)", "S_smooth(Q)2", "y")
     
-    QiQ1 = np.zeros(len(SsmoothDamp_Q))
-    idx, _ = UtilityAnalysis.find_nearest(Qi_Q, variables.QmaxIntegrate)
-    QiQ1[Q<variables.QmaxIntegrate] = Qi_Q[Q<variables.QmaxIntegrate]
-    QiQ1[0] = 0.0
     
-    GR1 = GR
-    DelG = np.zeros(len(GR))
-    Rnn = variables.rmin
-    DelG[r<Rnn] = GR1[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
+    # Ssmooth_Q5 = signal.savgol_filter(S_Q, 51, 3)
+    # Utility.plot_data(Q, Ssmooth_Q5, "S_Q", "Q", "S(Q)", "S_smooth(Q)5", "y")
     
-    # Utility.plot_data(r, DelG, "GR", "r", "G(r)", "G(r)", "y")
+    # SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+        # dampingFunction)
     
-    for i in range(variables.iterations):
-        Q1, QiQCorr = UtilityAnalysis.calc_IFFT_Fr(r, DelG)
-        mask = np.where((Q1>0.0) & (Q1<variables.QmaxIntegrate))
-        QiQ1[mask] = QiQ1[mask] - (QiQ1[mask] / 
-            (Q1[mask] *(Sinf + J_Q[:len(Q1[mask])])) + 1) * QiQCorr[mask]
-        r, GR1 = UtilityAnalysis.calc_FFT_QiQ(Q1, QiQ1, variables.QmaxIntegrate)
-        
-        DelG = np.zeros(len(GR1))
-        DelG[r<Rnn] = GR1[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
-        
-        Utility.plot_data(r, GR1, "GR", "r", "G(r)", "G(r)", "y")
-        plt.show()
-        
-        Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>0.95*Rnn]))[0][0]]
-        print(Rnn)
-
-    SQCorr = np.zeros(len(QiQ1))
-    SQCorr[1:] = QiQ1[1:]/Q1[1:]+Sinf
+    # Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
+        # variables.maxQ, variables.NumPoints)
     
-    DTemp = DelG
-    DTemp = DTemp**2
-    print(np.mean(DTemp))
-    
-    # Utility.plot_data(r, DTemp, "GR", "r", "G(r)", "G(r)", "y")
+    # chi2 = Optimization.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+        # variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
+        # variables.rmin, density, J_Q)
     
     plt.show()

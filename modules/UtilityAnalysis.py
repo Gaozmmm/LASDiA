@@ -305,7 +305,7 @@ def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, dampingFunction):
     return iintra_Q
 
 
-def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
+def calc_SQsmoothing(Q, S_Q, Sinf, smoothingFactor, minQ, QmaxIntegrate, maxQ):
     """Function for smoothing S(Q).
     This function smooths S(Q) and resets the number of points for the variable Q.
     
@@ -334,12 +334,15 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smooth_factor, minQ, QmaxIntegrate, maxQ):
                     smoothed S(Q) with NumPoints dimension
     """
     
-    smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)], \
-        S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
+    # smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)],
+        # S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
+    
+    StdDevWave=smoothingFactor * 10**(-6) * Q**3
+    smooth = interpolate.UnivariateSpline(Q, S_Q, k=3, s=smoothingFactor)
     S_Qsmoothed = smooth(Q)
     
-    S_Qsmoothed[Q<minQ] = 0
-    S_Qsmoothed[(Q>QmaxIntegrate)] = Sinf
+    # S_Qsmoothed[Q<minQ] = 0
+    # S_Qsmoothed[(Q>QmaxIntegrate)] = Sinf
     # S_Qsmoothed[(Q>QmaxIntegrate) & (Q<=maxQ)] = Sinf
     
     return S_Qsmoothed
