@@ -64,7 +64,7 @@ iterations = 2                                                   # Number of ite
 rmin = 0.24                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
-scaleFactor = 0.45                                               # Scale factor initial value
+scaleFactor = 1                                               # Scale factor initial value
 density = 27.1793                                          # Sample density initial value
 
 

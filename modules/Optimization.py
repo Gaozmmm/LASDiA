@@ -296,6 +296,8 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
     i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     Qi_Q = Q*i_Q
     r, GR = UtilityAnalysis.calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate)
+    # Utility.plot_data(r, GR, "GR", "r", "G(r)", "G(r)", "y")
+    plt.show()
     _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
         np.amax(Fintra_r), len(GR))
     
@@ -323,8 +325,8 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
         
         Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>0.95*Rnn]))[0][0]]
 
-    SQCorr = np.zeros(len(QiQ1))
-    SQCorr[1:] = QiQ1[1:]/Q1[1:]+Sinf
+    # SQCorr = np.zeros(len(QiQ1))
+    # SQCorr[1:] = QiQ1[1:]/Q1[1:]+Sinf
     
     DTemp = DelG
     DTemp = DTemp**2

@@ -73,7 +73,7 @@ if __name__ == "__main__":
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
 
     #--------------------Preliminary calculation-------------------------------
-
+    
     Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
         variables.minQ, variables.maxQ)
     
@@ -91,8 +91,9 @@ if __name__ == "__main__":
         variables.maxQ, elementList, element, x, y, z, elementParameters)
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
         dampingFunction)
-    r, Fintra_r = UtilityAnalysis.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
-
+    rintra, Fintra_r = UtilityAnalysis.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
+    
+    Qorg = Q
     # ------------------------Starting minimization----------------------------
 
     scaleFactor = variables.scaleFactor
@@ -105,75 +106,76 @@ if __name__ == "__main__":
     numSample = 23
     loopIteration = 0
     NoPeak = 0
+    scaleFactor = scaleFactor-scaleStep*11
     
     # ----------------------First scale minimization---------------------------
     Flag = 0
     while True: # Loop for the range shifting
         
+        print("------")
+        # print(Flag, scaleFactor, scaleStep, scaleStepEnd)
+        # scaleArray = np.zeros(numSample)
         scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+        # print(scaleArray)
         chi2Array = np.zeros(numSample)
         
         for i in range(len(scaleArray)):
             
             # ------------------Kaplow method for scale--------------------
-
+            Q = Qorg
             Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
-            alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, \
-                Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], \
+            alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
+                Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate],
                 fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
             Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
 
-            S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, \
+            S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, 
                 variables.QmaxIntegrate, variables.maxQ)
+            
             Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
-                variables.smoothingFactor, \
+                variables.smoothingFactor, 
                 variables.minQ, variables.QmaxIntegrate, variables.maxQ)
-            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf, \
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
                 dampingFunction)
-
-            i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-            r, F_r = UtilityAnalysis.calc_FFT_QiQ(Q, i_Q, variables.QmaxIntegrate)
             
-            GR = np.zeros(len(F_r))
-            Rnn = variables.rmin
-            GR[r<Rnn] = F_r[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
+            Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
+                variables.maxQ, variables.NumPoints)
             
-            Utility.plot_data(r, GR, "S_Q", "Q", "S(Q)", "S(Q)", "y")
-            
-            chi2Array[i] = simps(deltaFopt_r[r < variables.rmin]**2, r[r < variables.rmin])
-
+            chi2Array[i] = Optimization.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+                variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
+                variables.rmin, density, J_Q)
+            # print(chi2Array[i])
         
         # --------------------Range shifting selection --------------------
         
-        # if np.amax(chi2Array) > 10**8:
-        #     scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
-        # else:
-        #     scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+        if np.amax(chi2Array) > 10**8:
+            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
+        else:
+            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
         
-        # nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
-        # if nearIdx == 0:
-        #     scaleFactor -= scaleStep*10
-        #     scaleStep *= 10
-        #     NoPeak += 1
-        #     print("bug 1")
-        # if nearIdx >= numSample-2:
-        #     scaleFactor += scaleStep*10
-        #     scaleStep *= 10
-        #     NoPeak += 1
-        #     print("bug 2")
+        if nearIdx == 0:
+            scaleFactor -= scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
+        if nearIdx >= numSample-2:
+            scaleFactor += scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
 
-        # scaleStep /= 10
-        # Flag += 1
-        
-        # loopIteration += 1
+        scaleStep /= 10
+        Flag += 1
 
-        print(loopIteration, "cond ", 10*scaleStep, scaleStepEnd, NoPeak, Flag, scaleFactor+scaleStep*1.1)
-        # if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
-        if (1==1):
+        # print(Flag, scaleFactor, scaleStep, scaleStepEnd)
+        # print("------")
+        if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
+        # if (1==1):
             break
         
     # ------------------------chi2 curve fit for scale-------------------------
+    
+    print(scaleFactor)
     
     # print("finale scale array ", scaleArray)
     

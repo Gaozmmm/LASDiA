@@ -76,7 +76,6 @@ if __name__ == "__main__":
     Q, I_Q = Utility.read_file(variables.data_file)
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
     
-    
     #--------------------Preliminary calculation-------------------------------
 
     Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q,
@@ -100,7 +99,7 @@ if __name__ == "__main__":
     
     # ------------------------Starting minimization----------------------------
     
-    scaleFactor = variables.scaleFactor
+    scaleFactor = 0.45 #variables.scaleFactor
     density = variables.density
     
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
@@ -112,31 +111,21 @@ if __name__ == "__main__":
     S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, 
         variables.QmaxIntegrate, variables.maxQ)
     
-    Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
+    # Utility.plot_data(Q, S_Q, "S_Q", "Q", "S(Q)", "S(Q)", "y")
     
     Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
         variables.smoothingFactor, 
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+        dampingFunction)
     
-    Utility.plot_data(Q, Ssmooth_Q, "S_Q", "Q", "S(Q)", "S_smooth(Q)", "y")
+    Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
+        variables.maxQ, variables.NumPoints)
     
-    StdDevWave=variables.smoothingFactor * 10**(-6) * Q**3
-    smooth2 = interpolate.InterpolatedUnivariateSpline(Q, S_Q, w=StdDevWave, k=3)
-    Ssmooth_Q2 = smooth2(Q)
-    # Utility.plot_data(Q, Ssmooth_Q2, "S_Q", "Q", "S(Q)", "S_smooth(Q)2", "y")
+    chi2 = Optimization.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+        variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
+        variables.rmin, density, J_Q)
     
-    
-    # Ssmooth_Q5 = signal.savgol_filter(S_Q, 51, 3)
-    # Utility.plot_data(Q, Ssmooth_Q5, "S_Q", "Q", "S(Q)", "S_smooth(Q)5", "y")
-    
-    # SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
-        # dampingFunction)
-    
-    # Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
-        # variables.maxQ, variables.NumPoints)
-    
-    # chi2 = Optimization.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
-        # variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
-        # variables.rmin, density, J_Q)
+    print(chi2)
     
     plt.show()
