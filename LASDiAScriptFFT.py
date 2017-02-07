@@ -76,13 +76,24 @@ if __name__ == "__main__":
     Q, I_Q = Utility.read_file(variables.data_file)
     Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
     
+    Utility.plot_data(Qbkg, Ibkg_Q, "GR", "r", "G(r)", "G(r)", "y")
     #--------------------Preliminary calculation-------------------------------
 
-    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q,
-        variables.minQ, variables.maxQ)
+    # Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q,
+        # variables.minQ, variables.maxQ)
+    
+    
+    Q = np.linspace(0.0, variables.maxQ, 2048, endpoint=True)
+    interI_Q = interpolate.interp1d(Q, I_Q)
+    I_Q = interI_Q(Q)
+    
+
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
+    # Utility.write_file("./iincoh.txt", Q, Iincoh_Q)
+    # Utility.plot_data(Q, Iincoh_Q, "GR", "r", "G(r)", "G(r)", "y")
+    # print(len(Iincoh_Q))
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
@@ -97,12 +108,33 @@ if __name__ == "__main__":
         dampingFunction)
     rintra, Fintra_r = UtilityAnalysis.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
     
+    # ---------------------Geometrical correction------------------------------
+    
+    two_theta = UtilityAnalysis.Qto2theta(Q)
+    
+    # abs_corr_factor = Geometry.calc_absorption_correction(variables.abs_length,
+        # two_theta, variables.dac_thickness, 0)
+    
+    # print(len(Q))
+    # print(np.amin(Q))
+    # print(np.amax(Q))
+    abs_corr_factor = Geometry.absorptionIgor(Q)
+    
+    # Utility.write_file("./abs_corr_factor.txt", Q, A)
+    # Utility.plot_data(Q, A, "GR", "r", "G(r)", "G(r)", "y")
+    
+    I_Q = I_Q /(abs_corr_factor)
+    Ibkg_Q  = Ibkg_Q / (abs_corr_factor)
+    
+    
     # ------------------------Starting minimization----------------------------
     
     scaleFactor = 0.45 #variables.scaleFactor
     density = variables.density
     
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+    Utility.plot_data(Q, Isample_Q, "GR", "r", "G(r)", "G(r)", "y")
+    
     alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
         Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate],
         fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
@@ -126,6 +158,6 @@ if __name__ == "__main__":
         variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
         variables.rmin, density, J_Q)
     
-    print(chi2)
+    # print(chi2)
     
     plt.show()

@@ -601,7 +601,7 @@ def setArray(minVal, maxVal, stepVal):
     return arrayVal
 
 
-def write_file(path, xVal, yVal, xName, yName):
+def write_file(path, xVal, yVal):
     """Function to write on file.
 
     Parameters
@@ -612,10 +612,6 @@ def write_file(path, xVal, yVal, xName, yName):
             abscissa values
     yVal  : numpy array
             ordinate values
-    xName : string
-            abscissa name
-    yName : string
-            ordinate name
     """
 
     dir = os.path.dirname(path)
