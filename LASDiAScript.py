@@ -74,8 +74,8 @@ if __name__ == "__main__":
 
     #--------------------Preliminary calculation-------------------------------
     
-    Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
-        variables.minQ, variables.maxQ)
+    # Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q, \
+        # variables.minQ, variables.maxQ)
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
@@ -93,7 +93,17 @@ if __name__ == "__main__":
         dampingFunction)
     rintra, Fintra_r = UtilityAnalysis.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
     
+    _, dampingFunction = UtilityAnalysis.rebinning(Q, dampingFunction, 0.0, 
+        variables.maxQ, variables.NumPoints)
+    
     Qorg = Q
+    
+    # ---------------------Geometrical correction------------------------------
+    
+    abs_corr_factor = IgorFunctions.absorptionIgor(Q)
+    I_Q = I_Q /(abs_corr_factor)
+    Ibkg_Q  = Ibkg_Q / (abs_corr_factor)
+    
     # ------------------------Starting minimization----------------------------
 
     scaleFactor = variables.scaleFactor
@@ -135,13 +145,15 @@ if __name__ == "__main__":
             Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
                 variables.smoothingFactor, 
                 variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+            Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0, 
+                variables.maxQ, variables.NumPoints)
             SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
                 dampingFunction)
             
             Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
                 variables.maxQ, variables.NumPoints)
             
-            chi2Array[i] = Optimization.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+            chi2Array[i] = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
                 variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
                 variables.rmin, density, J_Q)
             # print(chi2Array[i])
@@ -169,8 +181,8 @@ if __name__ == "__main__":
 
         # print(Flag, scaleFactor, scaleStep, scaleStepEnd)
         # print("------")
-        if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
-        # if (1==1):
+        # if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
+        if (1==1):
             break
         
     # ------------------------chi2 curve fit for scale-------------------------

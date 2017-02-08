@@ -376,6 +376,8 @@ def read_file(path):
         header15 = file.readline()
         header16 = file.readline()
         header17 = file.readline()
+    else:
+        header1 = file.readline()
 
 
     # Read all the file in one time and close the file:

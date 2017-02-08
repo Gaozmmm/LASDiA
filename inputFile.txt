@@ -24,8 +24,8 @@
 # The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-data_file = "../data/cea_files/ar/ht2_034t++_rem.chi"
-bkg_file = "../data/cea_files/ar/ht2_036t++_rem.chi"
+data_file = "../data/cea_files/ar/HT2_034BBin.txt"
+bkg_file = "../data/cea_files/ar/HT2_036BBin.txt"
 # data_file = "../data/cea_files/CO2/WO2_007T++.chi"
 # bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
 

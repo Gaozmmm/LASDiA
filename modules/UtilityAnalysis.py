@@ -336,17 +336,16 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smoothingFactor, minQ, QmaxIntegrate, maxQ):
     
     # smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)],
         # S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
-    
     # Ssmooth_Q5 = signal.savgol_filter(S_Q, 51, 3)
-    
     # StdDevWave=smoothingFactor * 10**(-6) * Q**3
+    
     smooth = interpolate.UnivariateSpline(Q, S_Q, k=3, s=smoothingFactor)
     S_Qsmoothed = smooth(Q)
     
     S_Qsmoothed[Q<minQ] = 0
     S_Qsmoothed[(Q>QmaxIntegrate)] = Sinf
     
-    return S_Qsmoothed
+    return (S_Qsmoothed)
 
 
 def calc_dampingFunction(Q, dampingFactor, QmaxIntegrate, typeFunction):
