@@ -40,6 +40,9 @@ otherwise it is symbolized with just its name.
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
+from scipy.integrate import simps
+from scipy import fftpack
+import math
 import matplotlib.pyplot as plt
 
 # from modules import Formalism
@@ -53,24 +56,32 @@ from modules import Utility
 from modules import UtilityAnalysis
 
 
-def calc_JQIgor(Iincoh_Q, fe_Q):
+def calc_JQ(Iincoh_Q, fe_Q):
     """Function to calculate J(Q) (eq. 35)
 
     arguments:
     Iincoh_Q: incoherent scattering intensity - array
-    Ztot: total Z number - number
     fe_Q: effective electric form factor - array
 
     returns:
     J_Q: J(Q) - array
     """
 
-    J_Q = Iincoh_Q/(fe_Q**2) # Igor formula
+    J_Q = Iincoh_Q/fe_Q**2
 
     return J_Q
 
 
-def calc_alphaIgor(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
+def calc_Subt(I_Q, Ibkg_Q, scaleFactor, absCorrFactor):
+    """
+    """
+    
+    Subt = (I_Q - scaleFactor*Ibkg_Q)/absCorrFactor
+    
+    return Subt
+
+
+def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     """Function to calculate the normalization factor alpha (eq. 34)
 
     arguments:
@@ -81,20 +92,19 @@ def calc_alphaIgor(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0, index):
     fe_Q: effective electric form factor - array
     Ztot: total Z number - number
     rho0: average atomic density - number
-    index: array index of element in the calculation range - array
 
     returns:
     alpha: normalization factor - number
     """
 
-    Integral1 = simps(Q[index]**2*(J_Q[index] + Sinf*Ztot**2), Q[index])
-    Integral2 = simps(Isample_Q[index]*Q[index]**2/fe_Q[index]**2,Q[index])
+    Integral1 = simps(Q**2*(J_Q + Sinf*Ztot**2), Q)
+    Integral2 = simps(Isample_Q*Q**2/fe_Q**2, Q)
     alpha = ((-2*np.pi**2*Ztot**2*rho0) + Integral1) / Integral2
 
     return alpha
 
 
-def calc_SQIgor(Isample_Q, J_Q, Ztot, fe_Q, Sinf, Q, alpha, min_index, max_index, calculation_index): # Igor formula
+def calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, QmaxIntegrate):
     """Function to calculate the structure factor S(Q) (eq. 18) with Igor formula
 
     arguments:
@@ -109,20 +119,14 @@ def calc_SQIgor(Isample_Q, J_Q, Ztot, fe_Q, Sinf, Q, alpha, min_index, max_index
     returns:
     S_Q: structure factor - array
     """
-
-    S_Q = (alpha * Isample_Q[calculation_index]/fe_Q[calculation_index]**2 - J_Q[calculation_index]) / Ztot**2
-
-    S_Qmin = np.zeros(Q[min_index].size)
-    S_Q = np.concatenate([S_Qmin, S_Q])
-
-    S_Qmax = np.zeros(Q[max_index].size)
-    S_Qmax.fill(Sinf)
-    S_Q = np.concatenate([S_Q, S_Qmax])
-
+    
+    S_Q = (alpha*Subt/fe_Q**2-J_Q)/Ztot**2
+    S_Q[Q>QmaxIntegrate] = Sinf
+    
     return S_Q
 
 
-def absorptionIgor(Q):
+def absorption(Q):
     """Function to calculate the absorption correction with Igor formula.
     """
     xD=0.0
@@ -240,17 +244,90 @@ def muFunc(y0,x0,A1,t1,A2,t2):
     return mu
 
 
+def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
+    """Function to calculate the FFT following the Igor Pro procedure.
+    I do not agree with this procedure, but I follow it to compare my results
+    with Igor Pro's ones.
+    
+    Parameters
+    ----------
+    Q             : numpy array
+                    momentum transfer (nm^-1)
+    i_Q           : numpy array
+                    i(Q)
+    
+    QmaxIntegrate : float
+                    maximum Q value for the integrations
+    
+    Returns
+    -------
+    r             : numpy array
+                    atomic distance (nm)
+    F_r           : numpy array
+                    F(r)
+    """
+
+    pMax, elem = UtilityAnalysis.find_nearest(Q, QmaxIntegrate)
+    NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
+    DelR = 2*np.pi/(np.mean(np.diff(Q))*NumPoints)
+    # Qi_Q = Utility.resize_zero(Q[Q<=QmaxIntegrate]*i_Q[Q<=QmaxIntegrate], NumPoints)
+    Qi_Q = Utility.resize_zero(Qi_Q[Q<=QmaxIntegrate], NumPoints)
+    Qi_Q[pMax+1:] = 0.0
+    Q = np.arange(np.amin(Q), np.amin(Q)+np.mean(np.diff(Q))*NumPoints, np.mean(np.diff(Q)))
+    r = MainFunctions.calc_r(Q)
+    F_r = fftpack.fft(Qi_Q)
+    F_r = F_r[np.where(r>=0.0)]
+    F_r = -np.imag(F_r)*np.mean(np.diff(Q))*2/np.pi
+    r = np.arange(0.0, 0.0+DelR*len(F_r), DelR)
+    
+    return (r, F_r)
+
+
+def calc_IFFT_Fr(r, F_r):
+    """Function to calculate the FFT following the IGOR procedure.
+    I do not agree with this procedure, but I follow it to compare my results
+    with Igor Pro's ones.
+    
+    Parameters
+    ----------
+    r      : numpy array
+             atomic distance (nm)
+    F_r    : numpy array
+             F(r)
+    
+    Returns
+    -------
+    Q      : numpy array
+             momentum transfer (nm^-1)
+    Qi_Q   : numpy array
+             Qi(Q)
+    """
+    
+    NumPoints = 2**math.ceil(math.log(len(F_r)-1)/math.log(2))
+    F_r = Utility.resize_zero(F_r, NumPoints)
+    Q = np.linspace(0.0, 109, 550)
+    DelQ = 2*np.pi/(np.mean(np.diff(r))*NumPoints)
+    meanDeltar = np.mean(np.diff(r))
+    Q1 = fftpack.fftfreq(r.size, meanDeltar)
+    Qi_Q = fftpack.fft(F_r)
+    Qi_Q = Qi_Q[np.where(Q1>=0.0)]
+    Qi_Q = -np.imag(Qi_Q)*meanDeltar
+    Q1 = np.arange(0.0, 0.0+DelQ*len(Qi_Q), DelQ)
+    idxArray = np.zeros(550, dtype=np.int)
+    for i in range(len(Q)):
+        idxArray[i], _ = UtilityAnalysis.find_nearest(Q1, Q[i])
+    Qi_Q = Qi_Q[idxArray]
+    
+    return (Q, Qi_Q)
+
+
 def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
-    iterations, rmin, density, J_Q):
+    iterations, rmin, density, J_Q, Ztot):
     """Equivalent of Igor function
     """
     
     Qi_Q = Q*MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-    # Qi_Q = Q*i_Q
-    r, GR = UtilityAnalysis.calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate)
-    Utility.write_file("./GR.txt", r, GR)
-    Utility.plot_data(r, GR, "GR", "r", "GR", "GR", "y")
-    plt.show()
+    r, GR = calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate)
     
     _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
         np.amax(Fintra_r), len(GR))
@@ -265,17 +342,21 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
     Rnn = rmin
     DelG[r<Rnn] = GR1[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
     
+    GRIdealSmallR = Fintra_r-4*np.pi*r*density
+    
     for i in range(iterations):
-        Q1, QiQCorr = UtilityAnalysis.calc_IFFT_Fr(r, DelG)
+        Q1, QiQCorr = calc_IFFT_Fr(r, DelG)
         mask = np.where((Q1>0.0) & (Q1<QmaxIntegrate))
         QiQ1[mask] = QiQ1[mask] - (QiQ1[mask] / 
-            (Q1[mask] *(Sinf + J_Q[:len(Q1[mask])])) + 1) * QiQCorr[mask]
-        r, GR1 = UtilityAnalysis.calc_FFT_QiQ(Q1, QiQ1, QmaxIntegrate)
+            (Q1[mask] *(Sinf + J_Q[:len(Q1[mask])]/Ztot**2)) + 1) * QiQCorr[mask]
+        
+        r, GR1 = calc_FFT_QiQ(Q1, QiQ1, QmaxIntegrate)
         
         DelG = np.zeros(len(GR1))
-        DelG[r<Rnn] = GR1[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
+        DelG[r<Rnn] = GR1[r<Rnn]-GRIdealSmallR[r<Rnn]
         
-        Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>0.95*Rnn]))[0][0]]
+        _, rmin = UtilityAnalysis.find_nearest(r, 0.95*Rnn)
+        Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>=rmin]))[0][0]]
 
     # SQCorr = np.zeros(len(QiQ1))
     # SQCorr[1:] = QiQ1[1:]/Q1[1:]+Sinf
@@ -283,5 +364,5 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
     DTemp = DelG
     DTemp = DTemp**2
     chi2 = np.mean(DTemp)
-    
+
     return chi2

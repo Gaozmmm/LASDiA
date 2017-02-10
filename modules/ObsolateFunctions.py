@@ -211,6 +211,51 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, aff_path):
     return Sinf
 
 
+def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
+    """Function to calculate Sinf (eq. 19).
+    
+    Parameters
+    ----------
+    elementList       : dictionary("element": multiplicity)
+                        chemical elements of the sample with their multiplicity
+                        element      : string
+                                       chemical element
+                        multiplicity : int
+                                       chemical element multiplicity
+    fe_Q              : numpy array
+                        effective electric form factor
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    Ztot              : int
+                        total Z number
+    elementParameters : dictionary("element": parameters)
+                        chemical elements of the sample with their parameters
+                        element    : string
+                                     chemical element
+                        parameters : list
+                                     list of the parameters
+                                     (Z, a1, b1, a2, b2, a3, b3, a4, b4, c, M, K, L)
+    
+    Returns
+    -------
+    Sinf              : float
+                        value of S(Q) for Q->inf
+    """
+    
+    sum_Kp2 = 0
+    sum_Kp2_Q = np.zeros(Q.size)
+    
+    for element, multiplicity in elementList.items():
+        Kp, Kp_Q = calc_Kp(fe_Q, element, Q, elementParameters)
+        sum_Kp2 += multiplicity * Kp**2
+        sum_Kp2_Q += multiplicity * Kp_Q**2
+    
+    Sinf = sum_Kp2 / Ztot**2
+    Sinf_Q = sum_Kp2_Q / Ztot**2
+    
+    return (Sinf, Sinf_Q)
+
+
 def calc_Iincoh(elementList, Q, incoh_path, aff_path):
     """Function to calculate the incoherent scattering intensity Iincoh(Q).
     The incoherent scattering intensity is calculated with the formula from the article:

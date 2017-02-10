@@ -38,6 +38,7 @@ import math
 from scipy import fftpack
 from scipy import interpolate
 from scipy.integrate import simps
+from scipy import signal
 from scipy.constants import *
 
 from modules import MainFunctions
@@ -336,14 +337,14 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smoothingFactor, minQ, QmaxIntegrate, maxQ):
     
     # smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)],
         # S_Q[(Q>minQ) & (Q<=QmaxIntegrate)], k=3, s=smooth_factor)
-    # Ssmooth_Q5 = signal.savgol_filter(S_Q, 51, 3)
+    # S_Qsmoothed = signal.savgol_filter(S_Q, 51, 3)
     # StdDevWave=smoothingFactor * 10**(-6) * Q**3
     
     smooth = interpolate.UnivariateSpline(Q, S_Q, k=3, s=smoothingFactor)
     S_Qsmoothed = smooth(Q)
     
     S_Qsmoothed[Q<minQ] = 0
-    S_Qsmoothed[(Q>QmaxIntegrate)] = Sinf
+    S_Qsmoothed[(Q>=QmaxIntegrate)] = Sinf
     
     return (S_Qsmoothed)
 
@@ -538,80 +539,3 @@ def conv_atnm3_to_gcm3(val, atomMass):
     val_conv = val*atomMass/N_A*10**21
     
     return val_conv
-
-
-def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
-    """Function to calculate the FFT following the Igor Pro procedure.
-    I do not agree with this procedure, but I follow it to compare my results
-    with Igor Pro's ones.
-    
-    Parameters
-    ----------
-    Q             : numpy array
-                    momentum transfer (nm^-1)
-    i_Q           : numpy array
-                    i(Q)
-    
-    QmaxIntegrate : float
-                    maximum Q value for the integrations
-    
-    Returns
-    -------
-    r             : numpy array
-                    atomic distance (nm)
-    F_r           : numpy array
-                    F(r)
-    """
-
-    pMax, elem = UtilityAnalysis.find_nearest(Q, QmaxIntegrate)
-    NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
-    DelR = 2*np.pi/(np.mean(np.diff(Q))*NumPoints)
-    # Qi_Q = Utility.resize_zero(Q[Q<=QmaxIntegrate]*i_Q[Q<=QmaxIntegrate], NumPoints)
-    Qi_Q = Utility.resize_zero(Qi_Q[Q<=QmaxIntegrate], NumPoints)
-    Qi_Q[pMax+1:] = 0.0
-    Q = np.arange(np.amin(Q), np.amin(Q)+np.mean(np.diff(Q))*NumPoints, np.mean(np.diff(Q)))
-    r = MainFunctions.calc_r(Q)
-    F_r = fftpack.fft(Qi_Q)
-    F_r = F_r[np.where(r>=0.0)]
-    F_r = -np.imag(F_r)*np.mean(np.diff(Q))*2/np.pi
-    r = np.arange(0.0, 0.0+DelR*len(F_r), DelR)
-    
-    return (r, F_r)
-
-
-def calc_IFFT_Fr(r, F_r):
-    """Function to calculate the FFT following the IGOR procedure.
-    I do not agree with this procedure, but I follow it to compare my results
-    with Igor Pro's ones.
-    
-    Parameters
-    ----------
-    r      : numpy array
-             atomic distance (nm)
-    F_r    : numpy array
-             F(r)
-    
-    Returns
-    -------
-    Q      : numpy array
-             momentum transfer (nm^-1)
-    Qi_Q   : numpy array
-             Qi(Q)
-    """
-    
-    NumPoints = 2**math.ceil(math.log(len(F_r)-1)/math.log(2))
-    F_r = Utility.resize_zero(F_r, NumPoints)
-    Q = np.linspace(0.0, 109, 550)
-    DelQ = 2*np.pi/(np.mean(np.diff(r))*NumPoints)
-    meanDeltar = np.mean(np.diff(r))
-    Q1 = fftpack.fftfreq(r.size, meanDeltar)
-    Qi_Q = fftpack.fft(F_r)
-    Qi_Q = Qi_Q[np.where(Q1>=0.0)]
-    Qi_Q = -np.imag(Qi_Q)*meanDeltar
-    Q1 = np.arange(0.0, 0.0+DelQ*len(Qi_Q), DelQ)
-    idxArray = np.zeros(550, dtype=np.int)
-    for i in range(len(Q)):
-        idxArray[i], _ = UtilityAnalysis.find_nearest(Q1, Q[i])
-    Qi_Q = Qi_Q[idxArray]
-    
-    return (Q, Qi_Q)

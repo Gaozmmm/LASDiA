@@ -90,8 +90,8 @@ def calc_iintra(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element, x, y, 
     for ielem in range(len(element)):
         for jelem in range(len(element)):
             if ielem != jelem:
-                Kpi, Kp_Qi = MainFunctions.calc_Kp(fe_Q, element[ielem], Q, elementParameters)
-                Kpj, Kp_Qj = MainFunctions.calc_Kp(fe_Q, element[jelem], Q, elementParameters)
+                Kpi = MainFunctions.calc_Kp(fe_Q, element[ielem], Q, elementParameters)
+                Kpj = MainFunctions.calc_Kp(fe_Q, element[jelem], Q, elementParameters)
                 KK = Kpi * Kpj
                 d = Utility.calc_distMol(x[ielem], y[ielem], z[ielem], x[jelem], y[jelem], z[jelem])
                 if d != 0.0:

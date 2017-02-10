@@ -79,8 +79,8 @@ if __name__ == "__main__":
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
-    J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+    J_Q = IgorFunctions.calc_JQ(Iincoh_Q, fe_Q)
+    Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
     dampingFunction = UtilityAnalysis.calc_dampingFunction(Q, variables.dampingFactor,
         variables.QmaxIntegrate, variables.typeFunction)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         variables.maxQ, elementList, element, x, y, z, elementParameters)
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
         dampingFunction)
-    rintra, Fintra_r = UtilityAnalysis.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
+    rintra, Fintra_r = IgorFunctions.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
     
     _, dampingFunction = UtilityAnalysis.rebinning(Q, dampingFunction, 0.0, 
         variables.maxQ, variables.NumPoints)
@@ -100,9 +100,9 @@ if __name__ == "__main__":
     
     # ---------------------Geometrical correction------------------------------
     
-    abs_corr_factor = IgorFunctions.absorptionIgor(Q)
-    I_Q = I_Q /(abs_corr_factor)
-    Ibkg_Q  = Ibkg_Q / (abs_corr_factor)
+    absCorrFactor = IgorFunctions.absorption(Q)
+    # I_Q = I_Q /(absCorrFactor)
+    # Ibkg_Q  = Ibkg_Q / (absCorrFactor)
     
     # ------------------------Starting minimization----------------------------
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     Flag = 0
     while True: # Loop for the range shifting
         
-        print("------")
+        # print("------")
         # print(Flag, scaleFactor, scaleStep, scaleStepEnd)
         # scaleArray = np.zeros(numSample)
         scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
@@ -133,15 +133,14 @@ if __name__ == "__main__":
             
             # ------------------Kaplow method for scale--------------------
             Q = Qorg
-            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
-            alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
-                Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate],
+            Subt = IgorFunctions.calc_Subt(I_Q, Ibkg_Q, scaleArray[i], absCorrFactor)
+            alpha = IgorFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
+                Q[Q<=variables.QmaxIntegrate], Subt[Q<=variables.QmaxIntegrate],
                 fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
-            Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
-
-            S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, 
-                variables.QmaxIntegrate, variables.maxQ)
             
+            S_Q = IgorFunctions.calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, 
+                variables.QmaxIntegrate)
+                
             Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
                 variables.smoothingFactor, 
                 variables.minQ, variables.QmaxIntegrate, variables.maxQ)
@@ -155,15 +154,19 @@ if __name__ == "__main__":
             
             chi2Array[i] = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
                 variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
-                variables.rmin, density, J_Q)
+                variables.rmin, density, J_Q, Ztot)
             # print(chi2Array[i])
         
         # --------------------Range shifting selection --------------------
         
+        # Utility.write_file("./chi2Array"+str(Flag)+".txt", scaleArray, chi2Array)
+        
         if np.amax(chi2Array) > 10**8:
-            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
+            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] # - scaleStep*1.1
         else:
-            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+            scaleFactor = scaleArray[np.argmin(chi2Array)] #- scaleStep*1.1
+        
+        print(Flag, scaleFactor, scaleStep, scaleStepEnd)
         
         nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
@@ -179,10 +182,10 @@ if __name__ == "__main__":
         scaleStep /= 10
         Flag += 1
 
-        # print(Flag, scaleFactor, scaleStep, scaleStepEnd)
+        
         # print("------")
-        # if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
-        if (1==1):
+        #if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
+        if (Flag==2):
             break
         
     # ------------------------chi2 curve fit for scale-------------------------

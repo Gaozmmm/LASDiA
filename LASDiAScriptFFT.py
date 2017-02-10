@@ -80,8 +80,8 @@ if __name__ == "__main__":
 
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
-    J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
-    Sinf, Sinf_Q = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
+    J_Q = IgorFunctions.calc_JQ(Iincoh_Q, fe_Q)
+    Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
     
     dampingFunction = UtilityAnalysis.calc_dampingFunction(Q, variables.dampingFactor,
         variables.QmaxIntegrate, variables.typeFunction)
@@ -92,32 +92,29 @@ if __name__ == "__main__":
         variables.maxQ, elementList, element, x, y, z, elementParameters)
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
         dampingFunction)
-    rintra, Fintra_r = UtilityAnalysis.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
+    rintra, Fintra_r = IgorFunctions.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
     
     _, dampingFunction = UtilityAnalysis.rebinning(Q, dampingFunction, 0.0, 
         variables.maxQ, variables.NumPoints)
     
     # ---------------------Geometrical correction------------------------------
     
-    abs_corr_factor = IgorFunctions.absorptionIgor(Q)
-    I_Q = I_Q /(abs_corr_factor)
-    Ibkg_Q  = Ibkg_Q / (abs_corr_factor)
+    absCorrFactor = IgorFunctions.absorption(Q)
+    # I_Q = I_Q /(absCorrFactor)
+    # Ibkg_Q  = Ibkg_Q / (absCorrFactor)
     
     # ------------------------Starting minimization----------------------------
     
     scaleFactor = 0.45 #variables.scaleFactor
     density = variables.density
     
-    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)    
-    alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
-        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate],
+    Subt = IgorFunctions.calc_Subt(I_Q, Ibkg_Q, scaleFactor, absCorrFactor)
+    alpha = IgorFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
+        Q[Q<=variables.QmaxIntegrate], Subt[Q<=variables.QmaxIntegrate],
         fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
-    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
-
-    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, 
-        variables.QmaxIntegrate, variables.maxQ)
-
-    Utility.plot_data(Q, S_Q, "S_Q", "Q", "S_Q", "S_Q", "y")
+    
+    S_Q = IgorFunctions.calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, 
+        variables.QmaxIntegrate)
     
     Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
         variables.smoothingFactor, 
@@ -126,15 +123,16 @@ if __name__ == "__main__":
     Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0, 
         variables.maxQ, variables.NumPoints)
     
-    Utility.plot_data(Q, Ssmooth_Q, "S_Q", "Q", "S_Q", "Ssmooth_Q", "y")
+    # Q, Ssmooth_Q = Utility.read_file("../data/cea_files/ar/HT2_034SofQ_SS.txt")
+    Utility.plot_data(Q, Ssmooth_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
     
     SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
         dampingFunction)
-
+        
     chi2 = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
         variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
-        variables.rmin, density, J_Q)
+        variables.rmin, density, J_Q, Ztot)
     
-    # print(chi2)
+    print(chi2)
     
     plt.show()

@@ -249,7 +249,7 @@ def calc_Kp(fe_Q, element, Q, elementParameters):
     # average effective atomic number
     Kp = np.mean(Kp_Q)
     
-    return (Kp, Kp_Q)
+    return Kp
 
 
 def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
@@ -284,17 +284,13 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     """
     
     sum_Kp2 = 0
-    sum_Kp2_Q = np.zeros(Q.size)
-    
+
     for element, multiplicity in elementList.items():
-        Kp, Kp_Q = calc_Kp(fe_Q, element, Q, elementParameters)
-        sum_Kp2 += multiplicity * Kp**2
-        sum_Kp2_Q += multiplicity * Kp_Q**2
-    
+        sum_Kp2 += multiplicity * calc_Kp(fe_Q, element, Q, elementParameters)**2
+
     Sinf = sum_Kp2 / Ztot**2
-    Sinf_Q = sum_Kp2_Q / Ztot**2
-    
-    return (Sinf, Sinf_Q)
+
+    return Sinf
 
 
 def calc_IsampleQ(I_Q, scale_factor, Ibkg_Q):
