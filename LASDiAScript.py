@@ -162,11 +162,11 @@ if __name__ == "__main__":
         # Utility.write_file("./chi2Array"+str(Flag)+".txt", scaleArray, chi2Array)
         
         if np.amax(chi2Array) > 10**8:
-            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] # - scaleStep*1.1
+            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
         else:
-            scaleFactor = scaleArray[np.argmin(chi2Array)] #- scaleStep*1.1
+            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
         
-        print(Flag, scaleFactor, scaleStep, scaleStepEnd)
+        print(Flag, scaleFactor, scaleStep, scaleStepEnd, scaleArray[np.argmin(chi2Array)], np.min(chi2Array))
         
         nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
