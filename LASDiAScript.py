@@ -159,7 +159,7 @@ if __name__ == "__main__":
         
         # --------------------Range shifting selection --------------------
         
-        # Utility.write_file("./chi2Array"+str(Flag)+".txt", scaleArray, chi2Array)
+        #Utility.write_file("./chi2Array"+str(Flag)+".txt", scaleArray, chi2Array)
         
         if np.amax(chi2Array) > 10**8:
             scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
@@ -171,10 +171,12 @@ if __name__ == "__main__":
         nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
         if nearIdx == 0:
+            print("out1")
             scaleFactor -= scaleStep*10
             scaleStep *= 10
             NoPeak += 1
         if nearIdx >= numSample-2:
+            print("out2")
             scaleFactor += scaleStep*10
             scaleStep *= 10
             NoPeak += 1
@@ -183,9 +185,9 @@ if __name__ == "__main__":
         Flag += 1
 
         
-        # print("------")
+        print("------", scaleFactor)
         #if (10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0)):
-        if (Flag==2):
+        if (Flag==1):
             break
         
     # ------------------------chi2 curve fit for scale-------------------------
