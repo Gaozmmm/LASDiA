@@ -124,7 +124,7 @@ if __name__ == "__main__":
         variables.maxQ, variables.NumPoints)
     
     # Q, Ssmooth_Q = Utility.read_file("../data/cea_files/ar/HT2_034SofQ_SS.txt")
-    Utility.plot_data(Q, Ssmooth_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
+    # Utility.plot_data(Q, Ssmooth_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
     
     SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
         dampingFunction)
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     chi2 = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
         variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
         variables.rmin, density, J_Q, Ztot)
-    
+
     print(chi2)
     
     plt.show()

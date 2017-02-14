@@ -302,7 +302,7 @@ def calc_IFFT_Fr(r, F_r):
     Qi_Q   : numpy array
              Qi(Q)
     """
-    
+    # Utility.write_file("./F_r.txt", r, F_r)
     NumPoints = 2**math.ceil(math.log(len(F_r)-1)/math.log(2))
     F_r = Utility.resize_zero(F_r, NumPoints)
     Q = np.linspace(0.0, 109, 550)
@@ -312,7 +312,11 @@ def calc_IFFT_Fr(r, F_r):
     Qi_Q = fftpack.fft(F_r)
     Qi_Q = Qi_Q[np.where(Q1>=0.0)]
     Qi_Q = -np.imag(Qi_Q)*meanDeltar
+    # print(meanDeltar)
     Q1 = np.arange(0.0, 0.0+DelQ*len(Qi_Q), DelQ)
+    # print(len(Q1), len(Qi_Q))
+    # Utility.write_file("./Qi_Q.txt", Q1, Qi_Q)
+    
     idxArray = np.zeros(550, dtype=np.int)
     for i in range(len(Q)):
         idxArray[i], _ = UtilityAnalysis.find_nearest(Q1, Q[i])
@@ -344,16 +348,21 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
     
     GRIdealSmallR = Fintra_r-4*np.pi*r*density
     
-    for i in range(iterations):
+    for i in range(1):
         Q1, QiQCorr = calc_IFFT_Fr(r, DelG)
+        # print(len(J_Q))
+        # print(len(J_Q))
         mask = np.where((Q1>0.0) & (Q1<QmaxIntegrate))
         QiQ1[mask] = QiQ1[mask] - (QiQ1[mask] / 
             (Q1[mask] *(Sinf + J_Q[:len(Q1[mask])]/Ztot**2)) + 1) * QiQCorr[mask]
         
         r, GR1 = calc_FFT_QiQ(Q1, QiQ1, QmaxIntegrate)
         
+        # Utility.write_file("./QiQCorr"+str(i)+".txt", Q1, QiQCorr)
+        
         DelG = np.zeros(len(GR1))
         DelG[r<Rnn] = GR1[r<Rnn]-GRIdealSmallR[r<Rnn]
+        
         
         _, rmin = UtilityAnalysis.find_nearest(r, 0.95*Rnn)
         Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>=rmin]))[0][0]]
@@ -362,7 +371,190 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
     # SQCorr[1:] = QiQ1[1:]/Q1[1:]+Sinf
     
     DTemp = DelG
+    Utility.write_file("./DTEmp.txt", r, DTemp)
     DTemp = DTemp**2
     chi2 = np.mean(DTemp)
 
     return chi2
+
+
+def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
+    QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
+    dampingFunction, rintra, Fintra_r, iterations):
+    """
+    """
+    
+    Flag = 0
+    NoPeak = 0
+    scaleStep = 0.05
+    scaleStepEnd = 0.00006
+    numSample = 23
+    scaleFactor = scaleFactor-scaleStep*11
+    Qorg = Q
+    
+    while True: # Loop for the range shifting
+        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+        chi2Array = np.zeros(numSample)
+        
+        for i in range(len(scaleArray)):
+            
+            # ------------------Kaplow method for scale--------------------
+            Q = Qorg
+            Subt = calc_Subt(I_Q, Ibkg_Q, scaleArray[i], absCorrFactor)
+            alpha = calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
+                Q[Q<=QmaxIntegrate], Subt[Q<=QmaxIntegrate],
+                fe_Q[Q<=QmaxIntegrate], Ztot, density)
+            
+            S_Q = calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, 
+                QmaxIntegrate)
+                
+            Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                smoothingFactor, 
+                minQ, QmaxIntegrate, maxQ)
+            Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0, 
+                maxQ, NumPoints)
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+                dampingFunction)
+            
+            Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
+                maxQ, NumPoints)
+            
+            chi2Array[i] = FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+                QmaxIntegrate, rintra, Fintra_r, iterations, 
+                rmin, density, J_Q, Ztot)
+        
+        # --------------------Range shifting selection --------------------
+        
+        if np.amax(chi2Array) > 10**8:
+            scaleFactor = scaleArray[np.argmin(chi2Array[0:np.argmax(chi2Array)])] - scaleStep*1.1
+        else:
+            scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
+        
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+        
+        if nearIdx == 0:
+            scaleFactor -= scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
+        if nearIdx >= numSample-2:
+            scaleFactor += scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
+
+        scaleStep /= 10
+        Flag += 1
+        print(Flag)
+        if ((10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0))):
+            break
+        
+    # ------------------------chi2 curve fit for scale-------------------------
+    
+    if scaleFactor < 0:
+        print("Scale factor < 0")
+        # break
+    else:
+        left = scaleArray[0]
+        right = scaleArray[-1]
+        coeffs = np.polyfit(scaleArray, chi2Array, 3)
+        if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
+            scaleFactor = (left+right)/2
+        else:
+            x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
+                scaleFactor = left + np.diff(scaleArray)[0]*x1
+            else:
+                scaleFactor = left + np.diff(scaleArray)[0]*x2
+    
+    print("final scale factor", scaleFactor)
+    return scaleFactor
+
+
+def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
+    QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
+    dampingFunction, rintra, Fintra_r, iterations):
+    """
+    """
+    
+    Flag = 0
+    NoPeak = 0
+    densityStep = density/50
+    densityStepEnd = density/250
+    numSample = 23
+    density = density-densityStep*11
+    Qorg = Q
+    
+    while True: # Loop for the range shifting
+        densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+        chi2Array = np.zeros(numSample)
+        
+        for i in range(len(densityArray)):
+            
+            # ------------------Kaplow method for scale--------------------
+            Q = Qorg
+            Subt = calc_Subt(I_Q, Ibkg_Q, scaleFactor, absCorrFactor)
+            alpha = calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
+                Q[Q<=QmaxIntegrate], Subt[Q<=QmaxIntegrate],
+                fe_Q[Q<=QmaxIntegrate], Ztot, densityArray[i])
+            
+            S_Q = calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, 
+                QmaxIntegrate)
+                
+            Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                smoothingFactor, 
+                minQ, QmaxIntegrate, maxQ)
+            Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0, 
+                maxQ, NumPoints)
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+                dampingFunction)
+            
+            Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
+                maxQ, NumPoints)
+            
+            chi2Array[i] = FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+                QmaxIntegrate, rintra, Fintra_r, iterations, 
+                rmin, densityArray[i], J_Q, Ztot)
+        
+        # --------------------Range shifting selection --------------------
+
+        density = densityArray[np.argmin(chi2Array)] - densityStep*1.1
+        
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
+        
+        if nearIdx == 0:
+            density -= densityStep*10
+            densityStep *= 10
+            NoPeak += 1
+        if nearIdx >= numSample-2:
+            density += densityStep*10
+            densityStep *= 10
+            NoPeak += 1
+
+        densityStep /= 10
+        
+        Flag += 1
+        print(Flag)
+        if ((10*densityStep<=densityStepEnd) and (NoPeak>=5)):
+            break
+        
+    # ------------------------chi2 curve fit for scale-------------------------
+    
+    if density < 0:
+        print("Scale factor < 0")
+        # break
+    else:
+        left = densityArray[0]
+        right = densityArray[-1]
+        coeffs = np.polyfit(densityArray, chi2Array, 3)
+        if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
+            density = (left+right)/2
+        else:
+            x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
+            if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
+                density = left + np.diff(densityArray)[0]*x1
+            else:
+                density = left + np.diff(densityArray)[0]*x2
+    
+    print("final density", density)
+    return density
