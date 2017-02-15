@@ -107,41 +107,66 @@ if __name__ == "__main__":
     
     # ----------------------First scale minimization---------------------------
     
+    scaleStep = 0.05
+    # scaleStepEnd = 0.00006
+    
     scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
         variables.maxQ, variables.minQ,
         variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.NumPoints,
-        dampingFunction, rintra, Fintra_r, variables.iterations)
+        dampingFunction, rintra, Fintra_r, variables.iterations, scaleStep)
     
     # ----------------------First density minimization-------------------------
+    
+    densityStep = gi_1/50
+    densityStepEnd = gi_1/250
     
     gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
         variables.maxQ, variables.minQ,
         variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.NumPoints,
-        dampingFunction, rintra, Fintra_r, variables.iterations)
+        dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, densityStepEnd)
+    
+    Init1 = gi
+    
+    print("gi_1, gi", gi_1, gi)
+    numLoopIteration = 0
     
     while True:
-        if np.abs(gi-gi_1) > gi/25:
+        if np.abs(gi-gi_1) > Init1/25:
             scaleStep = 0.006
-            densityStep = gi/10
+            densityStep = Init1/10
             # print(1, np.abs(density-density0), density0/25)
-        elif np.abs(gi-gi_1) > gi/75:
+        elif np.abs(gi-gi_1) > Init1/75:
             scaleStep = 0.0006
-            densityStep = gi/100
+            densityStep = Init1/100
             # print(2, np.abs(density-density0), density0/75)
         else:
             scaleStep = 0.00006
-            densityStep = gi/1000
+            densityStep = Init1/1000
             # print(3, np.abs(density-density0))
-
+        
+        scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+            variables.maxQ, variables.minQ,
+            variables.QmaxIntegrate, Ztot, gi, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+            variables.NumPoints,
+            dampingFunction, rintra, Fintra_r, variables.iterations, scaleStep)
+        
+        gi_1 = gi
+        gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+            variables.maxQ, variables.minQ,
+            variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+            variables.NumPoints,
+            dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, Init1/250)
+        Init1 = gi
+        
         numLoopIteration += 1
-        print(numLoopIteration)
-        # if (numLoopIteration == 2):
-        if (np.abs(density-density0) < density0/2500 or numLoopIteration > 30):
-            print(4, np.abs(density-density0), density0/2500)
+        print("numLoopIteration", numLoopIteration, gi, gi_1, Init1)
+        
+        if (np.abs(gi-gi_1) < np.abs(gi/2500)) or (numLoopIteration > 30):
+            # print(4, np.abs(density-density0), density0/2500)
             break
     
     
-    
+    print("final scale", scaleFactor, "final density", gi)
     plt.show()

@@ -380,13 +380,13 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
 
 def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
-    dampingFunction, rintra, Fintra_r, iterations):
+    dampingFunction, rintra, Fintra_r, iterations, scaleStep):
     """
     """
     
     Flag = 0
     NoPeak = 0
-    scaleStep = 0.05
+    # scaleStep = 0.05
     scaleStepEnd = 0.00006
     numSample = 23
     scaleFactor = scaleFactor-scaleStep*11
@@ -472,14 +472,14 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
 
 def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
-    dampingFunction, rintra, Fintra_r, iterations):
+    dampingFunction, rintra, Fintra_r, iterations, densityStep, densityStepEnd):
     """
     """
     
     Flag = 0
     NoPeak = 0
-    densityStep = density/50
-    densityStepEnd = density/250
+    # densityStep = density/50
+    # densityStepEnd = density/250
     numSample = 23
     density = density-densityStep*11
     Qorg = Q
