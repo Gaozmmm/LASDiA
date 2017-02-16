@@ -26,8 +26,8 @@
 # Path sample and bkg file
 data_file = "../data/cea_files/ar/HT2_034BBin.txt"
 bkg_file = "../data/cea_files/ar/HT2_036BBin.txt"
-# data_file = "../data/cea_files/CO2/WO2_007T++.chi"
-# bkg_file = "../data/cea_files/CO2/WO2_013T++.chi"
+# data_file = "../data/cea_files/CO2/WO2_007BBin.chi"
+# bkg_file = "../data/cea_files/CO2/WO2_013BBin.chi"
 
 # Sample composition
 molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
@@ -66,7 +66,7 @@ rmin = 0.24                                                     # The distance b
 # Scale factor and density parameters
 scaleFactor = 1                                               # Scale factor initial value
 density = 27.1793                                          # Sample density initial value
-
+# density = 29.8929                                          # Sample density initial value
 
 
 # sfLoop = "n"                                                   # flag for the loop

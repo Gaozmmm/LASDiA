@@ -34,15 +34,15 @@ otherwise it is symbolized with just its name.
 
 import matplotlib.pyplot as plt
 import numpy as np
-import math
-from scipy import fftpack
+#import math
+#from scipy import fftpack
 from scipy import interpolate
 from scipy.integrate import simps
-from scipy import signal
-from scipy.constants import *
+#from scipy import signal
+from scipy import constants
 
 from modules import MainFunctions
-from modules import Utility
+#from modules import Utility
 from modules import UtilityAnalysis
 
 
@@ -264,8 +264,8 @@ def Qto2theta(Q):
     ----------
     Q         : numpy array
                 momentum transfer (nm^-1)
-    
-    
+
+
     Returns
     -------
     two_theta : numpy array
@@ -514,7 +514,7 @@ def conv_gcm3_to_atnm3(val, atomMass):
     
     """
     
-    val_conv = val/atomMass*N_A/10**21
+    val_conv = val/atomMass*constants.N_A/10**21
     
     return val_conv
 
@@ -536,6 +536,6 @@ def conv_atnm3_to_gcm3(val, atomMass):
     
     """
     
-    val_conv = val*atomMass/N_A*10**21
+    val_conv = val*atomMass/constants.N_A*10**21
     
     return val_conv

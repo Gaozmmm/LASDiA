@@ -39,7 +39,7 @@ otherwise it is symbolized with just its name.
 
 
 import numpy as np
-from scipy.interpolate import UnivariateSpline
+#from scipy.interpolate import UnivariateSpline
 from scipy.integrate import simps
 from scipy import fftpack
 import math
@@ -72,11 +72,12 @@ def calc_JQ(Iincoh_Q, fe_Q):
     return J_Q
 
 
-def calc_Subt(I_Q, Ibkg_Q, scaleFactor, absCorrFactor):
+def calc_Subt(I_Q, Ibkg_Q, scaleFactor):
     """
     """
     
-    Subt = (I_Q - scaleFactor*Ibkg_Q)/absCorrFactor
+    # Subt = (I_Q - scaleFactor*Ibkg_Q)/absCorrFactor
+    Subt = (I_Q - scaleFactor*Ibkg_Q)
     
     return Subt
 
@@ -129,6 +130,7 @@ def calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, QmaxIntegrate):
 def absorption(Q):
     """Function to calculate the absorption correction with Igor formula.
     """
+    
     xD=0.0
     Lambda=0.03778
     eD=0.17
@@ -230,7 +232,7 @@ def absorption(Q):
         AbsRefCalc[(Q>Q1) & (Q<=QDAC)] += np.exp(-(muD*rhoD*dOI[(Q>Q1) & (Q<=QDAC)]
             +muB*rhoB*(dOF[(Q>Q1) & (Q<=QDAC)]-dOI[(Q>Q1) & (Q<=QDAC)])))
         AbsRefCalc[Q>QDAC] += np.exp(-(muD*rhoD*dOI[Q>QDAC]
-            +muB*rhoB*(dOF[Q>QDAC]-dOI[Q>QDAC])+AlphaDAC*(dOG[Q>QDAC]-dOF[Q>QDAC])))
+            +muB*rhoB*(dOF[Q>QDAC]-dOI[Q>QDAC])+alphaDAC*(dOG[Q>QDAC]-dOF[Q>QDAC])))
         AbsRefCalc[Q<QGasket]*=1
     
     return AbsRefCalc
@@ -381,7 +383,7 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
 def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
     dampingFunction, rintra, Fintra_r, iterations, scaleStep):
-    """
+    """Function for the scale factor optimization.
     """
     
     Flag = 0
@@ -400,7 +402,7 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
             
             # ------------------Kaplow method for scale--------------------
             Q = Qorg
-            Subt = calc_Subt(I_Q, Ibkg_Q, scaleArray[i], absCorrFactor)
+            Subt = calc_Subt(I_Q, Ibkg_Q, scaleArray[i])
             alpha = calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
                 Q[Q<=QmaxIntegrate], Subt[Q<=QmaxIntegrate],
                 fe_Q[Q<=QmaxIntegrate], Ztot, density)
@@ -432,18 +434,24 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
         
         nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
+        print(scaleFactor, scaleArray[np.argmin(chi2Array)])
+        
         if nearIdx == 0:
+            print("out1")
             scaleFactor -= scaleStep*10
             scaleStep *= 10
             NoPeak += 1
         if nearIdx >= numSample-2:
+            print("out2")
             scaleFactor += scaleStep*10
             scaleStep *= 10
             NoPeak += 1
 
         scaleStep /= 10
         Flag += 1
-        print(Flag)
+        print(Flag, scaleFactor)
+        Utility.plot_data(scaleArray, chi2Array, "chi2", "scale", "chi2", "chi2", "y")
+        plt.show()
         if ((10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0))):
             break
         
@@ -466,14 +474,16 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
             else:
                 scaleFactor = left + np.diff(scaleArray)[0]*x2
     
+    
     print("final scale factor", scaleFactor)
+    
     return scaleFactor
 
 
 def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
     dampingFunction, rintra, Fintra_r, iterations, densityStep, densityStepEnd):
-    """
+    """Function for the density optimization.
     """
     
     Flag = 0
@@ -492,7 +502,7 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
             
             # ------------------Kaplow method for scale--------------------
             Q = Qorg
-            Subt = calc_Subt(I_Q, Ibkg_Q, scaleFactor, absCorrFactor)
+            Subt = calc_Subt(I_Q, Ibkg_Q, scaleFactor)
             alpha = calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
                 Q[Q<=QmaxIntegrate], Subt[Q<=QmaxIntegrate],
                 fe_Q[Q<=QmaxIntegrate], Ztot, densityArray[i])
@@ -556,5 +566,7 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
             else:
                 density = left + np.diff(densityArray)[0]*x2
     
+    Utility.plot_data(densityArray, chi2Array, "chi2", "density", "chi2", "chi2", "y")
+    plt.show()
     print("final density", density)
     return density

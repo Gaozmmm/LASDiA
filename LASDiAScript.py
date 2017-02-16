@@ -34,27 +34,24 @@ otherwise it is symbolized with just its name.
 
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import six
 
-import sys
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 # from itertools import product
 # from timeit import default_timer as timer
-from scipy.integrate import simps
+#from scipy.integrate import simps
 
-from modules import Formalism
-from modules import Geometry
+#from modules import Formalism
+#from modules import Geometry
 from modules import IgorFunctions
-from modules import KaplowMethod
+#from modules import KaplowMethod
 from modules import MainFunctions
-from modules import Minimization
+#from modules import Minimization
 from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
 
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
+#from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
 
 
 if __name__ == "__main__":
@@ -99,11 +96,12 @@ if __name__ == "__main__":
     # ---------------------Geometrical correction------------------------------
     
     absCorrFactor = IgorFunctions.absorption(Q)
-    
+    I_Q = I_Q/absCorrFactor
+    Ibkg_Q = Ibkg_Q/absCorrFactor
     # ------------------------Starting minimization----------------------------
 
     scaleFactor = variables.scaleFactor
-    gi_1 = variables.density
+    density0 = variables.density # gi_1 = variables.density
     
     # ----------------------First scale minimization---------------------------
     
@@ -112,61 +110,68 @@ if __name__ == "__main__":
     
     scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
         variables.maxQ, variables.minQ,
-        variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+        # variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+        variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.NumPoints,
         dampingFunction, rintra, Fintra_r, variables.iterations, scaleStep)
     
     # ----------------------First density minimization-------------------------
     
-    densityStep = gi_1/50
-    densityStepEnd = gi_1/250
+    densityStep = density0/50 #gi_1/50
+    densityStepEnd = density0/250 #gi_1/250
     
-    gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+    # gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+    density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
         variables.maxQ, variables.minQ,
-        variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+        # variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+        variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.NumPoints,
         dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, densityStepEnd)
     
-    Init1 = gi
+    # Init1 = density
     
-    print("gi_1, gi", gi_1, gi)
+    print("density0, density", density0, density) #print("gi_1, gi", gi_1, gi)
     numLoopIteration = 0
     
     while True:
-        if np.abs(gi-gi_1) > Init1/25:
+        if np.abs(density-density0) > density/25: # if np.abs(gi-gi_1) > Init1/25:
             scaleStep = 0.006
-            densityStep = Init1/10
+            densityStep = density/10 #densityStep = Init1/10
             # print(1, np.abs(density-density0), density0/25)
-        elif np.abs(gi-gi_1) > Init1/75:
+        elif np.abs(density-density0) > density/75: # elif np.abs(gi-gi_1) > Init1/75:
             scaleStep = 0.0006
-            densityStep = Init1/100
+            densityStep = density/100 #densityStep = Init1/100
             # print(2, np.abs(density-density0), density0/75)
         else:
             scaleStep = 0.00006
-            densityStep = Init1/1000
+            densityStep = density/1000 #densityStep = Init1/1000
             # print(3, np.abs(density-density0))
         
         scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
             variables.maxQ, variables.minQ,
-            variables.QmaxIntegrate, Ztot, gi, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+            # variables.QmaxIntegrate, Ztot, gi, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin,
+            variables.QmaxIntegrate, Ztot, density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
             variables.NumPoints,
             dampingFunction, rintra, Fintra_r, variables.iterations, scaleStep)
         
-        gi_1 = gi
-        gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+        density0=density #gi_1 = gi
+        # gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+        density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
             variables.maxQ, variables.minQ,
-            variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+            # variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+            variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
             variables.NumPoints,
-            dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, Init1/250)
-        Init1 = gi
+            # dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, Init1/250)
+            dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, density/250)
+        # Init1 = density
         
         numLoopIteration += 1
-        print("numLoopIteration", numLoopIteration, gi, gi_1, Init1)
+        print("numLoopIteration", numLoopIteration, density, density0, density)
         
-        if (np.abs(gi-gi_1) < np.abs(gi/2500)) or (numLoopIteration > 30):
+        if (np.abs(density-density0) < np.abs(density/2500)) or (numLoopIteration > 30): #if (np.abs(gi-gi_1) < np.abs(gi/2500)) or (numLoopIteration > 30):
             # print(4, np.abs(density-density0), density0/2500)
             break
     
     
-    print("final scale", scaleFactor, "final density", gi)
+    print("final scale", scaleFactor, "final density", density)
     plt.show()
