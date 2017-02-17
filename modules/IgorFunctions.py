@@ -350,17 +350,13 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
     
     GRIdealSmallR = Fintra_r-4*np.pi*r*density
     
-    for i in range(1):
+    for i in range(iterations):
         Q1, QiQCorr = calc_IFFT_Fr(r, DelG)
-        # print(len(J_Q))
-        # print(len(J_Q))
         mask = np.where((Q1>0.0) & (Q1<QmaxIntegrate))
         QiQ1[mask] = QiQ1[mask] - (QiQ1[mask] / 
             (Q1[mask] *(Sinf + J_Q[:len(Q1[mask])]/Ztot**2)) + 1) * QiQCorr[mask]
         
         r, GR1 = calc_FFT_QiQ(Q1, QiQ1, QmaxIntegrate)
-        
-        # Utility.write_file("./QiQCorr"+str(i)+".txt", Q1, QiQCorr)
         
         DelG = np.zeros(len(GR1))
         DelG[r<Rnn] = GR1[r<Rnn]-GRIdealSmallR[r<Rnn]
@@ -369,11 +365,7 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
         _, rmin = UtilityAnalysis.find_nearest(r, 0.95*Rnn)
         Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>=rmin]))[0][0]]
 
-    # SQCorr = np.zeros(len(QiQ1))
-    # SQCorr[1:] = QiQ1[1:]/Q1[1:]+Sinf
-    
     DTemp = DelG
-    Utility.write_file("./DTEmp.txt", r, DTemp)
     DTemp = DTemp**2
     chi2 = np.mean(DTemp)
 
@@ -394,7 +386,8 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     scaleFactor = scaleFactor-scaleStep*11
     Qorg = Q
     
-    while True: # Loop for the range shifting
+    while (10*scaleStep>scaleStepEnd) and (NoPeak<5) and ((Flag==1) or (scaleFactor+scaleStep*1.1>=0)): # Loop for the range shifting
+        # print("scale loop")
         scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
         chi2Array = np.zeros(numSample)
         
@@ -434,7 +427,7 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
         
         nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
-        print(scaleFactor, scaleArray[np.argmin(chi2Array)])
+        # print(scaleFactor, scaleArray[np.argmin(chi2Array)])
         
         if nearIdx == 0:
             print("out1")
@@ -449,31 +442,18 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
 
         scaleStep /= 10
         Flag += 1
-        print(Flag, scaleFactor)
-        Utility.plot_data(scaleArray, chi2Array, "chi2", "scale", "chi2", "chi2", "y")
-        plt.show()
-        if ((10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0))):
-            break
+        # print((10*scaleStep<=scaleStepEnd) and (NoPeak>=5))
+        print(Flag)
+        # Utility.plot_data(scaleArray, chi2Array, "chi2", "scale", "chi2", "chi2", "y")
+        plt.scatter(scaleArray, chi2Array)
+        plt.grid(True)
+        # plt.show
+        # if ((10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0))):
+            # break
         
     # ------------------------chi2 curve fit for scale-------------------------
     
-    if scaleFactor < 0:
-        print("Scale factor < 0")
-        # break
-    else:
-        left = scaleArray[0]
-        right = scaleArray[-1]
-        coeffs = np.polyfit(scaleArray, chi2Array, 3)
-        if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
-            scaleFactor = (left+right)/2
-        else:
-            x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
-            x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
-            if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
-                scaleFactor = left + np.diff(scaleArray)[0]*x1
-            else:
-                scaleFactor = left + np.diff(scaleArray)[0]*x2
-    
+    scaleFactor = chi2Fit(scaleFactor, scaleArray, chi2Array)
     
     print("final scale factor", scaleFactor)
     
@@ -494,7 +474,7 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
     density = density-densityStep*11
     Qorg = Q
     
-    while True: # Loop for the range shifting
+    while ((10*densityStep>densityStepEnd) and (NoPeak<5)): # Loop for the range shifting
         densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
         chi2Array = np.zeros(numSample)
         
@@ -532,10 +512,12 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
         nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
         
         if nearIdx == 0:
+            print("out3")
             density -= densityStep*10
             densityStep *= 10
             NoPeak += 1
         if nearIdx >= numSample-2:
+            print("out4")
             density += densityStep*10
             densityStep *= 10
             NoPeak += 1
@@ -544,29 +526,41 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
         
         Flag += 1
         print(Flag)
-        if ((10*densityStep<=densityStepEnd) and (NoPeak>=5)):
-            break
+        plt.scatter(densityArray, chi2Array)
+        plt.grid(True)
+        # plt.show
+        # if ((10*densityStep<=densityStepEnd) and (NoPeak>=5)):
+            # break
         
     # ------------------------chi2 curve fit for scale-------------------------
     
-    if density < 0:
+    density = chi2Fit(density, densityArray, chi2Array)
+    
+    # Utility.plot_data(densityArray, chi2Array, "chi2", "density", "chi2", "chi2", "y")
+    # plt.show()
+    print("final density", density)
+    return density
+
+
+def chi2Fit(value, valueArray, chi2Array):
+    """Function to fit the chi2 plot.
+    """
+    
+    if value < 0:
         print("Scale factor < 0")
         # break
     else:
-        left = densityArray[0]
-        right = densityArray[-1]
-        coeffs = np.polyfit(densityArray, chi2Array, 3)
+        left = valueArray[0]
+        right = valueArray[-1]
+        coeffs = np.polyfit(valueArray, chi2Array, 3)
         if (4*coeffs[1]**2 - 12*coeffs[2]*coeffs[0] < 0):
-            density = (left+right)/2
+            value = (left+right)/2
         else:
             x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
             x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
             if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
-                density = left + np.diff(densityArray)[0]*x1
+                value = left + np.diff(valueArray)[0]*x1
             else:
-                density = left + np.diff(densityArray)[0]*x2
+                value = left + np.diff(valueArray)[0]*x2
     
-    Utility.plot_data(densityArray, chi2Array, "chi2", "density", "chi2", "chi2", "y")
-    plt.show()
-    print("final density", density)
-    return density
+    return value

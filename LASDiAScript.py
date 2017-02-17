@@ -133,7 +133,8 @@ if __name__ == "__main__":
     print("density0, density", density0, density) #print("gi_1, gi", gi_1, gi)
     numLoopIteration = 0
     
-    while True:
+    while (np.abs(density-density0) > np.abs(density/2500)) and (numLoopIteration <= 30):
+        print("big loop", np.abs(density-density0) > np.abs(density/2500), np.abs(density-density0), np.abs(density/2500))
         if np.abs(density-density0) > density/25: # if np.abs(gi-gi_1) > Init1/25:
             scaleStep = 0.006
             densityStep = density/10 #densityStep = Init1/10
@@ -166,11 +167,11 @@ if __name__ == "__main__":
         # Init1 = density
         
         numLoopIteration += 1
-        print("numLoopIteration", numLoopIteration, density, density0, density)
+        print("numLoopIteration", numLoopIteration, scaleFactor, density)
         
-        if (np.abs(density-density0) < np.abs(density/2500)) or (numLoopIteration > 30): #if (np.abs(gi-gi_1) < np.abs(gi/2500)) or (numLoopIteration > 30):
-            # print(4, np.abs(density-density0), density0/2500)
-            break
+        # if (np.abs(density-density0) < np.abs(density/2500)) or (numLoopIteration > 30): #if (np.abs(gi-gi_1) < np.abs(gi/2500)) or (numLoopIteration > 30):
+            # # print(4, np.abs(density-density0), density0/2500)
+            # break
     
     
     print("final scale", scaleFactor, "final density", density)
