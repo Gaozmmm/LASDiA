@@ -50,7 +50,7 @@ import matplotlib.pyplot as plt
 # from modules import IgorFunctions
 # from modules import KaplowMethod
 from modules import MainFunctions
-# from modules import Minimization
+from modules import Minimization
 # from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
@@ -327,7 +327,7 @@ def calc_IFFT_Fr(r, F_r):
     return (Q, Qi_Q)
 
 
-def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
+def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, Fintra_r,
     iterations, rmin, density, J_Q, Ztot):
     """Equivalent of Igor function
     """
@@ -335,9 +335,9 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
     Qi_Q = Q*MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     r, GR = calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate)
     
-    _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
-        np.amax(Fintra_r), len(GR))
-    
+    # _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
+        # np.amax(Fintra_r), len(GR))
+
     QiQ1 = np.zeros(len(SsmoothDamp_Q))
     idx, _ = UtilityAnalysis.find_nearest(Qi_Q, QmaxIntegrate)
     QiQ1[Q<QmaxIntegrate] = Qi_Q[Q<QmaxIntegrate]
@@ -361,7 +361,6 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
         DelG = np.zeros(len(GR1))
         DelG[r<Rnn] = GR1[r<Rnn]-GRIdealSmallR[r<Rnn]
         
-        
         _, rmin = UtilityAnalysis.find_nearest(r, 0.95*Rnn)
         Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>=rmin]))[0][0]]
 
@@ -374,7 +373,7 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, rintra, Fintra_r,
 
 def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
-    dampingFunction, rintra, Fintra_r, iterations, scaleStep):
+    dampingFunction, Fintra_r, iterations, scaleStep):
     """Function for the scale factor optimization.
     """
     
@@ -388,7 +387,7 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     
     while (10*scaleStep>scaleStepEnd) and (NoPeak<5) and ((Flag==1) or (scaleFactor+scaleStep*1.1>=0)): # Loop for the range shifting
         # print("scale loop")
-        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+        scaleArray = make_array_loop(scaleFactor, scaleStep, numSample)
         chi2Array = np.zeros(numSample)
         
         for i in range(len(scaleArray)):
@@ -411,11 +410,8 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
             SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
                 dampingFunction)
             
-            Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
-                maxQ, NumPoints)
-            
             chi2Array[i] = FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
-                QmaxIntegrate, rintra, Fintra_r, iterations, 
+                QmaxIntegrate, Fintra_r, iterations, 
                 rmin, density, J_Q, Ztot)
         
         # --------------------Range shifting selection --------------------
@@ -426,9 +422,7 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
             scaleFactor = scaleArray[np.argmin(chi2Array)] - scaleStep*1.1
         
         nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
-        
-        # print(scaleFactor, scaleArray[np.argmin(chi2Array)])
-        
+
         if nearIdx == 0:
             print("out1")
             scaleFactor -= scaleStep*10
@@ -442,27 +436,23 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
 
         scaleStep /= 10
         Flag += 1
-        # print((10*scaleStep<=scaleStepEnd) and (NoPeak>=5))
         print(Flag)
-        # Utility.plot_data(scaleArray, chi2Array, "chi2", "scale", "chi2", "chi2", "y")
-        plt.scatter(scaleArray, chi2Array)
-        plt.grid(True)
-        # plt.show
-        # if ((10*scaleStep<=scaleStepEnd) and (NoPeak>=5) and ((Flag!=1) or (scaleFactor+scaleStep*1.1<0))):
-            # break
-        
+
     # ------------------------chi2 curve fit for scale-------------------------
-    
-    scaleFactor = chi2Fit(scaleFactor, scaleArray, chi2Array)
+
+    xFit, yFit, scaleFactor, chi2Min = chi2Fit(scaleFactor, scaleArray, chi2Array)
+    # plt.plot(xFit, yFit)
+    # plt.grid(True)
     
     print("final scale factor", scaleFactor)
+    # plt.show()
     
     return scaleFactor
 
 
 def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
-    dampingFunction, rintra, Fintra_r, iterations, densityStep, densityStepEnd):
+    dampingFunction, Fintra_r, iterations, densityStep, densityStepEnd):
     """Function for the density optimization.
     """
     
@@ -475,7 +465,7 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
     Qorg = Q
     
     while ((10*densityStep>densityStepEnd) and (NoPeak<5)): # Loop for the range shifting
-        densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+        densityArray = make_array_loop(density, densityStep, numSample)
         chi2Array = np.zeros(numSample)
         
         for i in range(len(densityArray)):
@@ -498,11 +488,8 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
             SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
                 dampingFunction)
             
-            Q, SsmoothDamp_Q = UtilityAnalysis.rebinning(Q, SsmoothDamp_Q, 0.0, 
-                maxQ, NumPoints)
-            
             chi2Array[i] = FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
-                QmaxIntegrate, rintra, Fintra_r, iterations, 
+                QmaxIntegrate, Fintra_r, iterations, 
                 rmin, densityArray[i], J_Q, Ztot)
         
         # --------------------Range shifting selection --------------------
@@ -534,10 +521,8 @@ def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ
         
     # ------------------------chi2 curve fit for scale-------------------------
     
-    density = chi2Fit(density, densityArray, chi2Array)
-    
-    # Utility.plot_data(densityArray, chi2Array, "chi2", "density", "chi2", "chi2", "y")
-    # plt.show()
+    xFit, yFit, density, chi2Min = chi2Fit(density, densityArray, chi2Array)
+
     print("final density", density)
     return density
 
@@ -559,8 +544,41 @@ def chi2Fit(value, valueArray, chi2Array):
             x1=(-2*coeffs[1]+(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
             x2=(-2*coeffs[1]-(4*coeffs[1]**2-12*coeffs[2]*coeffs[0])**0.5)/(6*coeffs[0])
             if (2*coeffs[1]+6*coeffs[0]*x1 > 2*coeffs[1]+6*coeffs[0]*x2):
-                value = left + np.diff(valueArray)[0]*x1
+                value = x1
             else:
-                value = left + np.diff(valueArray)[0]*x2
+                value = x2
     
-    return value
+    xFit = np.linspace(valueArray[0], valueArray[-1], 1000)
+    p = np.poly1d(coeffs)
+    yFit = p(xFit)
+    
+    valueY = p(value)
+    
+    return (xFit, yFit, value, valueY)
+
+
+def make_array_loop(varValue, step, numSample):
+    """Function to create an array given its middle value and the percentage
+    of the extreme.
+    
+    Parameters
+    ----------
+    varValue  : float
+                variable's value to generate the array
+    step      : float
+                array step
+    numSample : int
+                number of sample
+    
+    Returns
+    -------
+    varArray  : numpy array
+                variable final array
+    """
+
+    lowExtreme = varValue
+    highExtreme = varValue+step*22
+    
+    varArray = np.linspace(lowExtreme, highExtreme, numSample)
+    
+    return varArray

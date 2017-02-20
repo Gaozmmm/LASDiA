@@ -466,11 +466,9 @@ def make_array_loop(varValue, step, numSample):
                 variable final array
     """
     
-    # lowExtreme = varValue-step*11
-    # highExtreme = varValue+step*11
-    lowExtreme = varValue
-    highExtreme = varValue+step*22
-    
+    lowExtreme = varValue-step*11
+    highExtreme = varValue+step*11
+
     varArray = np.linspace(lowExtreme, highExtreme, numSample)
     
     return varArray

@@ -38,12 +38,13 @@ otherwise it is just the name.
 import numpy as np
 import matplotlib.pyplot as plt
 
+from modules import IgorFunctions
 from modules import KaplowMethod
 from modules import UtilityAnalysis
 import time
 
 
-def chi2_fit(variableArray, chi2Array):
+def chi2Fit(variableArray, chi2Array):
     """Function to fit the chi2 function to find the minimal value.
     
     Parameters
@@ -55,20 +56,198 @@ def chi2_fit(variableArray, chi2Array):
     
     Returns
     -------
-    x_fit         : numpy array
+    xFit          : numpy array
                     array with the x values to plot the fit results
-    y_fit         : numpy array
+    yFit          : numpy array
                     array with the fit y values
-    minValue      : float
-                    minimum value of the fit curve
+    absXMin       : float
+                    fit curve minimum value abscissa
+    absYMin       : float
+                    fit curve minimum value ordinate
     """
     
-    pol_fit = np.poly1d(np.polyfit(variableArray, chi2Array, 3))
-    x_fit = np.linspace(variableArray[0], variableArray[-1], 1000)
-    y_fit = pol_fit(x_fit)
-    minValue = x_fit[np.argmin(y_fit)]
+    polFit = np.poly1d(np.polyfit(variableArray, chi2Array, 3))
     
-    return (x_fit, y_fit, minValue)
+    polRoots = polFit.deriv().r
+    realPolRoots = polRoots[polRoots.imag==0].real
+    test = polFit.deriv(2)(realPolRoots)
+    
+    xMin = realPolRoots[test>0]
+    yMin = polFit(xMin)
+    
+    absXMin = xMin[np.argmin(yMin)]
+    absYMin = np.amin(yMin)
+    
+    # absXMin = variableArray[0]+xMin[np.argmin(yMin)]*np.diff(variableArray)[0]
+    # absYMin = polFit(absXMin)
+    
+    xFit = np.linspace(variableArray[0], variableArray[-1], 1000)
+    yFit = polFit(xFit)
+    
+    return (xFit, yFit, absXMin, absYMin)
+
+
+def OptimizeScaleGofRCorr(Qorg, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
+    QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
+    dampingFunction, Fintra_r, iterations, scaleStep):
+    """Function for the scale factor optimization.
+    """
+    
+    Flag = 0
+    NoPeak = 0
+    # scaleStep = 0.05
+    scaleStepEnd = 0.00006
+    numSample = 23
+    # scaleFactor = scaleFactor-scaleStep*11
+    # Qorg = Q
+    
+    while ((10*scaleStep>scaleStepEnd) and (NoPeak<5)): # Loop for the range shifting
+        # print("scale loop")
+        scaleArray = UtilityAnalysis.make_array_loop(scaleFactor, scaleStep, numSample)
+        chi2Array = np.zeros(numSample)
+        
+        for i in range(len(scaleArray)):
+            
+            # ------------------Kaplow method for scale--------------------
+            Q = Qorg
+            Subt = IgorFunctions.calc_Subt(I_Q, Ibkg_Q, scaleArray[i])
+            alpha = IgorFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
+                Q[Q<=QmaxIntegrate], Subt[Q<=QmaxIntegrate],
+                fe_Q[Q<=QmaxIntegrate], Ztot, density)
+            
+            S_Q = IgorFunctions.calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, 
+                QmaxIntegrate)
+                
+            Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                smoothingFactor, minQ, QmaxIntegrate, maxQ)
+            Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0, 
+                maxQ, NumPoints)
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+                dampingFunction)
+            
+            chi2Array[i] = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+                QmaxIntegrate, Fintra_r, iterations, 
+                rmin, density, J_Q, Ztot)
+        
+        # --------------------Range shifting selection --------------------
+        
+        if np.amax(chi2Array) > 10**8:
+            scaleFactorIdx = np.argmin(chi2Array[0:np.argmax(chi2Array)])
+            scaleFactor = scaleArray[scaleFactorIdx]
+        else:
+            scaleFactorIdx = np.argmin(chi2Array)
+            scaleFactor = scaleArray[scaleFactorIdx]
+        
+        # nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+        
+        print(scaleFactor)
+        
+        if scaleFactorIdx == 0:
+            print("out1")
+            scaleFactor -= scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
+        if scaleFactorIdx >= numSample-2:
+            print("out2")
+            scaleFactor += scaleStep*10
+            scaleStep *= 10
+            NoPeak += 1
+        
+        # plt.scatter(scaleArray, chi2Array)
+        # plt.grid(True)
+        # plt.show()
+        
+        scaleStep /= 10
+        Flag += 1
+        print(Flag, scaleFactor, scaleStep)
+
+    # ------------------------chi2 curve fit for scale-------------------------
+
+    xFit, yFit, scaleFactor, chi2Min = chi2Fit(scaleArray, chi2Array)
+    # plt.plot(xFit, yFit)
+    # plt.grid(True)
+    
+    print("final scale factor", scaleFactor)
+    # plt.show()
+    
+    return scaleFactor
+
+
+def OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
+    QmaxIntegrate, Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, NumPoints,
+    dampingFunction, Fintra_r, iterations, densityStep, densityStepEnd):
+    """Function for the density optimization.
+    """
+    
+    Flag = 0
+    NoPeak = 0
+    # densityStep = density/50
+    # densityStepEnd = density/250
+    numSample = 23
+    density = density-densityStep*11
+    Qorg = Q
+    
+    while ((10*densityStep>densityStepEnd) and (NoPeak<5)): # Loop for the range shifting
+        densityArray = UtilityAnalysis.make_array_loop(density, densityStep, numSample)
+        chi2Array = np.zeros(numSample)
+        
+        for i in range(len(densityArray)):
+            
+            # ------------------Kaplow method for scale--------------------
+            Q = Qorg
+            Subt = IgorFunctions.calc_Subt(I_Q, Ibkg_Q, scaleFactor)
+            alpha = IgorFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
+                Q[Q<=QmaxIntegrate], Subt[Q<=QmaxIntegrate],
+                fe_Q[Q<=QmaxIntegrate], Ztot, densityArray[i])
+            
+            S_Q = IgorFunctions.calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, 
+                QmaxIntegrate)
+                
+            Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                smoothingFactor, 
+                minQ, QmaxIntegrate, maxQ)
+            Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0, 
+                maxQ, NumPoints)
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+                dampingFunction)
+            
+            chi2Array[i] = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
+                QmaxIntegrate, Fintra_r, iterations, 
+                rmin, densityArray[i], J_Q, Ztot)
+        
+        # --------------------Range shifting selection --------------------
+        
+        densityIdx = np.argmin(chi2Array)
+        density = densityArray[densityIdx]
+        
+        # nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
+        
+        if densityIdx == 0:
+            print("out3")
+            density -= densityStep*10
+            densityStep *= 10
+            NoPeak += 1
+        if densityIdx >= numSample-2:
+            print("out4")
+            density += densityStep*10
+            densityStep *= 10
+            NoPeak += 1
+
+        densityStep /= 10
+        
+        Flag += 1
+        print(Flag, density, densityStep)
+        plt.scatter(densityArray, chi2Array)
+        plt.grid(True)
+        plt.show()
+        
+        
+    # ------------------------chi2 curve fit for scale-------------------------
+    
+    xFit, yFit, density, chi2Min = chi2Fit(densityArray, chi2Array)
+
+    print("final density", density)
+    return density
 
 
 def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,

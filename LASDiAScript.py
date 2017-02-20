@@ -46,7 +46,7 @@ import numpy as np
 from modules import IgorFunctions
 #from modules import KaplowMethod
 from modules import MainFunctions
-#from modules import Minimization
+from modules import Minimization
 from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
@@ -90,6 +90,9 @@ if __name__ == "__main__":
         dampingFunction)
     rintra, Fintra_r = IgorFunctions.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
     
+    _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
+        np.amax(Fintra_r), 8192)
+    
     _, dampingFunction = UtilityAnalysis.rebinning(Q, dampingFunction, 0.0, 
         variables.maxQ, variables.NumPoints)
     
@@ -98,6 +101,7 @@ if __name__ == "__main__":
     absCorrFactor = IgorFunctions.absorption(Q)
     I_Q = I_Q/absCorrFactor
     Ibkg_Q = Ibkg_Q/absCorrFactor
+    
     # ------------------------Starting minimization----------------------------
 
     scaleFactor = variables.scaleFactor
@@ -108,12 +112,12 @@ if __name__ == "__main__":
     scaleStep = 0.05
     # scaleStepEnd = 0.00006
     
-    scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+    scaleFactor = Minimization.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
         variables.maxQ, variables.minQ,
         # variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.NumPoints,
-        dampingFunction, rintra, Fintra_r, variables.iterations, scaleStep)
+        dampingFunction, Fintra_r, variables.iterations, scaleStep)
     
     # ----------------------First density minimization-------------------------
     
@@ -121,12 +125,12 @@ if __name__ == "__main__":
     densityStepEnd = density0/250 #gi_1/250
     
     # gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
-    density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
+    density = Minimization.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
         variables.maxQ, variables.minQ,
         # variables.QmaxIntegrate, Ztot, gi_1, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.NumPoints,
-        dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, densityStepEnd)
+        dampingFunction, Fintra_r, variables.iterations, densityStep, densityStepEnd)
     
     # Init1 = density
     
@@ -153,7 +157,7 @@ if __name__ == "__main__":
             # variables.QmaxIntegrate, Ztot, gi, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin,
             variables.QmaxIntegrate, Ztot, density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
             variables.NumPoints,
-            dampingFunction, rintra, Fintra_r, variables.iterations, scaleStep)
+            dampingFunction, Fintra_r, variables.iterations, scaleStep)
         
         density0=density #gi_1 = gi
         # gi = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q,
@@ -163,7 +167,7 @@ if __name__ == "__main__":
             variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
             variables.NumPoints,
             # dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, Init1/250)
-            dampingFunction, rintra, Fintra_r, variables.iterations, densityStep, density/250)
+            dampingFunction, Fintra_r, variables.iterations, densityStep, density/250)
         # Init1 = density
         
         numLoopIteration += 1
