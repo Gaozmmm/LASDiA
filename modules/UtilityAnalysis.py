@@ -105,7 +105,7 @@ def rebinning(Q, I_Q, minQ, maxQ, numPoints):
         numPoints = Q.size
     
     interI_Q = interpolate.interp1d(Q, I_Q)
-    Q = np.linspace(np.amin(Q), maxQ, numPoints, endpoint=True)
+    Q = np.linspace(minQ, maxQ, numPoints, endpoint=True)
     I_Q = interI_Q(Q)
     
     return (Q, I_Q)
@@ -280,7 +280,7 @@ def Qto2theta(Q):
     return two_theta
 
 
-def calc_iintradamp(iintra_Q, Q, QmaxIntegrate, dampingFunction):
+def calc_iintradamp(iintra_Q, dampingFunction):
     """Function to apply the damping factor to iintra(Q) function.
     
     Parameters

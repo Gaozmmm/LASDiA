@@ -38,7 +38,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 # import sys
 import matplotlib.pyplot as plt
-# import numpy as np
+import numpy as np
 # import time
 # from itertools import product
 # from timeit import default_timer as timer
@@ -93,6 +93,9 @@ if __name__ == "__main__":
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
         dampingFunction)
     rintra, Fintra_r = IgorFunctions.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
+    
+    _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
+        np.amax(Fintra_r), 8192)
 
     _, dampingFunction = UtilityAnalysis.rebinning(Q, dampingFunction, 0.0,
         variables.maxQ, variables.NumPoints)
@@ -100,8 +103,8 @@ if __name__ == "__main__":
     # ---------------------Geometrical correction------------------------------
 
     absCorrFactor = IgorFunctions.absorption(Q)
-    # I_Q = I_Q /(absCorrFactor)
-    # Ibkg_Q  = Ibkg_Q / (absCorrFactor)
+    I_Q = I_Q /(absCorrFactor)
+    Ibkg_Q  = Ibkg_Q / (absCorrFactor)
 
     # ------------------------Starting minimization----------------------------
 
@@ -109,7 +112,7 @@ if __name__ == "__main__":
     density = variables.density
     smoothingFactor = 0.2
 
-    Subt = IgorFunctions.calc_Subt(I_Q, Ibkg_Q, scaleFactor, absCorrFactor)
+    Subt = IgorFunctions.calc_Subt(I_Q, Ibkg_Q, scaleFactor)
     alpha = IgorFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
         Q[Q<=variables.QmaxIntegrate], Subt[Q<=variables.QmaxIntegrate],
         fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)

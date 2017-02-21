@@ -86,10 +86,8 @@ if __name__ == "__main__":
 
     iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, 
         variables.maxQ, elementList, element, x, y, z, elementParameters)
-    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, dampingFunction)
-    
-    
-    
+    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
+        dampingFunction)
     rintra, Fintra_r = IgorFunctions.calc_FFT_QiQ(Q, Q*iintradamp_Q, variables.QmaxIntegrate)
     
     _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(rintra), 

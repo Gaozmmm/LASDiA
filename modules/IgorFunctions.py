@@ -385,7 +385,8 @@ def OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor, J_Q, fe_Q, maxQ, minQ,
     scaleFactor = scaleFactor-scaleStep*11
     Qorg = Q
     
-    while (10*scaleStep>scaleStepEnd) and (NoPeak<5) and ((Flag==1) or (scaleFactor+scaleStep*1.1>=0)): # Loop for the range shifting
+    # Loop for the range shifting
+    while ((10*scaleStep>scaleStepEnd) and (NoPeak<5) and ((Flag==1) or (scaleFactor+scaleStep*1.1>=0))):
         # print("scale loop")
         scaleArray = make_array_loop(scaleFactor, scaleStep, numSample)
         chi2Array = np.zeros(numSample)
