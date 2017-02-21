@@ -472,6 +472,34 @@ def calc_r(Q):
     return r[mask]
 
 
+def calc_Fr(Q, Qi_Q):
+    """Function to calculate F(r) (eq. 20) with the FFT.
+
+    Parameters
+    ----------
+    Q    : numpy array
+           momentum transfer (nm^-1)
+    Qi_Q : numpy array
+           Qi(Q)
+    
+    Returns
+    -------
+    r    : numpy array
+           atomic distance (nm)
+    F_r  : numpy array
+           F(r) distribution function
+    """
+
+    meanDeltaQ = np.mean(np.diff(Q))
+    r = fftpack.fftfreq(Q.size, meanDeltaQ)
+    mask = np.where(r>=0)
+    
+    F_r = fftpack.fft(Qi_Q)
+    F_r = F_r[mask]
+    F_r = -np.imag(F_r)*meanDeltaQ*2/np.pi
+    
+    return (r, F_r)
+    
 def calc_SQCorr(F_r, r, Q, Sinf):
     """Function to calculate S(Q) Corr from F(r) optimal.
 
