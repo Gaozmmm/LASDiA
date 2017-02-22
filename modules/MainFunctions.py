@@ -498,7 +498,7 @@ def calc_Fr(Q, Qi_Q):
     F_r = F_r[mask]
     F_r = -np.imag(F_r)*meanDeltaQ*2/np.pi
     
-    return (r, F_r)
+    return (r[mask], F_r)
     
 def calc_SQCorr(F_r, r, Q, Sinf):
     """Function to calculate S(Q) Corr from F(r) optimal.

@@ -90,8 +90,7 @@ if __name__ == "__main__":
 
     iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate,
         variables.maxQ, elementList, element, x, y, z, elementParameters)
-    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, Q, variables.QmaxIntegrate, 
-        dampingFunction)
+    iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, dampingFunction)
     rintra, Fintra_r = IgorFunctions.calc_FFT_QiQ(Q, iintradamp_Q, variables.QmaxIntegrate)
     
     _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
@@ -120,23 +119,32 @@ if __name__ == "__main__":
     S_Q = IgorFunctions.calc_SQ(Q, Subt, alpha, fe_Q, J_Q, Ztot, Sinf, 
         variables.QmaxIntegrate)
     
-    Utility.plot_data(Q, S_Q, "S_Q", "Q", "S_Q", "S_Q", "y")
+    # Utility.plot_data(Q, S_Q, "S_Q", "Q", "S_Q", "S_Q", "y")
     
     Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
         smoothingFactor, 
         variables.minQ, variables.QmaxIntegrate, variables.maxQ)
     
-    Utility.plot_data(Q, Ssmooth_Q, "S_Q", "Q", "S_Q", "S_Q", "y")
+    # Utility.plot_data(Q, Ssmooth_Q, "S_Q", "Q", "S_Q", "S_Q", "y")
     
-    # Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0,
-        # variables.maxQ, variables.NumPoints)
+    Q, Ssmooth_Q = UtilityAnalysis.rebinning(Q, Ssmooth_Q, 0.0,
+        variables.maxQ, variables.NumPoints)
     
     # # Q, Ssmooth_Q = Utility.read_file("../data/cea_files/ar/HT2_034SofQ_SS.txt")
     # # Utility.plot_data(Q, Ssmooth_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
     
-    # SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
-        # dampingFunction)
-        
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+        dampingFunction)
+    
+    Qi_Q = Q*MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+    r, GR = IgorFunctions.calc_FFT_QiQ(Q, Qi_Q, variables.QmaxIntegrate)
+    # Utility.plot_data(Q, Qi_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
+    # Utility.plot_data(r, GR, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
+    
+    r, F_r = MainFunctions.calc_Fr(Q, Qi_Q)
+    # print(len(r), len(F_r))
+    # Utility.plot_data(r, F_r, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
+    
     # chi2 = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
         # variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
         # variables.rmin, density, J_Q, Ztot)

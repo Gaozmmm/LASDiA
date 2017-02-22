@@ -272,15 +272,18 @@ def calc_FFT_QiQ(Q, Qi_Q, QmaxIntegrate):
     pMax, elem = UtilityAnalysis.find_nearest(Q, QmaxIntegrate)
     NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
     DelR = 2*np.pi/(np.mean(np.diff(Q))*NumPoints)
+    # print("npoints", NumPoints, DelR)
     # Qi_Q = Utility.resize_zero(Q[Q<=QmaxIntegrate]*i_Q[Q<=QmaxIntegrate], NumPoints)
     Qi_Q = Utility.resize_zero(Qi_Q[Q<=QmaxIntegrate], NumPoints)
     Qi_Q[pMax+1:] = 0.0
     Q = np.arange(np.amin(Q), np.amin(Q)+np.mean(np.diff(Q))*NumPoints, np.mean(np.diff(Q)))
+    # print(len(Q), np.amin(Q), np.amax(Q))
     r = MainFunctions.calc_r(Q)
     F_r = fftpack.fft(Qi_Q)
     F_r = F_r[np.where(r>=0.0)]
     F_r = -np.imag(F_r)*np.mean(np.diff(Q))*2/np.pi
     r = np.arange(0.0, 0.0+DelR*len(F_r), DelR)
+    # print(len(r), np.amin(r), np.amax(r))
     
     return (r, F_r)
 
@@ -338,35 +341,40 @@ def FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, QmaxIntegrate, Fintra_r,
     # _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(Fintra_r), 
         # np.amax(Fintra_r), len(GR))
 
-    QiQ1 = np.zeros(len(SsmoothDamp_Q))
-    idx, _ = UtilityAnalysis.find_nearest(Qi_Q, QmaxIntegrate)
-    QiQ1[Q<QmaxIntegrate] = Qi_Q[Q<QmaxIntegrate]
-    QiQ1[0] = 0.0
+    # QiQ1 = np.zeros(len(SsmoothDamp_Q))
+    # idx, _ = UtilityAnalysis.find_nearest(Qi_Q, QmaxIntegrate)
+    # QiQ1[Q<QmaxIntegrate] = Qi_Q[Q<QmaxIntegrate]
+    # QiQ1[0] = 0.0
+    QiQ[Q>=QmaxIntegrate] = 0.0
+    QiQ[0] = 0.0
     
-    GR1 = GR
+    # GR1 = GR
     DelG = np.zeros(len(GR))
     Rnn = rmin
-    DelG[r<Rnn] = GR1[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
+    DelG[r<Rnn] = GR[r<Rnn]-(Fintra_r[r<Rnn]-4*np.pi*r[r<Rnn]*density)
     
     GRIdealSmallR = Fintra_r-4*np.pi*r*density
     
     for i in range(iterations):
         Q1, QiQCorr = calc_IFFT_Fr(r, DelG)
         mask = np.where((Q1>0.0) & (Q1<QmaxIntegrate))
-        QiQ1[mask] = QiQ1[mask] - (QiQ1[mask] / 
+        QiQ[mask] = QiQ[mask] - (QiQ[mask] / 
             (Q1[mask] *(Sinf + J_Q[:len(Q1[mask])]/Ztot**2)) + 1) * QiQCorr[mask]
         
-        r, GR1 = calc_FFT_QiQ(Q1, QiQ1, QmaxIntegrate)
+        r, GR = calc_FFT_QiQ(Q1, QiQ, QmaxIntegrate)
         
-        DelG = np.zeros(len(GR1))
-        DelG[r<Rnn] = GR1[r<Rnn]-GRIdealSmallR[r<Rnn]
+        DelG = np.zeros(len(GR))
+        DelG[r<Rnn] = GR[r<Rnn]-GRIdealSmallR[r<Rnn]
         
         _, rmin = UtilityAnalysis.find_nearest(r, 0.95*Rnn)
-        Rnn = 0.99*r[np.where(GR1==np.amin(GR1[r>=rmin]))[0][0]]
+        Rnn = 0.99*r[np.where(GR==np.amin(GR[r>=rmin]))[0][0]]
 
-    DTemp = DelG
-    DTemp = DTemp**2
-    chi2 = np.mean(DTemp)
+    # DTemp = DelG
+    # DTemp = DTemp**2
+    # chi2 = np.mean(DTemp)
+    
+    DelG = DelG**2
+    chi2 = np.mean(DelG)
 
     return chi2
 
