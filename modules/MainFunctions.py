@@ -40,6 +40,7 @@ otherwise it is symbolized with just its name.
 import numpy as np
 from scipy import fftpack
 from scipy.integrate import simps
+import math
 
 from modules import Utility
 from modules import UtilityAnalysis
@@ -494,11 +495,20 @@ def calc_Fr(Q, Qi_Q):
     r = fftpack.fftfreq(Q.size, meanDeltaQ)
     mask = np.where(r>=0)
     
-    F_r = fftpack.fft(Qi_Q)
+    pMax, elem = UtilityAnalysis.find_nearest(Q, 109)
+    NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
+    
+    F_r = fftpack.fft(Qi_Q, n=NumPoints)
     F_r = F_r[mask]
     F_r = -np.imag(F_r)*meanDeltaQ*2/np.pi
     
-    return (r[mask], F_r)
+    rQ = np.outer(r[mask], Q)
+    sinrQ = np.sin(rQ)
+    F_r2 = (2.0 / np.pi) * np.sum(Qi_Q * sinrQ, axis=1) * meanDeltaQ
+    
+    F_r3 = (2.0 / np.pi) * simps(Qi_Q * sinrQ, Q)
+    
+    return (r[mask], F_r, r, F_r2, F_r3)
     
 def calc_SQCorr(F_r, r, Q, Sinf):
     """Function to calculate S(Q) Corr from F(r) optimal.

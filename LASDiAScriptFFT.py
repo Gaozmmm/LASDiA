@@ -139,11 +139,13 @@ if __name__ == "__main__":
     Qi_Q = Q*MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     r, GR = IgorFunctions.calc_FFT_QiQ(Q, Qi_Q, variables.QmaxIntegrate)
     # Utility.plot_data(Q, Qi_Q, "I_Q", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
-    # Utility.plot_data(r, GR, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
+    Utility.plot_data(r, GR, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
     
-    r, F_r = MainFunctions.calc_Fr(Q, Qi_Q)
+    r, F_r, r2, F_r2, F_r3 = MainFunctions.calc_Fr(Q, Qi_Q)
     # print(len(r), len(F_r))
-    # Utility.plot_data(r, F_r, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"igor", "y")
+    Utility.plot_data(r, F_r, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"fft", "y")
+    # Utility.plot_data(r, F_r2, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"sum", "y")
+    # Utility.plot_data(r, F_r3, "GR", r"$Q(nm^{-1})$", r"$S(Q)$", r"simps", "y")
     
     # chi2 = IgorFunctions.FitRemoveGofRPeaks(Q, SsmoothDamp_Q, Sinf, 
         # variables.QmaxIntegrate, rintra, Fintra_r, variables.iterations, 
