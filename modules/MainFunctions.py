@@ -430,7 +430,7 @@ def calc_iQ(S_Q, Sinf):
     return i_Q
 
 
-def calc_QiQ(Q, i_Q):
+def calc_QiQ(Q, S_Q, Sinf):
     """Function to calculate Qi(Q) (eq. 7, 20).
     
     Parameters
@@ -446,6 +446,7 @@ def calc_QiQ(Q, i_Q):
            Qi(Q)
     """
     
+    i_Q = S_Q - Sinf
     Qi_Q = Q*i_Q
     
     return Qi_Q
@@ -495,20 +496,12 @@ def calc_Fr(Q, Qi_Q):
     r = fftpack.fftfreq(Q.size, meanDeltaQ)
     mask = np.where(r>=0)
     
-    pMax, elem = UtilityAnalysis.find_nearest(Q, 109)
-    NumPoints = 2*2*2**math.ceil(math.log(5*(pMax+1))/math.log(2))
-    
-    F_r = fftpack.fft(Qi_Q, n=NumPoints)
-    F_r = F_r[mask]
-    F_r = -np.imag(F_r)*meanDeltaQ*2/np.pi
-    
     rQ = np.outer(r[mask], Q)
     sinrQ = np.sin(rQ)
-    F_r2 = (2.0 / np.pi) * np.sum(Qi_Q * sinrQ, axis=1) * meanDeltaQ
     
-    F_r3 = (2.0 / np.pi) * simps(Qi_Q * sinrQ, Q)
+    F_r = (2.0 / np.pi) * simps(Qi_Q * sinrQ, Q)
     
-    return (r[mask], F_r, r, F_r2, F_r3)
+    return (r[mask], F_r)
     
 def calc_SQCorr(F_r, r, Q, Sinf):
     """Function to calculate S(Q) Corr from F(r) optimal.

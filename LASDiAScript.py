@@ -21,10 +21,11 @@
 # SOFTWARE.
 
 """LASDiA main script file.
-This script is mainly used for testing the software, but it can be used to run LASDiA
-in text mode.
+This script is mainly used for testing the software, but it can be used to run 
+LASDiA in text mode.
 
-The nomenclature and the procedures follow the article: Eggert et al. 2002 PRB, 65, 174105.
+The nomenclature and the procedures follow the article:
+    Eggert et al. 2002 PRB, 65, 174105.
 
 For the variables name I used this convention:
 if the variable symbolizes a mathematical function, its argument is preceded by
@@ -37,14 +38,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import matplotlib.pyplot as plt
 import numpy as np
-# from itertools import product
-# from timeit import default_timer as timer
-#from scipy.integrate import simps
 
-#from modules import Formalism
-#from modules import Geometry
+
+# from modules import Formalism
+# from modules import Geometry
 from modules import IgorFunctions
-#from modules import KaplowMethod
+# from modules import KaplowMethod
 from modules import MainFunctions
 from modules import Minimization
 from modules import Optimization
@@ -76,25 +75,20 @@ if __name__ == "__main__":
     
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
-    J_Q = IgorFunctions.calc_JQ(Iincoh_Q, fe_Q)
+    J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
-    
+
     dampingFunction = UtilityAnalysis.calc_dampingFunction(Q, variables.dampingFactor,
         variables.QmaxIntegrate, variables.typeFunction)
-
+        
     #-------------------Intra-molecular components-----------------------------
-
-    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate, 
+    
+    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate,
         variables.maxQ, elementList, element, x, y, z, elementParameters)
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, dampingFunction)
-
-    rintra, Fintra_r = MainFunctions.calc_Fr(Q, Q*iintradamp_Q)
-    
-    _, Fintra_r = UtilityAnalysis.rebinning(rintra, Fintra_r, np.amin(rintra), 
-        np.amax(rintra), 8192)
-    
-    _, dampingFunction = UtilityAnalysis.rebinning(Q, dampingFunction, 0.0, 
-        variables.maxQ, variables.NumPoints)
+    Qiintradamp_Q = Q*iintradamp_Q
+    rintra, Fintra_r = MainFunctions.calc_Fr(Q[Q<=variables.QmaxIntegrate], 
+        Qiintradamp_Q[Q<=variables.QmaxIntegrate])
     
     # ---------------------Geometrical correction------------------------------
     
@@ -103,10 +97,6 @@ if __name__ == "__main__":
     Ibkg_Q = Ibkg_Q/absCorrFactor
     
     # ------------------------Starting minimization----------------------------
-    # To keep in mind:
-    # gi_1 = density0
-    # gi = density
-    # Init1 = density
 
     scaleFactor = variables.scaleFactor
     density0 = variables.density
@@ -114,23 +104,20 @@ if __name__ == "__main__":
     # ----------------------First scale minimization---------------------------
     
     scaleStep = 0.05
-    # scaleStepEnd = 0.00006
     
-    scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor,
-        J_Q, fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
+    scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
+        fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
         density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-        variables.NumPoints, dampingFunction, Fintra_r, variables.iterations,
-        scaleStep)
+        dampingFunction, Fintra_r, variables.iterations, scaleStep)
     
     # ----------------------First density minimization-------------------------
     
     densityStep = density0/50
     densityStepEnd = density0/250
     
-    density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor,
-        J_Q, fe_Q, variables.maxQ, variables.minQ,
-        variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf,
-        variables.smoothingFactor, variables.rmin, variables.NumPoints,
+    density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
+        fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
+        density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         dampingFunction, Fintra_r, variables.iterations, densityStep, densityStepEnd)
     
     print("density0, density", density0, density)
@@ -147,20 +134,18 @@ if __name__ == "__main__":
             scaleStep = 0.00006
             densityStep = density/1000
         
-        scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, 
-            absCorrFactor, J_Q, fe_Q, variables.maxQ, variables.minQ,
-            variables.QmaxIntegrate, Ztot, density, scaleFactor, Sinf, 
-            variables.smoothingFactor, variables.rmin, variables.NumPoints,
+        scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
+            fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
+            density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
             dampingFunction, Fintra_r, variables.iterations, scaleStep)
-        
+
         density0=density
-        density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q,
-            absCorrFactor, J_Q, fe_Q, variables.maxQ, variables.minQ,
-            variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf,
-            variables.smoothingFactor, variables.rmin, variables.NumPoints,
-            dampingFunction, Fintra_r, variables.iterations, densityStep,
-            density/250)
-        
+
+        density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
+            fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
+            density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+            dampingFunction, Fintra_r, variables.iterations, densityStep, density/250)
+
         numLoopIteration += 1
         print("numLoopIteration", numLoopIteration, scaleFactor, density)
        

@@ -89,24 +89,24 @@ def Kaplow_method(Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q,
     """
 
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
-    alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, \
-        Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate], \
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf,
+        Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate],
         fe_Q[Q<=QmaxIntegrate], Ztot, density)
     Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
 
-    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, \
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ,
         QmaxIntegrate, maxQ)
-    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, smoothFactor, \
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, smoothFactor,
         minQ, QmaxIntegrate, maxQ)
-    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf, \
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Q, Sinf,
         QmaxIntegrate, dampFactor)
 
     i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
-    F_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate], \
+    F_r = MainFunctions.calc_Fr(r, Q[Q<=QmaxIntegrate],
         i_Q[Q<=QmaxIntegrate])
 
-    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(iteration, F_r, \
-        Fintra_r, density, i_Q[Q<=QmaxIntegrate], Q[Q<=QmaxIntegrate], \
+    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(iteration, F_r,
+        Fintra_r, density, i_Q[Q<=QmaxIntegrate], Q[Q<=QmaxIntegrate],
         Sinf, J_Q[Q<=QmaxIntegrate], r, rmin, "n")
 
     chi2 = simps(deltaFopt_r[r < rmin]**2, r[r < rmin])
@@ -114,7 +114,7 @@ def Kaplow_method(Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q,
     return (chi2, SsmoothDamp_Q, F_r, Fopt_r)
 
 
-def Kaplow_methodFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean, \
+def Kaplow_methodFZ(numAtoms, variables, Q, I_Q, Ibkg_Q, aff_squared_mean,
     aff_mean_squared, Iincoh_Q, sf, rho0, Fintra_r, r):
     """Function to apply the Kaplow method with Waseda FZ formalism.
 

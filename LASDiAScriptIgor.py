@@ -116,7 +116,7 @@ if __name__ == "__main__":
     scaleStep = 0.05
     # scaleStepEnd = 0.00006
     
-    scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor,
+    scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q,
         J_Q, fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
         density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         variables.NumPoints, dampingFunction, Fintra_r, variables.iterations,
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     densityStep = density0/50
     densityStepEnd = density0/250
     
-    density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q, absCorrFactor,
+    density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q,
         J_Q, fe_Q, variables.maxQ, variables.minQ,
         variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf,
         variables.smoothingFactor, variables.rmin, variables.NumPoints,
@@ -148,14 +148,14 @@ if __name__ == "__main__":
             densityStep = density/1000
         
         scaleFactor = IgorFunctions.OptimizeScaleGofRCorr(Q, I_Q, Ibkg_Q, 
-            absCorrFactor, J_Q, fe_Q, variables.maxQ, variables.minQ,
+            J_Q, fe_Q, variables.maxQ, variables.minQ,
             variables.QmaxIntegrate, Ztot, density, scaleFactor, Sinf, 
             variables.smoothingFactor, variables.rmin, variables.NumPoints,
             dampingFunction, Fintra_r, variables.iterations, scaleStep)
         
         density0=density
         density = IgorFunctions.OptimizeDensityGofRCorr(Q, I_Q, Ibkg_Q,
-            absCorrFactor, J_Q, fe_Q, variables.maxQ, variables.minQ,
+            J_Q, fe_Q, variables.maxQ, variables.minQ,
             variables.QmaxIntegrate, Ztot, density0, scaleFactor, Sinf,
             variables.smoothingFactor, variables.rmin, variables.NumPoints,
             dampingFunction, Fintra_r, variables.iterations, densityStep,

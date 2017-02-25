@@ -224,7 +224,8 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     return i_Qi
 
 
-def calc_optimize_Fr(iterations, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin, plot_iter):
+def calc_optimize_Fr(iterations, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r,
+    rmin, plot_iter):
     """Function to calculate the F(r) optimization (eq 47, 48, 49).
 
     Parameters
@@ -258,31 +259,31 @@ def calc_optimize_Fr(iterations, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r, rmin
                  difference between the last F(r) and its theoretical value
     """
 
-    if plot_iter.lower() == "y":
-        plt.ion()
-        plt.figure("F_rIt")
-        plt.plot(r, F_r, label="F(r)")
-        plt.xlabel("r (nm)")
-        plt.ylabel("F(r)")
-        plt.legend()
-        plt.grid(True)
+    # if plot_iter.lower() == "y":
+        # plt.ion()
+        # plt.figure("F_rIt")
+        # plt.plot(r, F_r, label="F(r)")
+        # plt.xlabel("r (nm)")
+        # plt.ylabel("F(r)")
+        # plt.legend()
+        # plt.grid(True)
 
     for i in range(iterations):
         deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
-        i_Q = calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin)
         i_Q[0] = 0.0
-        F_r = MainFunctions.calc_Fr2(r, Q, i_Q)
+        i_Q[1:] = calc_iQi(i_Q[1:], Q[1:], Sinf, J_Q[1:], deltaF_r, r, rmin)
+        
+        r, F_r = MainFunctions.calc_Fr(Q, Q*i_Q)
+        # if plot_iter.lower() == "y":
+            # j = i+1
+            # plt.figure("F_rIt")
+            # plt.plot(r, F_r, label="%s iteration F(r)" %j)
+            # plt.legend()
+            # plt.draw()
 
-        if plot_iter.lower() == "y":
-            j = i+1
-            plt.figure("F_rIt")
-            plt.plot(r, F_r, label="%s iteration F(r)" %j)
-            plt.legend()
-            plt.draw()
+            # time.sleep(1.0)
 
-            time.sleep(1.0)
-
-    if plot_iter.lower() == "y":
-        plt.ioff()
+    # if plot_iter.lower() == "y":
+        # plt.ioff()
 
     return (F_r, deltaF_r)

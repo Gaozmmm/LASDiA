@@ -447,7 +447,7 @@ def interpolation_after_smoothing(X, newX, f_X):
     return newf_X
 
 
-def make_array_loop(varValue, step, numSample):
+def makeArrayLoop(varValue, step, numSample):
     """Function to create an array given its middle value and the percentage
     of the extreme.
     

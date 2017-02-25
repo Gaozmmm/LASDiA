@@ -54,7 +54,7 @@ maxQ = 109.0                                                    # Maximum Q valu
 # maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
 
 NumPoints = 550                                               # Number of points for S(Q) smoothing
-smoothingFactor = 0.5                                            # Smoothing factor for cubic spline
+smoothingFactor = 0.2                                           # Smoothing factor for cubic spline
 dampingFactor = 0.5                                              # Exponential damping factor == A*Qmax^2
 typeFunction = "Exponential"                                    # Damping function
 
@@ -64,8 +64,8 @@ iterations = 2                                                   # Number of ite
 rmin = 0.24                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
-scaleFactor = 0.58 #1                                             # Scale factor initial value
-density = 25.06 #27.1793                                          # Sample density initial value
+scaleFactor = 1                                             # Scale factor initial value
+density = 27.1793                                          # Sample density initial value
 # density = 29.8929                                          # Sample density initial value
 
 
