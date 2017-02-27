@@ -100,11 +100,19 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
     scaleStepEnd = 0.00006
     numSample = 23
     
+    # plt.ion()
+    # figure, ax = plt.subplots()
+
     # Loop for the range shifting
     # print("cond", (10*scaleStep>scaleStepEnd) * (NoPeak<5) * ((Flag==1) + (scaleFactor+scaleStep*1.1>=0)))
     while ((10*scaleStep>scaleStepEnd) * (NoPeak<5) * ((Flag==1) + (scaleFactor+scaleStep*1.1>=0))):
         scaleArray = UtilityAnalysis.makeArrayLoop(scaleFactor, scaleStep, numSample)
         chi2Array = np.zeros(numSample)
+        
+        # ax.cla()
+        # ax.grid(True)
+        # ax.relim()
+        # ax.autoscale_view()
         
         for i in range(numSample):
 
@@ -139,7 +147,7 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
             chi2Array[i] = np.mean(deltaFopt_r**2)
 
         # --------------------Range shifting selection --------------------
-
+        
         if np.amax(chi2Array) > 10**8:
             scaleFactorIdx = np.argmin(chi2Array[0:np.argmax(chi2Array)])
             scaleFactor = scaleArray[scaleFactorIdx]
@@ -163,7 +171,6 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
             NoPeak += 1
         
         # plt.scatter(scaleArray, chi2Array)
-        # plt.grid(True)
         # plt.show()
         
         scaleStep /= 10
@@ -171,9 +178,11 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
         print(Flag, scaleFactor, scaleStep)
 
     # ------------------------chi2 curve fit for scale-------------------------
+    # plt.ioff()
 
     xFit, yFit, scaleFactor, chi2Min = chi2Fit(scaleArray, chi2Array)
     # plt.plot(xFit, yFit)
+    # plt.plot(scaleFactor, chi2Min, "r")
     # plt.grid(True)
     
     print("final scale factor", scaleFactor)
