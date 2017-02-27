@@ -105,8 +105,9 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
 
     # Loop for the range shifting
     # print("cond", (10*scaleStep>scaleStepEnd) * (NoPeak<5) * ((Flag==1) + (scaleFactor+scaleStep*1.1>=0)))
-    while ((10*scaleStep>scaleStepEnd) * (NoPeak<5) * ((Flag==1) + (scaleFactor+scaleStep*1.1>=0))):
-        scaleArray = UtilityAnalysis.makeArrayLoop(scaleFactor, scaleStep, numSample)
+    # while ((10*scaleStep>scaleStepEnd) * (NoPeak<5) * ((Flag==1) + (scaleFactor+scaleStep*1.1>=0))):
+    while 1:
+        scaleArray = UtilityAnalysis.makeArrayLoop(scaleFactor, scaleStep)
         chi2Array = np.zeros(numSample)
         
         # ax.cla()
@@ -170,12 +171,15 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
             scaleStep *= 10
             NoPeak += 1
         
-        # plt.scatter(scaleArray, chi2Array)
-        # plt.show()
+        plt.scatter(scaleArray, chi2Array)
+        plt.grid(True)
+        plt.show()
         
         scaleStep /= 10
         Flag += 1
         print(Flag, scaleFactor, scaleStep)
+        if (scaleFactorIdx>=6 and scaleFactorIdx<=16):
+            break
 
     # ------------------------chi2 curve fit for scale-------------------------
     # plt.ioff()
@@ -200,9 +204,11 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
     Flag = 0
     NoPeak = 0
     numSample = 23
-
-    while ((10*densityStep>densityStepEnd) and (NoPeak<5)): # Loop for the range shifting
-        densityArray = UtilityAnalysis.makeArrayLoop(density, densityStep, numSample)
+    
+    # Loop for the range shifting
+    # while ((10*densityStep>densityStepEnd) and (NoPeak<5)):
+    while 1:
+        densityArray = UtilityAnalysis.makeArrayLoop(density, densityStep)
         chi2Array = np.zeros(numSample)
 
         for i in range(numSample):
@@ -259,9 +265,11 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
         
         Flag += 1
         print(Flag, density, densityStep)
-        # plt.scatter(densityArray, chi2Array)
-        # plt.grid(True)
-        # plt.show()
+        plt.scatter(densityArray, chi2Array)
+        plt.grid(True)
+        plt.show()
+        if (densityIdx>=6 and densityIdx<=16):
+            break
         
         
     # ------------------------chi2 curve fit for scale-------------------------
