@@ -82,7 +82,7 @@ def calc_distMol(x1, y1, z1, x2, y2, z2):
     return d
 
 
-def molToelemList(molecule):
+def molToElemList(molecule):
     """Function to convert the molecule name to dictionary.
 
     Parameters

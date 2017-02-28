@@ -59,7 +59,7 @@ if __name__ == "__main__":
     
     variables = Utility.read_inputFile("./inputFile.txt")
     
-    elementList = Utility.molToelemList(variables.molecule)
+    elementList = Utility.molToElemList(variables.molecule)
     elementParameters = Utility.read_parameters(elementList, variables.element_params_path)
     
     path = Utility.path_xyz_file(variables.molecule)

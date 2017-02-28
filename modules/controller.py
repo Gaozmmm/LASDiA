@@ -50,6 +50,10 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.I_Q = None
         self.Qbkg = None
         self.Ibkg_Q = None
+        self.orgQ = None
+        self.orgI_Q = None
+        self.orgQbkg = None
+        self.orgIbkg_Q = None
         self.SsmoothDamp_Q = None
         self.elementList = None
         self.Ztot = None
@@ -121,6 +125,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.dataFileName.setPlainText(fileName)
         
         self.Q, self.I_Q = Utility.read_file(path)
+        self.orgQ = self.Q
+        self.orgI_Q = self.I_Q
         
         self.ui.rawDataPlot.canvas.ax.plot(self.Q, self.I_Q, "b", label="Data")
         self.ui.rawDataPlot.canvas.ax.legend()
@@ -145,6 +151,8 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.ui.bkgFileName.setPlainText(fileName)
         
         self.Qbkg, self.Ibkg_Q = Utility.read_file(path)
+        self.orgQbkg = self.Qbkg
+        self.orgIbkg_Q = self.Ibkg_Q
         path = ""
         
         self.ui.rawDataPlot.canvas.ax.plot(self.Qbkg, self.Ibkg_Q, "g--", label="Bkg")
@@ -156,11 +164,11 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def interpolation(self):
         """Function to interpolate data"""
         
-        self.Q, self.I_Q = UtilityAnalysis.data_interpolation(self.Q, self.I_Q, 
+        self.Q, self.I_Q = UtilityAnalysis.data_interpolation(self.orgQ, self.orgI_Q, 
             self.ui.minQ.value(), self.ui.maxQ.value(),
             self.ui.interpolationPoints.value())
 
-        self.Qbkg, self.Ibkg_Q = UtilityAnalysis.data_interpolation(self.Qbkg, self.Ibkg_Q, 
+        self.Qbkg, self.Ibkg_Q = UtilityAnalysis.data_interpolation(self.orgQbkg, self.orgIbkg_Q, 
             self.ui.minQ.value(), self.ui.maxQ.value(),
             self.ui.interpolationPoints.value())
         

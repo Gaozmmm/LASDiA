@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtCore import pyqtSlot
 from myMassEl_v16 import *
 
+import Utility
+
 def reset_(self):
     self.rbr = 0
     self.n = 0
@@ -180,7 +182,17 @@ class Calculate(QMainWindow):
     
     @pyqtSlot()
     def on_pushButton_close_clicked(self):
-        print("Closing")
+        molecule = ""
+        if self.ui.label_el_1.text() != "-":
+            molecule += self.ui.label_el_1.text() + str(self.ui.spinBox_el_1.value())
+        if self.ui.label_el_2.text() != "-":
+            molecule += self.ui.label_el_2.text() + str(self.ui.spinBox_el_2.value())
+        if self.ui.label_el_3.text() != "-":
+            molecule += self.ui.label_el_3.text() + str(self.ui.spinBox_el_3.value())
+        if self.ui.label_el_4.text() != "-":
+            molecule += self.ui.label_el_4.text() + str(self.ui.spinBox_el_4.value())
+        
+        elementList = Utility.molToElemList(molecule)
         self.close()
         
     @pyqtSlot()
