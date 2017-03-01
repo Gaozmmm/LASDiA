@@ -41,7 +41,7 @@ import numpy as np
 
 
 # from modules import Formalism
-# from modules import Geometry
+from modules import Geometry
 from modules import IgorFunctions
 # from modules import KaplowMethod
 from modules import MainFunctions
@@ -92,7 +92,12 @@ if __name__ == "__main__":
     
     # ---------------------Geometrical correction------------------------------
     
+    # I_Q, Ibkg_Q = Geometry.MCCCorrection(Q, I_Q, Qbkg, Ibkg_Q, variables, "n")
+    
     absCorrFactor = IgorFunctions.absorption(Q)
+    # two_theta = UtilityAnalysis.Qto2theta(Q)
+    # absCorrFactor = Geometry.calcAbsCorrection(variables.abs_length, two_theta, 
+        # variables.dac_thickness, 0.0)
     I_Q = I_Q/absCorrFactor
     Ibkg_Q = Ibkg_Q/absCorrFactor
     
