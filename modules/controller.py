@@ -29,6 +29,8 @@ from modules import Optimization
 from modules import Utility
 from modules import UtilityAnalysis
 
+# from modules import myMassEl_v16_code
+
 from modules import LASDiAGUI
 
 # class MyPopup(QWidget):
@@ -66,6 +68,7 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
         self.Iincoh_Q = None
         self.J_Q = None
         self.dampingFunct = None
+        self.molecule = None
         
         self.XYZFilePath = None
         
@@ -188,8 +191,17 @@ class LASDiA(QtWidgets.QMainWindow, LASDiAGUI.Ui_LASDiAGUI):
     def setComposition(self):
         """Function to set the sample composition"""
         
-        os.system("python.exe ./modules/myMassEl_v16_code.py")
-    
+        # os.system("python.exe ./modules/myMassEl_v16_code.py")
+        # form = myMassEl_v16_code.Calculate()
+        # form.show()
+        # command = ["python.exe", "./modules/myMassEl_v16_code.py"]
+        
+        command = [sys.executable, "./modules/myMassEl_v16_code.py"]
+        p = subprocess.Popen(command, stdout=subprocess.PIPE)
+        self.molecule = p.stdout.read().decode('ascii')
+        # print("molecule", self.molecule)
+        elementList = Utility.molToElemList(self.molecule)
+        # print(elementList)
 
     #---------------------------------------------------------
     

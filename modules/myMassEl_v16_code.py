@@ -1,9 +1,12 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtCore import pyqtSlot
-from myMassEl_v16 import *
 
+from myMassEl_v16 import *
 import Utility
+
+# from modules.myMassEl_v16 import *
+# from modules import Utility
 
 def reset_(self):
     self.rbr = 0
@@ -192,7 +195,8 @@ class Calculate(QMainWindow):
         if self.ui.label_el_4.text() != "-":
             molecule += self.ui.label_el_4.text() + str(self.ui.spinBox_el_4.value())
         
-        elementList = Utility.molToElemList(molecule)
+        # elementList = Utility.molToElemList(molecule)
+        print(molecule)
         self.close()
         
     @pyqtSlot()
