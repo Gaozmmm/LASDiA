@@ -128,14 +128,17 @@ if __name__ == "__main__":
     print("density0, density", density0, density)
     numLoopIteration = 0
     
-    while (np.abs(density-density0) > np.abs(density/2500)) and (numLoopIteration <= 30):
+    while 1:
         if np.abs(density-density0) > density/25:
+            print("First")
             scaleStep = 0.006
             densityStep = density/10
         elif np.abs(density-density0) > density/75:
+            print("Second")
             scaleStep = 0.0006
             densityStep = density/100
         else:
+            print("Third")
             scaleStep = 0.00006
             densityStep = density/1000
         
@@ -150,9 +153,42 @@ if __name__ == "__main__":
             fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
             density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
             dampingFunction, Fintra_r, variables.iterations, densityStep, density/250)
-
+        
         numLoopIteration += 1
         print("numLoopIteration", numLoopIteration, scaleFactor, density)
+        if (np.abs(density-density0) > np.abs(density/2500)) and (numLoopIteration <= 30):
+            continue
+        else:
+            break
        
     print("final scale", scaleFactor, "final density", density)
+    
+    
+    
+    
+    
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
+        Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], 
+        fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, 
+        variables.QmaxIntegrate, variables.maxQ)
+
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+        variables.smoothingFactor, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+        dampingFunction)
+
+    i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+    
+    Qi_Q = Q*i_Q
+    r, F_r = MainFunctions.calc_Fr(Q[Q<=variables.QmaxIntegrate], 
+        Qi_Q[Q<=variables.QmaxIntegrate])
+    
+    Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S_Q", "S(Q)", "y")
+    Utility.plot_data(r, F_r, "F_r", "r", "F_r", "F(r)", "y")
+    
     plt.show()

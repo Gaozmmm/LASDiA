@@ -559,7 +559,7 @@ def chi2Fit(value, valueArray, chi2Array):
     return (xFit, yFit, value, valueY)
 
 
-def make_array_loop(varValue, step, numSample):
+def makeArrayLoop(varValue, step, numSample=23):
     """Function to create an array given its middle value and the percentage
     of the extreme.
     

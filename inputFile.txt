@@ -49,19 +49,19 @@ MCC_type = "A"                                                  # type of Soller
 #maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
 
 # CO2
-minQ = 5.00                                                    # Minimum Q value in data interpolation waves
+minQ = 8.00                                                    # Minimum Q value in data interpolation waves
 QmaxIntegrate = 90.0                                            # Qmax for all integration operations
 maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
 
 NumPoints = 550                                               # Number of points for S(Q) smoothing
-smoothingFactor = 0.2                                           # Smoothing factor for cubic spline
+smoothingFactor = 0.25                                           # Smoothing factor for cubic spline
 dampingFactor = 0.5                                              # Exponential damping factor == A*Qmax^2
 typeFunction = "Exponential"                                    # Damping function
 
 # F(r) optimization
 plot_iter = "n"                                                 # flag to plot the F(r) iterations
 iterations = 2                                                   # Number of iteration for F(r) optimization
-rmin = 0.235                                                     # The distance below which no peaks in F(r) may occur
+rmin = 0.22                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
 scaleFactor = 1                                             # Scale factor initial value

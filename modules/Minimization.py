@@ -77,6 +77,9 @@ def chi2Fit(variableArray, chi2Array):
     xMin = realPolRoots[test>0]
     yMin = polFit(xMin)
     
+    print("xMin", xMin)
+    print("yMin", yMin)
+    
     absXMin = xMin[np.argmin(yMin)]
     absYMin = np.amin(yMin)
     
@@ -97,23 +100,16 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
     
     Flag = 0
     NoPeak = 0
+    scaleFactor = scaleFactor-scaleStep*11
     scaleStepEnd = 0.00006
     numSample = 23
     
-    # plt.ion()
-    # figure, ax = plt.subplots()
-
     # Loop for the range shifting
-    # print("cond", (10*scaleStep>scaleStepEnd) * (NoPeak<5) * ((Flag==1) + (scaleFactor+scaleStep*1.1>=0)))
-    # while ((10*scaleStep>scaleStepEnd) * (NoPeak<5) * ((Flag==1) + (scaleFactor+scaleStep*1.1>=0))):
     while 1:
-        scaleArray = UtilityAnalysis.makeArrayLoop(scaleFactor, scaleStep)
+        scaleArray = IgorFunctions.makeArrayLoop(scaleFactor, scaleStep)
         chi2Array = np.zeros(numSample)
         
-        # ax.cla()
-        # ax.grid(True)
-        # ax.relim()
-        # ax.autoscale_view()
+        #print(scaleArray)
         
         for i in range(numSample):
 
@@ -151,46 +147,46 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
         
         if np.amax(chi2Array) > 10**8:
             scaleFactorIdx = np.argmin(chi2Array[0:np.argmax(chi2Array)])
-            scaleFactor = scaleArray[scaleFactorIdx]
         else:
             scaleFactorIdx = np.argmin(chi2Array)
-            scaleFactor = scaleArray[scaleFactorIdx]
         
-        # nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
+        scaleFactor = scaleArray[scaleFactorIdx]-scaleStep*1.1
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
         
-        print(scaleFactor)
+        #print(scaleFactor, nearEl, nearIdx)
+        #print(scaleArray)
         
-        if scaleFactorIdx == 0:
+        if nearIdx == 0:
             print("out1")
             scaleFactor -= scaleStep*10
             scaleStep *= 10
             NoPeak += 1
-        if scaleFactorIdx >= numSample-2:
+        if nearIdx >= numSample-2:
             print("out2")
             scaleFactor += scaleStep*10
             scaleStep *= 10
             NoPeak += 1
         
-        plt.scatter(scaleArray, chi2Array)
-        plt.grid(True)
-        plt.show()
-        
         scaleStep /= 10
         Flag += 1
-        print(Flag, scaleFactor, scaleStep)
-        if (scaleFactorIdx>=6 and scaleFactorIdx<=16):
+        #print(Flag, scaleArray[scaleFactorIdx], scaleFactor, scaleStep, 10*scaleStep, scaleStepEnd)
+        
+        #plt.scatter(scaleArray, chi2Array)
+        #plt.grid(True)
+        #plt.show()
+        
+        if((10*scaleStep>scaleStepEnd) and (NoPeak<5) and ((Flag==1) or (scaleFactor+scaleStep*1.1>=0.0))):
+        #if (scaleFactorIdx>=6 and scaleFactorIdx<=16):
+            continue
+        else:
             break
 
     # ------------------------chi2 curve fit for scale-------------------------
     # plt.ioff()
-
-    xFit, yFit, scaleFactor, chi2Min = chi2Fit(scaleArray, chi2Array)
-    # plt.plot(xFit, yFit)
-    # plt.plot(scaleFactor, chi2Min, "r")
-    # plt.grid(True)
+    
+    xFit, yFit, scaleFactor, chi2 = IgorFunctions.chi2Fit(scaleFactor, scaleArray, chi2Array)
     
     print("final scale factor", scaleFactor)
-    # plt.show()
     
     return scaleFactor
 
@@ -204,13 +200,16 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
     Flag = 0
     NoPeak = 0
     numSample = 23
+    density = density-densityStep*11
     
     # Loop for the range shifting
     # while ((10*densityStep>densityStepEnd) and (NoPeak<5)):
     while 1:
-        densityArray = UtilityAnalysis.makeArrayLoop(density, densityStep)
+        densityArray = IgorFunctions.makeArrayLoop(density, densityStep)
         chi2Array = np.zeros(numSample)
-
+        
+        #print(densityArray)
+        
         for i in range(numSample):
 
             # ------------------Kaplow method for scale--------------------
@@ -246,16 +245,16 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
         # --------------------Range shifting selection --------------------
         
         densityIdx = np.argmin(chi2Array)
-        density = densityArray[densityIdx]
+        density = densityArray[densityIdx] - densityStep*1.1
         
-        # nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
         
-        if densityIdx == 0:
+        if nearIdx == 0:
             print("out3")
             density -= densityStep*10
             densityStep *= 10
             NoPeak += 1
-        if densityIdx >= numSample-2:
+        if nearIdx >= numSample-2:
             print("out4")
             density += densityStep*10
             densityStep *= 10
@@ -264,18 +263,23 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
         densityStep /= 10
         
         Flag += 1
-        print(Flag, density, densityStep)
-        plt.scatter(densityArray, chi2Array)
-        plt.grid(True)
-        plt.show()
-        if (densityIdx>=6 and densityIdx<=16):
-            break
+        #print(Flag, densityArray[densityIdx], density, densityStep, 10*densityStep, densityStepEnd)
         
+        #plt.scatter(densityArray, chi2Array)
+        #plt.grid(True)
+        #plt.show()
+        if ((10*densityStep>densityStepEnd) and (NoPeak<5)):
+        #if (densityIdx>=6 and densityIdx<=16):
+            continue
+        else:
+            break
+            
         
     # ------------------------chi2 curve fit for scale-------------------------
     
-    xFit, yFit, density, chi2Min = chi2Fit(densityArray, chi2Array)
-
+    #xFit, yFit, density, chi2Min = chi2Fit(densityArray, chi2Array)
+    xFit, yFit, density, chi2 = IgorFunctions.chi2Fit(density, densityArray, chi2Array)
+    
     print("final density", density)
     return density
 
