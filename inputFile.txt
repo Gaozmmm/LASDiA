@@ -54,7 +54,7 @@ QmaxIntegrate = 90.0                                            # Qmax for all i
 maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
 
 NumPoints = 550                                               # Number of points for S(Q) smoothing
-smoothingFactor = 0.25                                           # Smoothing factor for cubic spline
+smoothingFactor = 0.5                                           # Smoothing factor for cubic spline
 dampingFactor = 0.5                                              # Exponential damping factor == A*Qmax^2
 typeFunction = "Exponential"                                    # Damping function
 

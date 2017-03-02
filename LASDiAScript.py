@@ -145,7 +145,7 @@ if __name__ == "__main__":
         scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
             fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
             density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-            dampingFunction, Fintra_r, variables.iterations, scaleStep)
+           dampingFunction, Fintra_r, variables.iterations, scaleStep)
 
         density0=density
 
@@ -157,14 +157,15 @@ if __name__ == "__main__":
         numLoopIteration += 1
         print("numLoopIteration", numLoopIteration, scaleFactor, density)
         if (np.abs(density-density0) > np.abs(density/2500)) and (numLoopIteration <= 30):
-            continue
+           continue
         else:
             break
        
     print("final scale", scaleFactor, "final density", density)
     
     
-    
+    #scaleFactor = 1.0603638618
+    #density = 29.9874611902
     
     
     Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
@@ -187,8 +188,20 @@ if __name__ == "__main__":
     Qi_Q = Q*i_Q
     r, F_r = MainFunctions.calc_Fr(Q[Q<=variables.QmaxIntegrate], 
         Qi_Q[Q<=variables.QmaxIntegrate])
+    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r,
+                Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate],
+                Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+    
+    Scorr_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
     
     Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S_Q", "S(Q)", "y")
+    Utility.plot_data(Q, Scorr_Q, "S_Q", "Q", "S_Q", "Scorr(Q)", "y")
     Utility.plot_data(r, F_r, "F_r", "r", "F_r", "F(r)", "y")
+    Utility.plot_data(r, Fopt_r, "F_r", "r", "F_r", "Fopt(r)", "y")
+    
+    Utility.write_file("./S_Q.txt", Q, SsmoothDamp_Q)
+    Utility.write_file("./Scorr_Q.txt", Q, Scorr_Q)
+    Utility.write_file("./F_r.txt", r, F_r)
+    Utility.write_file("./Fopt_r.txt", r, Fopt_r)
     
     plt.show()
