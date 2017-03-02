@@ -24,14 +24,14 @@
 # The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-data_file = "../data/cea_files/ar/HT2_034BBin.txt"
-bkg_file = "../data/cea_files/ar/HT2_036BBin.txt"
-# data_file = "../data/cea_files/CO2/WO2_007BBin.chi"
-# bkg_file = "../data/cea_files/CO2/WO2_013BBin.chi"
+#data_file = "../data/cea_files/ar/HT2_034BBin.txt"
+#bkg_file = "../data/cea_files/ar/HT2_036BBin.txt"
+data_file = "../data/cea_files/CO2/WO2_007BBin.chi"
+bkg_file = "../data/cea_files/CO2/WO2_013BBin.chi"
 
 # Sample composition
-molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
-# molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
+#molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
+molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
 element_params_path = "./elementParameters.txt"                      # Path element parameters file
 
 # Geometry corrections
@@ -44,14 +44,14 @@ MCC_type = "A"                                                  # type of Soller
 
 # Analysis parameters
 # Ar
-minQ = 3.0                                                      # Minimum Q value in data interpolation waves
-QmaxIntegrate = 98.0                                            # Qmax for all integration operations
-maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
+#minQ = 3.0                                                      # Minimum Q value in data interpolation waves
+#QmaxIntegrate = 98.0                                            # Qmax for all integration operations
+#maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
 
 # CO2
-# minQ = 5.00                                                    # Minimum Q value in data interpolation waves
-# QmaxIntegrate = 90.0                                            # Qmax for all integration operations
-# maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
+minQ = 5.00                                                    # Minimum Q value in data interpolation waves
+QmaxIntegrate = 90.0                                            # Qmax for all integration operations
+maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
 
 NumPoints = 550                                               # Number of points for S(Q) smoothing
 smoothingFactor = 0.2                                           # Smoothing factor for cubic spline
@@ -61,7 +61,7 @@ typeFunction = "Exponential"                                    # Damping functi
 # F(r) optimization
 plot_iter = "n"                                                 # flag to plot the F(r) iterations
 iterations = 2                                                   # Number of iteration for F(r) optimization
-rmin = 0.24                                                     # The distance below which no peaks in F(r) may occur
+rmin = 0.235                                                     # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
 scaleFactor = 1                                             # Scale factor initial value

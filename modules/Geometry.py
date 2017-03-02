@@ -375,10 +375,10 @@ def MCCCorrection(Q, I_Q, Qbkg, Ibkg_Q, variables, phi_matrix_flag):
         thickness_sampling = np.linspace(0, variables.phi_matrix_thickness, num=num_point)
         phi_matrix = np.load(phi_matrix_path + ".npy")
     
-    T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = calc_T_MCC(0.003, thickness_sampling, \
-        phi_matrix, "y")
-    T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = calc_T_MCC(0.004, thickness_sampling, \
-        phi_matrix, "y")
+    T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = calc_T_MCC(0.007, thickness_sampling, \
+        phi_matrix, "y") # s0th
+    T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = calc_T_MCC(0.01, thickness_sampling, \
+        phi_matrix, "y") #sth
     T_MCC_corr_factor_bkg = calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
     
     I_Q = I_Q /T_MCC_sample4

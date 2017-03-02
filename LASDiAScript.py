@@ -92,7 +92,7 @@ if __name__ == "__main__":
     
     # ---------------------Geometrical correction------------------------------
     
-    # I_Q, Ibkg_Q = Geometry.MCCCorrection(Q, I_Q, Qbkg, Ibkg_Q, variables, "n")
+    I_Q, Ibkg_Q = Geometry.MCCCorrection(Q, I_Q, Qbkg, Ibkg_Q, variables, "n")
     
     absCorrFactor = IgorFunctions.absorption(Q)
     # two_theta = UtilityAnalysis.Qto2theta(Q)
