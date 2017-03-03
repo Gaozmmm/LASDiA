@@ -274,6 +274,66 @@ def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q
     return Ibkg_Q
 
 
+def MCCCorrection(sth, s0th, thickness_sampling, phi_matrix):
+    """Function to calcultate all intensity geometrical corrections.
+    
+    Parameters
+    ----------
+    Q               : numpy array
+                      momentum transfer (nm^-1)
+    I_Q             : numpy array
+                      measured scattering intensity
+    Qbkg            : numpy array
+                      background momentum transfer (nm^-1)
+    Ibkg_Q          : numpy array
+                      background scattering intensity
+    variables       : module
+                      input variables setted by the user
+    phi_matrix_flag : string
+                      flag for the phi matrix calculation:
+                      "y": calculate phi matrix and save on file
+                      "n": read the phi matrix from file
+    
+    Returns
+    -------
+    I_Q             : numpy array
+                      corrected measured sample intensity
+    Ibkg_Q          : numpy array
+                      corrected background intensity
+    """
+    
+    
+    T_MCC_sth, T_MCC_DACsth, T_MCC_ALLsth = calc_T_MCC(sth, thickness_sampling,
+        phi_matrix, "y")
+    T_MCC_samples0th, T_MCC_DACs0th, T_MCC_ALLs0th = calc_T_MCC(s0th, thickness_sampling,
+        phi_matrix, "y")
+    T_MCC_corr_factor_bkg = calc_T_DAC_MCC_bkg_corr(T_MCC_DACsth, T_MCC_DACs0th)
+    
+    # I_Q = I_Q /T_MCC_sth
+    # Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
+    
+    return (T_MCC_sth, T_MCC_corr_factor_bkg)
+
+
+def check_phi_matrix(Q, phi_matrix_flag, ws1, ws2, r1, r2, d,
+    phi_matrix_path="./phi_matrix.npy", phi_matrix_thickness=0.17):
+    """Function to make or read from file the phi matrix.
+    """
+    
+    two_theta = UtilityAnalysis.Qto2theta(Q)
+    num_point = 1000
+    
+    if phi_matrix_flag.lower() == "y": 
+        thickness_sampling, phi_matrix = calc_phi_matrix(phi_matrix_thickness, 
+            two_theta, ws1, ws2, r1, r2, d, num_point)
+        np.save(phi_matrix_path, phi_matrix)
+    else:
+        thickness_sampling = np.linspace(0, phi_matrix_thickness, num=num_point)
+        phi_matrix = np.load(phi_matrix_path)
+    
+    return (thickness_sampling, phi_matrix)
+
+
 def geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, phi_matrix_flag):
     """Function to calcultate all intensity geometrical corrections.
     
@@ -328,60 +388,5 @@ def geometry_correction(Q, I_Q, Qbkg, Ibkg_Q, variables, phi_matrix_flag):
     
     I_Q = I_Q /(abs_corr_factor * T_MCC_sample4)
     Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (abs_corr_factor * T_MCC_sample4)
-    
-    return (I_Q, Ibkg_Q)
-
-
-def MCCCorrection(Q, I_Q, Qbkg, Ibkg_Q, variables, phi_matrix_flag):
-    """Function to calcultate all intensity geometrical corrections.
-    
-    Parameters
-    ----------
-    Q               : numpy array
-                      momentum transfer (nm^-1)
-    I_Q             : numpy array
-                      measured scattering intensity
-    Qbkg            : numpy array
-                      background momentum transfer (nm^-1)
-    Ibkg_Q          : numpy array
-                      background scattering intensity
-    variables       : module
-                      input variables setted by the user
-    phi_matrix_flag : string
-                      flag for the phi matrix calculation:
-                      "y": calculate phi matrix and save on file
-                      "n": read the phi matrix from file
-    
-    Returns
-    -------
-    I_Q             : numpy array
-                      corrected measured sample intensity
-    Ibkg_Q          : numpy array
-                      corrected background intensity
-    """
-    
-    two_theta = UtilityAnalysis.Qto2theta(Q)
-    
-    num_point = 1000
-    
-    phi_matrix_path = "./phi_matrix_" + variables.molecule
-    
-    if phi_matrix_flag.lower() == "y": 
-        ws1, ws2, r1, r2, d = Utility.read_MCC_file(variables.MCC_path, variables.MCC_type)
-        thickness_sampling, phi_matrix = calc_phi_matrix(variables.phi_matrix_thickness, \
-            two_theta, ws1, ws2, r1, r2, d, num_point)
-        np.save(phi_matrix_path, phi_matrix)
-    else:
-        thickness_sampling = np.linspace(0, variables.phi_matrix_thickness, num=num_point)
-        phi_matrix = np.load(phi_matrix_path + ".npy")
-    
-    T_MCC_sample3, T_MCC_DAC3, T_MCC_ALL3 = calc_T_MCC(0.006, thickness_sampling, \
-        phi_matrix, "y") # s0th
-    T_MCC_sample4, T_MCC_DAC4, T_MCC_ALL4 = calc_T_MCC(0.008, thickness_sampling, \
-        phi_matrix, "y") #sth
-    T_MCC_corr_factor_bkg = calc_T_DAC_MCC_bkg_corr(T_MCC_DAC4, T_MCC_DAC3)
-    
-    I_Q = I_Q /T_MCC_sample4
-    Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sample4)
     
     return (I_Q, Ibkg_Q)

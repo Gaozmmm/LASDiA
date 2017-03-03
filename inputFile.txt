@@ -39,8 +39,13 @@ abs_length = 1.208                                              # @33keV 1.208cm
 dac_thickness = 0.144                                           # cm
 phi_matrix_thickness = 0.17                                     # cm 100um for the sample
 phi_matrix_flag = "n"                                           # flag for the phi matrix calculation
-MCC_path = "./SollerSlits.txt"                                  # path of Soller Slits parameters
-MCC_type = "A"                                                  # type of Soller Slits
+ws1 = 0.005
+ws2 = 0.02
+r1 = 5
+r2 = 20
+d = 1
+# MCC_path = "./SollerSlits.txt"                                  # path of Soller Slits parameters
+# MCC_type = "A"                                                  # type of Soller Slits
 
 # Analysis parameters
 # Ar

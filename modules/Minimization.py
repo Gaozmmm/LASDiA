@@ -38,6 +38,7 @@ otherwise it is just the name.
 import numpy as np
 import matplotlib.pyplot as plt
 
+from modules import Geometry
 from modules import IgorFunctions
 from modules import KaplowMethod
 from modules import MainFunctions
@@ -94,7 +95,7 @@ def chi2Fit(variableArray, chi2Array):
 
 def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
-    Fintra_r, iterations, scaleStep):
+    Fintra_r, iterations, scaleStep, sth, s0th, thickness_sampling, phi_matrix):
     """Function for the scale factor optimization.
     """
     
@@ -103,6 +104,12 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
     scaleFactor = scaleFactor-scaleStep*11
     scaleStepEnd = 0.00006
     numSample = 23
+    
+    T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
+        thickness_sampling, phi_matrix)
+    
+    I_Q = I_Q /T_MCC_sth
+    Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
     
     # Loop for the range shifting
     while 1:
@@ -193,7 +200,8 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
 
 def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
-    Fintra_r, iterations, densityStep, densityStepEnd):
+    Fintra_r, iterations, densityStep, densityStepEnd, sth, s0th,
+    thickness_sampling, phi_matrix):
     """Function for the density optimization.
     """
 
@@ -201,6 +209,12 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
     NoPeak = 0
     numSample = 23
     density = density-densityStep*11
+    
+    T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
+        thickness_sampling, phi_matrix)
+    
+    I_Q = I_Q /T_MCC_sth
+    Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
     
     # Loop for the range shifting
     # while ((10*densityStep>densityStepEnd) and (NoPeak<5)):
@@ -282,6 +296,192 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
     
     print("final density", density)
     return density
+
+
+def OptimizeThickness(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
+    Ztot, density, scaleFactor, sth, s0th, Sinf, smoothingFactor, rmin, dampingFunction,
+    Fintra_r, iterations, sthStep, ws1, ws2, r1, r2, d, phi_matrix_flag):
+    """Function for the thickness optimization.
+    """
+    
+    Flag = 0
+    NoPeak = 0
+    sth = max(sth-sthStep*11, 0.0)
+    sthStepEnd = 0.0006
+    numSample = 23
+    
+    # Loop for the range shifting
+    while 1:
+        sthArray = IgorFunctions.makeArrayLoop(sth, sthStep)
+        chi2Array = np.zeros(numSample)
+        
+        for i in range(numSample):
+
+            # ------------------Kaplow method for scale--------------------
+            
+            T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sthArray[i],
+                s0th, thickness_sampling, phi_matrix)
+    
+            I_Q = I_Q /T_MCC_sth
+            Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
+            
+            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+            alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
+                Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate], 
+                fe_Q[Q<=QmaxIntegrate], Ztot, density)
+            Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+            S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, 
+                QmaxIntegrate, maxQ)
+            
+            Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                smoothingFactor, minQ, QmaxIntegrate, maxQ)
+            
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+                dampingFunction)
+            
+            i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+            
+            Qi_Q = Q*i_Q
+            r, F_r = MainFunctions.calc_Fr(Q[Q<=QmaxIntegrate], 
+                Qi_Q[Q<=QmaxIntegrate])
+
+            Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(iterations, F_r,
+                Fintra_r, density, i_Q[Q<=QmaxIntegrate], Q[Q<=QmaxIntegrate],
+                Sinf, J_Q[Q<=QmaxIntegrate], r, rmin, "n")
+            
+            deltaFopt_r[np.where(r>=rmin)] = 0.0
+            chi2Array[i] = np.mean(deltaFopt_r**2)
+
+        # --------------------Range shifting selection --------------------
+        
+        if np.amax(chi2Array) > 10**8:
+            sthIdx = np.argmin(chi2Array[0:np.argmax(chi2Array)])
+        else:
+            sthIdx = np.argmin(chi2Array)
+        
+        sth = sthArray[sthIdx]-sthStep*1.1
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(sthArray, sth)
+        
+        if nearIdx == 0:
+            print("out1")
+            sth -= sthStep*10
+            sthStep *= 10
+            NoPeak += 1
+        if nearIdx >= numSample-2:
+            print("out2")
+            sth += sthStep*10
+            sthStep *= 10
+            NoPeak += 1
+        
+        sthStep /= 10
+        Flag += 1
+        
+        if((10*sthStep>sthStepEnd) and (NoPeak<5)):
+            continue
+        else:
+            break
+
+    # ------------------------chi2 curve fit for scale-------------------------
+    
+    xFit, yFit, sth, chi2 = IgorFunctions.chi2Fit(sth, sthArray, chi2Array)
+    
+    print("final sample thickness", sth)
+    
+    return sth
+
+
+def OptimizeThicknessRef(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
+    Ztot, density, scaleFactor, sth, s0th, Sinf, smoothingFactor, rmin, dampingFunction,
+    Fintra_r, iterations, s0thStep, ws1, ws2, r1, r2, d, phi_matrix_flag):
+    """Function for the thickness optimization.
+    """
+    
+    Flag = 0
+    NoPeak = 0
+    s0th = max(s0th-s0thStep*11, 0.0)
+    s0thStepEnd = 0.0006
+    numSample = 23
+    
+    # Loop for the range shifting
+    while 1:
+        s0thArray = IgorFunctions.makeArrayLoop(s0th, s0thStep)
+        chi2Array = np.zeros(numSample)
+        
+        for i in range(numSample):
+
+            # ------------------Kaplow method for scale--------------------
+            
+            T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth,
+                s0thArray[i], thickness_sampling, phi_matrix)
+    
+            I_Q = I_Q /T_MCC_sth
+            Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
+            
+            Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+            alpha = MainFunctions.calc_alpha(J_Q[Q<=QmaxIntegrate], Sinf, 
+                Q[Q<=QmaxIntegrate], Isample_Q[Q<=QmaxIntegrate], 
+                fe_Q[Q<=QmaxIntegrate], Ztot, density)
+            Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+
+            S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, minQ, 
+                QmaxIntegrate, maxQ)
+            
+            Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+                smoothingFactor, minQ, QmaxIntegrate, maxQ)
+            
+            SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+                dampingFunction)
+            
+            i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+            
+            Qi_Q = Q*i_Q
+            r, F_r = MainFunctions.calc_Fr(Q[Q<=QmaxIntegrate], 
+                Qi_Q[Q<=QmaxIntegrate])
+
+            Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(iterations, F_r,
+                Fintra_r, density, i_Q[Q<=QmaxIntegrate], Q[Q<=QmaxIntegrate],
+                Sinf, J_Q[Q<=QmaxIntegrate], r, rmin, "n")
+            
+            deltaFopt_r[np.where(r>=rmin)] = 0.0
+            chi2Array[i] = np.mean(deltaFopt_r**2)
+
+        # --------------------Range shifting selection --------------------
+        
+        if np.amax(chi2Array) > 10**8:
+            s0thIdx = np.argmin(chi2Array[0:np.argmax(chi2Array)])
+        else:
+            s0thIdx = np.argmin(chi2Array)
+        
+        s0th = s0thArray[s0thIdx]-s0thStep*1.1
+        nearIdx, nearEl = UtilityAnalysis.find_nearest(s0thArray, s0th)
+        
+        if nearIdx == 0:
+            print("out1")
+            s0th -= s0thStep*10
+            s0thStep *= 10
+            NoPeak += 1
+        if nearIdx >= numSample-2:
+            print("out2")
+            s0th += s0thStep*10
+            s0thStep *= 10
+            NoPeak += 1
+        
+        s0thStep /= 10
+        Flag += 1
+        
+        if((10*s0thStep>s0thStepEnd) and (NoPeak<5)):
+            continue
+        else:
+            break
+
+    # ------------------------chi2 curve fit for scale-------------------------
+    
+    xFit, yFit, sth, chi2 = IgorFunctions.chi2Fit(s0th, s0thArray, chi2Array)
+    
+    print("final sample thickness ref", s0th)
+    
+    return s0th
 
 
 def chi2_minimization(scaleFactor, Q, I_Q, Ibkg_Q, J_Q, fe_Q, Iincoh_Q, Sinf, Ztot,

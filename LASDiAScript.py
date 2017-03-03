@@ -92,7 +92,8 @@ if __name__ == "__main__":
     
     # ---------------------Geometrical correction------------------------------
     
-    I_Q, Ibkg_Q = Geometry.MCCCorrection(Q, I_Q, Qbkg, Ibkg_Q, variables, "n")
+    thickness_sampling, phi_matrix = Geometry.check_phi_matrix(Q, phi_matrix_flag,
+        ws1, ws2, r1, r2, d)
     
     absCorrFactor = IgorFunctions.absorption(Q)
     # two_theta = UtilityAnalysis.Qto2theta(Q)
@@ -113,7 +114,8 @@ if __name__ == "__main__":
     scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
         fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
         density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-        dampingFunction, Fintra_r, variables.iterations, scaleStep)
+        dampingFunction, Fintra_r, variables.iterations, scaleStep,
+        sth, s0th, thickness_sampling, phi_matrix)
     
     # ----------------------First density minimization-------------------------
     
@@ -123,7 +125,8 @@ if __name__ == "__main__":
     density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
         fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
         density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-        dampingFunction, Fintra_r, variables.iterations, densityStep, densityStepEnd)
+        dampingFunction, Fintra_r, variables.iterations, densityStep,
+        densityStepEnd, sth, s0th, thickness_sampling, phi_matrix)
     
     print("density0, density", density0, density)
     numLoopIteration = 0
@@ -133,19 +136,25 @@ if __name__ == "__main__":
             print("First")
             scaleStep = 0.006
             densityStep = density/10
+            WSamplestep=0.0008
+            WRefstep=0.0008
         elif np.abs(density-density0) > density/75:
             print("Second")
             scaleStep = 0.0006
             densityStep = density/100
+            WSamplestep=0.0002
+            WRefstep=0.0002
         else:
             print("Third")
             scaleStep = 0.00006
             densityStep = density/1000
+            WSamplestep=0.0001
+            WRefstep=0.0001
         
         scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
             fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
             density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-           dampingFunction, Fintra_r, variables.iterations, scaleStep)
+            dampingFunction, Fintra_r, variables.iterations, scaleStep)
 
         density0=density
 
