@@ -95,7 +95,8 @@ def chi2Fit(variableArray, chi2Array):
 
 def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
-    Fintra_r, iterations, scaleStep, sth, s0th, thickness_sampling, phi_matrix):
+    Fintra_r, iterations, scaleStep, sth, s0th, thickness_sampling, phi_matrix,
+    MCC_flag):
     """Function for the scale factor optimization.
     """
     
@@ -105,11 +106,13 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
     scaleStepEnd = 0.00006
     numSample = 23
     
-    T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
-        thickness_sampling, phi_matrix)
-    
-    I_Q = I_Q /T_MCC_sth
-    Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
+
+    if MCC_flag.lower() == "y":
+        T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
+            thickness_sampling, phi_matrix)
+        
+        I_Q = I_Q /T_MCC_sth
+        Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
     
     # Loop for the range shifting
     while 1:
@@ -201,7 +204,7 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
 def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
     Fintra_r, iterations, densityStep, densityStepEnd, sth, s0th,
-    thickness_sampling, phi_matrix):
+    thickness_sampling, phi_matrix, MCC_flag):
     """Function for the density optimization.
     """
 
@@ -209,12 +212,13 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
     NoPeak = 0
     numSample = 23
     density = density-densityStep*11
-    
-    T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
-        thickness_sampling, phi_matrix)
-    
-    I_Q = I_Q /T_MCC_sth
-    Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
+
+    if MCC_flag.lower() == "y":
+        T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
+            thickness_sampling, phi_matrix)
+        
+        I_Q = I_Q /T_MCC_sth
+        Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
     
     # Loop for the range shifting
     # while ((10*densityStep>densityStepEnd) and (NoPeak<5)):

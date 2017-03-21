@@ -92,8 +92,8 @@ if __name__ == "__main__":
     
     # ---------------------Geometrical correction------------------------------
     
-    thickness_sampling, phi_matrix = Geometry.check_phi_matrix(Q, phi_matrix_flag,
-        ws1, ws2, r1, r2, d)
+    thickness_sampling, phi_matrix = Geometry.check_phi_matrix(Q, variables.phi_matrix_flag,
+        variables.ws1, variables.ws2, variables.r1, variables.r2, variables.d)
     
     absCorrFactor = IgorFunctions.absorption(Q)
     # two_theta = UtilityAnalysis.Qto2theta(Q)
@@ -110,12 +110,15 @@ if __name__ == "__main__":
     # ----------------------First scale minimization---------------------------
     
     scaleStep = 0.05
+
+    sth = 0.008
+    s0th = 0.006
     
     scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
         fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
         density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         dampingFunction, Fintra_r, variables.iterations, scaleStep,
-        sth, s0th, thickness_sampling, phi_matrix)
+        sth, s0th, thickness_sampling, phi_matrix, "n")
     
     # ----------------------First density minimization-------------------------
     
@@ -126,7 +129,7 @@ if __name__ == "__main__":
         fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
         density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
         dampingFunction, Fintra_r, variables.iterations, densityStep,
-        densityStepEnd, sth, s0th, thickness_sampling, phi_matrix)
+        densityStepEnd, sth, s0th, thickness_sampling, phi_matrix, "n")
     
     print("density0, density", density0, density)
     numLoopIteration = 0
@@ -154,14 +157,26 @@ if __name__ == "__main__":
         scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
             fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
             density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-            dampingFunction, Fintra_r, variables.iterations, scaleStep)
+            dampingFunction, Fintra_r, variables.iterations, scaleStep,
+            sth, s0th, thickness_sampling, phi_matrix, "n")
+
+        # scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
+        #     fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
+        #     density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+        #     dampingFunction, Fintra_r, variables.iterations, scaleStep)
 
         density0=density
 
         density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
             fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
             density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-            dampingFunction, Fintra_r, variables.iterations, densityStep, density/250)
+            dampingFunction, Fintra_r, variables.iterations, densityStep,
+            density/250, sth, s0th, thickness_sampling, phi_matrix, "n")
+
+        # density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
+        #     fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
+        #     density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
+        #     dampingFunction, Fintra_r, variables.iterations, densityStep, density/250)
         
         numLoopIteration += 1
         print("numLoopIteration", numLoopIteration, scaleFactor, density)
@@ -208,9 +223,9 @@ if __name__ == "__main__":
     Utility.plot_data(r, F_r, "F_r", "r", "F_r", "F(r)", "y")
     Utility.plot_data(r, Fopt_r, "F_r", "r", "F_r", "Fopt(r)", "y")
     
-    Utility.write_file("./S_Q.txt", Q, SsmoothDamp_Q)
-    Utility.write_file("./Scorr_Q.txt", Q, Scorr_Q)
-    Utility.write_file("./F_r.txt", r, F_r)
-    Utility.write_file("./Fopt_r.txt", r, Fopt_r)
+    Utility.write_file("./S_Q_Ar.txt", Q, SsmoothDamp_Q)
+    Utility.write_file("./Scorr_Q_Ar.txt", Q, Scorr_Q)
+    Utility.write_file("./F_r_Ar.txt", r, F_r)
+    Utility.write_file("./Fopt_r_Ar.txt", r, Fopt_r)
     
     plt.show()
