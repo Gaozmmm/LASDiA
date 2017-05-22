@@ -26,19 +26,18 @@
 # Path sample and bkg file
 data_file = "../data/cea_files/ar/HT2_034BBin.txt"
 bkg_file = "../data/cea_files/ar/HT2_036BBin.txt"
-#data_file = "../data/cea_files/CO2/WO2_007BBin.chi"
-#bkg_file = "../data/cea_files/CO2/WO2_013BBin.chi"
 
 # Sample composition
 molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
-#molecule = "CO2"                                                # Molecular composition: Ar, CO2, N2
 element_params_path = "./elementParameters.txt"                      # Path element parameters file
 
 # Geometry corrections
 abs_length = 1.208                                              # @33keV 1.208cm
-dac_thickness = 0.144                                           # cm
+dac_thickness =  0.144                                           # cm
 phi_matrix_thickness = 0.17                                     # cm 100um for the sample
 phi_matrix_flag = "n"                                           # flag for the phi matrix calculation
+
+#
 ws1 = 0.005
 ws2 = 0.02
 r1 = 5
@@ -66,31 +65,8 @@ typeFunction = "Exponential"                                    # Damping functi
 # F(r) optimization
 plot_iter = "n"                                                 # flag to plot the F(r) iterations
 iterations = 2                                                   # Number of iteration for F(r) optimization
-rmin = 0.22                                                     # The distance below which no peaks in F(r) may occur
+rmin = 0.22                                             # The distance below which no peaks in F(r) may occur
 
 # Scale factor and density parameters
 scaleFactor = 1                                             # Scale factor initial value
-density = 27.1793                                          # Sample density initial value
-# density = 29.8929                                          # Sample density initial value
-
-
-# sfLoop = "n"                                                   # flag for the loop
-# rho0Loop = "n"                                                 # flag for the loop
-
-
-
-
-# Ploting/Writing variables: [Plot (Y/n), Write (Y/n), Path]
-# pw_raw_data = ["n"]                                             # Plot the Raw Data
-
-# pw_S_Q = ["n", "n", "./test/SQ.txt"]                            # Plot and save the S(Q)
-# pw_F_r = ["n", "N", "./test/Fr.txt"]                            # Plot and save F(r)
-
-# pw_F_r_iter = ["n"]                                             # Plot the iterations for the F(r) optimization
-
-# pw_chi2 = ["y"]                                                 # Plot Chi2 graphs
-
-# pw_F_rOpt = ["n", "N", "./test/FrOpt.txt"]                      # Plot and save the optimal F(r) with the best scale factor and rho0 density
-# pw_S_QCorr = ["n", "N", "./test/SQCorr.txt"]                    # Plot and save the S(Q) corrected
-
-# pw_results = ["n", "./results.txt"]                             # Save the scale factor and rho0 density on file otherwise print them
+density = 27.17                                            # Sample density initial value

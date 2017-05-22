@@ -158,7 +158,16 @@ def calc_intraComponent(Q, fe_Q, Ztot, QmaxIntegrate, maxQ, elementList, element
     return (r, iintradamp_Q, Fintra_r)
 
 
-def calc_deltaFr(F_r, Fintra_r, r, rho0):
+def calc_Ftheor(Fintra_r, r, density):
+    """Function to calculate the F(r) theoretical behavior.
+    """
+
+    Fth_r = Fintra_r - 4*np.pi*r*density
+
+    return Fth_r
+
+
+def calc_deltaFr(F_r, Fintra_r, r, density):
     """Function to calculate deltaF(r) (eq. 44, 48).
 
     Parameters
@@ -169,7 +178,7 @@ def calc_deltaFr(F_r, Fintra_r, r, rho0):
                intramolecular contribution of F(r)
     r        : numpy array
                atomic distance (nm)
-    rho0     : float
+    density     : float
                atomic density
 
     Returns
@@ -178,7 +187,7 @@ def calc_deltaFr(F_r, Fintra_r, r, rho0):
                difference between F(r) and its theoretical value
     """
 
-    deltaF_r = F_r - (Fintra_r - 4*np.pi*r*rho0)
+    deltaF_r = F_r - (Fintra_r - 4*np.pi*r*density)
 
     return deltaF_r
 
@@ -224,7 +233,7 @@ def calc_iQi(i_Q, Q, Sinf, J_Q, deltaF_r, r, rmin):
     return i_Qi
 
 
-def calc_optimize_Fr(iterations, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r,
+def calc_optimize_Fr(iterations, F_r, Fintra_r, density, i_Q, Q, Sinf, J_Q, r,
     rmin, plot_iter):
     """Function to calculate the F(r) optimization (eq 47, 48, 49).
 
@@ -234,7 +243,7 @@ def calc_optimize_Fr(iterations, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r,
                  number of iterations
     F_r        : numpy array
                  F(r)
-    rho0       : float
+    density       : float
                  atomic density
     i_Q        : numpy array
                  i(Q)
@@ -269,7 +278,7 @@ def calc_optimize_Fr(iterations, F_r, Fintra_r, rho0, i_Q, Q, Sinf, J_Q, r,
         # plt.grid(True)
 
     for i in range(iterations):
-        deltaF_r = calc_deltaFr(F_r, Fintra_r, r, rho0)
+        deltaF_r = calc_deltaFr(F_r, Fintra_r, r, density)
         i_Q[0] = 0.0
         i_Q[1:] = calc_iQi(i_Q[1:], Q[1:], Sinf, J_Q[1:], deltaF_r, r, rmin)
         

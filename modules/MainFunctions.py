@@ -294,14 +294,14 @@ def calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters):
     return Sinf
 
 
-def calc_IsampleQ(I_Q, scale_factor, Ibkg_Q):
+def calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q):
     """Function to calculate the sample scattering intensity Isample(Q) (eq. 28).
     
     Parameters
     ----------
     I_Q          : numpy array
                    measured scattering intensity
-    scale_factor : float
+    scaleFactor  : float
                    scale factor
     Ibkg_Q       : numpy array
                    background scattering intensity
@@ -312,12 +312,12 @@ def calc_IsampleQ(I_Q, scale_factor, Ibkg_Q):
                    sample scattering intensity
     """
     
-    Isample_Q = I_Q - scale_factor * Ibkg_Q
+    Isample_Q = I_Q - scaleFactor * Ibkg_Q
     
     return Isample_Q
 
 
-def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
+def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, density):
     """Function to calculate the normalization factor alpha (eq. 34).
     
     Parameters
@@ -334,7 +334,7 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
                 effective electric form factor
     Ztot      : int
                 total Z number
-    rho0      : float
+    density   : float
                 average atomic density
     
     Returns
@@ -345,7 +345,7 @@ def calc_alpha(J_Q, Sinf, Q, Isample_Q, fe_Q, Ztot, rho0):
     
     Integral1 = simps((J_Q + Sinf) * Q**2, Q)
     Integral2 = simps((Isample_Q/fe_Q**2) * Q**2, Q)
-    alpha = Ztot**2 * (((-2*np.pi**2*rho0) + Integral1) / Integral2)
+    alpha = Ztot**2 * (((-2*np.pi**2*density) + Integral1) / Integral2)
     
     return alpha
 

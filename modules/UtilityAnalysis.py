@@ -312,27 +312,27 @@ def calc_SQsmoothing(Q, S_Q, Sinf, smoothingFactor, minQ, QmaxIntegrate, maxQ):
     
     Parameters
     ----------
-    Q             : numpy array 
-                    momentum transfer (nm^-1)
-    S_Q           : numpy array 
-                    structure factor
-    Sinf          : float
-                    value of S(Q) for Q->inf
-    smooth_factor : float
-                    smoothing factor
-    minQ          : float
-                    minimum Q value
-    QmaxIntegrate : float
-                    maximum Q value for the integrations
-    maxQ          : float
-                    maximum Q value
-    NumPoints     : int
-                    number of points in the smoothed S(Q)
+    Q               : numpy array 
+                      momentum transfer (nm^-1)
+    S_Q             : numpy array 
+                      structure factor
+    Sinf            : float
+                      value of S(Q) for Q->inf
+    smoothingFactor : float
+                      smoothing factor
+    minQ            : float
+                      minimum Q value
+    QmaxIntegrate   : float
+                      maximum Q value for the integrations
+    maxQ            : float
+                      maximum Q value
+    NumPoints       : int
+                      number of points in the smoothed S(Q)
     
     Returns
     -------
-    S_Qsmoothed   : numpy array
-                    smoothed S(Q) with NumPoints dimension
+    S_Qsmoothed     : numpy array
+                      smoothed S(Q) with NumPoints dimension
     """
     
     # smooth = interpolate.UnivariateSpline(Q[(Q>minQ) & (Q<=QmaxIntegrate)],

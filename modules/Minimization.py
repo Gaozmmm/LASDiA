@@ -45,6 +45,7 @@ from modules import MainFunctions
 from modules import Optimization
 from modules import UtilityAnalysis
 import time
+from scipy.integrate import simps
 
 
 def chi2Fit(variableArray, chi2Array):
@@ -93,20 +94,58 @@ def chi2Fit(variableArray, chi2Array):
     return (xFit, yFit, absXMin, absYMin)
 
 
-def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
+def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, maxQ,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
     Fintra_r, iterations, scaleStep, sth, s0th, thickness_sampling, phi_matrix,
     MCC_flag):
     """Function for the scale factor optimization.
+
+    Q                  : numpy array
+                         momentum transfer (nm^-1)
+    I_Q                : numpy array
+                         measured scattering intensity 
+    Ibkg_Q             : numpy array
+                         background scattering intensity
+    J_Q                : numpy array
+                         J(Q)
+    Iincoh_Q           : numpy array
+                         incoherent scattering intensity
+    fe_Q               : numpy array
+                         effective electric form factor
+    minQ               : float
+                         minimum Q value
+    QmaxIntegrate      : float
+                         maximum Q value for the intagrations
+    maxQ               : float
+                         maximum Q value
+    Ztot               : int
+                         total Z number
+    density            : float
+                         average atomic density
+    scaleFactor        : float
+                         scale factor
+    Sinf               : float
+                         value of S(Q) for Q->inf
+    smoothingFactor    : float
+                         smoothing factor
+    rmin               : float
+                         r cut-off value (nm)
+    dampingFunction    : numpy array
+                         damping function
+    Fintra_r           : numpy array
+                         intramolecular contribution of F(r)
+    iterations         : int
+                         number of iterations
+    scaleStep
+    sth
+    s0th
+    thickness_sampling : float
+    phi_matrix
+    MCC_flag
     """
     
-    Flag = 0
-    NoPeak = 0
-    scaleFactor = scaleFactor-scaleStep*11
-    scaleStepEnd = 0.00006
     numSample = 23
     
-
     if MCC_flag.lower() == "y":
         T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
             thickness_sampling, phi_matrix)
@@ -114,15 +153,16 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
         I_Q = I_Q /T_MCC_sth
         Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
     
+    flag=0
     # Loop for the range shifting
     while 1:
-        scaleArray = IgorFunctions.makeArrayLoop(scaleFactor, scaleStep)
+        scaleArray = UtilityAnalysis.makeArrayLoop(scaleFactor, scaleStep)
         chi2Array = np.zeros(numSample)
-        
-        #print(scaleArray)
-        
-        for i in range(numSample):
+        # flag+=1
+        # print("iter flag ", flag)
 
+        for i in range(numSample):
+            # print("sample ", i)
             # ------------------Kaplow method for scale--------------------
 
             Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
@@ -150,46 +190,35 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
                 Fintra_r, density, i_Q[Q<=QmaxIntegrate], Q[Q<=QmaxIntegrate],
                 Sinf, J_Q[Q<=QmaxIntegrate], r, rmin, "n")
             
-            deltaFopt_r[np.where(r>=rmin)] = 0.0
-            chi2Array[i] = np.mean(deltaFopt_r**2)
+            deltaFopt_r[np.where(r>=rmin)] = 0.0 # Igor version
+            chi2Array[i] = np.mean(deltaFopt_r**2) # Igor version
+            # Fth_r = Fintra_r - 4*np.pi*r*density
+            # plt.plot(r, Fth_r)
+            # plt.show()
+            # print(Fth_r)
+            # print(Fintra_r)
+            # chi2Array[i] = simps(deltaFopt_r[np.where((r>0)&(r<rmin))]**2)
 
         # --------------------Range shifting selection --------------------
         
-        if np.amax(chi2Array) > 10**8:
-            scaleFactorIdx = np.argmin(chi2Array[0:np.argmax(chi2Array)])
-        else:
-            scaleFactorIdx = np.argmin(chi2Array)
+        plt.scatter(scaleArray, chi2Array)
+        plt.grid(True)
+        plt.show()
+
+        maxLimit = 10**5
+        if np.amax(chi2Array) >= maxLimit:
+            scaleArray = scaleArray[0:np.argmax(chi2Array>=maxLimit)]
+            chi2Array = chi2Array[0:np.argmax(chi2Array>=maxLimit)]
         
-        scaleFactor = scaleArray[scaleFactorIdx]-scaleStep*1.1
-        nearIdx, nearEl = UtilityAnalysis.find_nearest(scaleArray, scaleFactor)
-        
-        #print(scaleFactor, nearEl, nearIdx)
-        #print(scaleArray)
-        
-        if nearIdx == 0:
-            print("out1")
+        if np.argmin(chi2Array) < 6:
             scaleFactor -= scaleStep*10
-            scaleStep *= 10
-            NoPeak += 1
-        if nearIdx >= numSample-2:
-            print("out2")
+        if np.argmin(chi2Array) > 16:
             scaleFactor += scaleStep*10
-            scaleStep *= 10
-            NoPeak += 1
-        
-        scaleStep /= 10
-        Flag += 1
-        #print(Flag, scaleArray[scaleFactorIdx], scaleFactor, scaleStep, 10*scaleStep, scaleStepEnd)
-        
-        #plt.scatter(scaleArray, chi2Array)
-        #plt.grid(True)
-        #plt.show()
-        
-        if((10*scaleStep>scaleStepEnd) and (NoPeak<5) and ((Flag==1) or (scaleFactor+scaleStep*1.1>=0.0))):
-        #if (scaleFactorIdx>=6 and scaleFactorIdx<=16):
-            continue
-        else:
+
+        if (np.argmin(chi2Array)>=6 and np.argmin(chi2Array)<=16):
             break
+        else:
+            continue
 
     # ------------------------chi2 curve fit for scale-------------------------
     # plt.ioff()
@@ -197,21 +226,66 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate
     xFit, yFit, scaleFactor, chi2 = IgorFunctions.chi2Fit(scaleFactor, scaleArray, chi2Array)
     
     print("final scale factor", scaleFactor)
+
+    plt.scatter(scaleArray, chi2Array)
+    plt.plot(xFit, yFit)
+    plt.grid(True)
+    plt.show()
     
     return scaleFactor
 
 
-def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegrate,
+def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, maxQ,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
-    Fintra_r, iterations, densityStep, densityStepEnd, sth, s0th,
+    Fintra_r, iterations, densityStep, sth, s0th,
     thickness_sampling, phi_matrix, MCC_flag):
     """Function for the density optimization.
+
+    Q                  : numpy array
+                         momentum transfer (nm^-1)
+    I_Q                : numpy array
+                         measured scattering intensity 
+    Ibkg_Q             : numpy array
+                         background scattering intensity
+    J_Q                : numpy array
+                         J(Q)
+    Iincoh_Q           : numpy array
+                         incoherent scattering intensity
+    fe_Q               : numpy array
+                         effective electric form factor
+    minQ               : float
+                         minimum Q value
+    QmaxIntegrate      : float
+                         maximum Q value for the intagrations
+    maxQ               : float
+                         maximum Q value
+    Ztot               : int
+                         total Z number
+    density            : float
+                         average atomic density
+    scaleFactor        : float
+                         scale factor
+    Sinf               : float
+                         value of S(Q) for Q->inf
+    smoothingFactor    : float
+                         smoothing factor
+    rmin               : float
+                         r cut-off value (nm)
+    dampingFunction    : numpy array
+                         damping function
+    Fintra_r           : numpy array
+                         intramolecular contribution of F(r)
+    iterations         : int
+                         number of iterations
+    scaleStep
+    sth
+    s0th
+    thickness_sampling : float
+    phi_matrix
+    MCC_flag
     """
 
-    Flag = 0
-    NoPeak = 0
     numSample = 23
-    density = density-densityStep*11
 
     if MCC_flag.lower() == "y":
         T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
@@ -220,15 +294,17 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
         I_Q = I_Q /T_MCC_sth
         Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
     
+    flag =0
     # Loop for the range shifting
-    # while ((10*densityStep>densityStepEnd) and (NoPeak<5)):
     while 1:
-        densityArray = IgorFunctions.makeArrayLoop(density, densityStep)
+        flag+=1
+        # print("iter flag ", flag)
+
+        densityArray = UtilityAnalysis.makeArrayLoop(density, densityStep)
         chi2Array = np.zeros(numSample)
         
-        #print(densityArray)
-        
         for i in range(numSample):
+            # print("sample ", i, densityArray[i])
 
             # ------------------Kaplow method for scale--------------------
 
@@ -253,6 +329,10 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
             r, F_r = MainFunctions.calc_Fr(Q[Q<=QmaxIntegrate], 
                 Qi_Q[Q<=QmaxIntegrate])
 
+            # r, F_r = MainFunctions.calc_Fr(Q[Q<=QmaxIntegrate], 
+            #     Qi_Q[Q<=QmaxIntegrate])
+
+            
             Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(iterations, F_r,
                 Fintra_r, densityArray[i], i_Q[Q<=QmaxIntegrate], Q[Q<=QmaxIntegrate],
                 Sinf, J_Q[Q<=QmaxIntegrate], r, rmin, "n")
@@ -262,35 +342,34 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
             
         # --------------------Range shifting selection --------------------
         
-        densityIdx = np.argmin(chi2Array)
-        density = densityArray[densityIdx] - densityStep*1.1
+        # densityIdx = np.argmin(chi2Array)
+        # density = densityArray[densityIdx] - densityStep*1.1
         
-        nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
+        # nearIdx, nearEl = UtilityAnalysis.find_nearest(densityArray, density)
         
-        if nearIdx == 0:
-            print("out3")
-            density -= densityStep*10
-            densityStep *= 10
-            NoPeak += 1
-        if nearIdx >= numSample-2:
-            print("out4")
-            density += densityStep*10
-            densityStep *= 10
-            NoPeak += 1
+        plt.scatter(densityArray, chi2Array)
+        plt.grid(True)
+        plt.show()
 
-        densityStep /= 10
+        maxLimit = 10**5
+        if np.amax(chi2Array) >= maxLimit:
+            densityArray = densityArray[0:np.argmax(chi2Array>=maxLimit)]
+            chi2Array = chi2Array[0:np.argmax(chi2Array>=maxLimit)]
+
+        # print(np.argmin(chi2Array))
+
+        if np.argmin(chi2Array) < 6:
+            # print("bug")
+            density -= densityStep*10
+        if np.argmin(chi2Array) > 16:
+            density += densityStep*10
+
         
-        Flag += 1
-        #print(Flag, densityArray[densityIdx], density, densityStep, 10*densityStep, densityStepEnd)
-        
-        #plt.scatter(densityArray, chi2Array)
-        #plt.grid(True)
-        #plt.show()
-        if ((10*densityStep>densityStepEnd) and (NoPeak<5)):
-        #if (densityIdx>=6 and densityIdx<=16):
-            continue
-        else:
+
+        if (np.argmin(chi2Array)>=6 and np.argmin(chi2Array)<=16):
             break
+        else:
+            continue
             
         
     # ------------------------chi2 curve fit for scale-------------------------
@@ -299,6 +378,12 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIntegra
     xFit, yFit, density, chi2 = IgorFunctions.chi2Fit(density, densityArray, chi2Array)
     
     print("final density", density)
+
+    plt.scatter(densityArray, chi2Array)
+    plt.plot(xFit, yFit)
+    plt.grid(True)
+    plt.show()
+
     return density
 
 
