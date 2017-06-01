@@ -24,27 +24,37 @@
 # The lines with the hash tag (#) are commented.
 
 # Path sample and bkg file
-data_file = "../data/cea_files/ar/HT2_034BBin.txt"
-bkg_file = "../data/cea_files/ar/HT2_036BBin.txt"
+#dataFile = ../data/laura/Sulfur_4_046_a.dat
+#bkgFile = ../data/laura/Sulfur_4bkg_004_a.dat
+
+dataFile = ../data/cea_files/ar/HT2_034BBin.txt
+bkgFile = ../data/cea_files/ar/HT2_036BBin.txt
+
+#dataFile = ../data/cea_files/co2/WO2_007BBin.chi
+#bkgFile = ../data/cea_files/co2/WO2_013BBin.chi
 
 # Sample composition
-molecule = "Ar"                                                # Molecular composition: Ar, CO2, N2
-element_params_path = "./elementParameters.txt"                      # Path element parameters file
+molecule = Ar                                                # Molecular composition: Ar, CO2, N2
+elementParamsPath = ./elementParameters.txt                     # Path element parameters file
+xyzPath = ./xyzFiles/ar.xyz 										# Path of XYZ file
 
 # Geometry corrections
-abs_length = 1.208                                              # @33keV 1.208cm
-dac_thickness =  0.144                                           # cm
-phi_matrix_thickness = 0.17                                     # cm 100um for the sample
-phi_matrix_flag = "n"                                           # flag for the phi matrix calculation
+absLength = 1.208                                              # @33keV 1.208cm
+dacThickness =  0.144                                           # cm
 
-#
+# MCC
+mccFlag = n      												# flag for using MCC
 ws1 = 0.005
 ws2 = 0.02
 r1 = 5
 r2 = 20
 d = 1
-# MCC_path = "./SollerSlits.txt"                                  # path of Soller Slits parameters
-# MCC_type = "A"                                                  # type of Soller Slits
+sth = 0.008														# sample thickness (cm)
+s0th = 0.006													# sample thickness for the reference (cm)
+thicknessOptimize = sth #s0th									# thickness to optimize: sth or s0th
+#phiMatrixThickness = 0.17                                     # cm 100um for the sample
+phiMatrixCalcFlag = n                                           # flag for the phi matrix calculation
+phiMatrixPath = ./test.npy										# path of the phi matrix file
 
 # Analysis parameters
 # Ar
@@ -52,21 +62,25 @@ minQ = 3.0                                                      # Minimum Q valu
 QmaxIntegrate = 98.0                                            # Qmax for all integration operations
 maxQ = 109.0                                                    # Maximum Q value in data interpolation waves
 
+# S
+#minQ = 2.0                                                      # Minimum Q value in data interpolation waves
+#QmaxIntegrate = 102.0                                            # Qmax for all integration operations
+#maxQ = 130.0                                                    # Maximum Q value in data interpolation waves
+
 # CO2
 #minQ = 8.00                                                    # Minimum Q value in data interpolation waves
 #QmaxIntegrate = 90.0                                            # Qmax for all integration operations
 #maxQ = 100.0                                                    # Maximum Q value in data interpolation waves
 
-NumPoints = 550                                               # Number of points for S(Q) smoothing
-smoothingFactor = 0.2                                           # Smoothing factor for cubic spline
+numPoints = 2000                                               # Number of points for interpolation
+smoothingFactor = 0.5                                           # Smoothing factor for cubic spline
 dampingFactor = 0.5                                              # Exponential damping factor == A*Qmax^2
-typeFunction = "Exponential"                                    # Damping function
+typeFunction = Exponential                                    # Damping function
 
 # F(r) optimization
-plot_iter = "n"                                                 # flag to plot the F(r) iterations
 iterations = 2                                                   # Number of iteration for F(r) optimization
-rmin = 0.22                                             # The distance below which no peaks in F(r) may occur
+rmin = 0.24 #1.21 #0.22                                             # The distance below which no peaks in F(r) may occur (nm)
 
 # Scale factor and density parameters
 scaleFactor = 1                                             # Scale factor initial value
-density = 27.17                                            # Sample density initial value
+density = 27.17 #33.24                                             # Sample density initial value

@@ -412,14 +412,32 @@ def read_inputFile(path):
 
     Returns
     -------
-    variables : module
+    variables : dictionary
                 input variables setted by the user
     """
 
-    file = open(path)
-    variables = imp.load_source("data", "", file)
-    file.close()
+    variables = {}
+
+    with open(path) as f:
+        for line in f:
+            if line.startswith('#') or line == "\n":
+                pass
+            else:
+                key = line.split()[0]
+                if key in ("ws1", "ws2", "r1", "r2", "d", "absLength",
+                    "dacThickness", "phiMatrixThickness", "minQ",
+                    "QmaxIntegrate", "maxQ", "NumPoints", "smoothingFactor",
+                    "dampingFactor", "rmin", "scaleFactor",
+                    "density", "sth", "s0th"):
+                    val = float(line.split()[2])
+                elif key in ("iterations"):
+                    val = int(line.split()[2])
+                else:
+                    val = line.split()[2]
+                variables[key] = val
+
     return variables
+
 
 
 def read_MCC_file(path, type):
@@ -527,22 +545,19 @@ def read_xyz_file(path):
 
     Parameters
     ----------
-    path             : string
-                       path of the xyz file
+    path            : string
+                      path of the xyz file
 
     Returns
     -------
-    numAtoms         : int
-                       number of atoms in the molecule
-    element          : string array
-                       array of the elements in the molecule
-    xPos, yPos, zPos : float array
-                       atomic coordinate in the xyz_file (nm)
+    elementPosition : dictionary("key":value)
+                      element : list array
+                                list of the elements in the molecule
+                      x, y, z : float array
+                                atomic coordinate in the xyz_file (nm)
     """
 
     file = open(path, "r")
-    file_name = file.name
-    ext = os.path.splitext(file_name)[1]
 
     numAtoms = int(file.readline())
     comment = file.readline()
@@ -568,13 +583,9 @@ def read_xyz_file(path):
     yPos /= 10.0
     zPos = np.array(z)
     zPos /= 10.0
-    # elementPosition = {}
+    elementPosition = {"element":element, "x":xPos, "y":yPos, "z":zPos}
 
-    # for line in lines:
-        # elem, x, y, z = line.split()
-        # elementPosition[elem] = [x, y, z]
-
-    return (numAtoms, element, xPos, yPos, zPos)
+    return elementPosition
 
 
 def setArray(minVal, maxVal, stepVal):

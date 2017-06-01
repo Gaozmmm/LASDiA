@@ -96,8 +96,7 @@ def chi2Fit(variableArray, chi2Array):
 
 def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, maxQ,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
-    Fintra_r, iterations, scaleStep, sth, s0th, thickness_sampling, phi_matrix,
-    MCC_flag):
+    Fintra_r, iterations, scaleStep, sth, s0th, mccFlag, thickness_sampling, phi_matrix):
     """Function for the scale factor optimization.
 
     Q                  : numpy array
@@ -139,30 +138,41 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, maxQ
     scaleStep
     sth
     s0th
-    thickness_sampling : float
-    phi_matrix
     MCC_flag
     """
     
     numSample = 23
     
-    if MCC_flag.lower() == "y":
-        T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
+    if mccFlag.lower() == "y":
+        T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCC_correction(sth, s0th,
             thickness_sampling, phi_matrix)
-        
+
+        # print(thickness_sampling)
+        # plt.contour(phi_matrix)
+        # plt.show()
+
+        # x = np.linspace(0, len(T_MCC_sth), len(T_MCC_sth), endpoint=True)
+        # _, T_MCC_sth = UtilityAnalysis.rebinning(x, T_MCC_sth, np.amin(T_MCC_sth),
+        #     np.amax(T_MCC_sth), len(I_Q))
+
+        # plt.plot(T_MCC_sth)
+        # plt.show()
+
         I_Q = I_Q /T_MCC_sth
         Ibkg_Q  = Ibkg_Q * T_MCC_corr_factor_bkg / (T_MCC_sth)
     
     flag=0
     # Loop for the range shifting
     while 1:
+        # print(type(scaleFactor))
+        # print(type(scaleStep))
         scaleArray = UtilityAnalysis.makeArrayLoop(scaleFactor, scaleStep)
         chi2Array = np.zeros(numSample)
-        # flag+=1
-        # print("iter flag ", flag)
+        flag+=1
+        print("iter flag ", flag)
 
         for i in range(numSample):
-            # print("sample ", i)
+            print("sample ", i, scaleArray[i])
             # ------------------Kaplow method for scale--------------------
 
             Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleArray[i], Ibkg_Q)
@@ -237,8 +247,8 @@ def OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, maxQ
 
 def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, maxQ,
     Ztot, density, scaleFactor, Sinf, smoothingFactor, rmin, dampingFunction,
-    Fintra_r, iterations, densityStep, sth, s0th,
-    thickness_sampling, phi_matrix, MCC_flag):
+    Fintra_r, iterations, densityStep,
+    sth, s0th, mccFlag, thickness_sampling, phi_matrix):
     """Function for the density optimization.
 
     Q                  : numpy array
@@ -287,8 +297,8 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, ma
 
     numSample = 23
 
-    if MCC_flag.lower() == "y":
-        T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCCCorrection(sth, s0th,
+    if mccFlag.lower() == "y":
+        T_MCC_sth, T_MCC_corr_factor_bkg = Geometry.MCC_correction(sth, s0th,
             thickness_sampling, phi_matrix)
         
         I_Q = I_Q /T_MCC_sth
@@ -298,13 +308,13 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, ma
     # Loop for the range shifting
     while 1:
         flag+=1
-        # print("iter flag ", flag)
+        print("iter flag ", flag)
 
         densityArray = UtilityAnalysis.makeArrayLoop(density, densityStep)
         chi2Array = np.zeros(numSample)
         
         for i in range(numSample):
-            # print("sample ", i, densityArray[i])
+            print("sample ", i, densityArray[i])
 
             # ------------------Kaplow method for scale--------------------
 
@@ -364,13 +374,10 @@ def OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, minQ, QmaxIntegrate, ma
         if np.argmin(chi2Array) > 16:
             density += densityStep*10
 
-        
-
         if (np.argmin(chi2Array)>=6 and np.argmin(chi2Array)<=16):
             break
         else:
             continue
-            
         
     # ------------------------chi2 curve fit for scale-------------------------
     
@@ -466,10 +473,11 @@ def OptimizeThickness(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxInteg
         sthStep /= 10
         Flag += 1
         
-        if((10*sthStep>sthStepEnd) and (NoPeak<5)):
-            continue
-        else:
+        # if((10*sthStep>sthStepEnd) and (NoPeak<5)):
+        if(np.argmin(chi2Array)>=6 and np.argmin(chi2Array)<=16):
             break
+        else:
+            continue
 
     # ------------------------chi2 curve fit for scale-------------------------
     

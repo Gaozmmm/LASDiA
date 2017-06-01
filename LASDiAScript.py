@@ -72,83 +72,106 @@ if __name__ == "__main__":
 
     # inputFile_path = open_file("./")
 
-    variables = Utility.read_inputFile("./inputFile.txt")
+    inputVariables = Utility.read_inputFile("./inputFile.txt")
+
+    elementList = Utility.molToElemList(inputVariables["molecule"])
+    elementParameters = Utility.read_parameters(elementList, inputVariables["elementParamsPath"])
+    elementPosition = Utility.read_xyz_file(inputVariables["xyzPath"])
     
-    elementList = Utility.molToElemList(variables.molecule)
-    elementParameters = Utility.read_parameters(elementList, variables.element_params_path)
-    
-    path = Utility.path_xyz_file(variables.molecule)
-    numAtoms, element, x, y, z = Utility.read_xyz_file(path)
-    
-    Q, I_Q = Utility.read_file(variables.data_file)
-    Qbkg, Ibkg_Q  = Utility.read_file(variables.bkg_file)
+    Q, I_Q = Utility.read_file(inputVariables["dataFile"])
+    Qbkg, Ibkg_Q  = Utility.read_file(inputVariables["bkgFile"])
+
+    # plt.plot(Q, I_Q)
+    # plt.plot(Qbkg, Ibkg_Q)
+    # plt.show
 
     #--------------------Preliminary calculation-------------------------------
-    
-    # Q, I_Q, Qbkg, Ibkg_Q = UtilityAnalysis.check_data_length(Q, I_Q, Qbkg, Ibkg_Q,
-        # variables.minQ, variables.maxQ)
-    
+
+    Q, I_Q = UtilityAnalysis.data_interpolation(Q, I_Q, inputVariables["minQ"],
+        inputVariables["maxQ"], inputVariables["numPoints"])
+    Qbkg, Ibkg_Q = UtilityAnalysis.data_interpolation(Qbkg, Ibkg_Q, inputVariables["minQ"],
+        inputVariables["maxQ"], inputVariables["numPoints"])
+
+    # plt.plot(Q, I_Q)
+    # plt.plot(Qbkg, Ibkg_Q)
+    # plt.show
+
     fe_Q, Ztot = MainFunctions.calc_eeff(elementList, Q, elementParameters)
     Iincoh_Q = MainFunctions.calc_Iincoh(elementList, Q, elementParameters)
     J_Q = MainFunctions.calc_JQ(Iincoh_Q, Ztot, fe_Q)
     Sinf = MainFunctions.calc_Sinf(elementList, fe_Q, Q, Ztot, elementParameters)
-    dampingFunction = UtilityAnalysis.calc_dampingFunction(Q, variables.dampingFactor,
-        variables.QmaxIntegrate, variables.typeFunction)
+    dampingFunction = UtilityAnalysis.calc_dampingFunction(Q, inputVariables["dampingFactor"],
+        inputVariables["QmaxIntegrate"], inputVariables["typeFunction"])
         
     #-------------------Intra-molecular components-----------------------------
-    
-    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, variables.QmaxIntegrate,
-        variables.maxQ, elementList, element, x, y, z, elementParameters)
+
+    iintra_Q = Optimization.calc_iintra(Q, fe_Q, Ztot, inputVariables["QmaxIntegrate"],
+        inputVariables["maxQ"], elementList, elementPosition["element"],
+        elementPosition["x"], elementPosition["y"], elementPosition["z"], elementParameters)
     iintradamp_Q = UtilityAnalysis.calc_iintradamp(iintra_Q, dampingFunction)
     Qiintradamp_Q = Q*iintradamp_Q
-    rintra, Fintra_r = MainFunctions.calc_Fr(Q[Q<=variables.QmaxIntegrate], 
-        Qiintradamp_Q[Q<=variables.QmaxIntegrate])
+    rintra, Fintra_r = MainFunctions.calc_Fr(Q[Q<=inputVariables["QmaxIntegrate"]], 
+        Qiintradamp_Q[Q<=inputVariables["QmaxIntegrate"]])
     
     # ---------------------Geometrical correction------------------------------
-    
-    # thickness_sampling, phi_matrix = Geometry.check_phi_matrix(Q, variables.phi_matrix_flag,
-    #     variables.ws1, variables.ws2, variables.r1, variables.r2, variables.d)
-    
-    # absCorrFactor = IgorFunctions.absorption(Q)
-    two_theta = UtilityAnalysis.Qto2theta(Q)
-    absCorrFactor = Geometry.calcAbsCorrection(variables.abs_length, two_theta, 
-        variables.dac_thickness, 0.0)
+
+    # global phi_matrix
+    # global thickness_sampling
+
+    if inputVariables["mccFlag"].lower() == "y":
+        print("Start matrix calculation or reading")
+        thickness_sampling, phi_matrix = Geometry.check_phi_matrix(Q, inputVariables["ws1"],
+            inputVariables["ws2"], inputVariables["r1"], 
+            inputVariables["r2"], inputVariables["d"], inputVariables["phiMatrixCalcFlag"],
+            inputVariables["phiMatrixPath"])
+        print("End matrix calculation or reading")
+    else:
+        phi_matrix = 0.0
+        thickness_sampling = 0.0
+
+    absCorrFactor = Geometry.calc_abs_correction(Q, inputVariables["absLength"], 
+        inputVariables["dacThickness"], 0.0)
     I_Q = I_Q/absCorrFactor
     Ibkg_Q = Ibkg_Q/absCorrFactor
+
+    # plt.plot(Q, I_Q)
+    # plt.plot(Qbkg, Ibkg_Q)
+    # plt.show()
     
     # ------------------------Starting minimization----------------------------
 
-    scaleFactor = variables.scaleFactor
-    density0 = variables.density
+    scaleFactor = inputVariables["scaleFactor"]
+    density0 = inputVariables["density"]
     
     # ----------------------First scale minimization---------------------------
     
     scaleStep = 0.05
 
-    # sth = 0.008
-    # s0th = 0.006
-    sth = 0.0
-    s0th = 0.0
-    phi_matrix = 0.0
-    thickness_sampling = 0.0
-
+    print("Start first scale minimization")
     scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
-        fe_Q, variables.minQ, variables.QmaxIntegrate, variables.maxQ, Ztot,
-        density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-        dampingFunction, Fintra_r, variables.iterations, scaleStep,
-        sth, s0th, thickness_sampling, phi_matrix, "n")
+        fe_Q, inputVariables["minQ"], inputVariables["QmaxIntegrate"], inputVariables["maxQ"],
+        Ztot, density0, scaleFactor, Sinf, inputVariables["smoothingFactor"],
+        inputVariables["rmin"], dampingFunction, Fintra_r, inputVariables["iterations"],
+        scaleStep, inputVariables["sth"], inputVariables["s0th"], inputVariables["mccFlag"],
+        thickness_sampling, phi_matrix)
+    print("End first scale minimization")
     
     # ----------------------First density minimization-------------------------
     
     densityStep = density0/50
     densityStepEnd = density0/250
     
+    print("Start first density minimization")
     density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
-        fe_Q, variables.minQ, variables.QmaxIntegrate, variables.maxQ, Ztot, 
-        density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-        dampingFunction, Fintra_r, variables.iterations, densityStep,
-        sth, s0th, thickness_sampling, phi_matrix, "n")
-    
+        fe_Q, inputVariables["minQ"], inputVariables["QmaxIntegrate"], inputVariables["maxQ"],
+        Ztot, density0, scaleFactor, Sinf, inputVariables["smoothingFactor"],
+        inputVariables["rmin"], dampingFunction, Fintra_r, inputVariables["iterations"],
+        densityStep, inputVariables["sth"], inputVariables["s0th"], inputVariables["mccFlag"],
+        thickness_sampling, phi_matrix)
+    print("End first density minimization")
+
+    # --------------------Free parameters minimization-------------------------
+
     # print("density0, density", density0, density)
     numLoopIteration = 0
     
@@ -172,29 +195,25 @@ if __name__ == "__main__":
             WSamplestep=0.0001
             WRefstep=0.0001
         
+        print("Start scale minimization")
         scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
-            fe_Q, variables.minQ, variables.QmaxIntegrate, variables.maxQ, Ztot,
-            density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-            dampingFunction, Fintra_r, variables.iterations, scaleStep,
-            sth, s0th, thickness_sampling, phi_matrix, "n")
-
-        # scaleFactor = Minimization.OptimizeScale(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
-        #     fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot,
-        #     density, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-        #     dampingFunction, Fintra_r, variables.iterations, scaleStep)
+            fe_Q, inputVariables["minQ"], inputVariables["QmaxIntegrate"], inputVariables["maxQ"],
+            Ztot, density, scaleFactor, Sinf, inputVariables["smoothingFactor"],
+            inputVariables["rmin"], dampingFunction, Fintra_r, inputVariables["iterations"],
+            scaleStep, inputVariables["sth"], inputVariables["s0th"], inputVariables["mccFlag"],
+            thickness_sampling, phi_matrix)
+        print("End scale minimization")
 
         density0=density
 
+        print("Start density minimization")
         density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
-            fe_Q, variables.minQ, variables.QmaxIntegrate, variables.maxQ, Ztot, 
-            density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-            dampingFunction, Fintra_r, variables.iterations, densityStep,
-            sth, s0th, thickness_sampling, phi_matrix, "n")
-
-        # density = Minimization.OptimizeDensity(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q,
-        #     fe_Q, variables.maxQ, variables.minQ, variables.QmaxIntegrate, Ztot, 
-        #     density0, scaleFactor, Sinf, variables.smoothingFactor, variables.rmin, 
-        #     dampingFunction, Fintra_r, variables.iterations, densityStep, density/250)
+            fe_Q, inputVariables["minQ"], inputVariables["QmaxIntegrate"], inputVariables["maxQ"],
+            Ztot, density0, scaleFactor, Sinf, inputVariables["smoothingFactor"],
+            inputVariables["rmin"], dampingFunction, Fintra_r, inputVariables["iterations"],
+            densityStep, inputVariables["sth"], inputVariables["s0th"], inputVariables["mccFlag"],
+            thickness_sampling, phi_matrix)
+        print("End density minimization")
         
         numLoopIteration += 1
         print("numLoopIteration", numLoopIteration, scaleFactor, density)
@@ -205,41 +224,36 @@ if __name__ == "__main__":
        
     print("final scale", scaleFactor, "final density", density)
     
-    
-    # #scaleFactor = 1.0603638618
-    # #density = 29.9874611902
-    
-    
-    # Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
-    # alpha = MainFunctions.calc_alpha(J_Q[Q<=variables.QmaxIntegrate], Sinf, 
-    #     Q[Q<=variables.QmaxIntegrate], Isample_Q[Q<=variables.QmaxIntegrate], 
-    #     fe_Q[Q<=variables.QmaxIntegrate], Ztot, density)
-    # Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
+    Isample_Q = MainFunctions.calc_IsampleQ(I_Q, scaleFactor, Ibkg_Q)
+    alpha = MainFunctions.calc_alpha(J_Q[Q<=inputVariables["QmaxIntegrate"]], Sinf, 
+        Q[Q<=inputVariables["QmaxIntegrate"]], Isample_Q[Q<=inputVariables["QmaxIntegrate"]], 
+        fe_Q[Q<=inputVariables["QmaxIntegrate"]], Ztot, density)
+    Icoh_Q = MainFunctions.calc_Icoh(alpha, Isample_Q, Iincoh_Q)
 
-    # S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, variables.minQ, 
-    #     variables.QmaxIntegrate, variables.maxQ)
+    S_Q = MainFunctions.calc_SQ(Icoh_Q, Ztot, fe_Q, Sinf, Q, inputVariables["minQ"], 
+        inputVariables["QmaxIntegrate"], inputVariables["maxQ"])
 
-    # Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
-    #     variables.smoothingFactor, variables.minQ, variables.QmaxIntegrate, variables.maxQ)
+    Ssmooth_Q = UtilityAnalysis.calc_SQsmoothing(Q, S_Q, Sinf, 
+        inputVariables["smoothingFactor"], inputVariables["minQ"], inputVariables["QmaxIntegrate"], inputVariables["maxQ"])
 
-    # SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
-    #     dampingFunction)
+    SsmoothDamp_Q = UtilityAnalysis.calc_SQdamp(Ssmooth_Q, Sinf,
+        dampingFunction)
 
-    # i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
+    i_Q = MainFunctions.calc_iQ(SsmoothDamp_Q, Sinf)
     
-    # Qi_Q = Q*i_Q
-    # r, F_r = MainFunctions.calc_Fr(Q[Q<=variables.QmaxIntegrate], 
-    #     Qi_Q[Q<=variables.QmaxIntegrate])
-    # Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(variables.iterations, F_r,
-    #             Fintra_r, density, i_Q[Q<=variables.QmaxIntegrate], Q[Q<=variables.QmaxIntegrate],
-    #             Sinf, J_Q[Q<=variables.QmaxIntegrate], r, variables.rmin, "n")
+    Qi_Q = Q*i_Q
+    r, F_r = MainFunctions.calc_Fr(Q[Q<=inputVariables["QmaxIntegrate"]], 
+        Qi_Q[Q<=inputVariables["QmaxIntegrate"]])
+    Fopt_r, deltaFopt_r = Optimization.calc_optimize_Fr(inputVariables["iterations"], F_r,
+                Fintra_r, density, i_Q[Q<=inputVariables["QmaxIntegrate"]], Q[Q<=inputVariables["QmaxIntegrate"]],
+                Sinf, J_Q[Q<=inputVariables["QmaxIntegrate"]], r, inputVariables["rmin"], "n")
     
-    # Scorr_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
+    Scorr_Q = MainFunctions.calc_SQCorr(Fopt_r, r, Q, Sinf)
     
-    # Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S_Q", "S(Q)", "y")
-    # Utility.plot_data(Q, Scorr_Q, "S_Q", "Q", "S_Q", "Scorr(Q)", "y")
-    # Utility.plot_data(r, F_r, "F_r", "r", "F_r", "F(r)", "y")
-    # Utility.plot_data(r, Fopt_r, "F_r", "r", "F_r", "Fopt(r)", "y")
+    Utility.plot_data(Q, SsmoothDamp_Q, "S_Q", "Q", "S_Q", "S(Q)", "y")
+    Utility.plot_data(Q, Scorr_Q, "S_Q", "Q", "S_Q", "Scorr(Q)", "y")
+    Utility.plot_data(r, F_r, "F_r", "r", "F_r", "F(r)", "y")
+    Utility.plot_data(r, Fopt_r, "F_r", "r", "F_r", "Fopt(r)", "y")
     
     # Utility.write_file("./S_Q_Ar.txt", Q, SsmoothDamp_Q)
     # Utility.write_file("./Scorr_Q_Ar.txt", Q, Scorr_Q)

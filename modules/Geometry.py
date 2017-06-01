@@ -46,7 +46,7 @@ from modules import Utility
 from modules import UtilityAnalysis
 
 
-def calcAbsCorrection(abs_length, two_theta, thickness, angle):
+def calc_abs_correction(Q, abs_length, thickness, angle):
     """Function to calculate the absorption correction.
     This function can be used to calculate the absorption correction for the diamond
     or for any other object between the sample and the detector.
@@ -56,10 +56,10 @@ def calcAbsCorrection(abs_length, two_theta, thickness, angle):
 
     Parameters
     ----------
+    Q           : numpy array
+                  momentum transfer (nm^-1)
     abs_length  : float
                   absorption length (cm), @33keV 1.208cm
-    two_theta   : numpy array
-                  diffraction angle (rad)
     thickness   : float
                   object thickness (cm)
     angle       : float
@@ -76,6 +76,8 @@ def calcAbsCorrection(abs_length, two_theta, thickness, angle):
     #               XRay beam wavelenght (nm), @ESRF ID27 0.03738nm
     # wavelenght = 0.03738 # nm
     # two_theta = Qto2theta(Q) # rad
+
+    two_theta = UtilityAnalysis.Qto2theta(Q)
 
     mu_l = 1/abs_length
     angle = np.radians(angle)
@@ -129,14 +131,12 @@ def calc_phi_angle(ws1, ws2, r1, r2, d, two_theta, xth):
     return phi
 
 
-def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
+def calc_phi_matrix(two_theta, ws1, ws2, r1, r2, d, num_point=1000, thickness=0.17):
     """Function to calculate the dispersion angle matrix.
     half_thick in cm
 
     Parameters
     ----------
-    thickness          : float
-                         object thickness (sample or sample+DAC) (cm)
     two_theta          : numpy array
                          diffraction angle (rad)
     ws1                : float
@@ -151,6 +151,8 @@ def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
                          slit thickness (cm)
     num_point          : int
                          number of point for the thickness array
+    thickness          : float
+                         object thickness (sample or sample+DAC) (cm)
 
     Returns
     -------
@@ -160,8 +162,8 @@ def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
                          dispersion angle matrix (rad)
     """
 
-    # thickness_sampling = np.linspace(-thickness/2, thickness/2, num=num_point) # num=500)
-    thickness_sampling = np.linspace(0, thickness, num=num_point) # num=500)
+    # thickness_sampling = np.linspace(-thickness/2, thickness/2, num=num_point)
+    thickness_sampling = np.linspace(0, thickness, num=num_point)
     phi_matrix = np.zeros((thickness_sampling.size, two_theta.size))
 
     for i, val_sth in enumerate(thickness_sampling):
@@ -169,7 +171,7 @@ def calc_phi_matrix(thickness, two_theta, ws1, ws2, r1, r2, d, num_point):
             phi_matrix[i][j] = calc_phi_angle(ws1, ws2, r1, r2, d, two_theta[j], \
             thickness_sampling[i])
 
-    return (thickness_sampling, phi_matrix)
+    return (phi_matrix)
 
 
 def calc_T_MCC(sample_thickness, thickness_sampling, phi_matrix, norm):
@@ -274,32 +276,15 @@ def calc_empty_cell_bkg(Q, Ibkg_Q, diamond_abs_corr_factor, Iincoh_Q, Ztot, fe_Q
     return Ibkg_Q
 
 
-def MCCCorrection(sth, s0th, thickness_sampling, phi_matrix):
+def MCC_correction(sth, s0th, thickness_sampling, phi_matrix):
     """Function to calcultate all intensity geometrical corrections.
     
     Parameters
     ----------
-    Q               : numpy array
-                      momentum transfer (nm^-1)
-    I_Q             : numpy array
-                      measured scattering intensity
-    Qbkg            : numpy array
-                      background momentum transfer (nm^-1)
-    Ibkg_Q          : numpy array
-                      background scattering intensity
-    variables       : module
-                      input variables setted by the user
-    phi_matrix_flag : string
-                      flag for the phi matrix calculation:
-                      "y": calculate phi matrix and save on file
-                      "n": read the phi matrix from file
     
     Returns
     -------
-    I_Q             : numpy array
-                      corrected measured sample intensity
-    Ibkg_Q          : numpy array
-                      corrected background intensity
+    
     """
     
     
@@ -315,22 +300,43 @@ def MCCCorrection(sth, s0th, thickness_sampling, phi_matrix):
     return (T_MCC_sth, T_MCC_corr_factor_bkg)
 
 
-def check_phi_matrix(Q, phi_matrix_flag, ws1, ws2, r1, r2, d,
-    phi_matrix_path="./phi_matrix.npy", phi_matrix_thickness=0.17):
+def check_phi_matrix(Q, ws1, ws2, r1, r2, d, phiMatrixCalcFlag, phiMatrixPath):
     """Function to make or read from file the phi matrix.
+
+    Parameters
+    ----------
+    Q                 : numpy array
+                        momentum transfer (nm^-1)
+    ws1               : float
+                        distance between the slits of first set (cm)
+    ws2               : float
+                        distance between the slits of second set (cm)
+    r1                : float
+                        first radius
+    r2                : float
+                        second radius
+    d                 : float
+                        dimension of slit
+    phiMatrixCalcFlag : string
+                        flag for the phi matrix calculation
+    phiMatrixPath     : string
+                        phi matrix path
+
+    Returns
+    -------
+    phi_matrix        : 2D numpy array
+                        dispersion angle matrix for sample+DAC (rad)                     
     """
     
     two_theta = UtilityAnalysis.Qto2theta(Q)
-    num_point = 1000
     
-    if phi_matrix_flag.lower() == "y": 
-        thickness_sampling, phi_matrix = calc_phi_matrix(phi_matrix_thickness, 
-            two_theta, ws1, ws2, r1, r2, d, num_point)
-        np.save(phi_matrix_path, phi_matrix)
+    if phiMatrixCalcFlag.lower() == "y": 
+        phi_matrix = calc_phi_matrix(two_theta, ws1, ws2, r1, r2, d)
+        np.save(phiMatrixPath, phi_matrix)
     else:
-        thickness_sampling = np.linspace(0, phi_matrix_thickness, num=num_point)
-        phi_matrix = np.load(phi_matrix_path)
+        phi_matrix = np.load(phiMatrixPath)
     
+    thickness_sampling = np.linspace(0, 0.17, num=1000)
     return (thickness_sampling, phi_matrix)
 
 

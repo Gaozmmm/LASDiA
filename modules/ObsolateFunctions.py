@@ -2294,3 +2294,75 @@ def OptimizeThicknessRef(Q, I_Q, Ibkg_Q, J_Q, Iincoh_Q, fe_Q, maxQ, minQ, QmaxIn
     print("final sample thickness ref", s0th)
     
     return s0th
+
+
+def read_inputFile(path):
+    """Function to read variables from the inputFile.txt.
+
+    Parameters
+    ----------
+    path      : string
+                path of the input file
+
+    Returns
+    -------
+    variables : module
+                input variables setted by the user
+    """
+
+    file = open(path)
+    variables = imp.load_source("data", "", file)
+    file.close()
+
+    return variables
+
+
+def read_xyz_file(path):
+    """Function to read the xyz file.
+    The atomic coordinates are in Angstrom, the function converts them in nanometer.
+
+    Parameters
+    ----------
+    path             : string
+                       path of the xyz file
+
+    Returns
+    -------
+    numAtoms         : int
+                       number of atoms in the molecule
+    element          : string array
+                       array of the elements in the molecule
+    xPos, yPos, zPos : float array
+                       atomic coordinate in the xyz_file (nm)
+    """
+
+    file = open(path, "r")
+    file_name = file.name
+    ext = os.path.splitext(file_name)[1]
+
+    numAtoms = int(file.readline())
+    comment = file.readline()
+
+    lines = file.readlines()
+    file.close()
+
+    element = []
+    x = []
+    y = []
+    z = []
+
+    for line in lines:
+        columns = line.split()
+        element.append(columns[0])
+        x.append(float(columns[1]))
+        y.append(float(columns[2]))
+        z.append(float(columns[3]))
+
+    xPos = np.array(x)
+    xPos /= 10.0
+    yPos = np.array(y)
+    yPos /= 10.0
+    zPos = np.array(z)
+    zPos /= 10.0
+
+    return (numAtoms, element, xPos, yPos, zPos)
